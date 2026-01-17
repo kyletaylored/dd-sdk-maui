@@ -15,24 +15,29 @@ Welcome to the Datadog MAUI SDK documentation. This directory contains comprehen
 ### Project Documentation
 
 #### [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)
+
 **Quick overview and current status**
 
 High-level summary of the project with current state, accomplishments, and key metrics. Perfect for:
+
 - Getting a quick update on project progress
 - Understanding what's complete and what's in progress
 - Seeing key technical achievements
 - Finding the right documentation quickly
 
 **Read this when**:
+
 - You're new to the project
 - You want a quick status update
 - You need to understand the current state
 - You're looking for specific documentation
 
 #### [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md)
+
 **Comprehensive technical overview**
 
 Detailed technical documentation covering architecture, build system, decisions, and roadmap. Includes:
+
 - Complete architecture breakdown
 - Component descriptions
 - Build system and scripts
@@ -42,6 +47,7 @@ Detailed technical documentation covering architecture, build system, decisions,
 - Implementation roadmap
 
 **Read this when**:
+
 - You need to understand the architecture
 - You're contributing to the project
 - You're planning significant changes
@@ -50,9 +56,11 @@ Detailed technical documentation covering architecture, build system, decisions,
 ### Core Documentation
 
 #### [ANDROID_DEPENDENCY_MANAGEMENT.md](ANDROID_DEPENDENCY_MANAGEMENT.md)
+
 **Comprehensive guide to Android dependency management**
 
 Essential reading for understanding how dependencies work in the binding projects. Covers:
+
 - The dependency problem and why it exists
 - The centralized core pattern (our solution)
 - Dependency categories and classification
@@ -62,15 +70,18 @@ Essential reading for understanding how dependencies work in the binding project
 - Key insights and gotchas
 
 **Read this when**:
+
 - Setting up binding projects for the first time
 - Encountering duplicate class errors
 - Updating to a new Datadog SDK version
 - Contributing dependency-related changes
 
 #### [DEPENDENCY_QUICK_REFERENCE.md](DEPENDENCY_QUICK_REFERENCE.md)
+
 **Fast lookup table and command reference**
 
 Quick answers without the theory. Includes:
+
 - Decision tree flowchart
 - Dependency lookup table
 - Project file templates
@@ -79,15 +90,18 @@ Quick answers without the theory. Includes:
 - Common patterns
 
 **Read this when**:
+
 - You know what you're doing, just need the specifics
 - Looking up how to handle a specific dependency
 - Need a command or pattern quickly
 - Doing a routine SDK version update
 
 #### [AUTOMATION_ROADMAP.md](AUTOMATION_ROADMAP.md)
+
 **Future vision for dependency automation**
 
 Analysis of current vs. desired automation state. Covers:
+
 - Current script capabilities and limitations
 - Enhanced configuration-driven system design
 - Recommended system architecture
@@ -96,6 +110,7 @@ Analysis of current vs. desired automation state. Covers:
 - ROI analysis
 
 **Read this when**:
+
 - Planning to improve automation
 - Evaluating whether to invest in tooling
 - Designing the next generation of scripts
@@ -106,6 +121,7 @@ Analysis of current vs. desired automation state. Covers:
 ### For New Contributors
 
 1. Start with [ANDROID_DEPENDENCY_MANAGEMENT.md](ANDROID_DEPENDENCY_MANAGEMENT.md) sections:
+
    - Overview
    - The Dependency Problem
    - The Solution Pattern
@@ -140,34 +156,33 @@ Analysis of current vs. desired automation state. Covers:
 - **Duplicate issues** resolved (gson, jetbrains.annotations)
 - **Documentation** comprehensive and up-to-date
 
-### ⏳ In Progress
-
-- iOS binding compatibility with MacCatalyst (temporarily disabled)
-- Windows and Tizen platform support (not yet started)
-
 ### 🎯 Future Goals
 
 - Automated dependency categorization from POMs
 - NuGet package discovery via API
 - Project file generation from configuration
 - CI/CD integration for validation
-- Broader platform support (MacCatalyst, Windows, Tizen)
 
 ## Key Principles
 
 ### 1. Centralize Shared Dependencies
+
 **Core provides, features consume**. Shared dependencies live in core as NuGet packages, feature modules declare them as ignored.
 
 ### 2. Use NuGet When Available
+
 **Prefer NuGet over Maven bindings**. Xamarin/AndroidX packages are well-maintained and handle complex binding scenarios.
 
 ### 3. Document the Why
+
 **Decisions have reasons**. Every dependency placement should have a documented rationale, especially for non-obvious cases.
 
 ### 4. Automate Incrementally
+
 **Make common tasks easy**. Build tooling that saves time on repetitive tasks while allowing manual control for edge cases.
 
 ### 5. Test Thoroughly
+
 **Build errors are better than runtime crashes**. Always test builds after dependency changes.
 
 ## FAQ
@@ -181,6 +196,7 @@ See: [ANDROID_DEPENDENCY_MANAGEMENT.md - Key Insights #2](ANDROID_DEPENDENCY_MAN
 ### Q: What's the difference between AndroidMavenLibrary and PackageReference?
 
 **A**:
+
 - `AndroidMavenLibrary` downloads Java AAR/JAR from Maven and optionally generates C# bindings
 - `PackageReference` references pre-built NuGet packages (which may contain bindings or native code)
 
@@ -189,6 +205,7 @@ Use `PackageReference` when a good NuGet binding exists, `AndroidMavenLibrary` o
 ### Q: When should I add AndroidIgnoredJavaDependency?
 
 **A**: Add it when a dependency is satisfied through another mechanism:
+
 - Transitively from core (via ProjectReference)
 - Transitively from MAUI
 - Via NuGet package (when Maven also lists it)
@@ -206,6 +223,7 @@ dotnet list package --include-transitive | grep -i <package-name>
 ### Q: What if I encounter a new dependency not documented here?
 
 **A**:
+
 1. Check NuGet.org for Xamarin/AndroidX bindings
 2. Check if it's a Datadog internal module
 3. See if MAUI provides it transitively
@@ -224,21 +242,21 @@ When contributing to these docs:
 
 ### Document Maintenance
 
-| Document | Update Frequency | Trigger |
-|----------|------------------|---------|
-| ANDROID_DEPENDENCY_MANAGEMENT.md | Per major insight | New pattern discovered, breaking change |
-| DEPENDENCY_QUICK_REFERENCE.md | Per SDK update | Version numbers, new common dependencies |
-| AUTOMATION_ROADMAP.md | Quarterly | Progress on automation, architectural decisions |
-| This README | As needed | New documents added, major changes |
+| Document                         | Update Frequency  | Trigger                                         |
+| -------------------------------- | ----------------- | ----------------------------------------------- |
+| ANDROID_DEPENDENCY_MANAGEMENT.md | Per major insight | New pattern discovered, breaking change         |
+| DEPENDENCY_QUICK_REFERENCE.md    | Per SDK update    | Version numbers, new common dependencies        |
+| AUTOMATION_ROADMAP.md            | Quarterly         | Progress on automation, architectural decisions |
+| This README                      | As needed         | New documents added, major changes              |
 
 ## Version History
 
-| Version | Date | Changes |
-|---------|------|---------|
-| 1.0 | 2026-01-16 | Initial documentation set created |
-|  |  | - Documented dependency management pattern |
-|  |  | - Resolved gson and jetbrains.annotations duplicates |
-|  |  | - Established automation roadmap |
+| Version | Date       | Changes                                              |
+| ------- | ---------- | ---------------------------------------------------- |
+| 1.0     | 2026-01-16 | Initial documentation set created                    |
+|         |            | - Documented dependency management pattern           |
+|         |            | - Resolved gson and jetbrains.annotations duplicates |
+|         |            | - Established automation roadmap                     |
 
 ## Feedback
 

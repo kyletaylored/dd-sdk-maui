@@ -88,7 +88,7 @@ graph TD
 - **Runner**: `ubuntu-latest`
 - **Purpose**: Download Android AAR files from Maven/GitHub
 - **Caching**:
-  - Cache key: `${{ runner.os }}-aars-${{ version }}`
+  - Cache key: {% raw %}`${{ runner.os }}-aars-${{ version }}`{% endraw %}
   - Cached paths: `Datadog.MAUI.Android.Binding/**/aars/*.aar`
 - **Output**: Uploads AAR files as artifact (`android-aar-files`)
 
@@ -154,7 +154,7 @@ graph TD
 - **Runner**: `macos-latest`
 - **Purpose**: Download iOS XCFrameworks from GitHub releases
 - **Caching**:
-  - Cache key: `${{ runner.os }}-xcframeworks-${{ version }}`
+  - Cache key: {% raw %}`${{ runner.os }}-xcframeworks-${{ version }}`{% endraw %}
   - Cached paths: `Datadog.MAUI.iOS.Binding/Libs/*.xcframework`
 - **Xcode**: Selects Xcode 15.4
 - **Output**: Uploads XCFrameworks as artifact (`ios-xcframeworks`)
@@ -252,17 +252,17 @@ graph TD
 ## Caching Strategy
 
 ### AAR Files (Android)
-- **Key**: `${{ runner.os }}-aars-${{ sdk-version }}`
+- **Key**: {% raw %}`${{ runner.os }}-aars-${{ sdk-version }}`{% endraw %}
 - **Paths**: `Datadog.MAUI.Android.Binding/**/aars/*.aar`
 - **Retention**: Permanent (until version changes)
 
 ### XCFrameworks (iOS)
-- **Key**: `${{ runner.os }}-xcframeworks-${{ sdk-version }}`
+- **Key**: {% raw %}`${{ runner.os }}-xcframeworks-${{ sdk-version }}`{% endraw %}
 - **Paths**: `Datadog.MAUI.iOS.Binding/Libs/*.xcframework`
 - **Retention**: Permanent (until version changes)
 
 ### .NET Workloads
-- **Key**: `${{ runner.os }}-dotnet-workload-{platform}-${{ dotnet-version }}`
+- **Key**: {% raw %}`${{ runner.os }}-dotnet-workload-{platform}-${{ dotnet-version }}`{% endraw %}
 - **Paths**:
   - `~/.dotnet/sdk-manifests`
   - `~/.dotnet/metadata`
@@ -271,7 +271,7 @@ graph TD
 - **Retention**: Permanent (until .NET version changes)
 
 ### NuGet Packages
-- **Key**: `${{ runner.os }}-{platform}-{framework}-packages-${{ sdk-version }}-${{ hashFiles('**/*.csproj') }}`
+- **Key**: {% raw %}`${{ runner.os }}-{platform}-{framework}-packages-${{ sdk-version }}-${{ hashFiles('**/*.csproj') }}`{% endraw %}
 - **Paths**: `./artifacts-{framework}/*.nupkg`
 - **Retention**: Per-framework, invalidated by .csproj changes
 

@@ -70,13 +70,13 @@ jobs:
 
       - name: Clean build artifacts
         if: steps.cache-nuget-net9.outputs.cache-hit != 'true'
-        run: dotnet clean Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln --configuration Release
+        run: dotnet clean Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln --configuration Release -p:TargetFrameworks=net9.0-android
 
       - name: Restore dependencies
         if: steps.cache-nuget-net9.outputs.cache-hit != 'true'
         run: |
-          dotnet workload restore Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln
-          dotnet restore Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln
+          dotnet workload restore Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln -p:TargetFrameworks=net9.0-android
+          dotnet restore Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln -p:TargetFrameworks=net9.0-android
 
       - name: Build Android bindings (net9.0-android)
         if: steps.cache-nuget-net9.outputs.cache-hit != 'true'
@@ -165,13 +165,13 @@ jobs:
 
       - name: Clean build artifacts
         if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
-        run: dotnet clean Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln --configuration Release
+        run: dotnet clean Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln --configuration Release -p:TargetFrameworks=net10.0-android
 
       - name: Restore dependencies
         if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
         run: |
-          dotnet workload restore Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln
-          dotnet restore Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln
+          dotnet workload restore Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln -p:TargetFrameworks=net10.0-android
+          dotnet restore Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln -p:TargetFrameworks=net10.0-android
 
       - name: Build Android bindings (net10.0-android)
         if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
