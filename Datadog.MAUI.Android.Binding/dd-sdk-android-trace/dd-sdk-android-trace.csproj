@@ -29,12 +29,12 @@
     <AndroidMavenLibrary Include="org.jctools:jctools-core" Version="3.3.0" Bind="false" />
     <AndroidMavenLibrary Include="com.google.re2j:re2j" Version="1.7" Bind="false" />
     <AndroidMavenLibrary Include="com.lyft.kronos:kronos-android" Version="0.0.1-alpha11" Bind="false" />
-    <AndroidMavenLibrary Include="com.lyft.kronos:kronos-java" Version="0.0.1-alpha11" Bind="false" />
   </ItemGroup>
 
   <!-- Ignore test dependencies that are in the AAR metadata but not needed at runtime -->
   <ItemGroup>
     <!-- Shared dependencies provided by dd-sdk-android-core -->
+    <AndroidIgnoredJavaDependency Include="com.lyft.kronos:kronos-java:0.0.1-alpha11" />
     <AndroidIgnoredJavaDependency Include="com.google.code.gson:gson:2.10.1" />
     <AndroidIgnoredJavaDependency Include="org.jetbrains:annotations:13.0" />
     <AndroidIgnoredJavaDependency Include="org.junit.platform:junit-platform-launcher:1.9.3" />
