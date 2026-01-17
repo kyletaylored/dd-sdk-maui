@@ -554,10 +554,10 @@ jobs:
         run: dotnet nuget add source $PWD/artifacts --name local
 
       - name: Restore sample app dependencies
-        run: dotnet restore samples/DatadogMauiSample/DatadogMauiSample.csproj
+        run: dotnet restore samples/DatadogMauiSample/DatadogMauiSample.csproj -p:TargetFrameworks=net10.0-ios
 
       - name: Build sample app
-        run: dotnet build samples/DatadogMauiSample/DatadogMauiSample.csproj --configuration Release --no-restore -f net10.0-ios -p:BuildIpa=true
+        run: dotnet build samples/DatadogMauiSample/DatadogMauiSample.csproj --configuration Release --no-restore -f net10.0-ios -p:TargetFrameworks=net10.0-ios -p:BuildIpa=true
 
       - name: Upload sample app
         uses: actions/upload-artifact@v6

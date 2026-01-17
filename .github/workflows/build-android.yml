@@ -70,21 +70,21 @@ jobs:
 
       - name: Clean build artifacts
         if: steps.cache-nuget-net9.outputs.cache-hit != 'true'
-        run: dotnet clean Datadog.MAUI.Android.Binding.sln --configuration Release
+        run: dotnet clean Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln --configuration Release
 
       - name: Restore dependencies
         if: steps.cache-nuget-net9.outputs.cache-hit != 'true'
         run: |
-          dotnet workload restore Datadog.MAUI.Android.Binding.sln
-          dotnet restore Datadog.MAUI.Android.Binding.sln
+          dotnet workload restore Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln
+          dotnet restore Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln
 
       - name: Build Android bindings (net9.0-android)
         if: steps.cache-nuget-net9.outputs.cache-hit != 'true'
-        run: dotnet build Datadog.MAUI.Android.Binding.sln --configuration Release --no-restore --verbosity minimal -p:TargetFrameworks=net9.0-android
+        run: dotnet build Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln --configuration Release --no-restore --verbosity minimal -p:TargetFrameworks=net9.0-android
 
       - name: Pack NuGet packages (net9.0-android)
         if: steps.cache-nuget-net9.outputs.cache-hit != 'true'
-        run: dotnet pack Datadog.MAUI.Android.Binding.sln --configuration Release --no-build --output ./artifacts-net9 -p:TargetFrameworks=net9.0-android
+        run: dotnet pack Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln --configuration Release --no-build --output ./artifacts-net9 -p:TargetFrameworks=net9.0-android
 
       - name: Upload net9.0-android packages
         uses: actions/upload-artifact@v6
@@ -165,21 +165,21 @@ jobs:
 
       - name: Clean build artifacts
         if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
-        run: dotnet clean Datadog.MAUI.Android.Binding.sln --configuration Release
+        run: dotnet clean Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln --configuration Release
 
       - name: Restore dependencies
         if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
         run: |
-          dotnet workload restore Datadog.MAUI.Android.Binding.sln
-          dotnet restore Datadog.MAUI.Android.Binding.sln
+          dotnet workload restore Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln
+          dotnet restore Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln
 
       - name: Build Android bindings (net10.0-android)
         if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
-        run: dotnet build Datadog.MAUI.Android.Binding.sln --configuration Release --no-restore --verbosity minimal -p:TargetFrameworks=net10.0-android
+        run: dotnet build Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln --configuration Release --no-restore --verbosity minimal -p:TargetFrameworks=net10.0-android
 
       - name: Pack NuGet packages (net10.0-android)
         if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
-        run: dotnet pack Datadog.MAUI.Android.Binding.sln --configuration Release --no-build --output ./artifacts-net10 -p:TargetFrameworks=net10.0-android
+        run: dotnet pack Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln --configuration Release --no-build --output ./artifacts-net10 -p:TargetFrameworks=net10.0-android
 
       - name: Upload net10.0-android packages
         uses: actions/upload-artifact@v6
@@ -321,10 +321,10 @@ jobs:
         run: dotnet nuget add source $PWD/artifacts --name local
 
       - name: Restore sample app dependencies
-        run: dotnet restore samples/DatadogMauiSample/DatadogMauiSample.csproj
+        run: dotnet restore samples/DatadogMauiSample/DatadogMauiSample.csproj -p:TargetFrameworks=net10.0-android
 
       - name: Build sample app
-        run: dotnet build samples/DatadogMauiSample/DatadogMauiSample.csproj --configuration Release --no-restore -f net10.0-android
+        run: dotnet build samples/DatadogMauiSample/DatadogMauiSample.csproj --configuration Release --no-restore -f net10.0-android -p:TargetFrameworks=net10.0-android
 
       - name: Upload sample APK
         uses: actions/upload-artifact@v6
