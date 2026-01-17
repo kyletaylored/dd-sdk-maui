@@ -2,7 +2,7 @@
 layout: default
 title: Home
 nav_order: 1
-description: "Official documentation for the Datadog SDK for .NET MAUI"
+description: "Documentation for the Datadog SDK for .NET MAUI"
 permalink: /
 ---
 

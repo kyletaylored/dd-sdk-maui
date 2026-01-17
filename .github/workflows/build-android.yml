@@ -124,7 +124,9 @@ jobs:
 
       - name: Restore dependencies
         if: steps.cache-nuget-net9.outputs.cache-hit != 'true'
-        run: dotnet restore Datadog.MAUI.Android.Binding.sln
+        run: |
+          dotnet workload restore Datadog.MAUI.Android.Binding.sln
+          dotnet restore Datadog.MAUI.Android.Binding.sln
 
       - name: Build Android bindings (net9.0-android)
         if: steps.cache-nuget-net9.outputs.cache-hit != 'true'
@@ -219,7 +221,9 @@ jobs:
 
       - name: Restore dependencies
         if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
-        run: dotnet restore Datadog.MAUI.Android.Binding.sln
+        run: |
+          dotnet workload restore Datadog.MAUI.Android.Binding.sln
+          dotnet restore Datadog.MAUI.Android.Binding.sln
 
       - name: Build Android bindings (net10.0-android)
         if: steps.cache-nuget-net10.outputs.cache-hit != 'true'

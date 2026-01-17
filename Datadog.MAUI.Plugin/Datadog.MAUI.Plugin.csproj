@@ -19,7 +19,7 @@
 
     <PackageId>Datadog.MAUI</PackageId>
     <Title>Datadog SDK for .NET MAUI</Title>
-    <Description>Official Datadog SDK for .NET MAUI applications. Provides Real User Monitoring (RUM), Log Collection, APM Tracing, Session Replay, and more for iOS and Android platforms.</Description>
+    <Description>Unofficial Datadog SDK for .NET MAUI applications. Provides Real User Monitoring (RUM), Log Collection, APM Tracing, Session Replay, and more for iOS and Android platforms.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 

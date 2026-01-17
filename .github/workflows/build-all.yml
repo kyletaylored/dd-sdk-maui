@@ -51,10 +51,10 @@ jobs:
         run: |
           if [ "${{ needs.build-android.result }}" == "success" ]; then
             echo "android_success=true" >> $GITHUB_OUTPUT
-            echo "✅ Android builds succeeded"
+            echo "Android builds succeeded"
           else
             echo "android_success=false" >> $GITHUB_OUTPUT
-            echo "❌ Android builds failed or were skipped"
+            echo "Android builds failed or were skipped"
           fi
 
       - name: Check iOS build status
@@ -62,10 +62,10 @@ jobs:
         run: |
           if [ "${{ needs.build-ios.result }}" == "success" ]; then
             echo "ios_success=true" >> $GITHUB_OUTPUT
-            echo "✅ iOS builds succeeded"
+            echo "iOS builds succeeded"
           else
             echo "ios_success=false" >> $GITHUB_OUTPUT
-            echo "⚠️ iOS builds failed or were skipped (bindings incomplete)"
+            echo "iOS builds failed or were skipped (bindings incomplete)"
           fi
 
       - name: Download Android artifacts
@@ -189,7 +189,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "All packages support multi-framework targeting:" >> $GITHUB_STEP_SUMMARY
           echo "- **Android**: net9.0-android, net10.0-android" >> $GITHUB_STEP_SUMMARY
-          echo "- **iOS**: net9.0-ios, net10.0-ios" >> $GITHUB_STEP_SUMMARY
+          echo "- **iOS**: net8.0-ios, net9.0-ios, net10.0-ios" >> $GITHUB_STEP_SUMMARY
 
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "---" >> $GITHUB_STEP_SUMMARY
@@ -274,7 +274,7 @@ jobs:
           EOF
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           name: Release ${{ steps.get-version.outputs.version }}
           body_path: release-notes.md

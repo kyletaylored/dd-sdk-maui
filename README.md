@@ -3,7 +3,7 @@
 [![NuGet](https://img.shields.io/nuget/v/Datadog.MAUI.svg)](https://www.nuget.org/packages/Datadog.MAUI/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
-Official [Datadog](https://www.datadoghq.com/) SDK for .NET MAUI applications, providing comprehensive monitoring and observability for iOS and Android mobile apps.
+Unofficial [Datadog](https://www.datadoghq.com/) SDK for .NET MAUI applications, providing comprehensive monitoring and observability for iOS and Android mobile apps.
 
 ## Features
 
