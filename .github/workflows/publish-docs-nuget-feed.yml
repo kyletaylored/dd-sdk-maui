@@ -80,6 +80,9 @@ jobs:
           future: false
           verbose: true
 
+      - name: Fix _site permissions
+        run: chmod -R u+w _site
+
       # --- Build NuGet feed into _site/nuget ---
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
