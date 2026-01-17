@@ -1,0 +1,280 @@
+name: Publish to NuGet
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag to publish (e.g., v3.5.0)'
+        required: true
+        type: string
+      dry_run:
+        description: 'Dry run (validate without publishing)'
+        required: true
+        type: boolean
+        default: true
+
+env:
+  NUGET_SOURCE: 'https://api.nuget.org/v3/index.json'
+
+jobs:
+  # Download packages from GitHub Release
+  download-release-packages:
+    name: Download Release Packages
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download release assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Downloading packages from release ${{ github.event.inputs.release_tag }}..."
+
+          # Download all .nupkg files from the release
+          gh release download ${{ github.event.inputs.release_tag }} \
+            --pattern "*.nupkg" \
+            --dir ./packages
+
+          echo "=== Downloaded Packages ==="
+          ls -lh ./packages/
+          echo ""
+          echo "Total packages: $(ls -1 ./packages/*.nupkg | wc -l)"
+
+      - name: Download checksums
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release download ${{ github.event.inputs.release_tag }} \
+            --pattern "checksums.txt" \
+            --dir ./packages || echo "No checksums file available"
+
+      - name: Verify checksums
+        run: |
+          cd ./packages
+          if [ -f checksums.txt ]; then
+            echo "Verifying package checksums..."
+            sha256sum -c checksums.txt
+            echo "✅ All checksums verified"
+          else
+            echo "⚠️  Warning: No checksums.txt found, skipping verification"
+          fi
+
+      - name: Upload packages for publishing
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-packages-to-publish
+          path: ./packages/*.nupkg
+          retention-days: 7
+
+  # Validate packages before publishing
+  validate-packages:
+    name: Validate Packages
+    runs-on: ubuntu-latest
+    needs: download-release-packages
+
+    steps:
+      - name: Download packages
+        uses: actions/download-artifact@v4
+        with:
+          name: release-packages-to-publish
+          path: ./packages
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: List packages
+        run: |
+          echo "=== Packages to Publish ==="
+          ls -lh ./packages/
+          echo ""
+          echo "Total: $(ls -1 ./packages/*.nupkg | wc -l) packages"
+
+      - name: Validate package structure
+        run: |
+          echo "Validating package structure..."
+
+          for package in ./packages/*.nupkg; do
+            pkg_name=$(basename "$package")
+            echo ""
+            echo "Validating: $pkg_name"
+
+            # Use dotnet to validate the package
+            if dotnet nuget verify "$package" 2>/dev/null; then
+              echo "✅ Valid package structure"
+            else
+              echo "⚠️  Could not verify (may not be signed)"
+            fi
+          done
+
+      - name: Test package metadata
+        run: |
+          echo "Checking package metadata..."
+
+          for package in ./packages/*.nupkg; do
+            pkg_name=$(basename "$package")
+
+            # Extract package
+            mkdir -p temp-pkg
+            unzip -q "$package" -d temp-pkg
+
+            # Check for nuspec
+            if ls temp-pkg/*.nuspec 1> /dev/null 2>&1; then
+              echo "✅ $pkg_name - Has .nuspec"
+            else
+              echo "❌ $pkg_name - Missing .nuspec"
+              rm -rf temp-pkg
+              exit 1
+            fi
+
+            # Check for LICENSE
+            if [ -f temp-pkg/LICENSE ]; then
+              echo "✅ $pkg_name - Has LICENSE"
+            else
+              echo "⚠️  $pkg_name - Missing LICENSE"
+            fi
+
+            rm -rf temp-pkg
+          done
+
+          echo ""
+          echo "✅ Validation complete"
+
+  # Publish to NuGet.org
+  publish-to-nuget:
+    name: Publish to NuGet.org
+    runs-on: ubuntu-latest
+    needs: validate-packages
+    if: github.event.inputs.dry_run == 'false'
+    environment:
+      name: nuget-production
+      url: https://www.nuget.org/
+
+    steps:
+      - name: Download packages
+        uses: actions/download-artifact@v4
+        with:
+          name: release-packages-to-publish
+          path: ./packages
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Publish packages to NuGet.org
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          echo "Publishing packages to NuGet.org..."
+          echo ""
+
+          SUCCESS=0
+          FAILED=0
+          SKIPPED=0
+
+          for package in ./packages/*.nupkg; do
+            pkg_name=$(basename "$package")
+            echo "----------------------------------------"
+            echo "Publishing: $pkg_name"
+
+            if dotnet nuget push "$package" \
+              --api-key "$NUGET_API_KEY" \
+              --source "${{ env.NUGET_SOURCE }}" \
+              --skip-duplicate \
+              --timeout 300; then
+              echo "✅ Published: $pkg_name"
+              SUCCESS=$((SUCCESS + 1))
+            else
+              EXIT_CODE=$?
+              if [ $EXIT_CODE -eq 0 ]; then
+                echo "⏭️  Skipped (already exists): $pkg_name"
+                SKIPPED=$((SKIPPED + 1))
+              else
+                echo "❌ Failed: $pkg_name (exit code: $EXIT_CODE)"
+                FAILED=$((FAILED + 1))
+              fi
+            fi
+            echo ""
+          done
+
+          echo "========================================"
+          echo "         PUBLISH SUMMARY"
+          echo "========================================"
+          echo "✅ Successfully Published: $SUCCESS"
+          echo "⏭️  Skipped (duplicates):  $SKIPPED"
+          echo "❌ Failed:                 $FAILED"
+          echo "========================================"
+          echo ""
+
+          if [ $FAILED -gt 0 ]; then
+            echo "❌ Some packages failed to publish!"
+            exit 1
+          fi
+
+          if [ $SUCCESS -eq 0 ] && [ $SKIPPED -eq 0 ]; then
+            echo "❌ No packages were published or skipped!"
+            exit 1
+          fi
+
+          echo "✅ Publish operation completed successfully!"
+
+      - name: Create publish summary
+        run: |
+          echo "# 📤 NuGet Publish Complete!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📦 Published from Release" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Release Tag**: ${{ github.event.inputs.release_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Total Packages**: $(ls -1 ./packages/*.nupkg | wc -l)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🔗 Links" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- [NuGet.org Packages](https://www.nuget.org/profiles/DataDog)" >> $GITHUB_STEP_SUMMARY
+          echo "- [GitHub Release](${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ github.event.inputs.release_tag }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## ⏰ Availability" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Packages will be available on NuGet.org within 15-30 minutes." >> $GITHUB_STEP_SUMMARY
+
+  # Dry run summary
+  dry-run-summary:
+    name: Dry Run Summary
+    runs-on: ubuntu-latest
+    needs: validate-packages
+    if: github.event.inputs.dry_run == 'true'
+
+    steps:
+      - name: Download packages
+        uses: actions/download-artifact@v4
+        with:
+          name: release-packages-to-publish
+          path: ./packages
+
+      - name: Create dry run summary
+        run: |
+          echo "# 🧪 Dry Run Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## ✅ Validation Passed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All packages passed validation checks." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📦 Packages Ready for Publishing" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Release Tag**: ${{ github.event.inputs.release_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Total Packages**: $(ls -1 ./packages/*.nupkg | wc -l)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Package List" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          ls -1 ./packages/*.nupkg | xargs -n1 basename >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📤 To Publish for Real" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "1. Re-run this workflow" >> $GITHUB_STEP_SUMMARY
+          echo "2. **Uncheck** 'Dry run' option" >> $GITHUB_STEP_SUMMARY
+          echo "3. Packages will be published to NuGet.org" >> $GITHUB_STEP_SUMMARY

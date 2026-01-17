@@ -1,0 +1,108 @@
+name: Validate Pull Request
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [ main, develop ]
+
+jobs:
+  validate-changes:
+    name: Validate PR Changes
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+        with:
+          files: |
+            Datadog.MAUI.Android.Binding/**
+            Datadog.MAUI.iOS.Binding/**
+            samples/**
+            *.md
+            .github/**
+
+      - name: List changed files
+        run: |
+          echo "Changed files:"
+          echo "${{ steps.changed-files.outputs.all_changed_files }}"
+
+      - name: Check for version updates
+        if: contains(steps.changed-files.outputs.all_changed_files, '.csproj')
+        run: |
+          echo "Checking if version numbers were updated in .csproj files..."
+          git diff origin/${{ github.base_ref }} -- '*.csproj' | grep -E '^\+.*<(Version|PackageVersion)>' || echo "⚠️  Warning: No version changes detected"
+
+      - name: Check for README updates
+        if: contains(steps.changed-files.outputs.all_changed_files, 'Datadog.MAUI')
+        run: |
+          if [ -n "${{ steps.changed-files.outputs.all_changed_files }}" ]; then
+            echo "✅ Code changes detected"
+
+            # Check if corresponding README was updated
+            if ! echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q 'README.md'; then
+              echo "⚠️  Warning: Code changed but no README updates found. Consider updating documentation."
+            else
+              echo "✅ README updates found"
+            fi
+          fi
+
+  check-build:
+    name: Quick Build Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore NuGet packages
+        run: |
+          dotnet restore Datadog.MAUI.Android.Binding.sln || echo "⚠️  Android restore failed"
+
+      - name: Build Android (quick check)
+        run: |
+          dotnet build Datadog.MAUI.Android.Binding.sln --configuration Release --no-restore || echo "⚠️  Android build check failed"
+        continue-on-error: true
+
+  link-checker:
+    name: Check Documentation Links
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check links in markdown files
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: 'yes'
+          config-file: '.github/markdown-link-check-config.json'
+        continue-on-error: true
+
+  size-check:
+    name: Check Package Sizes
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check AAR sizes
+        run: |
+          echo "=== AAR File Sizes ==="
+          find Datadog.MAUI.Android.Binding -name "*.aar" -exec ls -lh {} \; || echo "No AAR files found (will be downloaded during build)"
+
+      - name: Check XCFramework sizes
+        run: |
+          echo "=== XCFramework Sizes ==="
+          find Datadog.MAUI.iOS.Binding/Libs -name "*.xcframework" -exec du -sh {} \; 2>/dev/null || echo "No XCFramework files found (will be downloaded during build)"

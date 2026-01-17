@@ -11,7 +11,7 @@ jobs:
   # Download XCFrameworks once and share across builds (requires macOS)
   download-xcframeworks:
     name: Download XCFrameworks
-    runs-on: macos-14  # macOS runner required for framework handling
+    runs-on: macos-26
 
     steps:
       - name: Checkout repository
@@ -28,7 +28,7 @@ jobs:
         id: cache-xcframeworks
         uses: actions/cache@v4
         with:
-          path: Datadog.MAUI.iOS.Binding/Libs/*.xcframework
+          path: Datadog.MAUI.iOS.Binding/artifacts/*.xcframework
           key: ${{ runner.os }}-xcframeworks-${{ steps.sdk-version.outputs.version }}
           restore-keys: |
             ${{ runner.os }}-xcframeworks-
@@ -46,13 +46,13 @@ jobs:
       - name: Verify XCFrameworks downloaded
         run: |
           echo "XCFrameworks found:"
-          ls -la Datadog.MAUI.iOS.Binding/Libs/*.xcframework || echo "No XCFrameworks found"
+          ls -la Datadog.MAUI.iOS.Binding/artifacts/*.xcframework || echo "No XCFrameworks found"
 
       - name: Upload XCFrameworks
         uses: actions/upload-artifact@v4
         with:
           name: ios-xcframeworks
-          path: Datadog.MAUI.iOS.Binding/Libs/*.xcframework
+          path: Datadog.MAUI.iOS.Binding/artifacts/*.xcframework
           retention-days: 1
 
       - name: Upload download logs on failure
@@ -79,10 +79,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ios-xcframeworks
-          path: Datadog.MAUI.iOS.Binding/Libs/
+          path: Datadog.MAUI.iOS.Binding/artifacts/
 
       - name: Verify XCFrameworks
-        run: ls -la Datadog.MAUI.iOS.Binding/Libs/
+        run: ls -la Datadog.MAUI.iOS.Binding/artifacts/
 
       - name: Setup .NET SDK 8
         uses: actions/setup-dotnet@v4
@@ -176,10 +176,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ios-xcframeworks
-          path: Datadog.MAUI.iOS.Binding/Libs/
+          path: Datadog.MAUI.iOS.Binding/artifacts/
 
       - name: Verify XCFrameworks
-        run: ls -la Datadog.MAUI.iOS.Binding/Libs/
+        run: ls -la Datadog.MAUI.iOS.Binding/artifacts/
 
       - name: Setup .NET SDK 9
         uses: actions/setup-dotnet@v4
@@ -273,10 +273,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ios-xcframeworks
-          path: Datadog.MAUI.iOS.Binding/Libs/
+          path: Datadog.MAUI.iOS.Binding/artifacts/
 
       - name: Verify XCFrameworks
-        run: ls -la Datadog.MAUI.iOS.Binding/Libs/
+        run: ls -la Datadog.MAUI.iOS.Binding/artifacts/
 
       - name: Remove global.json to allow SDK 10+
         run: rm -f global.json

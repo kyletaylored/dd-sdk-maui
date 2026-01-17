@@ -1,12 +1,16 @@
 name: Deploy Docs + NuGet Feed to GitHub Pages
 
+# This workflow runs when:
+# 1. Documentation files are pushed to main (docs/** or _config.base.yml)
+# 2. A GitHub release is published (updates NuGet feed with release packages)
+# 3. Manually triggered via workflow_dispatch
+
 on:
   push:
     branches: ["main"]
     paths:
       - "docs/**"
-      - "src/**"
-      - ".github/workflows/**"
+      - "_config.base.yml"
   release:
     types: [published]
   workflow_dispatch:
@@ -26,20 +30,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      # --- Your docs generation (optional/keep if you need it) ---
-      # If your repo actually uses these to generate docs content, keep them.
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "lts/-1"
-          cache: "npm"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build documentation
-        run: npm run docs:build
 
       # --- Pages vars (origin/base_path) ---
       - name: Setup Pages
@@ -90,16 +80,29 @@ jobs:
           future: false
           verbose: true
 
-      # --- Build NuGet feed into _site/nuget (NEW) ---
+      # --- Build NuGet feed into _site/nuget ---
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.0.x"
 
-      - name: Pack
+      - name: Download release packages (if from release event)
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p pkgs
-          dotnet pack -c Release -o pkgs
+          echo "Downloading packages from release ${{ github.event.release.tag_name }}..."
+          gh release download ${{ github.event.release.tag_name }} \
+            --pattern "*.nupkg" \
+            --dir ./pkgs || echo "No packages found in release"
+
+      - name: Build packages (if not from release)
+        if: github.event_name != 'release'
+        run: |
+          echo "Not a release event, skipping package build"
+          echo "NuGet feed will only be updated during releases"
+          mkdir -p pkgs
 
       - name: Install Sleet
         run: dotnet tool install -g sleet

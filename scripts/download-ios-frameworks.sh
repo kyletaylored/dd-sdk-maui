@@ -7,7 +7,10 @@
 #
 # Examples:
 #   ./download-ios-frameworks.sh 3.5.0
+#   ./download-ios-frameworks.sh 3.5.0 Datadog.MAUI.iOS.Binding
 #   ./download-ios-frameworks.sh 3.5.0 ../Datadog.MAUI.iOS.Binding
+#
+# The frameworks will be installed in <output_path>/artifacts/*.xcframework
 
 set -e
 
@@ -40,9 +43,12 @@ if [ -z "$VERSION" ]; then
     echo -e "${GREEN}Latest version: $VERSION${NC}"
 fi
 
-# Check if output path exists
+# Create output directory if it doesn't exist
+mkdir -p "$OUTPUT_PATH"
+
+# Check if output path is accessible
 if [ ! -d "$OUTPUT_PATH" ]; then
-    echo -e "${RED}Output path does not exist: $OUTPUT_PATH${NC}"
+    echo -e "${RED}Could not create or access output path: $OUTPUT_PATH${NC}"
     exit 1
 fi
 

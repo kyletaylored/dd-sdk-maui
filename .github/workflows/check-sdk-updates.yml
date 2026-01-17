@@ -1,0 +1,161 @@
+name: Check for Datadog SDK Updates
+
+on:
+  schedule:
+    # Run every Monday at 9 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  check-updates:
+    name: Check for SDK Updates
+    runs-on: ubuntu-latest
+    outputs:
+      updates-available: ${{ steps.check-versions.outputs.updates-available }}
+      latest-android: ${{ steps.check-versions.outputs.latest-android }}
+      current-android: ${{ steps.check-versions.outputs.current-android }}
+      latest-ios: ${{ steps.check-versions.outputs.latest-ios }}
+      current-ios: ${{ steps.check-versions.outputs.current-ios }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get current SDK versions
+        id: current
+        run: |
+          # Get current version from Directory.Build.props
+          CURRENT_VERSION=$(grep -E '<DatadogSdkVersion>.*</DatadogSdkVersion>' Directory.Build.props | sed 's/.*<DatadogSdkVersion>\(.*\)<\/DatadogSdkVersion>.*/\1/')
+          echo "current-version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "Current version: $CURRENT_VERSION"
+
+      - name: Fetch latest SDK versions
+        id: check-versions
+        run: |
+          CURRENT_VERSION="${{ steps.current.outputs.current-version }}"
+
+          # Get latest Android SDK version from GitHub API
+          LATEST_ANDROID=$(curl -s https://api.github.com/repos/DataDog/dd-sdk-android/releases/latest | jq -r '.tag_name')
+          echo "latest-android=$LATEST_ANDROID" >> $GITHUB_OUTPUT
+          echo "current-android=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+
+          # Get latest iOS SDK version from GitHub API
+          LATEST_IOS=$(curl -s https://api.github.com/repos/DataDog/dd-sdk-ios/releases/latest | jq -r '.tag_name')
+          echo "latest-ios=$LATEST_IOS" >> $GITHUB_OUTPUT
+          echo "current-ios=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+
+          echo "Latest Android: $LATEST_ANDROID"
+          echo "Latest iOS: $LATEST_IOS"
+          echo "Current: $CURRENT_VERSION"
+
+          # Check if updates are available (remove 'v' prefix if present)
+          LATEST_ANDROID_CLEAN=${LATEST_ANDROID#v}
+          LATEST_IOS_CLEAN=${LATEST_IOS#v}
+
+          if [ "$LATEST_ANDROID_CLEAN" != "$CURRENT_VERSION" ] || [ "$LATEST_IOS_CLEAN" != "$CURRENT_VERSION" ]; then
+            echo "updates-available=true" >> $GITHUB_OUTPUT
+            echo "Updates available!"
+          else
+            echo "updates-available=false" >> $GITHUB_OUTPUT
+            echo "Already up to date"
+          fi
+
+      - name: Create issue if updates available
+        if: steps.check-versions.outputs.updates-available == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const latestAndroid = '${{ steps.check-versions.outputs.latest-android }}';
+            const currentAndroid = '${{ steps.check-versions.outputs.current-android }}';
+            const latestIos = '${{ steps.check-versions.outputs.latest-ios }}';
+            const currentIos = '${{ steps.check-versions.outputs.current-ios }}';
+
+            const title = 'New Datadog SDK versions available';
+            let body = '## New Datadog SDK Releases Available\n\n';
+
+            const latestAndroidClean = latestAndroid.replace(/^v/, '');
+            const latestIosClean = latestIos.replace(/^v/, '');
+
+            if (latestAndroidClean !== currentAndroid) {
+              body += `### Android SDK\n`;
+              body += `- Current: \`${currentAndroid}\`\n`;
+              body += `- Latest: \`${latestAndroidClean}\` ([Release Notes](https://github.com/DataDog/dd-sdk-android/releases/tag/${latestAndroid}))\n\n`;
+            }
+
+            if (latestIosClean !== currentIos) {
+              body += `### iOS SDK\n`;
+              body += `- Current: \`${currentIos}\`\n`;
+              body += `- Latest: \`${latestIosClean}\` ([Release Notes](https://github.com/DataDog/dd-sdk-ios/releases/tag/${latestIos}))\n\n`;
+            }
+
+            body += `## Update Instructions\n\n`;
+            body += `To update to the latest versions:\n\n`;
+            body += `1. Update the \`<DatadogSdkVersion>\` in \`Directory.Build.props\`\n`;
+            body += `2. Run \`./scripts/setup-aars.sh <version>\` for Android\n`;
+            body += `3. Run \`./scripts/download-ios-frameworks.sh <version> Datadog.MAUI.iOS.Binding\` for iOS\n`;
+            body += `4. Test the builds\n`;
+            body += `5. Update \`docs/CHANGELOG.md\`\n`;
+            body += `6. Create a pull request\n\n`;
+
+            body += `### Automated Update\n\n`;
+            body += `Or use the version update commands:\n\n`;
+            body += `\`\`\`bash\n`;
+            body += `# Update Directory.Build.props\n`;
+            body += `sed -i '' 's/<DatadogSdkVersion>.*<\\/DatadogSdkVersion>/<DatadogSdkVersion>${latestAndroidClean}<\\/DatadogSdkVersion>/' Directory.Build.props\n\n`;
+            body += `# Download new Android AARs\n`;
+            body += `./scripts/setup-aars.sh ${latestAndroidClean}\n\n`;
+            body += `# Download new iOS frameworks\n`;
+            body += `./scripts/download-ios-frameworks.sh ${latestIosClean} Datadog.MAUI.iOS.Binding\n`;
+            body += `\`\`\`\n`;
+
+            // Check if issue already exists
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'sdk-update'
+            });
+
+            const existingIssue = issues.data.find(issue =>
+              issue.title === title
+            );
+
+            if (existingIssue) {
+              // Update existing issue
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssue.number,
+                body: body
+              });
+              console.log(`Updated existing issue #${existingIssue.number}`);
+            } else {
+              // Create new issue
+              const issue = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['sdk-update', 'enhancement']
+              });
+              console.log(`Created new issue #${issue.data.number}`);
+            }
+
+      - name: Summary
+        run: |
+          echo "## SDK Version Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Current Version" >> $GITHUB_STEP_SUMMARY
+          echo "- \`${{ steps.check-versions.outputs.current-android }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Latest Available" >> $GITHUB_STEP_SUMMARY
+          echo "- Android: \`${{ steps.check-versions.outputs.latest-android }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- iOS: \`${{ steps.check-versions.outputs.latest-ios }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.check-versions.outputs.updates-available }}" == "true" ]; then
+            echo "🔔 **Updates available!** An issue has been created." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ **SDK is up to date**" >> $GITHUB_STEP_SUMMARY
+          fi

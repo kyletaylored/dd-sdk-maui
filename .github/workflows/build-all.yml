@@ -227,6 +227,13 @@ jobs:
           echo "version=$TAG_NAME" >> $GITHUB_OUTPUT
           echo "Release version: $TAG_NAME"
 
+      - name: Generate checksums
+        run: |
+          cd ./release-artifacts
+          find . -name "*.nupkg" -exec sha256sum {} \; > checksums.txt
+          echo "=== SHA256 Checksums ==="
+          cat checksums.txt
+
       - name: Create release notes
         run: |
           cat > release-notes.md << 'EOF'
@@ -278,7 +285,9 @@ jobs:
         with:
           name: Release ${{ steps.get-version.outputs.version }}
           body_path: release-notes.md
-          files: ./release-artifacts/**/*.nupkg
+          files: |
+            ./release-artifacts/**/*.nupkg
+            ./release-artifacts/checksums.txt
           draft: false
           prerelease: false
         env:
