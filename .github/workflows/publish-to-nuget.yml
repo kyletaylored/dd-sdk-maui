@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Download release assets
         env:
@@ -62,7 +62,7 @@ jobs:
           fi
 
       - name: Upload packages for publishing
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: release-packages-to-publish
           path: ./packages/*.nupkg
@@ -76,13 +76,13 @@ jobs:
 
     steps:
       - name: Download packages
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: release-packages-to-publish
           path: ./packages
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
 
@@ -155,13 +155,13 @@ jobs:
 
     steps:
       - name: Download packages
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: release-packages-to-publish
           path: ./packages
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
 
@@ -249,7 +249,7 @@ jobs:
 
     steps:
       - name: Download packages
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: release-packages-to-publish
           path: ./packages

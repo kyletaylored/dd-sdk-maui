@@ -131,36 +131,30 @@ Located in `scripts/` directory:
    - Generates dependency declarations
    - Usage: `./scripts/setup-android-bindings.sh [version]`
 
-2. **setup-aars.sh**
-   - Downloads AAR/JAR files from Maven Central
-   - Validates checksums
-   - Organizes into binding project directories
-   - Usage: `./scripts/setup-aars.sh [version]`
-
-3. **generate-android-dependencies.sh**
+2. **generate-android-dependencies.sh**
    - Parses POM files for dependency information
    - Generates AndroidMavenLibrary and AndroidIgnoredJavaDependency entries
    - Adds appropriate `Bind="false"` attributes
    - Usage: `./scripts/generate-android-dependencies.sh`
 
-4. **analyze-android-dependencies.sh**
+3. **analyze-android-dependencies.sh**
    - Analyzes transitive dependency chains
    - Identifies which dependencies should be centralized
    - Helps categorize dependencies (NuGet vs Maven)
    - Usage: `./scripts/analyze-android-dependencies.sh [module]`
 
-5. **download-ios-frameworks.sh**
+4. **download-ios-frameworks.sh**
    - Downloads XCFrameworks from Datadog iOS SDK releases
    - Uses GitHub API to find latest or specific version
    - Extracts to iOS binding directory
    - Usage: `./scripts/download-ios-frameworks.sh [version]`
 
-6. **generate-ios-bindings.sh**
+5. **generate-ios-bindings.sh**
    - Prepares iOS binding project structure
    - Sets up framework references
    - Usage: `./scripts/generate-ios-bindings.sh`
 
-7. **build.sh**
+6. **build.sh**
    - Main build script for all projects
    - Supports Debug and Release configurations
    - Creates NuGet packages in Release mode
@@ -256,7 +250,6 @@ dd-sdk-maui/
 │       └── Platforms/Android/MainApplication.cs
 ├── scripts/
 │   ├── setup-android-bindings.sh      # Main Android setup
-│   ├── setup-aars.sh                  # Download AARs
 │   ├── generate-android-dependencies.sh # Generate dep entries
 │   ├── analyze-android-dependencies.sh # Analyze dep chains
 │   ├── download-ios-frameworks.sh     # Download iOS frameworks

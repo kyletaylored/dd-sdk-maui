@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Get current SDK versions
         id: current
@@ -92,21 +92,19 @@ jobs:
             body += `## Update Instructions\n\n`;
             body += `To update to the latest versions:\n\n`;
             body += `1. Update the \`<DatadogSdkVersion>\` in \`Directory.Build.props\`\n`;
-            body += `2. Run \`./scripts/setup-aars.sh <version>\` for Android\n`;
-            body += `3. Run \`./scripts/download-ios-frameworks.sh <version> Datadog.MAUI.iOS.Binding\` for iOS\n`;
-            body += `4. Test the builds\n`;
-            body += `5. Update \`docs/CHANGELOG.md\`\n`;
-            body += `6. Create a pull request\n\n`;
+            body += `2. Run \`./scripts/download-ios-frameworks.sh <version> Datadog.MAUI.iOS.Binding\` for iOS\n`;
+            body += `3. Test the builds (dependencies are automatically fetched via Maven)\n`;
+            body += `4. Update \`docs/CHANGELOG.md\`\n`;
+            body += `5. Create a pull request\n\n`;
 
             body += `### Automated Update\n\n`;
             body += `Or use the version update commands:\n\n`;
             body += `\`\`\`bash\n`;
             body += `# Update Directory.Build.props\n`;
             body += `sed -i '' 's/<DatadogSdkVersion>.*<\\/DatadogSdkVersion>/<DatadogSdkVersion>${latestAndroidClean}<\\/DatadogSdkVersion>/' Directory.Build.props\n\n`;
-            body += `# Download new Android AARs\n`;
-            body += `./scripts/setup-aars.sh ${latestAndroidClean}\n\n`;
             body += `# Download new iOS frameworks\n`;
-            body += `./scripts/download-ios-frameworks.sh ${latestIosClean} Datadog.MAUI.iOS.Binding\n`;
+            body += `./scripts/download-ios-frameworks.sh ${latestIosClean} Datadog.MAUI.iOS.Binding\n\n`;
+            body += `# Android dependencies are automatically fetched via AndroidMavenLibrary during build\n`;
             body += `\`\`\`\n`;
 
             // Check if issue already exists

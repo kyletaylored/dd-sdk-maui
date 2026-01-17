@@ -216,10 +216,7 @@ cd dd-sdk-maui
 # Download iOS XCFrameworks
 ./scripts/download-ios-frameworks.sh
 
-# Download Android AAR files
-./scripts/setup-aars.sh
-
-# Build all projects
+# Build all projects (Android dependencies are fetched automatically)
 ./scripts/build.sh
 
 # Or build manually with dotnet
