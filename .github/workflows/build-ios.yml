@@ -65,10 +65,10 @@ jobs:
           if-no-files-found: ignore
           retention-days: 3
 
-  # Build with .NET 8 for net8.0-ios support (can use ubuntu runner)
+  # Build with .NET 8 for net8.0-ios support
   build-ios-net8:
     name: Build iOS (net8.0-ios)
-    runs-on: ubuntu-latest  # iOS bindings can build on Linux
+    runs-on: macos-26
     needs: download-xcframeworks
 
     steps:
@@ -162,10 +162,10 @@ jobs:
           if-no-files-found: ignore
           retention-days: 3
 
-  # Build with .NET 9 for net9.0-ios support (can use ubuntu runner)
+  # Build with .NET 9 for net9.0-ios support
   build-ios-net9:
     name: Build iOS (net9.0-ios)
-    runs-on: ubuntu-latest  # iOS bindings can build on Linux
+    runs-on: macos-26
     needs: download-xcframeworks
 
     steps:
@@ -259,10 +259,10 @@ jobs:
           if-no-files-found: ignore
           retention-days: 3
 
-  # Build with .NET 10 for net10.0-ios support (can use ubuntu runner)
+  # Build with .NET 10 for net10.0-ios support
   build-ios-net10:
     name: Build iOS (net10.0-ios)
-    runs-on: ubuntu-latest  # iOS bindings can build on Linux
+    runs-on: macos-26
     needs: download-xcframeworks
 
     steps:
@@ -511,7 +511,7 @@ jobs:
   # Build iOS sample app (requires macOS)
   build-ios-sample:
     name: Build iOS Sample App
-    runs-on: macos-14  # macOS required for iOS app compilation
+    runs-on: macos-26  # macOS required for iOS app compilation
     needs: combine-ios-packages
     if: success()  # Only run if packages were created
 
