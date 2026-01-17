@@ -52,3 +52,41 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# macOS
+.DS_Store
+*.xcworkspace
+!*.xcworkspace/contents.xcworkspacedata
+!*.xcworkspace/xcshareddata/
+xcuserdata/
+
+# XCFrameworks and artifacts (downloaded separately)
+*.xcframework/
+**/artifacts/
+**/Generated/
+
+# Android
+*.aar
+*.jar
+.gradle/
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+local.properties
+
+# Visual Studio / Rider
+.claude/
+_reference/
+.vs/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+*.sln.iml
+# Environment files with secrets
+.env
+*.env
+!.env.example

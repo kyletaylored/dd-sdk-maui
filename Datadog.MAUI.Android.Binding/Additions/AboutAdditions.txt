@@ -1,0 +1,24 @@
+Additions allow you to add arbitrary C# code to the generated binding.
+
+Additions are placed in the Additions/ folder and will be merged with the generated
+binding source code. New classes, methods, properties, and events can be added here.
+
+This is useful for:
+- Adding helper methods or extension methods
+- Implementing interfaces or partial classes
+- Providing additional documentation or comments
+- Working around binding limitations
+
+Example:
+
+  namespace Com.Datadoghq.Android {
+      public partial class DatadogSdk {
+          // Add custom helper method
+          public static void InitializeWithDefaults(string clientToken, string environment) {
+              // Custom initialization logic
+          }
+      }
+  }
+
+For more information, see:
+https://learn.microsoft.com/en-us/xamarin/android/platform/binding-java-library/customizing-bindings/

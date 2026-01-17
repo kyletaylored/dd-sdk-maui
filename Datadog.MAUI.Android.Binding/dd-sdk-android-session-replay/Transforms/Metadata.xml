@@ -1,0 +1,12 @@
+<metadata>
+  <!--
+    Binding fixes for Datadog Android SDK Session Replay
+  -->
+
+  <!-- Remove BaseWireframeMapper and BaseAsyncBackgroundWireframeMapper -->
+  <!-- These are abstract base classes that don't properly implement WireframeMapper.map() -->
+  <!-- They leave the implementation to subclasses, which causes C# binding generation errors -->
+  <!-- Concrete implementations like ImageViewMapper, TextViewMapper, etc. are available in the public API -->
+  <remove-node path="/api/package[@name='com.datadog.android.sessionreplay.recorder.mapper']/class[@name='BaseWireframeMapper']" />
+  <remove-node path="/api/package[@name='com.datadog.android.sessionreplay.recorder.mapper']/class[@name='BaseAsyncBackgroundWireframeMapper']" />
+</metadata>

@@ -1,0 +1,148 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '9.0.x'
+  DATADOG_SDK_VERSION: '3.5.0'
+
+jobs:
+  build-ios:
+    name: Build iOS Binding
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Download iOS XCFrameworks
+      run: |
+        chmod +x ./scripts/download-ios-frameworks.sh
+        ./scripts/download-ios-frameworks.sh ${{ env.DATADOG_SDK_VERSION }}
+
+    - name: Restore dependencies
+      run: dotnet restore Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj
+
+    - name: Build iOS binding
+      run: dotnet build Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj -c Release --no-restore
+
+    - name: Upload iOS binding artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ios-binding
+        path: Datadog.MAUI.iOS.Binding/bin/Release/
+
+  build-android:
+    name: Build Android Binding
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'microsoft'
+        java-version: '17'
+
+    - name: Restore dependencies
+      run: dotnet restore Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.csproj
+
+    - name: Build Android binding
+      run: dotnet build Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.csproj -c Release --no-restore
+
+    - name: Upload Android binding artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-binding
+        path: Datadog.MAUI.Android.Binding/bin/Release/
+
+  build-plugin:
+    name: Build Main Plugin
+    runs-on: macos-latest
+    needs: [build-ios, build-android]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'microsoft'
+        java-version: '17'
+
+    - name: Download iOS XCFrameworks
+      run: |
+        chmod +x ./scripts/download-ios-frameworks.sh
+        ./scripts/download-ios-frameworks.sh ${{ env.DATADOG_SDK_VERSION }}
+
+    - name: Restore dependencies
+      run: dotnet restore Datadog.MAUI.sln
+
+    - name: Build solution
+      run: |
+        chmod +x ./scripts/build.sh
+        ./scripts/build.sh Release
+
+    - name: Pack NuGet packages
+      run: |
+        mkdir -p artifacts/packages
+        dotnet pack Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj -c Release -o artifacts/packages
+        dotnet pack Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.csproj -c Release -o artifacts/packages
+        dotnet pack Datadog.MAUI.Plugin/Datadog.MAUI.Plugin.csproj -c Release -o artifacts/packages
+
+    - name: Upload NuGet packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: nuget-packages
+        path: artifacts/packages/*.nupkg
+
+  build-sample:
+    name: Build Sample App
+    runs-on: macos-latest
+    needs: [build-plugin]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Download iOS XCFrameworks
+      run: |
+        chmod +x ./scripts/download-ios-frameworks.sh
+        ./scripts/download-ios-frameworks.sh ${{ env.DATADOG_SDK_VERSION }}
+
+    - name: Restore dependencies
+      run: dotnet restore samples/DatadogMauiSample/DatadogMauiSample.csproj
+
+    - name: Build sample (iOS)
+      run: dotnet build samples/DatadogMauiSample/DatadogMauiSample.csproj -f net9.0-ios -c Release
+
+    - name: Build sample (Android)
+      run: dotnet build samples/DatadogMauiSample/DatadogMauiSample.csproj -f net9.0-android -c Release

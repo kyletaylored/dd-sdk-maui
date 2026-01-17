@@ -1,0 +1,35 @@
+<Project>
+  <PropertyGroup>
+    <!-- Datadog SDK Version - Keep in sync across iOS and Android -->
+    <DatadogSdkVersion>3.5.0</DatadogSdkVersion>
+
+    <!-- .NET MAUI Binding Package Version -->
+    <Version>$(DatadogSdkVersion)</Version>
+    <PackageVersion>$(DatadogSdkVersion)</PackageVersion>
+
+    <!-- Common Package Metadata -->
+    <Authors>Datadog</Authors>
+    <Company>Datadog</Company>
+    <Product>Datadog SDK for .NET MAUI</Product>
+    <Copyright>Copyright © Datadog $(Year)</Copyright>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/DataDog/dd-sdk-maui</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/DataDog/dd-sdk-maui</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageTags>datadog;monitoring;rum;apm;logs;trace;maui;ios;android</PackageTags>
+    <Description>Datadog SDK bindings for .NET MAUI applications</Description>
+
+    <!-- Build Configuration -->
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <!-- Android Binding Configuration -->
+    <!-- Disable Java dependency verification for Android bindings -->
+    <!-- The Datadog Android SDK AARs include test dependencies in their Maven metadata -->
+    <!-- which aren't needed at runtime and cause build failures -->
+    <AndroidSkipJavaDependencyVerification>true</AndroidSkipJavaDependencyVerification>
+  </PropertyGroup>
+</Project>

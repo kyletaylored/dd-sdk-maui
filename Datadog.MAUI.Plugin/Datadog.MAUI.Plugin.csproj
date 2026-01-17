@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net9.0-ios;net10.0-ios;net9.0-android;net10.0-android</TargetFrameworks>
+    <UseMaui>true</UseMaui>
+    <SingleProject>true</SingleProject>
+
+    <!-- iOS -->
+    <SupportedOSPlatformVersion Condition="$(TargetFramework.Contains('-ios'))">12.0</SupportedOSPlatformVersion>
+
+    <!-- Android -->
+    <SupportedOSPlatformVersion Condition="$(TargetFramework.Contains('-android'))">21</SupportedOSPlatformVersion>
+
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>true</ImplicitUsings>
+
+    <!-- Suppress MAUI warnings for library project -->
+    <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
+
+    <PackageId>Datadog.MAUI</PackageId>
+    <Title>Datadog SDK for .NET MAUI</Title>
+    <Description>Official Datadog SDK for .NET MAUI applications. Provides Real User Monitoring (RUM), Log Collection, APM Tracing, Session Replay, and more for iOS and Android platforms.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <!-- iOS Binding References -->
+  <ItemGroup Condition="$(TargetFramework.Contains('-ios'))">
+    <ProjectReference Include="..\Datadog.MAUI.iOS.Binding\Datadog.MAUI.iOS.Binding.csproj" />
+  </ItemGroup>
+
+  <!-- Android Binding References -->
+  <ItemGroup Condition="$(TargetFramework.Contains('-android'))">
+    <ProjectReference Include="..\Datadog.MAUI.Android.Binding\Datadog.MAUI.Android.Binding.csproj" />
+  </ItemGroup>
+
+  <!-- Package README -->
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

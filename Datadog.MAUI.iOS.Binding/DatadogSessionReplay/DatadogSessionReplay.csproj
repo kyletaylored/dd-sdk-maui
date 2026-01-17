@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks Condition="'$(NETCoreSdkVersion)' &lt; '9.0'">net8.0-ios</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NETCoreSdkVersion)' &gt;= '9.0'">net9.0-ios;net10.0-ios</TargetFrameworks>
+    <SupportedOSPlatformVersion>12.0</SupportedOSPlatformVersion>
+    <NoWarn>$(NoWarn);NETSDK1202;NU5123;CS8767</NoWarn>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>true</ImplicitUsings>
+    <IsBindingProject>true</IsBindingProject>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>Datadog.MAUI.iOS.SessionReplay</AssemblyName>
+
+    <PackageId>Datadog.MAUI.iOS.SessionReplay</PackageId>
+    <Authors>Datadog</Authors>
+    <Description>.NET Bindings for Datadog iOS SDK SessionReplay framework</Description>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/DataDog/dd-sdk-maui</RepositoryUrl>
+    <PackageTags>.NET MAUI iOS Datadog Mobile Binding SessionReplay</PackageTags>
+
+    <XCFrameworkPath>../artifacts/DatadogSessionReplay.xcframework</XCFrameworkPath>
+    <IsTrimmable>true</IsTrimmable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DatadogCore\DatadogCore.csproj" />
+    <ProjectReference Include="..\DatadogRUM\DatadogRUM.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
+    <ObjcBindingCoreSource Include="StructsAndEnums.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <NativeReference Include="$(XCFrameworkPath)">
+      <Kind>Framework</Kind>
+      <SmartLink>True</SmartLink>
+      <ForceLoad>True</ForceLoad>
+    </NativeReference>
+  </ItemGroup>
+</Project>

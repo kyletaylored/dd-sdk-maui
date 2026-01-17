@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks Condition="'$(NETCoreSdkVersion)' &lt; '9.0'">net8.0-ios</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NETCoreSdkVersion)' &gt;= '9.0'">net9.0-ios;net10.0-ios</TargetFrameworks>
+    <SupportedOSPlatformVersion>12.0</SupportedOSPlatformVersion>
+    <NoWarn>$(NoWarn);NETSDK1202</NoWarn>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>true</ImplicitUsings>
+
+    <!-- Meta-package properties -->
+    <PackageId>Datadog.MAUI.iOS.Binding</PackageId>
+    <Title>Datadog iOS Bindings for .NET MAUI</Title>
+    <Authors>Datadog</Authors>
+    <Description>Complete .NET bindings for Datadog iOS SDK - includes all modules (Core, Internal, RUM, Logs, Trace, CrashReporting, SessionReplay, WebViewTracking, Flags, OpenTelemetryApi). This is a convenience meta-package that references all individual Datadog.MAUI.iOS.* packages.</Description>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/DataDog/dd-sdk-maui</RepositoryUrl>
+    <PackageTags>.NET MAUI iOS Datadog Mobile Binding RUM Logs Trace APM SessionReplay CrashReporting OpenTelemetry</PackageTags>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+
+    <!-- This is a meta-package with no assemblies -->
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+  </PropertyGroup>
+
+  <!-- Reference all individual binding packages -->
+  <ItemGroup>
+    <ProjectReference Include="DatadogInternal\DatadogInternal.csproj" />
+    <ProjectReference Include="DatadogCore\DatadogCore.csproj" />
+    <ProjectReference Include="DatadogRUM\DatadogRUM.csproj" />
+    <ProjectReference Include="DatadogLogs\DatadogLogs.csproj" />
+    <ProjectReference Include="DatadogTrace\DatadogTrace.csproj" />
+    <ProjectReference Include="DatadogCrashReporting\DatadogCrashReporting.csproj" />
+    <ProjectReference Include="DatadogSessionReplay\DatadogSessionReplay.csproj" />
+    <ProjectReference Include="DatadogWebViewTracking\DatadogWebViewTracking.csproj" />
+    <ProjectReference Include="DatadogFlags\DatadogFlags.csproj" />
+    <ProjectReference Include="OpenTelemetryApi\OpenTelemetryApi.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,72 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<!-- Only targeting Android and iOS for Datadog SDK -->
+		<TargetFrameworks>net9.0-android;net9.0-ios</TargetFrameworks>
+
+		<OutputType>Exe</OutputType>
+		<RootNamespace>DatadogMauiSample</RootNamespace>
+		<UseMaui>true</UseMaui>
+		<SingleProject>true</SingleProject>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+
+		<!-- Display name -->
+		<ApplicationTitle>Shopist Demo</ApplicationTitle>
+
+		<!-- App Identifier -->
+		<ApplicationId>com.datadog.shopist.demo</ApplicationId>
+
+		<!-- Versions -->
+		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+		<ApplicationVersion>1</ApplicationVersion>
+
+		<!-- Platform-specific settings -->
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">23.0</SupportedOSPlatformVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!-- App Icon -->
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+
+		<!-- Splash Screen -->
+		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+
+		<!-- Images -->
+		<MauiImage Include="Resources\Images\*" />
+		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
+		
+		<!-- Custom Fonts -->
+		<MauiFont Include="Resources\Fonts\*" />
+
+		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
+		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.9" />
+		<PackageReference Include="DotNetEnv" Version="3.1.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- Include .env file as a raw asset so it's bundled with the app -->
+		<MauiAsset Include=".env" LogicalName=".env" />
+	</ItemGroup>
+
+	<!-- Reference Datadog bindings for testing -->
+	<ItemGroup Condition="'$(TargetPlatformIdentifier)' == 'android'">
+		<ProjectReference Include="..\..\Datadog.MAUI.Android.Binding\dd-sdk-android-core\dd-sdk-android-core.csproj" />
+		<ProjectReference Include="..\..\Datadog.MAUI.Android.Binding\dd-sdk-android-rum\dd-sdk-android-rum.csproj" />
+		<ProjectReference Include="..\..\Datadog.MAUI.Android.Binding\dd-sdk-android-logs\dd-sdk-android-logs.csproj" />
+		<ProjectReference Include="..\..\Datadog.MAUI.Android.Binding\dd-sdk-android-trace\dd-sdk-android-trace.csproj" />
+		<ProjectReference Include="..\..\Datadog.MAUI.Android.Binding\dd-sdk-android-session-replay\dd-sdk-android-session-replay.csproj" />
+		<ProjectReference Include="..\..\Datadog.MAUI.Android.Binding\dd-sdk-android-webview\dd-sdk-android-webview.csproj" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetPlatformIdentifier)' == 'ios'">
+		<ProjectReference Include="..\..\Datadog.MAUI.iOS.Binding\Datadog.MAUI.iOS.Binding.csproj" />
+	</ItemGroup>
+
+</Project>

@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net9.0-android;net10.0-android</TargetFrameworks>
+    <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>true</ImplicitUsings>
+
+    <!-- Meta-package properties -->
+    <PackageId>Datadog.MAUI.Android.Binding</PackageId>
+    <Title>Datadog Android Bindings for .NET MAUI</Title>
+    <Authors>Datadog</Authors>
+    <Description>Complete .NET bindings for Datadog Android SDK - includes all core and feature modules (Internal, Core, RUM, Logs, Trace, NDK, SessionReplay, WebView, Flags). This is a convenience meta-package that references all individual Datadog.MAUI.Android.* packages.</Description>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/DataDog/dd-sdk-maui</RepositoryUrl>
+    <PackageTags>.NET MAUI Android Datadog Mobile Binding RUM Logs Trace APM SessionReplay NDK</PackageTags>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+
+    <!-- This is a meta-package with no assemblies -->
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+  </PropertyGroup>
+
+  <!-- Reference all individual binding packages -->
+  <ItemGroup>
+    <ProjectReference Include="dd-sdk-android-internal\dd-sdk-android-internal.csproj" />
+    <ProjectReference Include="dd-sdk-android-core\dd-sdk-android-core.csproj" />
+    <ProjectReference Include="dd-sdk-android-rum\dd-sdk-android-rum.csproj" />
+    <ProjectReference Include="dd-sdk-android-logs\dd-sdk-android-logs.csproj" />
+    <ProjectReference Include="dd-sdk-android-trace\dd-sdk-android-trace.csproj" />
+    <ProjectReference Include="dd-sdk-android-ndk\dd-sdk-android-ndk.csproj" />
+    <ProjectReference Include="dd-sdk-android-session-replay\dd-sdk-android-session-replay.csproj" />
+    <ProjectReference Include="dd-sdk-android-webview\dd-sdk-android-webview.csproj" />
+    <ProjectReference Include="dd-sdk-android-flags\dd-sdk-android-flags.csproj" />
+  </ItemGroup>
+</Project>

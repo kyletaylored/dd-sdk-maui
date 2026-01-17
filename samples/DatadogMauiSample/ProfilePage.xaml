@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="DatadogMauiSample.ProfilePage"
+             Title="Profile">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+            <!-- User Avatar and Info -->
+            <Frame Padding="20" CornerRadius="10" BackgroundColor="#F5F5F5">
+                <VerticalStackLayout Spacing="15">
+                    <!-- Avatar -->
+                    <Image x:Name="AvatarImage"
+                           Source="https://api.dicebear.com/7.x/avataaars/svg?seed=guest"
+                           WidthRequest="120"
+                           HeightRequest="120"
+                           Aspect="AspectFill"
+                           HorizontalOptions="Center">
+                        <Image.Clip>
+                            <EllipseGeometry Center="60,60" RadiusX="60" RadiusY="60"/>
+                        </Image.Clip>
+                    </Image>
+
+                    <!-- User Name -->
+                    <Label x:Name="UserNameLabel"
+                           Text="Guest"
+                           FontSize="24"
+                           FontAttributes="Bold"
+                           HorizontalTextAlignment="Center"/>
+
+                    <!-- User Email -->
+                    <Label x:Name="UserEmailLabel"
+                           Text="guest@example.com"
+                           FontSize="14"
+                           TextColor="Gray"
+                           HorizontalTextAlignment="Center"/>
+
+                    <!-- User ID -->
+                    <Label x:Name="UserIdLabel"
+                           Text="ID: guest"
+                           FontSize="12"
+                           TextColor="Gray"
+                           HorizontalTextAlignment="Center"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Login Form (visible when not logged in) -->
+            <VerticalStackLayout x:Name="LoginForm" Spacing="10">
+                <Label Text="Sign In"
+                       FontSize="20"
+                       FontAttributes="Bold"
+                       Margin="0,10,0,10"/>
+
+                <Entry x:Name="NameEntry"
+                       Placeholder="Enter your name"
+                       Text="John Doe"/>
+
+                <Entry x:Name="EmailEntry"
+                       Placeholder="Enter your email"
+                       Keyboard="Email"
+                       Text="john.doe@example.com"/>
+
+                <Button Text="Sign In"
+                        Clicked="OnSignInClicked"
+                        BackgroundColor="#2196F3"
+                        TextColor="White"
+                        Margin="0,10,0,0"/>
+            </VerticalStackLayout>
+
+            <!-- Quick Login Buttons -->
+            <VerticalStackLayout Spacing="10">
+                <Label Text="Quick Sign In"
+                       FontSize="16"
+                       FontAttributes="Bold"
+                       Margin="0,10,0,5"/>
+
+                <Button Text="Sign in as Alice"
+                        Clicked="OnQuickSignInClicked"
+                        CommandParameter="alice"
+                        BackgroundColor="#4CAF50"
+                        TextColor="White"/>
+
+                <Button Text="Sign in as Bob"
+                        Clicked="OnQuickSignInClicked"
+                        CommandParameter="bob"
+                        BackgroundColor="#FF9800"
+                        TextColor="White"/>
+
+                <Button Text="Sign in as Charlie"
+                        Clicked="OnQuickSignInClicked"
+                        CommandParameter="charlie"
+                        BackgroundColor="#9C27B0"
+                        TextColor="White"/>
+            </VerticalStackLayout>
+
+            <!-- Logged In Actions -->
+            <VerticalStackLayout x:Name="LoggedInActions" IsVisible="False" Spacing="10">
+                <Label Text="Account Actions"
+                       FontSize="16"
+                       FontAttributes="Bold"
+                       Margin="0,10,0,5"/>
+
+                <Button Text="Update Profile"
+                        Clicked="OnUpdateProfileClicked"
+                        BackgroundColor="#2196F3"
+                        TextColor="White"/>
+
+                <Button Text="Sign Out"
+                        Clicked="OnSignOutClicked"
+                        BackgroundColor="#F44336"
+                        TextColor="White"/>
+            </VerticalStackLayout>
+
+            <!-- Datadog User Info -->
+            <Frame Padding="15" CornerRadius="8" BackgroundColor="#E3F2FD" BorderColor="#2196F3">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="Datadog RUM User Tracking"
+                           FontSize="14"
+                           FontAttributes="Bold"
+                           TextColor="#1976D2"/>
+
+                    <Label Text="When you sign in, your user information is sent to Datadog RUM for session tracking and user analytics."
+                           FontSize="12"
+                           TextColor="#424242"/>
+
+                    <Label Text="User attributes tracked:"
+                           FontSize="12"
+                           FontAttributes="Bold"
+                           TextColor="#424242"
+                           Margin="0,5,0,0"/>
+
+                    <Label Text="• User ID"
+                           FontSize="11"
+                           TextColor="#616161"/>
+
+                    <Label Text="• Name"
+                           FontSize="11"
+                           TextColor="#616161"/>
+
+                    <Label Text="• Email"
+                           FontSize="11"
+                           TextColor="#616161"/>
+                </VerticalStackLayout>
+            </Frame>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -1,0 +1,27 @@
+<metadata>
+  <!--
+    This file contains metadata transformations for the Android binding.
+    Use it to fix common binding issues such as:
+    - Renaming classes, methods, or parameters
+    - Removing problematic APIs
+    - Changing visibility or accessibility
+    - Specifying managed names for native types
+
+    Example transformations:
+
+    Remove a problematic class:
+    <remove-node path="/api/package[@name='com.example']/class[@name='ProblematicClass']" />
+
+    Rename a method:
+    <attr path="/api/package[@name='com.example']/class[@name='MyClass']/method[@name='oldName']" name="managedName">newName</attr>
+
+    Change parameter type:
+    <attr path="/api/package[@name='com.example']/class[@name='MyClass']/method[@name='myMethod']/parameter[@type='java.lang.Object']" name="managedType">System.String</attr>
+
+    For more information, see:
+    https://learn.microsoft.com/en-us/xamarin/android/platform/binding-java-library/customizing-bindings/java-bindings-metadata
+  -->
+
+  <!-- Add transformations here as needed during binding generation -->
+
+</metadata>

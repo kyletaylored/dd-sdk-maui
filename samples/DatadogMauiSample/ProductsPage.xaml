@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="DatadogMauiSample.ProductsPage"
+             Title="Products">
+    <Grid RowDefinitions="Auto,*" Padding="10">
+        <!-- Header with refresh and test purchase buttons -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" Margin="0,0,0,10">
+            <Label Grid.Column="0"
+                   Text="Shopist Products"
+                   FontSize="24"
+                   FontAttributes="Bold"
+                   VerticalOptions="Center"/>
+
+            <Button Grid.Column="1"
+                    Text="Refresh"
+                    Clicked="OnRefreshClicked"
+                    Margin="5,0"/>
+
+            <Button Grid.Column="2"
+                    Text="Test Purchase"
+                    Clicked="OnTestPurchaseClicked"
+                    BackgroundColor="#4CAF50"
+                    TextColor="White"/>
+        </Grid>
+
+        <!-- Products List -->
+        <CollectionView Grid.Row="1"
+                        x:Name="ProductsCollectionView"
+                        SelectionMode="Single"
+                        SelectionChanged="OnProductSelected">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Padding="10" RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="80,*,Auto">
+                        <!-- Product Image -->
+                        <Image Grid.Row="0" Grid.RowSpan="3" Grid.Column="0"
+                               Source="{Binding ImageUrl}"
+                               Aspect="AspectFill"
+                               WidthRequest="80"
+                               HeightRequest="80"
+                               Margin="0,0,10,0">
+                            <Image.Clip>
+                                <RoundRectangleGeometry Rect="0,0,80,80" CornerRadius="8"/>
+                            </Image.Clip>
+                        </Image>
+
+                        <!-- Product Name -->
+                        <Label Grid.Row="0" Grid.Column="1"
+                               Text="{Binding Name}"
+                               FontSize="16"
+                               FontAttributes="Bold"
+                               LineBreakMode="TailTruncation"/>
+
+                        <!-- Product Description -->
+                        <Label Grid.Row="1" Grid.Column="1"
+                               Text="{Binding Description}"
+                               FontSize="12"
+                               TextColor="Gray"
+                               LineBreakMode="TailTruncation"/>
+
+                        <!-- Product Price -->
+                        <Label Grid.Row="2" Grid.Column="1"
+                               Text="{Binding Price, StringFormat='${0:F2}'}"
+                               FontSize="14"
+                               FontAttributes="Bold"
+                               TextColor="#2196F3"
+                               VerticalOptions="End"/>
+
+                        <!-- Stock Status -->
+                        <Label Grid.Row="0" Grid.Column="2"
+                               Text="{Binding InStock, Converter={StaticResource StockStatusConverter}}"
+                               FontSize="12"
+                               TextColor="{Binding InStock, Converter={StaticResource StockColorConverter}}"
+                               VerticalOptions="Start"
+                               HorizontalOptions="End"/>
+
+                        <!-- Separator -->
+                        <BoxView Grid.Row="3" Grid.ColumnSpan="3"
+                                 HeightRequest="1"
+                                 Color="LightGray"
+                                 Margin="0,10,0,0"/>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+            <CollectionView.EmptyView>
+                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                    <Label Text="No products available"
+                           FontSize="18"
+                           TextColor="Gray"
+                           HorizontalTextAlignment="Center"/>
+                    <Label Text="Tap Refresh to load products"
+                           FontSize="14"
+                           TextColor="Gray"
+                           HorizontalTextAlignment="Center"
+                           Margin="0,10,0,0"/>
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+        </CollectionView>
+
+        <!-- Loading Indicator -->
+        <ActivityIndicator Grid.Row="1"
+                          x:Name="LoadingIndicator"
+                          IsRunning="False"
+                          IsVisible="False"
+                          Color="#2196F3"
+                          HorizontalOptions="Center"
+                          VerticalOptions="Center"/>
+    </Grid>
+</ContentPage>

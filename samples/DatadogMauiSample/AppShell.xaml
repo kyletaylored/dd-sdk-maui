@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="DatadogMauiSample.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:DatadogMauiSample"
+    Title="Shopist Demo">
+
+    <TabBar>
+        <ShellContent
+            Title="Products"
+            Icon="dotnet_bot.png"
+            ContentTemplate="{DataTemplate local:ProductsPage}"
+            Route="ProductsPage" />
+
+        <ShellContent
+            Title="Store"
+            Icon="dotnet_bot.png"
+            ContentTemplate="{DataTemplate local:WebViewPage}"
+            Route="WebViewPage" />
+
+        <ShellContent
+            Title="Profile"
+            Icon="dotnet_bot.png"
+            ContentTemplate="{DataTemplate local:ProfilePage}"
+            Route="ProfilePage" />
+    </TabBar>
+
+</Shell>

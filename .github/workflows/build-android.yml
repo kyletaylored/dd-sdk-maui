@@ -1,0 +1,391 @@
+name: Build Android Bindings
+
+on:
+  workflow_call:  # Allow this workflow to be called by other workflows
+  workflow_dispatch:  # Allow manual triggering
+
+env:
+  JAVA_VERSION: '17'
+  DATADOG_SDK_VERSION: '3.5.0'  # TODO: Read from Directory.Build.props
+
+jobs:
+  # Download AAR files once and share across builds
+  download-aars:
+    name: Download AAR Files
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get Datadog SDK version from Directory.Build.props
+        id: sdk-version
+        run: |
+          VERSION=$(grep -oPm1 "(?<=<DatadogSdkVersion>)[^<]+" Directory.Build.props)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Using Datadog Android SDK version: $VERSION"
+
+      - name: Cache AAR files
+        id: cache-aars
+        uses: actions/cache@v4
+        with:
+          path: Datadog.MAUI.Android.Binding/**/aars/*.aar
+          key: ${{ runner.os }}-aars-${{ steps.sdk-version.outputs.version }}
+          restore-keys: |
+            ${{ runner.os }}-aars-
+
+      - name: Setup AAR files
+        if: steps.cache-aars.outputs.cache-hit != 'true'
+        run: |
+          chmod +x scripts/setup-aars.sh
+          scripts/setup-aars.sh ${{ steps.sdk-version.outputs.version }}
+
+      - name: Upload AAR files
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-aar-files
+          path: Datadog.MAUI.Android.Binding/**/aars/*.aar
+          retention-days: 1
+
+      - name: Upload build logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aar-download-logs
+          path: |
+            **/*.log
+          if-no-files-found: ignore
+          retention-days: 3
+
+  # Build with .NET 9 for net9.0-android support
+  build-android-net9:
+    name: Build Android (net9.0-android)
+    runs-on: ubuntu-latest
+    needs: download-aars
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download AAR files
+        uses: actions/download-artifact@v4
+        with:
+          name: android-aar-files
+          path: Datadog.MAUI.Android.Binding/
+
+      - name: Verify AAR files
+        run: find Datadog.MAUI.Android.Binding -name "*.aar" -exec basename {} \;
+
+      - name: Setup .NET SDK 9
+        uses: actions/setup-dotnet@v4
+        id: setup-dotnet-9
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Create temporary global.json for SDK 9
+        run: echo '{"sdk":{"version":"${{ steps.setup-dotnet-9.outputs.dotnet-version }}","rollForward":"latestPatch"}}' > ./global.json
+
+      - name: Verify SDK version
+        run: dotnet --version
+
+      - name: Cache .NET workloads
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.dotnet/sdk-manifests
+            ~/.dotnet/metadata
+            ~/.dotnet/workloadsets
+            ~/.nuget/packages
+          key: ${{ runner.os }}-dotnet-workload-android-${{ steps.setup-dotnet-9.outputs.dotnet-version }}
+          restore-keys: |
+            ${{ runner.os }}-dotnet-workload-android-
+
+      - name: Install .NET Android workload
+        run: dotnet workload install android
+
+      - name: Get SDK version for cache key
+        id: sdk-version
+        run: |
+          VERSION=$(grep -oPm1 "(?<=<DatadogSdkVersion>)[^<]+" Directory.Build.props)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Cache NuGet packages (net9.0-android)
+        id: cache-nuget-net9
+        uses: actions/cache@v4
+        with:
+          path: ./artifacts-net9/*.nupkg
+          key: ${{ runner.os }}-android-net9-packages-${{ steps.sdk-version.outputs.version }}-${{ hashFiles('Datadog.MAUI.Android.Binding/**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-android-net9-packages-${{ steps.sdk-version.outputs.version }}-
+
+      - name: Clean build artifacts
+        if: steps.cache-nuget-net9.outputs.cache-hit != 'true'
+        run: dotnet clean Datadog.MAUI.Android.Binding.sln --configuration Release
+
+      - name: Restore dependencies
+        if: steps.cache-nuget-net9.outputs.cache-hit != 'true'
+        run: dotnet restore Datadog.MAUI.Android.Binding.sln
+
+      - name: Build Android bindings (net9.0-android)
+        if: steps.cache-nuget-net9.outputs.cache-hit != 'true'
+        run: dotnet build Datadog.MAUI.Android.Binding.sln --configuration Release --no-restore --verbosity minimal -p:TargetFrameworks=net9.0-android
+
+      - name: Pack NuGet packages (net9.0-android)
+        if: steps.cache-nuget-net9.outputs.cache-hit != 'true'
+        run: dotnet pack Datadog.MAUI.Android.Binding.sln --configuration Release --no-build --output ./artifacts-net9 -p:TargetFrameworks=net9.0-android
+
+      - name: Upload net9.0-android packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-nuget-packages-net9
+          path: ./artifacts-net9/*.nupkg
+          retention-days: 7
+
+      - name: Upload build logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-net9-build-logs
+          path: |
+            **/*.binlog
+            **/bin/**/*.log
+          if-no-files-found: ignore
+          retention-days: 3
+
+  # Build with .NET 10 for net10.0-android support
+  build-android-net10:
+    name: Build Android (net10.0-android)
+    runs-on: ubuntu-latest
+    needs: download-aars
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download AAR files
+        uses: actions/download-artifact@v4
+        with:
+          name: android-aar-files
+          path: Datadog.MAUI.Android.Binding/
+
+      - name: Verify AAR files
+        run: find Datadog.MAUI.Android.Binding -name "*.aar" -exec basename {} \;
+
+      - name: Remove global.json to allow SDK 10+
+        run: rm -f global.json
+
+      - name: Setup .NET SDK 10
+        uses: actions/setup-dotnet@v4
+        id: setup-dotnet-10
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Verify SDK version
+        run: dotnet --version
+
+      - name: Cache .NET workloads
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.dotnet/sdk-manifests
+            ~/.dotnet/metadata
+            ~/.dotnet/workloadsets
+            ~/.nuget/packages
+          key: ${{ runner.os }}-dotnet-workload-android-${{ steps.setup-dotnet-10.outputs.dotnet-version }}
+          restore-keys: |
+            ${{ runner.os }}-dotnet-workload-android-
+
+      - name: Install .NET Android workload
+        run: dotnet workload install android
+
+      - name: Get SDK version for cache key
+        id: sdk-version
+        run: |
+          VERSION=$(grep -oPm1 "(?<=<DatadogSdkVersion>)[^<]+" Directory.Build.props)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Cache NuGet packages (net10.0-android)
+        id: cache-nuget-net10
+        uses: actions/cache@v4
+        with:
+          path: ./artifacts-net10/*.nupkg
+          key: ${{ runner.os }}-android-net10-packages-${{ steps.sdk-version.outputs.version }}-${{ hashFiles('Datadog.MAUI.Android.Binding/**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-android-net10-packages-${{ steps.sdk-version.outputs.version }}-
+
+      - name: Clean build artifacts
+        if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
+        run: dotnet clean Datadog.MAUI.Android.Binding.sln --configuration Release
+
+      - name: Restore dependencies
+        if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
+        run: dotnet restore Datadog.MAUI.Android.Binding.sln
+
+      - name: Build Android bindings (net10.0-android)
+        if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
+        run: dotnet build Datadog.MAUI.Android.Binding.sln --configuration Release --no-restore --verbosity minimal -p:TargetFrameworks=net10.0-android
+
+      - name: Pack NuGet packages (net10.0-android)
+        if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
+        run: dotnet pack Datadog.MAUI.Android.Binding.sln --configuration Release --no-build --output ./artifacts-net10 -p:TargetFrameworks=net10.0-android
+
+      - name: Upload net10.0-android packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-nuget-packages-net10
+          path: ./artifacts-net10/*.nupkg
+          retention-days: 7
+
+      - name: Upload build logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-net10-build-logs
+          path: |
+            **/*.binlog
+            **/bin/**/*.log
+          if-no-files-found: ignore
+          retention-days: 3
+
+  # Combine both target frameworks into unified packages
+  combine-android-packages:
+    name: Combine Android Packages
+    runs-on: ubuntu-latest
+    needs: [build-android-net9, build-android-net10]
+
+    steps:
+      - name: Download net9.0-android packages
+        uses: actions/download-artifact@v4
+        with:
+          name: android-nuget-packages-net9
+          path: ./artifacts-net9
+
+      - name: Download net10.0-android packages
+        uses: actions/download-artifact@v4
+        with:
+          name: android-nuget-packages-net10
+          path: ./artifacts-net10
+
+      - name: Combine packages for both target frameworks
+        run: |
+          mkdir -p ./artifacts-combined
+          mkdir -p ./temp-extract
+
+          # Process each package
+          for net9_pkg in ./artifacts-net9/*.nupkg; do
+            pkg_name=$(basename "$net9_pkg" | sed 's/\.[0-9]\+\.[0-9]\+\.[0-9]\+.*\.nupkg$//')
+            version=$(basename "$net9_pkg" | sed -n 's/.*\.\([0-9]\+\.[0-9]\+\.[0-9]\+[^.]*\)\.nupkg$/\1/p')
+            net10_pkg="./artifacts-net10/${pkg_name}.${version}.nupkg"
+
+            echo "Processing $pkg_name version $version"
+
+            if [ -f "$net10_pkg" ]; then
+              # Extract both packages
+              unzip -q "$net9_pkg" -d "./temp-extract/net9"
+              unzip -q "$net10_pkg" -d "./temp-extract/net10"
+
+              # Copy net10.0-android libs to net9 package structure
+              if [ -d "./temp-extract/net10/lib/net10.0-android" ]; then
+                cp -r "./temp-extract/net10/lib/net10.0-android" "./temp-extract/net9/lib/"
+              fi
+
+              # Repackage the combined content
+              (cd "./temp-extract/net9" && zip -q -r "../../artifacts-combined/${pkg_name}.${version}.nupkg" *)
+
+              # Clean up temp directories
+              rm -rf "./temp-extract/net9" "./temp-extract/net10"
+
+              echo "  ✅ Created combined package: ${pkg_name}.${version}.nupkg"
+            else
+              echo "  ⚠️  Missing net10 package, using net9 only"
+              cp "$net9_pkg" "./artifacts-combined/"
+            fi
+          done
+
+          echo ""
+          echo "Combined packages:"
+          ls -lh ./artifacts-combined/
+
+      - name: Upload combined Android packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-nuget-packages
+          path: ./artifacts-combined/*.nupkg
+          retention-days: 30
+
+      - name: Package summary
+        run: |
+          echo "## Android NuGet Packages Built" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Target frameworks included:" >> $GITHUB_STEP_SUMMARY
+          echo "- net9.0-android" >> $GITHUB_STEP_SUMMARY
+          echo "- net10.0-android" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Packages" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ls -1 ./artifacts-combined/*.nupkg | xargs -n1 basename >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  # Build sample app using combined packages
+  build-android-sample:
+    name: Build Android Sample App
+    runs-on: ubuntu-latest
+    needs: combine-android-packages
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Setup Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'microsoft'
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Install .NET Android workload
+        run: dotnet workload install android
+
+      - name: Download combined packages
+        uses: actions/download-artifact@v4
+        with:
+          name: android-nuget-packages
+          path: ./artifacts
+
+      - name: Get package version from artifacts
+        id: package-version
+        run: |
+          # Extract version from first package filename
+          PACKAGE=$(ls ./artifacts/*.nupkg | head -1 | xargs basename)
+          VERSION=$(echo "$PACKAGE" | grep -oP '\d+\.\d+\.\d+' | head -1)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Detected version: $VERSION from package: $PACKAGE"
+
+      - name: Add local NuGet source
+        run: dotnet nuget add source $PWD/artifacts --name local
+
+      - name: Restore sample app dependencies
+        run: dotnet restore samples/DatadogMauiSample/DatadogMauiSample.csproj
+
+      - name: Build sample app
+        run: dotnet build samples/DatadogMauiSample/DatadogMauiSample.csproj --configuration Release --no-restore -f net10.0-android
+
+      - name: Upload sample APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-sample-apk
+          path: samples/DatadogMauiSample/bin/Release/**/*.apk
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Sample build summary
+        run: |
+          echo "## Android Sample App Built" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Sample app compiled successfully using combined NuGet packages" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Package version: ${{ steps.package-version.outputs.version }}" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,294 @@
+name: Build All Platforms
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'Datadog.MAUI.Android.Binding/**'
+      - 'Datadog.MAUI.iOS.Binding/**'
+      - 'samples/**'
+      - 'scripts/**'
+      - 'Directory.Build.props'
+      - '.github/workflows/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'Datadog.MAUI.Android.Binding/**'
+      - 'Datadog.MAUI.iOS.Binding/**'
+      - 'samples/**'
+      - 'scripts/**'
+      - 'Directory.Build.props'
+      - '.github/workflows/**'
+  workflow_dispatch:  # Allow manual triggering
+  schedule:
+    # Run weekly on Monday at 9 AM UTC
+    - cron: '0 9 * * 1'
+
+jobs:
+  # Call the Android build workflow
+  build-android:
+    name: Build Android
+    uses: ./.github/workflows/build-android.yml
+
+  # Call the iOS build workflow
+  build-ios:
+    name: Build iOS
+    uses: ./.github/workflows/build-ios.yml
+
+  # Validate all builds completed successfully
+  validate-builds:
+    name: Validate All Builds
+    runs-on: ubuntu-latest
+    needs: [build-android, build-ios]
+    if: always()  # Run even if some builds failed
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check Android build status
+        id: check-android
+        run: |
+          if [ "${{ needs.build-android.result }}" == "success" ]; then
+            echo "android_success=true" >> $GITHUB_OUTPUT
+            echo "✅ Android builds succeeded"
+          else
+            echo "android_success=false" >> $GITHUB_OUTPUT
+            echo "❌ Android builds failed or were skipped"
+          fi
+
+      - name: Check iOS build status
+        id: check-ios
+        run: |
+          if [ "${{ needs.build-ios.result }}" == "success" ]; then
+            echo "ios_success=true" >> $GITHUB_OUTPUT
+            echo "✅ iOS builds succeeded"
+          else
+            echo "ios_success=false" >> $GITHUB_OUTPUT
+            echo "⚠️ iOS builds failed or were skipped (bindings incomplete)"
+          fi
+
+      - name: Download Android artifacts
+        if: needs.build-android.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: android-nuget-packages
+          path: ./artifacts/android
+        continue-on-error: true
+
+      - name: Download iOS artifacts
+        if: needs.build-ios.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-nuget-packages
+          path: ./artifacts/ios
+        continue-on-error: true
+
+      - name: List all packages
+        run: |
+          echo "=== Android Packages ==="
+          if [ -d "./artifacts/android" ]; then
+            ls -lh ./artifacts/android/ || echo "No Android packages found"
+            ANDROID_COUNT=$(ls -1 ./artifacts/android/*.nupkg 2>/dev/null | wc -l || echo "0")
+          else
+            echo "Android artifacts directory not found"
+            ANDROID_COUNT=0
+          fi
+
+          echo ""
+          echo "=== iOS Packages ==="
+          if [ -d "./artifacts/ios" ]; then
+            ls -lh ./artifacts/ios/ || echo "No iOS packages found"
+            IOS_COUNT=$(ls -1 ./artifacts/ios/*.nupkg 2>/dev/null | wc -l || echo "0")
+          else
+            echo "iOS artifacts directory not found"
+            IOS_COUNT=0
+          fi
+
+          echo ""
+          echo "=== Package Count ==="
+          echo "Android: $ANDROID_COUNT packages"
+          echo "iOS: $IOS_COUNT packages"
+
+      - name: Verify package versions
+        run: |
+          echo "Verifying all packages have consistent versioning..."
+          if [ -d "./artifacts" ]; then
+            find ./artifacts -name "*.nupkg" -exec basename {} \; | sort || echo "No packages found"
+          else
+            echo "No artifacts directory found"
+          fi
+
+      - name: Upload combined artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: all-nuget-packages
+          path: ./artifacts/**/*.nupkg
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Generate build summary
+        run: |
+          echo "# Datadog MAUI SDK Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # SDK Version
+          VERSION=$(grep -E '<DatadogSdkVersion>.*</DatadogSdkVersion>' Directory.Build.props | sed 's/.*<DatadogSdkVersion>\(.*\)<\/DatadogSdkVersion>.*/\1/')
+          echo "**SDK Version**: $VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Build Status
+          echo "## Build Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.check-android.outputs.android_success }}" == "true" ]; then
+            echo "- ✅ **Android**: All modules built successfully" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ❌ **Android**: Build failed" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ steps.check-ios.outputs.ios_success }}" == "true" ]; then
+            echo "- ✅ **iOS**: All modules built successfully" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ⚠️ **iOS**: Builds skipped (bindings not yet complete)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Package Counts
+          echo "## Packages Created" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -d "./artifacts/android" ]; then
+            ANDROID_COUNT=$(ls -1 ./artifacts/android/*.nupkg 2>/dev/null | wc -l | tr -d ' ')
+            echo "**Android**: $ANDROID_COUNT packages" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            ls -1 ./artifacts/android/*.nupkg 2>/dev/null | xargs -n1 basename || echo "None"
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**Android**: 0 packages" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -d "./artifacts/ios" ]; then
+            IOS_COUNT=$(ls -1 ./artifacts/ios/*.nupkg 2>/dev/null | wc -l | tr -d ' ')
+            echo "**iOS**: $IOS_COUNT packages" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            ls -1 ./artifacts/ios/*.nupkg 2>/dev/null | xargs -n1 basename || echo "None"
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**iOS**: 0 packages (bindings incomplete)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Target Frameworks
+          echo "## Target Frameworks" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All packages support multi-framework targeting:" >> $GITHUB_STEP_SUMMARY
+          echo "- **Android**: net9.0-android, net10.0-android" >> $GITHUB_STEP_SUMMARY
+          echo "- **iOS**: net9.0-ios, net10.0-ios" >> $GITHUB_STEP_SUMMARY
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "*Build triggered by: ${{ github.event_name }}*" >> $GITHUB_STEP_SUMMARY
+
+      - name: Fail if critical builds failed
+        if: needs.build-android.result != 'success'
+        run: |
+          echo "❌ Android builds failed - this is a critical failure"
+          exit 1
+
+  # Optional: Create GitHub release (when tagged)
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: validate-builds
+    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download all packages
+        uses: actions/download-artifact@v4
+        with:
+          name: all-nuget-packages
+          path: ./release-artifacts
+
+      - name: Get version from tag
+        id: get-version
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/v}
+          echo "version=$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "Release version: $TAG_NAME"
+
+      - name: Create release notes
+        run: |
+          cat > release-notes.md << 'EOF'
+          # Datadog MAUI SDK ${{ steps.get-version.outputs.version }}
+
+          .NET MAUI bindings for Datadog's native iOS and Android Mobile SDKs.
+
+          ## Packages
+
+          This release includes the following NuGet packages:
+
+          ### Android Bindings
+          - Datadog.MAUI.Android.Core
+          - Datadog.MAUI.Android.Internal
+          - Datadog.MAUI.Android.RUM
+          - Datadog.MAUI.Android.Logs
+          - Datadog.MAUI.Android.Trace
+          - Datadog.MAUI.Android.SessionReplay
+          - Datadog.MAUI.Android.NDK
+          - Datadog.MAUI.Android.WebView
+          - Datadog.MAUI.Android.Flags
+
+          ### iOS Bindings
+          - Datadog.MAUI.iOS.Binding (if available)
+
+          ## Target Frameworks
+
+          All packages support:
+          - net9.0-android / net9.0-ios
+          - net10.0-android / net10.0-ios
+
+          ## Installation
+
+          ```bash
+          dotnet add package Datadog.MAUI.Android.Core --version ${{ steps.get-version.outputs.version }}
+          ```
+
+          ## Documentation
+
+          See the [documentation](https://github.com/DataDog/dd-sdk-maui/tree/main/docs) for usage guides and API reference.
+
+          ## What's Changed
+
+          See [CHANGELOG.md](https://github.com/DataDog/dd-sdk-maui/blob/main/docs/CHANGELOG.md) for detailed changes.
+          EOF
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release ${{ steps.get-version.outputs.version }}
+          body_path: release-notes.md
+          files: ./release-artifacts/**/*.nupkg
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release summary
+        run: |
+          echo "## GitHub Release Created" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version**: ${{ steps.get-version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All NuGet packages have been attached to the release." >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,41 @@
+<metadata>
+  <!--
+    Binding fixes for Datadog Android SDK Trace
+
+    Strategy: Opt-in approach - hide everything by default, then expose only the public API
+    that developers need to use. This avoids complex interdependency issues between
+    trace, trace-api, and trace-internal packages.
+  -->
+
+  <!-- Step 1: Hide all trace.api and trace.bootstrap packages by default -->
+  <!-- These packages have complex interdependencies that cause binding conflicts -->
+  <attr path="/api/package[@name='com.datadog.trace.api']" name="visibility">internal</attr>
+  <attr path="/api/package[@name='com.datadog.trace.bootstrap.instrumentation.api']" name="visibility">internal</attr>
+  <attr path="/api/package[@name='com.datadog.trace.core']" name="visibility">internal</attr>
+
+  <!-- Step 2: Hide all trace packages to start with clean slate -->
+  <attr path="/api/package[starts-with(@name, 'com.datadog.trace')]" name="visibility">internal</attr>
+
+  <!-- Step 3: Expose the public API from com.datadog.android.trace package -->
+  <!-- Based on usage in ShopistApplication.kt, these are the classes developers need: -->
+
+  <!-- Main Trace module entry point -->
+  <attr path="/api/package[@name='com.datadog.android.trace']/class[@name='Trace']" name="visibility">public</attr>
+
+  <!-- Trace configuration -->
+  <attr path="/api/package[@name='com.datadog.android.trace']/class[@name='TraceConfiguration']" name="visibility">public</attr>
+  <attr path="/api/package[@name='com.datadog.android.trace']/class[@name='TraceConfiguration.Builder']" name="visibility">public</attr>
+
+  <!-- DatadogTracing for building tracers -->
+  <attr path="/api/package[@name='com.datadog.android.trace']/class[@name='DatadogTracing']" name="visibility">public</attr>
+
+  <!-- GlobalDatadogTracer for registering tracers -->
+  <attr path="/api/package[@name='com.datadog.android.trace']/class[@name='GlobalDatadogTracer']" name="visibility">public</attr>
+
+  <!-- OpenTelemetry support -->
+  <attr path="/api/package[@name='com.datadog.android.trace.opentelemetry']/class[@name='OtelTracerProvider']" name="visibility">public</attr>
+  <attr path="/api/package[@name='com.datadog.android.trace.opentelemetry']/class[@name='OtelTracerProvider.Builder']" name="visibility">public</attr>
+
+  <!-- Model classes that may be needed -->
+  <attr path="/api/package[@name='com.datadog.android.trace.model']" name="visibility">public</attr>
+</metadata>

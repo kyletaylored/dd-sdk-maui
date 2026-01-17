@@ -1,0 +1,10 @@
+<metadata>
+  <!--
+    Binding fixes for Datadog Android SDK Core
+  -->
+
+  <!-- Fix IFlushableExecutorService binding issues -->
+  <!-- FlushableExecutorService extends java.util.concurrent.ExecutorService which has generic type issues -->
+  <!-- Since this is an internal threading class, we remove it from the public API -->
+  <remove-node path="/api/package[@name='com.datadog.android.core.thread']/interface[@name='FlushableExecutorService']" />
+</metadata>

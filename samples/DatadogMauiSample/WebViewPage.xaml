@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="DatadogMauiSample.WebViewPage"
+             Title="Shopist Store">
+    <Grid RowDefinitions="Auto,*">
+        <!-- Header with URL bar -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" Padding="10" BackgroundColor="#F5F5F5">
+            <Entry Grid.Column="0"
+                   x:Name="UrlEntry"
+                   Text="https://shopist.io"
+                   VerticalOptions="Center"
+                   Margin="0,0,5,0"/>
+
+            <Button Grid.Column="1"
+                    Text="Go"
+                    Clicked="OnGoClicked"
+                    WidthRequest="60"
+                    Margin="0,0,5,0"/>
+
+            <Button Grid.Column="2"
+                    Text="Refresh"
+                    Clicked="OnRefreshClicked"
+                    WidthRequest="80"/>
+        </Grid>
+
+        <!-- WebView -->
+        <WebView Grid.Row="1"
+                 x:Name="ShopistWebView"
+                 Source="https://shopist.io"
+                 Navigating="OnNavigating"
+                 Navigated="OnNavigated"/>
+
+        <!-- Loading Indicator -->
+        <ActivityIndicator Grid.Row="1"
+                          x:Name="LoadingIndicator"
+                          IsRunning="False"
+                          IsVisible="False"
+                          Color="#2196F3"
+                          HorizontalOptions="Center"
+                          VerticalOptions="Center"/>
+    </Grid>
+</ContentPage>

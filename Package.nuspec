@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>Datadog.MAUI</id>
+    <version>3.5.0</version>
+    <title>Datadog SDK for .NET MAUI</title>
+    <authors>Datadog</authors>
+    <owners>Datadog</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">Apache-2.0</license>
+    <projectUrl>https://github.com/DataDog/dd-sdk-maui</projectUrl>
+    <description>Official Datadog SDK for .NET MAUI applications. Provides Real User Monitoring (RUM), Log Collection, APM Tracing, Session Replay, and more for iOS and Android platforms.</description>
+    <releaseNotes>Initial release of Datadog SDK for .NET MAUI v3.5.0.
+
+Features:
+- Real User Monitoring (RUM)
+- Log Collection
+- APM Distributed Tracing
+- Crash Reporting
+- Session Replay
+- WebView Tracking
+- Feature Flags
+- Network Request Tracking
+
+Supported Platforms:
+- iOS 12.0+ (.NET 8, 9, 10)
+- Android API 21+ (.NET 9, 10)
+
+For full documentation, visit: https://docs.datadoghq.com/real_user_monitoring/mobile_and_tv_monitoring/setup/dotnet_maui/
+</releaseNotes>
+    <copyright>Copyright © Datadog 2026</copyright>
+    <tags>datadog monitoring rum apm logs trace maui ios android telemetry observability crash-reporting session-replay</tags>
+    <repository type="git" url="https://github.com/DataDog/dd-sdk-maui" />
+    <readme>README.md</readme>
+
+    <dependencies>
+      <!-- iOS Dependencies -->
+      <group targetFramework="net8.0-ios">
+        <dependency id="Datadog.MAUI.iOS.Binding" version="3.5.0" />
+      </group>
+      <group targetFramework="net9.0-ios">
+        <dependency id="Datadog.MAUI.iOS.Binding" version="3.5.0" />
+      </group>
+      <group targetFramework="net10.0-ios">
+        <dependency id="Datadog.MAUI.iOS.Binding" version="3.5.0" />
+      </group>
+
+      <!-- Android Dependencies -->
+      <group targetFramework="net9.0-android">
+        <dependency id="Datadog.MAUI.Android.Binding" version="3.5.0" />
+      </group>
+      <group targetFramework="net10.0-android">
+        <dependency id="Datadog.MAUI.Android.Binding" version="3.5.0" />
+      </group>
+    </dependencies>
+  </metadata>
+
+  <files>
+    <!-- Main Plugin DLL -->
+    <file src="Datadog.MAUI.Plugin/bin/Release/net8.0-ios/Datadog.MAUI.Plugin.dll" target="lib/net8.0-ios" />
+    <file src="Datadog.MAUI.Plugin/bin/Release/net9.0-ios/Datadog.MAUI.Plugin.dll" target="lib/net9.0-ios" />
+    <file src="Datadog.MAUI.Plugin/bin/Release/net10.0-ios/Datadog.MAUI.Plugin.dll" target="lib/net10.0-ios" />
+    <file src="Datadog.MAUI.Plugin/bin/Release/net9.0-android/Datadog.MAUI.Plugin.dll" target="lib/net9.0-android" />
+    <file src="Datadog.MAUI.Plugin/bin/Release/net10.0-android/Datadog.MAUI.Plugin.dll" target="lib/net10.0-android" />
+
+    <!-- README -->
+    <file src="README.md" target="" />
+  </files>
+</package>

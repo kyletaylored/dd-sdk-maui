@@ -1,0 +1,112 @@
+# ------------------------------------------------------------
+# Base Jekyll configuration (environment-agnostic)
+# Dynamic values (url, baseurl, repository, links) are injected
+# by the GitHub Actions workflow at build time.
+# ------------------------------------------------------------
+
+title: dd-sdk-maui
+description: Developer documentation for the dd-sdk-maui project.
+
+# These are injected dynamically in CI
+url: ""
+baseurl: ""
+repository: ""
+
+permalink: pretty
+
+# Theme
+remote_theme: just-the-docs/just-the-docs
+
+# Default frontmatter
+defaults:
+  - scope:
+      path: ""
+      type: pages
+    values:
+      layout: default
+
+# Navigation
+nav_enabled: true
+nav_sort: case_insensitive
+nav_error_report: false
+
+# Search
+search_enabled: true
+search:
+  heading_level: 2
+  previews: 2
+  preview_words_before: 3
+  preview_words_after: 3
+  tokenizer_separator: /[\s/]+/
+  rel_url: true
+  button: false
+  focus_shortcut_key: "k"
+
+# UX
+heading_anchors: true
+enable_copy_code_button: true
+
+back_to_top: true
+back_to_top_text: "Back to top"
+
+# Footer
+footer_content: "Documentation for dd-sdk-maui."
+
+# Markdown
+markdown: kramdown
+kramdown:
+  syntax_highlighter_opts:
+    block:
+      line_numbers: false
+
+# Callouts (just-the-docs)
+callouts_level: quiet
+callouts:
+  highlight:
+    color: yellow
+  important:
+    title: Important
+    color: blue
+  note:
+    title: Note
+    color: purple
+  warning:
+    title: Warning
+    color: red
+
+# Mermaid (just-the-docs)
+mermaid:
+  version: "9.1.6"
+
+# Plugins (must be explicitly listed when building via Actions)
+plugins:
+  - jekyll-seo-tag
+  - jekyll-github-metadata
+  - jekyll-include-cache
+  - jekyll-sitemap
+  - jekyll-remote-theme
+
+# Liquid strictness (helps catch errors early)
+liquid:
+  error_mode: strict
+  strict_filters: true
+
+# Exclusions
+exclude:
+  - .sass-cache/
+  - .jekyll-cache/
+  - gemfiles/
+  - Gemfile
+  - Gemfile.lock
+  - node_modules/
+  - vendor/
+  - .github/
+  - fixtures/
+  - README.md
+  - nuget # Safety: ensure feed output is never processed by Jekyll
+
+# Sass
+sass:
+  quiet_deps: true
+  silence_deprecations:
+    - import
