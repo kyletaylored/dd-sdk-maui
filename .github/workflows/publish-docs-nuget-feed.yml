@@ -80,9 +80,6 @@ jobs:
           future: false
           verbose: true
 
-      - name: Fix _site permissions
-        run: chmod -R u+w _site
-
       # --- Build NuGet feed into _site/nuget ---
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -112,8 +109,6 @@ jobs:
 
       - name: Generate sleet.json dynamically (baseURI uses Pages origin + base_path)
         run: |
-          mkdir -p _site/nuget
-
           cat > sleet.json <<'JSON'
           {
             "username": "github-actions[bot]",
