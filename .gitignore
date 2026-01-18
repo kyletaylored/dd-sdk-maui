@@ -76,6 +76,7 @@ captures/
 local.properties
 
 # Visual Studio / Rider
+.vscode/
 .claude/
 _reference/
 .vs/
