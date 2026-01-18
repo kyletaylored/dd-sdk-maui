@@ -1,9 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <!-- When building with .NET 8 SDK, only build net8.0-ios -->
-    <TargetFrameworks Condition="'$(NETCoreSdkVersion)' &lt; '9.0'">net8.0-ios</TargetFrameworks>
-    <!-- When building with .NET 9+ SDK, build net9.0-ios and net10.0-ios -->
-    <TargetFrameworks Condition="'$(NETCoreSdkVersion)' &gt;= '9.0'">net9.0-ios;net10.0-ios</TargetFrameworks>
+    <TargetFrameworks>net9.0-ios;net10.0-ios</TargetFrameworks>
     <SupportedOSPlatformVersion>17.0</SupportedOSPlatformVersion>
     <NoWarn>$(NoWarn);NETSDK1202;NU5123;CS8767</NoWarn>
     <Nullable>enable</Nullable>

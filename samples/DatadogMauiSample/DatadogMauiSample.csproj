@@ -2,8 +2,7 @@
 
 	<PropertyGroup>
 		<!-- Only targeting Android and iOS for Datadog SDK -->
-		<!-- Using net9.0 for iOS due to Xcode 15.4 compatibility -->
-		<TargetFrameworks>net10.0-android;net9.0-ios</TargetFrameworks>
+		<TargetFrameworks>net9.0-android;net10.0-android;net9.0-ios;net10.0-ios</TargetFrameworks>
 
 		<OutputType>Exe</OutputType>
 		<RootNamespace>DatadogMauiSample</RootNamespace>
@@ -23,8 +22,8 @@
 		<ApplicationVersion>1</ApplicationVersion>
 
 		<!-- Platform-specific settings -->
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">23.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">17.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 	</PropertyGroup>
 
 	<!-- Android-specific settings to fix tracing library conflicts -->

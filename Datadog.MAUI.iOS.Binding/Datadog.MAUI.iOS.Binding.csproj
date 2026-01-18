@@ -1,9 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks Condition="'$(NETCoreSdkVersion)' &lt; '9.0'">net8.0-ios</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NETCoreSdkVersion)' &gt;= '9.0' and '$(NETCoreSdkVersion)' &lt; '10.0'">net8.0-ios;net9.0-ios</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NETCoreSdkVersion)' &gt;= '10.0'">net8.0-ios;net9.0-ios;net10.0-ios</TargetFrameworks>
-    <SupportedOSPlatformVersion>12.0</SupportedOSPlatformVersion>
+    <TargetFrameworks>net9.0-ios;net10.0-ios</TargetFrameworks>
+    <SupportedOSPlatformVersion>17.0</SupportedOSPlatformVersion>
     <NoWarn>$(NoWarn);NETSDK1202</NoWarn>
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
@@ -20,6 +18,7 @@
 
     <!-- This is a meta-package with no assemblies -->
     <IncludeBuildOutput>false</IncludeBuildOutput>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
 
   <!-- Reference all individual binding packages -->
