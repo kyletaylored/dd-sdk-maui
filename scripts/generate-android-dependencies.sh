@@ -108,6 +108,12 @@ for dep in "${deps[@]}"; do
     continue
   fi
 
+  # Skip Kotlin stdlib (embedded in Datadog SDK AARs)
+  # These should be handled via AndroidIgnoredJavaDependency instead
+  if [[ "$dep_group" == "org.jetbrains.kotlin" ]]; then
+    continue
+  fi
+
   # Determine if we should bind (only Datadog packages)
   if [[ "$dep_group" == "com.datadoghq" ]]; then
     bind_attr=""
@@ -121,3 +127,10 @@ done
 echo ""
 echo "Note: Non-Datadog dependencies have Bind=\"false\" to avoid duplicate bindings"
 echo "Note: Test dependencies (scope=test/provided) are excluded"
+echo "Note: Kotlin stdlib is excluded (embedded in Datadog SDK AARs)"
+echo ""
+echo "Remember to add AndroidIgnoredJavaDependency entries for Kotlin libraries:"
+echo '    <AndroidIgnoredJavaDependency Include="org.jetbrains.kotlin:kotlin-stdlib:2.0.21" />'
+echo '    <AndroidIgnoredJavaDependency Include="org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10" />'
+echo '    <AndroidIgnoredJavaDependency Include="org.jetbrains.kotlin:kotlin-stdlib-common:1.9.10" />'
+echo '    <AndroidIgnoredJavaDependency Include="org.jetbrains.kotlin:kotlin-reflect:2.0.21" />'

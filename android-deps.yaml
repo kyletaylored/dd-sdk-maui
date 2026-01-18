@@ -1,0 +1,278 @@
+# Android Binding Dependencies Configuration
+#
+# This file defines how Java/Android dependencies should be handled for Xamarin bindings.
+# Used by scripts/generate-android-dependencies.sh to automatically generate dependency declarations.
+#
+# Categories:
+# - skip: Dependencies that should NOT be included as AndroidMavenLibrary (already available elsewhere)
+# - nuget: Dependencies available as NuGet packages (use PackageReference instead)
+# - download: Dependencies that must be downloaded as AAR/JAR from Maven
+# - ignore: Dependencies that appear in POM but should be explicitly ignored at build time
+
+# Dependencies that should be skipped (not added as AndroidMavenLibrary)
+skip:
+  # Kotlin standard library - embedded in Datadog SDK AARs
+  - groupId: org.jetbrains.kotlin
+    artifactId: kotlin-stdlib
+    reason: Embedded in Datadog SDK AARs
+    note: Use AndroidIgnoredJavaDependency with version instead
+
+  - groupId: org.jetbrains.kotlin
+    artifactId: kotlin-stdlib-jdk8
+    reason: Embedded in Datadog SDK AARs
+    note: Use AndroidIgnoredJavaDependency with version instead
+
+  - groupId: org.jetbrains.kotlin
+    artifactId: kotlin-stdlib-common
+    reason: Embedded in Datadog SDK AARs
+    note: Use AndroidIgnoredJavaDependency with version instead
+
+  - groupId: org.jetbrains.kotlin
+    artifactId: kotlin-reflect
+    reason: Embedded in Datadog SDK AARs
+    note: Use AndroidIgnoredJavaDependency with version instead
+
+  # Datadog internal cross-references (handled by ProjectReference)
+  - groupId: com.datadoghq
+    artifactId: dd-sdk-android-core
+    reason: Handled by ProjectReference between binding projects
+
+  - groupId: com.datadoghq
+    artifactId: dd-sdk-android-internal
+    reason: Handled by ProjectReference between binding projects
+
+  - groupId: com.datadoghq
+    artifactId: dd-sdk-android-logs
+    reason: Handled by ProjectReference between binding projects
+
+  - groupId: com.datadoghq
+    artifactId: dd-sdk-android-rum
+    reason: Handled by ProjectReference between binding projects
+
+  - groupId: com.datadoghq
+    artifactId: dd-sdk-android-trace
+    reason: Handled by ProjectReference between binding projects
+
+  - groupId: com.datadoghq
+    artifactId: dd-sdk-android-ndk
+    reason: Handled by ProjectReference between binding projects
+
+  - groupId: com.datadoghq
+    artifactId: dd-sdk-android-webview
+    reason: Handled by ProjectReference between binding projects
+
+  - groupId: com.datadoghq
+    artifactId: dd-sdk-android-session-replay
+    reason: Handled by ProjectReference between binding projects
+
+# Dependencies available as NuGet packages
+nuget:
+  - groupId: com.google.code.gson
+    artifactId: gson
+    nugetPackage: GoogleGson
+    version: 2.11.0
+    note: Gson has complex binding requirements, use NuGet instead of Maven
+
+  - groupId: com.squareup.okhttp3
+    artifactId: okhttp
+    nugetPackage: Square.OkHttp3
+    version: 4.12.0
+
+  - groupId: androidx.work
+    artifactId: work-runtime
+    nugetPackage: Xamarin.AndroidX.Work.Runtime
+    version: 2.10.0
+
+  - groupId: androidx.annotation
+    artifactId: annotation
+    nugetPackage: Xamarin.AndroidX.Annotation
+    version: 1.9.1
+
+  - groupId: androidx.collection
+    artifactId: collection
+    nugetPackage: Xamarin.AndroidX.Collection
+    version: 1.4.5
+
+  - groupId: androidx.core
+    artifactId: core
+    nugetPackage: Xamarin.AndroidX.Core
+    version: 1.16.0.3
+
+  - groupId: androidx.tracing
+    artifactId: tracing-ktx
+    nugetPackage: Xamarin.AndroidX.Tracing.Tracing.Ktx
+    version: 1.3.0.2
+    note: Critical - this version is compatible with AndroidX.Core 1.16.0.3
+
+  - groupId: androidx.navigation
+    artifactId: navigation-fragment
+    nugetPackage: Xamarin.AndroidX.Navigation.Fragment
+    version: 2.8.5.1
+
+  - groupId: androidx.navigation
+    artifactId: navigation-runtime
+    nugetPackage: Xamarin.AndroidX.Navigation.Runtime
+    version: 2.8.5.1
+
+  - groupId: androidx.recyclerview
+    artifactId: recyclerview
+    nugetPackage: Xamarin.AndroidX.RecyclerView
+    version: 1.3.2.7
+
+  - groupId: androidx.fragment
+    artifactId: fragment
+    nugetPackage: Xamarin.AndroidX.Fragment
+    version: 1.8.5.2
+
+  - groupId: org.jetbrains
+    artifactId: annotations
+    nugetPackage: Xamarin.Jetbrains.Annotations
+    version: 26.0.1.1
+
+# Dependencies that must be downloaded from Maven
+download:
+  - groupId: com.lyft.kronos
+    artifactId: kronos-android
+    version: 0.0.1-alpha11
+    note: NTP time synchronization - no NuGet binding available
+
+  - groupId: com.lyft.kronos
+    artifactId: kronos-java
+    version: 0.0.1-alpha11
+    note: NTP time synchronization - no NuGet binding available
+
+  - groupId: com.squareup.okio
+    artifactId: okio
+    version: 3.6.0
+    note: Transitive dependency of OkHttp
+
+  - groupId: com.squareup.okio
+    artifactId: okio-jvm
+    version: 3.6.0
+    note: Transitive dependency of OkHttp
+
+# Dependencies that should be explicitly ignored
+# These appear in POM files but are not needed at runtime
+ignore:
+  # Test dependencies
+  - groupId: org.junit.platform
+    artifactId: junit-platform-launcher
+    version: 1.9.3
+    reason: Test dependency
+
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    version: 5.9.3
+    reason: Test dependency
+
+  - groupId: org.junit.vintage
+    artifactId: junit-vintage-engine
+    version: 5.9.3
+    reason: Test dependency
+
+  - groupId: org.mockito
+    artifactId: mockito-junit-jupiter
+    version: 5.4.0
+    reason: Test dependency
+
+  - groupId: org.assertj
+    artifactId: assertj-core
+    version: 3.18.1
+    reason: Test dependency
+
+  - groupId: com.github.xgouchet.Elmyr
+    artifactId: core
+    version: 1.3.1
+    reason: Test dependency
+
+  - groupId: com.github.xgouchet.Elmyr
+    artifactId: inject
+    version: 1.3.1
+    reason: Test dependency
+
+  - groupId: com.github.xgouchet.Elmyr
+    artifactId: junit5
+    version: 1.3.1
+    reason: Test dependency
+
+  - groupId: com.github.xgouchet.Elmyr
+    artifactId: jvm
+    version: 1.3.1
+    reason: Test dependency
+
+  - groupId: org.mockito.kotlin
+    artifactId: mockito-kotlin
+    version: 5.1.0
+    reason: Test dependency
+
+  - groupId: dd-sdk-android.tools
+    artifactId: unit
+    version: unspecified
+    reason: Test dependency
+
+  # AndroidX Metrics - not available on Maven Central, only Google Maven
+  - groupId: androidx.metrics
+    artifactId: metrics-performance
+    version: 1.0.0-beta03
+    reason: Not available on Maven Central, RUM doesn't require it at runtime
+
+  # Kotlin stdlib versions - embedded in Datadog SDK AARs
+  # IMPORTANT: These must include exact versions as seen in build errors
+  - groupId: org.jetbrains.kotlin
+    artifactId: kotlin-stdlib
+    version: 2.0.21
+    reason: Embedded in Datadog SDK AARs
+
+  - groupId: org.jetbrains.kotlin
+    artifactId: kotlin-stdlib
+    version: 1.4.10
+    reason: Embedded in Datadog SDK AARs (older version in some AARs)
+
+  - groupId: org.jetbrains.kotlin
+    artifactId: kotlin-stdlib-jdk8
+    version: 1.9.10
+    reason: Embedded in Datadog SDK AARs
+
+  - groupId: org.jetbrains.kotlin
+    artifactId: kotlin-stdlib-jdk8
+    version: 1.8.21
+    reason: Embedded in Datadog SDK AARs (older version in some AARs)
+
+  - groupId: org.jetbrains.kotlin
+    artifactId: kotlin-stdlib-common
+    version: 1.9.10
+    reason: Embedded in Datadog SDK AARs
+
+  - groupId: org.jetbrains.kotlin
+    artifactId: kotlin-reflect
+    version: 2.0.21
+    reason: Embedded in Datadog SDK AARs
+
+# Special notes for .csproj configuration
+notes:
+  AndroidIgnoredJavaDependency:
+    description: Used to ignore dependencies declared in AAR POM files
+    format: group:artifact:version (version is required)
+    limitation: Only ONE entry per group:artifact allowed (dictionary key conflict)
+    solution: Use highest version seen when multiple versions exist
+    example: |
+      <AndroidIgnoredJavaDependency Include="org.jetbrains.kotlin:kotlin-stdlib:2.0.21" />
+
+  AndroidMavenLibrary:
+    description: Downloads AAR/JAR from Maven Central
+    format: group:artifact with Version attribute
+    bind_attribute: Set Bind="false" for non-Datadog dependencies
+    example: |
+      <AndroidMavenLibrary Include="com.lyft.kronos:kronos-android" Version="0.0.1-alpha11" Bind="false" />
+
+  PackageReference:
+    description: NuGet package reference for Xamarin AndroidX bindings
+    prefer_over: AndroidMavenLibrary when NuGet binding exists
+    example: |
+      <PackageReference Include="Xamarin.AndroidX.Core" Version="1.16.0.3" />
+
+  DatadogSdkVersion:
+    description: MSBuild property defined in Directory.Build.props
+    usage: $(DatadogSdkVersion) in binding projects
+    current_value: 3.5.0
+    location: Datadog.MAUI.Android.Binding/Directory.Build.props

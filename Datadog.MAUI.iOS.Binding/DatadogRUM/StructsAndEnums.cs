@@ -1,6 +1,9 @@
-namespace DatadogMaui.iOS.RUM
+using ObjCRuntime;
+
+namespace Datadog.iOS.DatadogRUM
 {
-	public enum DDRUMActionEventActionActionType
+	[Native]
+	public enum DDRUMActionEventActionActionType : long
 	{
 		Custom = 0,
 		Click = 1,
@@ -11,7 +14,8 @@ namespace DatadogMaui.iOS.RUM
 		Back = 6
 	}
 
-	public enum DDRUMActionEventActionFrustrationFrustrationType
+	[Native]
+	public enum DDRUMActionEventActionFrustrationFrustrationType : long
 	{
 		RageClick = 0,
 		DeadClick = 1,
@@ -20,7 +24,8 @@ namespace DatadogMaui.iOS.RUM
 		ErrorTap = 4
 	}
 
-	public enum DDRUMActionEventContainerSource
+	[Native]
+	public enum DDRUMActionEventContainerSource : long
 	{
 		Android = 0,
 		Ios = 1,
@@ -32,7 +37,8 @@ namespace DatadogMaui.iOS.RUM
 		KotlinMultiplatform = 7
 	}
 
-	public enum DDRUMActionEventDDActionNameSource
+	[Native]
+	public enum DDRUMActionEventDDActionNameSource : long
 	{
 		None = 0,
 		CustomAttribute = 1,
@@ -43,14 +49,16 @@ namespace DatadogMaui.iOS.RUM
 		Blank = 6
 	}
 
-	public enum DDRUMActionEventDDSessionPlan
+	[Native]
+	public enum DDRUMActionEventDDSessionPlan : long
 	{
 		None = 0,
 		Plan1 = 1,
 		Plan2 = 2
 	}
 
-	public enum DDRUMActionEventDDSessionRUMSessionPrecondition
+	[Native]
+	public enum DDRUMActionEventDDSessionRUMSessionPrecondition : long
 	{
 		None = 0,
 		UserAppLaunch = 1,
@@ -62,7 +70,8 @@ namespace DatadogMaui.iOS.RUM
 		ExplicitStop = 7
 	}
 
-	public enum DDRUMActionEventDeviceDeviceType
+	[Native]
+	public enum DDRUMActionEventDeviceDeviceType : long
 	{
 		None = 0,
 		Mobile = 1,
@@ -74,7 +83,8 @@ namespace DatadogMaui.iOS.RUM
 		Other = 7
 	}
 
-	public enum DDRUMActionEventRUMConnectivityEffectiveType
+	[Native]
+	public enum DDRUMActionEventRUMConnectivityEffectiveType : long
 	{
 		None = 0,
 		Slow2g = 1,
@@ -83,7 +93,8 @@ namespace DatadogMaui.iOS.RUM
 		EffectiveType4g = 4
 	}
 
-	public enum DDRUMActionEventRUMConnectivityInterfaces
+	[Native]
+	public enum DDRUMActionEventRUMConnectivityInterfaces : long
 	{
 		None = 0,
 		Bluetooth = 1,
@@ -97,21 +108,24 @@ namespace DatadogMaui.iOS.RUM
 		InterfacesNone = 9
 	}
 
-	public enum DDRUMActionEventRUMConnectivityStatus
+	[Native]
+	public enum DDRUMActionEventRUMConnectivityStatus : long
 	{
 		Connected = 0,
 		NotConnected = 1,
 		Maybe = 2
 	}
 
-	public enum DDRUMActionEventSessionRUMSessionType
+	[Native]
+	public enum DDRUMActionEventSessionRUMSessionType : long
 	{
 		User = 0,
 		Synthetics = 1,
 		CiTest = 2
 	}
 
-	public enum DDRUMActionEventSource
+	[Native]
+	public enum DDRUMActionEventSource : long
 	{
 		None = 0,
 		Android = 1,
@@ -124,7 +138,8 @@ namespace DatadogMaui.iOS.RUM
 		KotlinMultiplatform = 8
 	}
 
-	public enum DDRUMActionType
+	[Native]
+	public enum DDRUMActionType : long
 	{
 		Tap = 0,
 		Scroll = 1,
@@ -132,7 +147,8 @@ namespace DatadogMaui.iOS.RUM
 		Custom = 3
 	}
 
-	public enum DDRUMErrorEventContainerSource
+	[Native]
+	public enum DDRUMErrorEventContainerSource : long
 	{
 		Android = 0,
 		Ios = 1,
@@ -144,14 +160,16 @@ namespace DatadogMaui.iOS.RUM
 		KotlinMultiplatform = 7
 	}
 
-	public enum DDRUMErrorEventDDSessionPlan
+	[Native]
+	public enum DDRUMErrorEventDDSessionPlan : long
 	{
 		None = 0,
 		Plan1 = 1,
 		Plan2 = 2
 	}
 
-	public enum DDRUMErrorEventDDSessionRUMSessionPrecondition
+	[Native]
+	public enum DDRUMErrorEventDDSessionRUMSessionPrecondition : long
 	{
 		None = 0,
 		UserAppLaunch = 1,
@@ -163,7 +181,8 @@ namespace DatadogMaui.iOS.RUM
 		ExplicitStop = 7
 	}
 
-	public enum DDRUMErrorEventDeviceDeviceType
+	[Native]
+	public enum DDRUMErrorEventDeviceDeviceType : long
 	{
 		None = 0,
 		Mobile = 1,
@@ -175,14 +194,16 @@ namespace DatadogMaui.iOS.RUM
 		Other = 7
 	}
 
-	public enum DDRUMErrorEventErrorCSPDisposition
+	[Native]
+	public enum DDRUMErrorEventErrorCSPDisposition : long
 	{
 		None = 0,
 		Enforce = 1,
 		Report = 2
 	}
 
-	public enum DDRUMErrorEventErrorCategory
+	[Native]
+	public enum DDRUMErrorEventErrorCategory : long
 	{
 		None = 0,
 		Anr = 1,
@@ -193,7 +214,8 @@ namespace DatadogMaui.iOS.RUM
 		Network = 6
 	}
 
-	public enum DDRUMErrorEventErrorCausesSource
+	[Native]
+	public enum DDRUMErrorEventErrorCausesSource : long
 	{
 		Network = 0,
 		Source = 1,
@@ -205,14 +227,16 @@ namespace DatadogMaui.iOS.RUM
 		Report = 7
 	}
 
-	public enum DDRUMErrorEventErrorHandling
+	[Native]
+	public enum DDRUMErrorEventErrorHandling : long
 	{
 		None = 0,
 		Handled = 1,
 		Unhandled = 2
 	}
 
-	public enum DDRUMErrorEventErrorResourceProviderProviderType
+	[Native]
+	public enum DDRUMErrorEventErrorResourceProviderProviderType : long
 	{
 		None = 0,
 		Ad = 1,
@@ -231,7 +255,8 @@ namespace DatadogMaui.iOS.RUM
 		Video = 14
 	}
 
-	public enum DDRUMErrorEventErrorResourceRUMMethod
+	[Native]
+	public enum DDRUMErrorEventErrorResourceRUMMethod : long
 	{
 		Post = 0,
 		Get = 1,
@@ -244,7 +269,8 @@ namespace DatadogMaui.iOS.RUM
 		Connect = 8
 	}
 
-	public enum DDRUMErrorEventErrorSource
+	[Native]
+	public enum DDRUMErrorEventErrorSource : long
 	{
 		Network = 0,
 		Source = 1,
@@ -256,7 +282,8 @@ namespace DatadogMaui.iOS.RUM
 		Report = 7
 	}
 
-	public enum DDRUMErrorEventErrorSourceType
+	[Native]
+	public enum DDRUMErrorEventErrorSourceType : long
 	{
 		None = 0,
 		Android = 1,
@@ -270,7 +297,8 @@ namespace DatadogMaui.iOS.RUM
 		NdkIl2cpp = 9
 	}
 
-	public enum DDRUMErrorEventRUMConnectivityEffectiveType
+	[Native]
+	public enum DDRUMErrorEventRUMConnectivityEffectiveType : long
 	{
 		None = 0,
 		Slow2g = 1,
@@ -279,7 +307,8 @@ namespace DatadogMaui.iOS.RUM
 		EffectiveType4g = 4
 	}
 
-	public enum DDRUMErrorEventRUMConnectivityInterfaces
+	[Native]
+	public enum DDRUMErrorEventRUMConnectivityInterfaces : long
 	{
 		None = 0,
 		Bluetooth = 1,
@@ -293,21 +322,24 @@ namespace DatadogMaui.iOS.RUM
 		InterfacesNone = 9
 	}
 
-	public enum DDRUMErrorEventRUMConnectivityStatus
+	[Native]
+	public enum DDRUMErrorEventRUMConnectivityStatus : long
 	{
 		Connected = 0,
 		NotConnected = 1,
 		Maybe = 2
 	}
 
-	public enum DDRUMErrorEventSessionRUMSessionType
+	[Native]
+	public enum DDRUMErrorEventSessionRUMSessionType : long
 	{
 		User = 0,
 		Synthetics = 1,
 		CiTest = 2
 	}
 
-	public enum DDRUMErrorEventSource
+	[Native]
+	public enum DDRUMErrorEventSource : long
 	{
 		None = 0,
 		Android = 1,
@@ -320,7 +352,8 @@ namespace DatadogMaui.iOS.RUM
 		KotlinMultiplatform = 8
 	}
 
-	public enum DDRUMErrorSource
+	[Native]
+	public enum DDRUMErrorSource : long
 	{
 		Source = 0,
 		Network = 1,
@@ -329,14 +362,16 @@ namespace DatadogMaui.iOS.RUM
 		Custom = 4
 	}
 
-	public enum DDRUMFeatureOperationFailureReason
+	[Native]
+	public enum DDRUMFeatureOperationFailureReason : long
 	{
 		Error = 0,
 		Abandoned = 1,
 		Other = 2
 	}
 
-	public enum DDRUMLongTaskEventContainerSource
+	[Native]
+	public enum DDRUMLongTaskEventContainerSource : long
 	{
 		Android = 0,
 		Ios = 1,
@@ -348,7 +383,8 @@ namespace DatadogMaui.iOS.RUM
 		KotlinMultiplatform = 7
 	}
 
-	public enum DDRUMLongTaskEventDDProfilingErrorReason
+	[Native]
+	public enum DDRUMLongTaskEventDDProfilingErrorReason : long
 	{
 		None = 0,
 		NotSupportedByBrowser = 1,
@@ -357,7 +393,8 @@ namespace DatadogMaui.iOS.RUM
 		UnexpectedException = 4
 	}
 
-	public enum DDRUMLongTaskEventDDProfilingStatus
+	[Native]
+	public enum DDRUMLongTaskEventDDProfilingStatus : long
 	{
 		None = 0,
 		Starting = 1,
@@ -366,14 +403,16 @@ namespace DatadogMaui.iOS.RUM
 		Error = 4
 	}
 
-	public enum DDRUMLongTaskEventDDSessionPlan
+	[Native]
+	public enum DDRUMLongTaskEventDDSessionPlan : long
 	{
 		None = 0,
 		Plan1 = 1,
 		Plan2 = 2
 	}
 
-	public enum DDRUMLongTaskEventDDSessionRUMSessionPrecondition
+	[Native]
+	public enum DDRUMLongTaskEventDDSessionRUMSessionPrecondition : long
 	{
 		None = 0,
 		UserAppLaunch = 1,
@@ -385,7 +424,8 @@ namespace DatadogMaui.iOS.RUM
 		ExplicitStop = 7
 	}
 
-	public enum DDRUMLongTaskEventDeviceDeviceType
+	[Native]
+	public enum DDRUMLongTaskEventDeviceDeviceType : long
 	{
 		None = 0,
 		Mobile = 1,
@@ -397,14 +437,16 @@ namespace DatadogMaui.iOS.RUM
 		Other = 7
 	}
 
-	public enum DDRUMLongTaskEventLongTaskEntryType
+	[Native]
+	public enum DDRUMLongTaskEventLongTaskEntryType : long
 	{
 		None = 0,
 		LongTask = 1,
 		LongAnimationFrame = 2
 	}
 
-	public enum DDRUMLongTaskEventLongTaskScriptsInvokerType
+	[Native]
+	public enum DDRUMLongTaskEventLongTaskScriptsInvokerType : long
 	{
 		None = 0,
 		UserCallback = 1,
@@ -415,7 +457,8 @@ namespace DatadogMaui.iOS.RUM
 		ModuleScript = 6
 	}
 
-	public enum DDRUMLongTaskEventRUMConnectivityEffectiveType
+	[Native]
+	public enum DDRUMLongTaskEventRUMConnectivityEffectiveType : long
 	{
 		None = 0,
 		Slow2g = 1,
@@ -424,7 +467,8 @@ namespace DatadogMaui.iOS.RUM
 		EffectiveType4g = 4
 	}
 
-	public enum DDRUMLongTaskEventRUMConnectivityInterfaces
+	[Native]
+	public enum DDRUMLongTaskEventRUMConnectivityInterfaces : long
 	{
 		None = 0,
 		Bluetooth = 1,
@@ -438,21 +482,24 @@ namespace DatadogMaui.iOS.RUM
 		InterfacesNone = 9
 	}
 
-	public enum DDRUMLongTaskEventRUMConnectivityStatus
+	[Native]
+	public enum DDRUMLongTaskEventRUMConnectivityStatus : long
 	{
 		Connected = 0,
 		NotConnected = 1,
 		Maybe = 2
 	}
 
-	public enum DDRUMLongTaskEventSessionRUMSessionType
+	[Native]
+	public enum DDRUMLongTaskEventSessionRUMSessionType : long
 	{
 		User = 0,
 		Synthetics = 1,
 		CiTest = 2
 	}
 
-	public enum DDRUMLongTaskEventSource
+	[Native]
+	public enum DDRUMLongTaskEventSource : long
 	{
 		None = 0,
 		Android = 1,
@@ -465,7 +512,8 @@ namespace DatadogMaui.iOS.RUM
 		KotlinMultiplatform = 8
 	}
 
-	public enum DDRUMMethod
+	[Native]
+	public enum DDRUMMethod : long
 	{
 		Post = 0,
 		Get = 1,
@@ -478,7 +526,8 @@ namespace DatadogMaui.iOS.RUM
 		Options = 8
 	}
 
-	public enum DDRUMResourceEventContainerSource
+	[Native]
+	public enum DDRUMResourceEventContainerSource : long
 	{
 		Android = 0,
 		Ios = 1,
@@ -490,14 +539,16 @@ namespace DatadogMaui.iOS.RUM
 		KotlinMultiplatform = 7
 	}
 
-	public enum DDRUMResourceEventDDSessionPlan
+	[Native]
+	public enum DDRUMResourceEventDDSessionPlan : long
 	{
 		None = 0,
 		Plan1 = 1,
 		Plan2 = 2
 	}
 
-	public enum DDRUMResourceEventDDSessionRUMSessionPrecondition
+	[Native]
+	public enum DDRUMResourceEventDDSessionRUMSessionPrecondition : long
 	{
 		None = 0,
 		UserAppLaunch = 1,
@@ -509,7 +560,8 @@ namespace DatadogMaui.iOS.RUM
 		ExplicitStop = 7
 	}
 
-	public enum DDRUMResourceEventDeviceDeviceType
+	[Native]
+	public enum DDRUMResourceEventDeviceDeviceType : long
 	{
 		None = 0,
 		Mobile = 1,
@@ -521,7 +573,8 @@ namespace DatadogMaui.iOS.RUM
 		Other = 7
 	}
 
-	public enum DDRUMResourceEventRUMConnectivityEffectiveType
+	[Native]
+	public enum DDRUMResourceEventRUMConnectivityEffectiveType : long
 	{
 		None = 0,
 		Slow2g = 1,
@@ -530,7 +583,8 @@ namespace DatadogMaui.iOS.RUM
 		EffectiveType4g = 4
 	}
 
-	public enum DDRUMResourceEventRUMConnectivityInterfaces
+	[Native]
+	public enum DDRUMResourceEventRUMConnectivityInterfaces : long
 	{
 		None = 0,
 		Bluetooth = 1,
@@ -544,14 +598,16 @@ namespace DatadogMaui.iOS.RUM
 		InterfacesNone = 9
 	}
 
-	public enum DDRUMResourceEventRUMConnectivityStatus
+	[Native]
+	public enum DDRUMResourceEventRUMConnectivityStatus : long
 	{
 		Connected = 0,
 		NotConnected = 1,
 		Maybe = 2
 	}
 
-	public enum DDRUMResourceEventResourceDeliveryType
+	[Native]
+	public enum DDRUMResourceEventResourceDeliveryType : long
 	{
 		None = 0,
 		Cache = 1,
@@ -559,7 +615,8 @@ namespace DatadogMaui.iOS.RUM
 		Other = 3
 	}
 
-	public enum DDRUMResourceEventResourceGraphqlOperationType
+	[Native]
+	public enum DDRUMResourceEventResourceGraphqlOperationType : long
 	{
 		None = 0,
 		Query = 1,
@@ -567,7 +624,8 @@ namespace DatadogMaui.iOS.RUM
 		Subscription = 3
 	}
 
-	public enum DDRUMResourceEventResourceProviderProviderType
+	[Native]
+	public enum DDRUMResourceEventResourceProviderProviderType : long
 	{
 		None = 0,
 		Ad = 1,
@@ -586,7 +644,8 @@ namespace DatadogMaui.iOS.RUM
 		Video = 14
 	}
 
-	public enum DDRUMResourceEventResourceRUMMethod
+	[Native]
+	public enum DDRUMResourceEventResourceRUMMethod : long
 	{
 		None = 0,
 		Post = 1,
@@ -600,14 +659,16 @@ namespace DatadogMaui.iOS.RUM
 		Connect = 9
 	}
 
-	public enum DDRUMResourceEventResourceRenderBlockingStatus
+	[Native]
+	public enum DDRUMResourceEventResourceRenderBlockingStatus : long
 	{
 		None = 0,
 		Blocking = 1,
 		NonBlocking = 2
 	}
 
-	public enum DDRUMResourceEventResourceResourceType
+	[Native]
+	public enum DDRUMResourceEventResourceResourceType : long
 	{
 		Document = 0,
 		Xhr = 1,
@@ -622,14 +683,16 @@ namespace DatadogMaui.iOS.RUM
 		Native = 10
 	}
 
-	public enum DDRUMResourceEventSessionRUMSessionType
+	[Native]
+	public enum DDRUMResourceEventSessionRUMSessionType : long
 	{
 		User = 0,
 		Synthetics = 1,
 		CiTest = 2
 	}
 
-	public enum DDRUMResourceEventSource
+	[Native]
+	public enum DDRUMResourceEventSource : long
 	{
 		None = 0,
 		Android = 1,
@@ -642,7 +705,8 @@ namespace DatadogMaui.iOS.RUM
 		KotlinMultiplatform = 8
 	}
 
-	public enum DDRUMViewEventContainerSource
+	[Native]
+	public enum DDRUMViewEventContainerSource : long
 	{
 		Android = 0,
 		Ios = 1,
@@ -654,7 +718,8 @@ namespace DatadogMaui.iOS.RUM
 		KotlinMultiplatform = 7
 	}
 
-	public enum DDRUMViewEventDDPageStatesState
+	[Native]
+	public enum DDRUMViewEventDDPageStatesState : long
 	{
 		Active = 0,
 		Passive = 1,
@@ -663,7 +728,8 @@ namespace DatadogMaui.iOS.RUM
 		Terminated = 4
 	}
 
-	public enum DDRUMViewEventDDProfilingErrorReason
+	[Native]
+	public enum DDRUMViewEventDDProfilingErrorReason : long
 	{
 		None = 0,
 		NotSupportedByBrowser = 1,
@@ -672,7 +738,8 @@ namespace DatadogMaui.iOS.RUM
 		UnexpectedException = 4
 	}
 
-	public enum DDRUMViewEventDDProfilingStatus
+	[Native]
+	public enum DDRUMViewEventDDProfilingStatus : long
 	{
 		None = 0,
 		Starting = 1,
@@ -681,14 +748,16 @@ namespace DatadogMaui.iOS.RUM
 		Error = 4
 	}
 
-	public enum DDRUMViewEventDDSessionPlan
+	[Native]
+	public enum DDRUMViewEventDDSessionPlan : long
 	{
 		None = 0,
 		Plan1 = 1,
 		Plan2 = 2
 	}
 
-	public enum DDRUMViewEventDDSessionRUMSessionPrecondition
+	[Native]
+	public enum DDRUMViewEventDDSessionRUMSessionPrecondition : long
 	{
 		None = 0,
 		UserAppLaunch = 1,
@@ -700,7 +769,8 @@ namespace DatadogMaui.iOS.RUM
 		ExplicitStop = 7
 	}
 
-	public enum DDRUMViewEventDeviceDeviceType
+	[Native]
+	public enum DDRUMViewEventDeviceDeviceType : long
 	{
 		None = 0,
 		Mobile = 1,
@@ -712,14 +782,16 @@ namespace DatadogMaui.iOS.RUM
 		Other = 7
 	}
 
-	public enum DDRUMViewEventPrivacyReplayLevel
+	[Native]
+	public enum DDRUMViewEventPrivacyReplayLevel : long
 	{
 		Allow = 0,
 		Mask = 1,
 		MaskUserInput = 2
 	}
 
-	public enum DDRUMViewEventRUMConnectivityEffectiveType
+	[Native]
+	public enum DDRUMViewEventRUMConnectivityEffectiveType : long
 	{
 		None = 0,
 		Slow2g = 1,
@@ -728,7 +800,8 @@ namespace DatadogMaui.iOS.RUM
 		EffectiveType4g = 4
 	}
 
-	public enum DDRUMViewEventRUMConnectivityInterfaces
+	[Native]
+	public enum DDRUMViewEventRUMConnectivityInterfaces : long
 	{
 		None = 0,
 		Bluetooth = 1,
@@ -742,21 +815,24 @@ namespace DatadogMaui.iOS.RUM
 		InterfacesNone = 9
 	}
 
-	public enum DDRUMViewEventRUMConnectivityStatus
+	[Native]
+	public enum DDRUMViewEventRUMConnectivityStatus : long
 	{
 		Connected = 0,
 		NotConnected = 1,
 		Maybe = 2
 	}
 
-	public enum DDRUMViewEventSessionRUMSessionType
+	[Native]
+	public enum DDRUMViewEventSessionRUMSessionType : long
 	{
 		User = 0,
 		Synthetics = 1,
 		CiTest = 2
 	}
 
-	public enum DDRUMViewEventSource
+	[Native]
+	public enum DDRUMViewEventSource : long
 	{
 		None = 0,
 		Android = 1,
@@ -769,7 +845,8 @@ namespace DatadogMaui.iOS.RUM
 		KotlinMultiplatform = 8
 	}
 
-	public enum DDRUMViewEventViewLoadingType
+	[Native]
+	public enum DDRUMViewEventViewLoadingType : long
 	{
 		None = 0,
 		InitialLoad = 1,
@@ -782,7 +859,8 @@ namespace DatadogMaui.iOS.RUM
 		ViewControllerRedisplay = 8
 	}
 
-	public enum DDRUMVitalAppLaunchEventContainerSource
+	[Native]
+	public enum DDRUMVitalAppLaunchEventContainerSource : long
 	{
 		Android = 0,
 		Ios = 1,
@@ -794,7 +872,8 @@ namespace DatadogMaui.iOS.RUM
 		KotlinMultiplatform = 7
 	}
 
-	public enum DDRUMVitalAppLaunchEventDDProfilingErrorReason
+	[Native]
+	public enum DDRUMVitalAppLaunchEventDDProfilingErrorReason : long
 	{
 		None = 0,
 		NotSupportedByBrowser = 1,
@@ -803,7 +882,8 @@ namespace DatadogMaui.iOS.RUM
 		UnexpectedException = 4
 	}
 
-	public enum DDRUMVitalAppLaunchEventDDProfilingStatus
+	[Native]
+	public enum DDRUMVitalAppLaunchEventDDProfilingStatus : long
 	{
 		None = 0,
 		Starting = 1,
@@ -812,14 +892,16 @@ namespace DatadogMaui.iOS.RUM
 		Error = 4
 	}
 
-	public enum DDRUMVitalAppLaunchEventDDSessionPlan
+	[Native]
+	public enum DDRUMVitalAppLaunchEventDDSessionPlan : long
 	{
 		None = 0,
 		Plan1 = 1,
 		Plan2 = 2
 	}
 
-	public enum DDRUMVitalAppLaunchEventDDSessionRUMSessionPrecondition
+	[Native]
+	public enum DDRUMVitalAppLaunchEventDDSessionRUMSessionPrecondition : long
 	{
 		None = 0,
 		UserAppLaunch = 1,
@@ -831,7 +913,8 @@ namespace DatadogMaui.iOS.RUM
 		ExplicitStop = 7
 	}
 
-	public enum DDRUMVitalAppLaunchEventDeviceDeviceType
+	[Native]
+	public enum DDRUMVitalAppLaunchEventDeviceDeviceType : long
 	{
 		None = 0,
 		Mobile = 1,
@@ -843,7 +926,8 @@ namespace DatadogMaui.iOS.RUM
 		Other = 7
 	}
 
-	public enum DDRUMVitalAppLaunchEventRUMConnectivityEffectiveType
+	[Native]
+	public enum DDRUMVitalAppLaunchEventRUMConnectivityEffectiveType : long
 	{
 		None = 0,
 		Slow2g = 1,
@@ -852,7 +936,8 @@ namespace DatadogMaui.iOS.RUM
 		EffectiveType4g = 4
 	}
 
-	public enum DDRUMVitalAppLaunchEventRUMConnectivityInterfaces
+	[Native]
+	public enum DDRUMVitalAppLaunchEventRUMConnectivityInterfaces : long
 	{
 		None = 0,
 		Bluetooth = 1,
@@ -866,21 +951,24 @@ namespace DatadogMaui.iOS.RUM
 		InterfacesNone = 9
 	}
 
-	public enum DDRUMVitalAppLaunchEventRUMConnectivityStatus
+	[Native]
+	public enum DDRUMVitalAppLaunchEventRUMConnectivityStatus : long
 	{
 		Connected = 0,
 		NotConnected = 1,
 		Maybe = 2
 	}
 
-	public enum DDRUMVitalAppLaunchEventSessionRUMSessionType
+	[Native]
+	public enum DDRUMVitalAppLaunchEventSessionRUMSessionType : long
 	{
 		User = 0,
 		Synthetics = 1,
 		CiTest = 2
 	}
 
-	public enum DDRUMVitalAppLaunchEventSource
+	[Native]
+	public enum DDRUMVitalAppLaunchEventSource : long
 	{
 		None = 0,
 		Android = 1,
@@ -893,20 +981,23 @@ namespace DatadogMaui.iOS.RUM
 		KotlinMultiplatform = 8
 	}
 
-	public enum DDRUMVitalAppLaunchEventVitalAppLaunchMetric
+	[Native]
+	public enum DDRUMVitalAppLaunchEventVitalAppLaunchMetric : long
 	{
 		id = 0,
 		fd = 1
 	}
 
-	public enum DDRUMVitalAppLaunchEventVitalStartupType
+	[Native]
+	public enum DDRUMVitalAppLaunchEventVitalStartupType : long
 	{
 		None = 0,
 		ColdStart = 1,
 		WarmStart = 2
 	}
 
-	public enum DDRUMVitalDurationEventContainerSource
+	[Native]
+	public enum DDRUMVitalDurationEventContainerSource : long
 	{
 		Android = 0,
 		Ios = 1,
@@ -918,14 +1009,16 @@ namespace DatadogMaui.iOS.RUM
 		KotlinMultiplatform = 7
 	}
 
-	public enum DDRUMVitalDurationEventDDSessionPlan
+	[Native]
+	public enum DDRUMVitalDurationEventDDSessionPlan : long
 	{
 		None = 0,
 		Plan1 = 1,
 		Plan2 = 2
 	}
 
-	public enum DDRUMVitalDurationEventDDSessionRUMSessionPrecondition
+	[Native]
+	public enum DDRUMVitalDurationEventDDSessionRUMSessionPrecondition : long
 	{
 		None = 0,
 		UserAppLaunch = 1,
@@ -937,7 +1030,8 @@ namespace DatadogMaui.iOS.RUM
 		ExplicitStop = 7
 	}
 
-	public enum DDRUMVitalDurationEventDeviceDeviceType
+	[Native]
+	public enum DDRUMVitalDurationEventDeviceDeviceType : long
 	{
 		None = 0,
 		Mobile = 1,
@@ -949,7 +1043,8 @@ namespace DatadogMaui.iOS.RUM
 		Other = 7
 	}
 
-	public enum DDRUMVitalDurationEventRUMConnectivityEffectiveType
+	[Native]
+	public enum DDRUMVitalDurationEventRUMConnectivityEffectiveType : long
 	{
 		None = 0,
 		Slow2g = 1,
@@ -958,7 +1053,8 @@ namespace DatadogMaui.iOS.RUM
 		EffectiveType4g = 4
 	}
 
-	public enum DDRUMVitalDurationEventRUMConnectivityInterfaces
+	[Native]
+	public enum DDRUMVitalDurationEventRUMConnectivityInterfaces : long
 	{
 		None = 0,
 		Bluetooth = 1,
@@ -972,21 +1068,24 @@ namespace DatadogMaui.iOS.RUM
 		InterfacesNone = 9
 	}
 
-	public enum DDRUMVitalDurationEventRUMConnectivityStatus
+	[Native]
+	public enum DDRUMVitalDurationEventRUMConnectivityStatus : long
 	{
 		Connected = 0,
 		NotConnected = 1,
 		Maybe = 2
 	}
 
-	public enum DDRUMVitalDurationEventSessionRUMSessionType
+	[Native]
+	public enum DDRUMVitalDurationEventSessionRUMSessionType : long
 	{
 		User = 0,
 		Synthetics = 1,
 		CiTest = 2
 	}
 
-	public enum DDRUMVitalDurationEventSource
+	[Native]
+	public enum DDRUMVitalDurationEventSource : long
 	{
 		None = 0,
 		Android = 1,
@@ -999,7 +1098,8 @@ namespace DatadogMaui.iOS.RUM
 		KotlinMultiplatform = 8
 	}
 
-	public enum DDRUMVitalOperationStepEventContainerSource
+	[Native]
+	public enum DDRUMVitalOperationStepEventContainerSource : long
 	{
 		Android = 0,
 		Ios = 1,
@@ -1011,14 +1111,16 @@ namespace DatadogMaui.iOS.RUM
 		KotlinMultiplatform = 7
 	}
 
-	public enum DDRUMVitalOperationStepEventDDSessionPlan
+	[Native]
+	public enum DDRUMVitalOperationStepEventDDSessionPlan : long
 	{
 		None = 0,
 		Plan1 = 1,
 		Plan2 = 2
 	}
 
-	public enum DDRUMVitalOperationStepEventDDSessionRUMSessionPrecondition
+	[Native]
+	public enum DDRUMVitalOperationStepEventDDSessionRUMSessionPrecondition : long
 	{
 		None = 0,
 		UserAppLaunch = 1,
@@ -1030,7 +1132,8 @@ namespace DatadogMaui.iOS.RUM
 		ExplicitStop = 7
 	}
 
-	public enum DDRUMVitalOperationStepEventDeviceDeviceType
+	[Native]
+	public enum DDRUMVitalOperationStepEventDeviceDeviceType : long
 	{
 		None = 0,
 		Mobile = 1,
@@ -1042,7 +1145,8 @@ namespace DatadogMaui.iOS.RUM
 		Other = 7
 	}
 
-	public enum DDRUMVitalOperationStepEventRUMConnectivityEffectiveType
+	[Native]
+	public enum DDRUMVitalOperationStepEventRUMConnectivityEffectiveType : long
 	{
 		None = 0,
 		Slow2g = 1,
@@ -1051,7 +1155,8 @@ namespace DatadogMaui.iOS.RUM
 		EffectiveType4g = 4
 	}
 
-	public enum DDRUMVitalOperationStepEventRUMConnectivityInterfaces
+	[Native]
+	public enum DDRUMVitalOperationStepEventRUMConnectivityInterfaces : long
 	{
 		None = 0,
 		Bluetooth = 1,
@@ -1065,21 +1170,24 @@ namespace DatadogMaui.iOS.RUM
 		InterfacesNone = 9
 	}
 
-	public enum DDRUMVitalOperationStepEventRUMConnectivityStatus
+	[Native]
+	public enum DDRUMVitalOperationStepEventRUMConnectivityStatus : long
 	{
 		Connected = 0,
 		NotConnected = 1,
 		Maybe = 2
 	}
 
-	public enum DDRUMVitalOperationStepEventSessionRUMSessionType
+	[Native]
+	public enum DDRUMVitalOperationStepEventSessionRUMSessionType : long
 	{
 		User = 0,
 		Synthetics = 1,
 		CiTest = 2
 	}
 
-	public enum DDRUMVitalOperationStepEventSource
+	[Native]
+	public enum DDRUMVitalOperationStepEventSource : long
 	{
 		None = 0,
 		Android = 1,
@@ -1092,7 +1200,8 @@ namespace DatadogMaui.iOS.RUM
 		KotlinMultiplatform = 8
 	}
 
-	public enum DDRUMVitalOperationStepEventVitalFailureReason
+	[Native]
+	public enum DDRUMVitalOperationStepEventVitalFailureReason : long
 	{
 		None = 0,
 		Error = 1,
@@ -1100,7 +1209,8 @@ namespace DatadogMaui.iOS.RUM
 		Other = 3
 	}
 
-	public enum DDRUMVitalOperationStepEventVitalStepType
+	[Native]
+	public enum DDRUMVitalOperationStepEventVitalStepType : long
 	{
 		Start = 0,
 		Update = 1,
@@ -1108,7 +1218,8 @@ namespace DatadogMaui.iOS.RUM
 		End = 3
 	}
 
-	public enum DDRUMResourceType
+	[Native]
+	public enum DDRUMResourceType : long
 	{
 		Image = 0,
 		Xhr = 1,
@@ -1123,7 +1234,8 @@ namespace DatadogMaui.iOS.RUM
 		Native = 10
 	}
 
-	public enum DDTelemetryConfigurationEventSource
+	[Native]
+	public enum DDTelemetryConfigurationEventSource : long
 	{
 		Android = 0,
 		Ios = 1,
@@ -1134,7 +1246,8 @@ namespace DatadogMaui.iOS.RUM
 		KotlinMultiplatform = 6
 	}
 
-	public enum DDTelemetryConfigurationEventTelemetryConfigurationSelectedTracingPropagators
+	[Native]
+	public enum DDTelemetryConfigurationEventTelemetryConfigurationSelectedTracingPropagators : long
 	{
 		None = 0,
 		Datadog = 1,
@@ -1143,21 +1256,24 @@ namespace DatadogMaui.iOS.RUM
 		Tracecontext = 4
 	}
 
-	public enum DDTelemetryConfigurationEventTelemetryConfigurationSessionPersistence
+	[Native]
+	public enum DDTelemetryConfigurationEventTelemetryConfigurationSessionPersistence : long
 	{
 		None = 0,
 		LocalStorage = 1,
 		Cookie = 2
 	}
 
-	public enum DDTelemetryConfigurationEventTelemetryConfigurationTraceContextInjection
+	[Native]
+	public enum DDTelemetryConfigurationEventTelemetryConfigurationTraceContextInjection : long
 	{
 		None = 0,
 		All = 1,
 		Sampled = 2
 	}
 
-	public enum DDTelemetryConfigurationEventTelemetryConfigurationTrackFeatureFlagsForEvents
+	[Native]
+	public enum DDTelemetryConfigurationEventTelemetryConfigurationTrackFeatureFlagsForEvents : long
 	{
 		None = 0,
 		Vital = 1,
@@ -1166,7 +1282,8 @@ namespace DatadogMaui.iOS.RUM
 		LongTask = 4
 	}
 
-	public enum DDTelemetryConfigurationEventTelemetryConfigurationTrackingConsent
+	[Native]
+	public enum DDTelemetryConfigurationEventTelemetryConfigurationTrackingConsent : long
 	{
 		None = 0,
 		Granted = 1,
@@ -1174,7 +1291,8 @@ namespace DatadogMaui.iOS.RUM
 		Pending = 3
 	}
 
-	public enum DDTelemetryConfigurationEventTelemetryConfigurationViewTrackingStrategy
+	[Native]
+	public enum DDTelemetryConfigurationEventTelemetryConfigurationViewTrackingStrategy : long
 	{
 		None = 0,
 		ActivityViewTrackingStrategy = 1,
@@ -1183,7 +1301,8 @@ namespace DatadogMaui.iOS.RUM
 		NavigationViewTrackingStrategy = 4
 	}
 
-	public enum DDTelemetryDebugEventSource
+	[Native]
+	public enum DDTelemetryDebugEventSource : long
 	{
 		Android = 0,
 		Ios = 1,
@@ -1194,7 +1313,8 @@ namespace DatadogMaui.iOS.RUM
 		KotlinMultiplatform = 6
 	}
 
-	public enum DDTelemetryErrorEventSource
+	[Native]
+	public enum DDTelemetryErrorEventSource : long
 	{
 		Android = 0,
 		Ios = 1,
@@ -1205,7 +1325,8 @@ namespace DatadogMaui.iOS.RUM
 		KotlinMultiplatform = 6
 	}
 
-	public enum DDRUMVitalsFrequency
+	[Native]
+	public enum DDRUMVitalsFrequency : long
 	{
 		Frequent = 0,
 		Average = 1,

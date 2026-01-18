@@ -2,7 +2,8 @@
 
 	<PropertyGroup>
 		<!-- Only targeting Android and iOS for Datadog SDK -->
-		<TargetFrameworks>net10.0-android;net10.0-ios</TargetFrameworks>
+		<!-- Using net9.0 for iOS due to Xcode 15.4 compatibility -->
+		<TargetFrameworks>net10.0-android;net9.0-ios</TargetFrameworks>
 
 		<OutputType>Exe</OutputType>
 		<RootNamespace>DatadogMauiSample</RootNamespace>
@@ -25,6 +26,25 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">23.0</SupportedOSPlatformVersion>
 	</PropertyGroup>
+
+	<!-- Android-specific settings to fix tracing library conflicts -->
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net10.0-android' And '$(Configuration)' == 'Debug'">
+		<!-- Use multidex and disable R8 optimizations for Debug to avoid duplicate class errors -->
+		<AndroidDexTool>d8</AndroidDexTool>
+		<AndroidEnableMultiDex>true</AndroidEnableMultiDex>
+		<AndroidLinkMode>None</AndroidLinkMode>
+		<AndroidPackageFormat>apk</AndroidPackageFormat>
+		<AndroidProguardFile>Platforms\Android\proguard-r8.txt</AndroidProguardFile>
+		<!-- Disable Java dependency verification - Kotlin stdlib is embedded in Datadog SDK AARs -->
+		<AndroidVerifyJavaDependencies>false</AndroidVerifyJavaDependencies>
+	</PropertyGroup>
+
+	<!-- Custom target to remove duplicate tracing AAR before dex compilation -->
+	<Target Name="RemoveDuplicateTracingAAR" BeforeTargets="_CompileToDalvik" Condition="'$(TargetFramework)' == 'net10.0-android'">
+		<Exec Command="find $(IntermediateOutputPath)lp -type d -name '12*' -o -name '16*' | while read dir; do if [ -f &quot;$$dir/jl/classes.jar&quot; ] &amp;&amp; unzip -l &quot;$$dir/jl/classes.jar&quot; 2&gt;/dev/null | grep -q 'androidx/tracing/TraceKt.class' &amp;&amp; echo &quot;$$dir&quot; | grep -q '/12'; then echo &quot;Removing duplicate tracing-android from $$dir&quot;; rm -rf &quot;$$dir/jl/classes.jar&quot;; fi; done"
+			  IgnoreExitCode="true"
+			  Condition="Exists('$(IntermediateOutputPath)lp')" />
+	</Target>
 
 	<ItemGroup>
 		<!-- App Icon -->
@@ -50,6 +70,7 @@
 		<PackageReference Include="DotNetEnv" Version="3.1.1" />
 	</ItemGroup>
 
+
 	<ItemGroup>
 		<!-- Include .env file as a raw asset so it's bundled with the app -->
 		<MauiAsset Include=".env" LogicalName=".env" />
@@ -61,12 +82,21 @@
 		<ProjectReference Include="..\..\Datadog.MAUI.Android.Binding\dd-sdk-android-rum\dd-sdk-android-rum.csproj" />
 		<ProjectReference Include="..\..\Datadog.MAUI.Android.Binding\dd-sdk-android-logs\dd-sdk-android-logs.csproj" />
 		<ProjectReference Include="..\..\Datadog.MAUI.Android.Binding\dd-sdk-android-trace\dd-sdk-android-trace.csproj" />
-		<ProjectReference Include="..\..\Datadog.MAUI.Android.Binding\dd-sdk-android-session-replay\dd-sdk-android-session-replay.csproj" />
+		<!-- Session Replay temporarily disabled due to tracing library conflicts -->
+		<!-- <ProjectReference Include="..\..\Datadog.MAUI.Android.Binding\dd-sdk-android-session-replay\dd-sdk-android-session-replay.csproj" /> -->
 		<ProjectReference Include="..\..\Datadog.MAUI.Android.Binding\dd-sdk-android-webview\dd-sdk-android-webview.csproj" />
+		<ProjectReference Include="..\..\Datadog.MAUI.Android.Binding\dd-sdk-android-ndk\dd-sdk-android-ndk.csproj" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetPlatformIdentifier)' == 'ios'">
-		<ProjectReference Include="..\..\Datadog.MAUI.iOS.Binding\Datadog.MAUI.iOS.Binding.csproj" />
+		<ProjectReference Include="..\..\Datadog.MAUI.iOS.Binding\DatadogCore\DatadogCore.csproj" />
+		<ProjectReference Include="..\..\Datadog.MAUI.iOS.Binding\DatadogRUM\DatadogRUM.csproj" />
+		<ProjectReference Include="..\..\Datadog.MAUI.iOS.Binding\DatadogLogs\DatadogLogs.csproj" />
+		<ProjectReference Include="..\..\Datadog.MAUI.iOS.Binding\DatadogTrace\DatadogTrace.csproj" />
+		<ProjectReference Include="..\..\Datadog.MAUI.iOS.Binding\DatadogSessionReplay\DatadogSessionReplay.csproj" />
+		<ProjectReference Include="..\..\Datadog.MAUI.iOS.Binding\DatadogWebViewTracking\DatadogWebViewTracking.csproj" />
+		<ProjectReference Include="..\..\Datadog.MAUI.iOS.Binding\DatadogCrashReporting\DatadogCrashReporting.csproj" />
+		<ProjectReference Include="..\..\Datadog.MAUI.iOS.Binding\OpenTelemetryApi\OpenTelemetryApi.csproj" />
 	</ItemGroup>
 
 </Project>

@@ -1,11 +1,13 @@
 using System;
-using DatadogCore;
 using Foundation;
 using ObjCRuntime;
+using UIKit;
+using Datadog.iOS.DatadogInternal;
 
-namespace DatadogMaui.iOS.Core
+namespace Datadog.iOS.DatadogCore
 {
-	// @interface DDCrossPlatformExtension
+	// @interface DDCrossPlatformExtension : NSObject
+	[BaseType (typeof(NSObject))]
 	interface DDCrossPlatformExtension
 	{
 		// +(void)subscribeToSharedContext:(void (^ _Nonnull)(DDSharedContext * _Nullable))toSharedContext;
@@ -19,7 +21,8 @@ namespace DatadogMaui.iOS.Core
 		void UnsubscribeFromSharedContext ();
 	}
 
-	// @interface DDSharedContext
+	// @interface DDSharedContext : NSObject
+	[BaseType (typeof(NSObject))]
 	[DisableDefaultCtor]
 	interface DDSharedContext
 	{
@@ -32,7 +35,8 @@ namespace DatadogMaui.iOS.Core
 		string AccountId { get; }
 	}
 
-	// @interface DDConfiguration
+	// @interface DDConfiguration : NSObject
+	[BaseType (typeof(NSObject))]
 	[DisableDefaultCtor]
 	interface DDConfiguration
 	{
@@ -68,9 +72,9 @@ namespace DatadogMaui.iOS.Core
 		[Export ("batchProcessingLevel", ArgumentSemantic.Assign)]
 		DDBatchProcessingLevel BatchProcessingLevel { get; set; }
 
-		// @property (copy, nonatomic) int * _Nullable proxyConfiguration;
+		// @property (copy, nonatomic) NSDictionary * _Nullable proxyConfiguration;
 		[NullAllowed, Export ("proxyConfiguration", ArgumentSemantic.Copy)]
-		unsafe int* ProxyConfiguration { get; set; }
+		NSDictionary ProxyConfiguration { get; set; }
 
 		// -(void)setEncryption:(id<DDDataEncryption> _Nonnull)encryption;
 		[Export ("setEncryption:")]
@@ -84,9 +88,13 @@ namespace DatadogMaui.iOS.Core
 		[Export ("bundle", ArgumentSemantic.Strong)]
 		NSBundle Bundle { get; set; }
 
-		// @property (nonatomic) int backgroundTasksEnabled;
+		// @property (copy, nonatomic) NSDictionary<NSString *,id> * _Nonnull additionalConfiguration;
+		[Export ("additionalConfiguration", ArgumentSemantic.Copy)]
+		NSDictionary<NSString, NSObject> AdditionalConfiguration { get; set; }
+
+		// @property (nonatomic) BOOL backgroundTasksEnabled;
 		[Export ("backgroundTasksEnabled")]
-		int BackgroundTasksEnabled { get; set; }
+		bool BackgroundTasksEnabled { get; set; }
 
 		// -(instancetype _Nonnull)initWithClientToken:(NSString * _Nonnull)clientToken env:(NSString * _Nonnull)env __attribute__((objc_designated_initializer));
 		[Export ("initWithClientToken:env:")]
@@ -103,23 +111,26 @@ namespace DatadogMaui.iOS.Core
   the generated interface. If consumers are not supposed to implement this
   protocol, then [Model] is redundant and will generate code that will never
   be used.
-*/[Protocol]
+*/
+	[Protocol]
+	[BaseType(typeof(NSObject))]
 	interface DDDataEncryption
 	{
-		// @required -(NSData * _Nullable)encryptWithData:(NSData * _Nonnull)data error:(id)error __attribute__((warn_unused_result("")));
+		// @required -(NSData * _Nullable)encryptWithData:(NSData * _Nonnull)data error:(NSError * _Nullable * _Nullable)error __attribute__((warn_unused_result("")));
 		[Abstract]
 		[Export ("encryptWithData:error:")]
 		[return: NullAllowed]
-		NSData EncryptWithData (NSData data, NSObject error);
+		NSData EncryptWithData (NSData data, [NullAllowed] out NSError error);
 
-		// @required -(NSData * _Nullable)decryptWithData:(NSData * _Nonnull)data error:(id)error __attribute__((warn_unused_result("")));
+		// @required -(NSData * _Nullable)decryptWithData:(NSData * _Nonnull)data error:(NSError * _Nullable * _Nullable)error __attribute__((warn_unused_result("")));
 		[Abstract]
 		[Export ("decryptWithData:error:")]
 		[return: NullAllowed]
-		NSData DecryptWithData (NSData data, NSObject error);
+		NSData DecryptWithData (NSData data, [NullAllowed] out NSError error);
 	}
 
-	// @interface DDDatadog
+	// @interface DDDatadog : NSObject
+	[BaseType (typeof(NSObject))]
 	interface DDDatadog
 	{
 		// +(void)initializeWithConfiguration:(DDConfiguration * _Nonnull)configuration trackingConsent:(DDTrackingConsent * _Nonnull)trackingConsent;
@@ -131,33 +142,33 @@ namespace DatadogMaui.iOS.Core
 		// +(void)setVerbosityLevel:(enum DDCoreLoggerLevel)verbosityLevel;
 		[Static]
 		[Export ("verbosityLevel")]
-		[Verify (MethodToProperty)]
+		
 		DDCoreLoggerLevel VerbosityLevel { get; set; }
 
-		// +(void)setUserInfoWithUserId:(NSString * _Nonnull)userId name:(NSString * _Nullable)name email:(NSString * _Nullable)email extraInfo:(id)extraInfo;
+		// +(void)setUserInfoWithUserId:(NSString * _Nonnull)userId name:(NSString * _Nullable)name email:(NSString * _Nullable)email extraInfo:(NSDictionary<NSString *,id> * _Nonnull)extraInfo;
 		[Static]
 		[Export ("setUserInfoWithUserId:name:email:extraInfo:")]
-		void SetUserInfoWithUserId (string userId, [NullAllowed] string name, [NullAllowed] string email, NSObject extraInfo);
+		void SetUserInfoWithUserId (string userId, [NullAllowed] string name, [NullAllowed] string email, NSDictionary<NSString, NSObject> extraInfo);
 
 		// +(void)clearUserInfo;
 		[Static]
 		[Export ("clearUserInfo")]
 		void ClearUserInfo ();
 
-		// +(void)addUserExtraInfo:(id)extraInfo;
+		// +(void)addUserExtraInfo:(NSDictionary<NSString *,id> * _Nonnull)extraInfo;
 		[Static]
 		[Export ("addUserExtraInfo:")]
-		void AddUserExtraInfo (NSObject extraInfo);
+		void AddUserExtraInfo (NSDictionary<NSString, NSObject> extraInfo);
 
-		// +(void)setAccountInfoWithAccountId:(NSString * _Nonnull)accountId name:(NSString * _Nullable)name extraInfo:(id)extraInfo;
+		// +(void)setAccountInfoWithAccountId:(NSString * _Nonnull)accountId name:(NSString * _Nullable)name extraInfo:(NSDictionary<NSString *,id> * _Nonnull)extraInfo;
 		[Static]
 		[Export ("setAccountInfoWithAccountId:name:extraInfo:")]
-		void SetAccountInfoWithAccountId (string accountId, [NullAllowed] string name, NSObject extraInfo);
+		void SetAccountInfoWithAccountId (string accountId, [NullAllowed] string name, NSDictionary<NSString, NSObject> extraInfo);
 
-		// +(void)addAccountExtraInfo:(id)extraInfo;
+		// +(void)addAccountExtraInfo:(NSDictionary<NSString *,id> * _Nonnull)extraInfo;
 		[Static]
 		[Export ("addAccountExtraInfo:")]
-		void AddAccountExtraInfo (NSObject extraInfo);
+		void AddAccountExtraInfo (NSDictionary<NSString, NSObject> extraInfo);
 
 		// +(void)clearAccountInfo;
 		[Static]
@@ -169,11 +180,11 @@ namespace DatadogMaui.iOS.Core
 		[Export ("setTrackingConsentWithConsent:")]
 		void SetTrackingConsentWithConsent (DDTrackingConsent consent);
 
-		// +(id)isInitialized __attribute__((warn_unused_result("")));
+		// +(BOOL)isInitialized __attribute__((warn_unused_result("")));
 		[Static]
 		[Export ("isInitialized")]
-		[Verify (MethodToProperty)]
-		NSObject IsInitialized { get; }
+		
+		bool IsInitialized { get; }
 
 		// +(void)stopInstance;
 		[Static]
@@ -186,50 +197,51 @@ namespace DatadogMaui.iOS.Core
 		void ClearAllData ();
 	}
 
-	// @interface DDSite
+	// @interface DDSite : NSObject
+	[BaseType (typeof(NSObject))]
 	[DisableDefaultCtor]
 	interface DDSite
 	{
 		// +(DDSite * _Nonnull)us1 __attribute__((warn_unused_result("")));
 		[Static]
 		[Export ("us1")]
-		[Verify (MethodToProperty)]
+		
 		DDSite Us1 { get; }
 
 		// +(DDSite * _Nonnull)us3 __attribute__((warn_unused_result("")));
 		[Static]
 		[Export ("us3")]
-		[Verify (MethodToProperty)]
+		
 		DDSite Us3 { get; }
 
 		// +(DDSite * _Nonnull)us5 __attribute__((warn_unused_result("")));
 		[Static]
 		[Export ("us5")]
-		[Verify (MethodToProperty)]
+		
 		DDSite Us5 { get; }
 
 		// +(DDSite * _Nonnull)eu1 __attribute__((warn_unused_result("")));
 		[Static]
 		[Export ("eu1")]
-		[Verify (MethodToProperty)]
+		
 		DDSite Eu1 { get; }
 
 		// +(DDSite * _Nonnull)ap1 __attribute__((warn_unused_result("")));
 		[Static]
 		[Export ("ap1")]
-		[Verify (MethodToProperty)]
+		
 		DDSite Ap1 { get; }
 
 		// +(DDSite * _Nonnull)ap2 __attribute__((warn_unused_result("")));
 		[Static]
 		[Export ("ap2")]
-		[Verify (MethodToProperty)]
+		
 		DDSite Ap2 { get; }
 
 		// +(DDSite * _Nonnull)us1_fed __attribute__((warn_unused_result("")));
 		[Static]
 		[Export ("us1_fed")]
-		[Verify (MethodToProperty)]
+		
 		DDSite Us1_fed { get; }
 	}
 
@@ -242,39 +254,43 @@ namespace DatadogMaui.iOS.Core
   the generated interface. If consumers are not supposed to implement this
   protocol, then [Model] is redundant and will generate code that will never
   be used.
-*/[Protocol]
+*/
+	[Protocol]
+	[BaseType(typeof(NSObject))]
 	interface DDServerDateProvider
 	{
-		// @required -(void)synchronizeWithUpdate:(id)update;
+		// @required -(void)synchronizeWithUpdate:(void (^ _Nonnull)(NSTimeInterval))update;
 		[Abstract]
 		[Export ("synchronizeWithUpdate:")]
-		void SynchronizeWithUpdate (NSObject update);
+		void SynchronizeWithUpdate (Action<double> update);
 	}
 
-	// @interface DDTrackingConsent
+	// @interface DDTrackingConsent : NSObject
+	[BaseType (typeof(NSObject))]
 	[DisableDefaultCtor]
 	interface DDTrackingConsent
 	{
 		// +(DDTrackingConsent * _Nonnull)granted __attribute__((warn_unused_result("")));
 		[Static]
 		[Export ("granted")]
-		[Verify (MethodToProperty)]
+		
 		DDTrackingConsent Granted { get; }
 
 		// +(DDTrackingConsent * _Nonnull)notGranted __attribute__((warn_unused_result("")));
 		[Static]
 		[Export ("notGranted")]
-		[Verify (MethodToProperty)]
+		
 		DDTrackingConsent NotGranted { get; }
 
 		// +(DDTrackingConsent * _Nonnull)pending __attribute__((warn_unused_result("")));
 		[Static]
 		[Export ("pending")]
-		[Verify (MethodToProperty)]
+		
 		DDTrackingConsent Pending { get; }
 	}
 
-	// @interface DDURLSessionInstrumentation
+	// @interface DDURLSessionInstrumentation : NSObject
+	[BaseType (typeof(NSObject))]
 	interface DDURLSessionInstrumentation
 	{
 		// +(void)enableWithConfiguration:(DDURLSessionInstrumentationConfiguration * _Nonnull)configuration;
@@ -282,42 +298,44 @@ namespace DatadogMaui.iOS.Core
 		[Export ("enableWithConfiguration:")]
 		void EnableWithConfiguration (DDURLSessionInstrumentationConfiguration configuration);
 
-		// +(void)disableWithDelegateClass:(Class<NSURLSessionDataDelegate> _Nonnull)delegateClass;
+		// +(void)disableWithDelegateClass:(Class<INSUrlSessionDataDelegate> _Nonnull)delegateClass;
 		[Static]
 		[Export ("disableWithDelegateClass:")]
-		void DisableWithDelegateClass (NSURLSessionDataDelegate delegateClass);
+		void DisableWithDelegateClass (INSUrlSessionDataDelegate delegateClass);
 	}
 
-	// @interface DDURLSessionInstrumentationConfiguration
+	// @interface DDURLSessionInstrumentationConfiguration : NSObject
+	[BaseType (typeof(NSObject))]
 	[DisableDefaultCtor]
 	interface DDURLSessionInstrumentationConfiguration
 	{
-		// -(instancetype _Nonnull)initWithDelegateClass:(Class<NSURLSessionDataDelegate> _Nonnull)delegateClass __attribute__((objc_designated_initializer));
+		// -(instancetype _Nonnull)initWithDelegateClass:(Class<INSUrlSessionDataDelegate> _Nonnull)delegateClass __attribute__((objc_designated_initializer));
 		[Export ("initWithDelegateClass:")]
 		[DesignatedInitializer]
-		NativeHandle Constructor (NSURLSessionDataDelegate delegateClass);
+		NativeHandle Constructor (INSUrlSessionDataDelegate delegateClass);
 
 		// -(void)setFirstPartyHostsTracing:(DDURLSessionInstrumentationFirstPartyHostsTracing * _Nonnull)firstPartyHostsTracing;
 		[Export ("setFirstPartyHostsTracing:")]
 		void SetFirstPartyHostsTracing (DDURLSessionInstrumentationFirstPartyHostsTracing firstPartyHostsTracing);
 
-		// @property (nonatomic) Class<NSURLSessionDataDelegate> _Nonnull delegateClass;
+		// @property (nonatomic) Class<INSUrlSessionDataDelegate> _Nonnull delegateClass;
 		[Export ("delegateClass", ArgumentSemantic.Assign)]
-		NSURLSessionDataDelegate DelegateClass { get; set; }
+		INSUrlSessionDataDelegate DelegateClass { get; set; }
 	}
 
-	// @interface DDURLSessionInstrumentationFirstPartyHostsTracing
+	// @interface DDURLSessionInstrumentationFirstPartyHostsTracing : NSObject
+	[BaseType (typeof(NSObject))]
 	[DisableDefaultCtor]
 	interface DDURLSessionInstrumentationFirstPartyHostsTracing
 	{
-		// -(instancetype _Nonnull)initWithHostsWithHeaderTypes:(id)hostsWithHeaderTypes __attribute__((objc_designated_initializer));
+		// -(instancetype _Nonnull)initWithHostsWithHeaderTypes:(NSDictionary<NSString *,NSSet<DDTracingHeaderType *> *> * _Nonnull)hostsWithHeaderTypes __attribute__((objc_designated_initializer));
 		[Export ("initWithHostsWithHeaderTypes:")]
 		[DesignatedInitializer]
-		NativeHandle Constructor (NSObject hostsWithHeaderTypes);
+		NativeHandle Constructor (NSDictionary<NSString, NSSet<DDTracingHeaderType>> hostsWithHeaderTypes);
 
-		// -(instancetype _Nonnull)initWithHosts:(id)hosts __attribute__((objc_designated_initializer));
+		// -(instancetype _Nonnull)initWithHosts:(NSSet<NSString *> * _Nonnull)hosts __attribute__((objc_designated_initializer));
 		[Export ("initWithHosts:")]
 		[DesignatedInitializer]
-		NativeHandle Constructor (NSObject hosts);
+		NativeHandle Constructor (NSSet<NSString> hosts);
 	}
 }

@@ -1,6 +1,9 @@
-namespace DatadogMaui.iOS.Logs
+using ObjCRuntime;
+
+namespace Datadog.iOS.DatadogLogs
 {
-	public enum DDLogEventDeviceDeviceType
+	[Native]
+	public enum DDLogEventDeviceDeviceType : long
 	{
 		None = 0,
 		Mobile = 1,
@@ -12,7 +15,8 @@ namespace DatadogMaui.iOS.Logs
 		Other = 7
 	}
 
-	public enum DDLogEventInterface
+	[Native]
+	public enum DDLogEventInterface : long
 	{
 		Wifi = 0,
 		WiredEthernet = 1,
@@ -21,7 +25,8 @@ namespace DatadogMaui.iOS.Logs
 		Other = 4
 	}
 
-	public enum DDLogEventRadioAccessTechnology
+	[Native]
+	public enum DDLogEventRadioAccessTechnology : long
 	{
 		Gprs = 0,
 		Edge = 1,
@@ -37,14 +42,16 @@ namespace DatadogMaui.iOS.Logs
 		Unknown = 11
 	}
 
-	public enum DDLogEventReachability
+	[Native]
+	public enum DDLogEventReachability : long
 	{
 		Yes = 0,
 		Maybe = 1,
 		No = 2
 	}
 
-	public enum DDLogEventStatus
+	[Native]
+	public enum DDLogEventStatus : long
 	{
 		Debug = 0,
 		Info = 1,
@@ -55,7 +62,8 @@ namespace DatadogMaui.iOS.Logs
 		Emergency = 6
 	}
 
-	public enum DDLogLevel
+	[Native]
+	public enum DDLogLevel : long
 	{
 		Debug = 0,
 		Info = 1,

@@ -1,12 +1,16 @@
-namespace DatadogMaui.iOS.Trace
+using ObjCRuntime;
+
+namespace Datadog.iOS.DatadogTrace
 {
-	public enum DDInjectEncoding
+	[Native]
+	public enum DDInjectEncoding : long
 	{
 		Multiple = 0,
 		Single = 1
 	}
 
-	public enum DDTraceContextInjection
+	[Native]
+	public enum DDTraceContextInjection : long
 	{
 		All = 0,
 		Sampled = 1

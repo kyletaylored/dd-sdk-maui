@@ -1,11 +1,12 @@
 using System;
-using DatadogLogs;
+using System;
 using Foundation;
 using ObjCRuntime;
 
-namespace DatadogMaui.iOS.Logs
+namespace Datadog.iOS.DatadogLogs
 {
-	// @interface DDLogEvent
+	// @interface DDLogEvent : NSObject
+	[BaseType (typeof(NSObject))]
 	[DisableDefaultCtor]
 	interface DDLogEvent
 	{
@@ -92,9 +93,14 @@ namespace DatadogMaui.iOS.Logs
 		// @property (readonly, nonatomic, strong) DDLogEventAttributes * _Nonnull attributes;
 		[Export ("attributes", ArgumentSemantic.Strong)]
 		DDLogEventAttributes Attributes { get; }
+
+		// @property (copy, nonatomic) NSArray<NSString *> * _Nullable tags;
+		[NullAllowed, Export ("tags", ArgumentSemantic.Copy)]
+		string[] Tags { get; set; }
 	}
 
-	// @interface DDLogEventAccountInfo
+	// @interface DDLogEventAccountInfo : NSObject
+	[BaseType (typeof(NSObject))]
 	[DisableDefaultCtor]
 	interface DDLogEventAccountInfo
 	{
@@ -105,15 +111,24 @@ namespace DatadogMaui.iOS.Logs
 		// @property (readonly, copy, nonatomic) NSString * _Nullable name;
 		[NullAllowed, Export ("name")]
 		string Name { get; }
+
+		// @property (copy, nonatomic) NSDictionary<NSString *,id> * _Nonnull extraInfo;
+		[Export ("extraInfo", ArgumentSemantic.Copy)]
+		NSDictionary<NSString, NSObject> ExtraInfo { get; set; }
 	}
 
-	// @interface DDLogEventAttributes
+	// @interface DDLogEventAttributes : NSObject
+	[BaseType (typeof(NSObject))]
 	[DisableDefaultCtor]
 	interface DDLogEventAttributes
 	{
+		// @property (copy, nonatomic) NSDictionary<NSString *,id> * _Nonnull userAttributes;
+		[Export ("userAttributes", ArgumentSemantic.Copy)]
+		NSDictionary<NSString, NSObject> UserAttributes { get; set; }
 	}
 
-	// @interface DDLogEventBinaryImage
+	// @interface DDLogEventBinaryImage : NSObject
+	[BaseType (typeof(NSObject))]
 	[DisableDefaultCtor]
 	interface DDLogEventBinaryImage
 	{
@@ -121,9 +136,9 @@ namespace DatadogMaui.iOS.Logs
 		[NullAllowed, Export ("arch")]
 		string Arch { get; }
 
-		// @property (readonly, nonatomic) int isSystem;
+		// @property (readonly, nonatomic) BOOL isSystem;
 		[Export ("isSystem")]
-		int IsSystem { get; }
+		bool IsSystem { get; }
 
 		// @property (readonly, copy, nonatomic) NSString * _Nullable loadAddress;
 		[NullAllowed, Export ("loadAddress")]
@@ -142,7 +157,8 @@ namespace DatadogMaui.iOS.Logs
 		string Uuid { get; }
 	}
 
-	// @interface DDLogEventCarrierInfo
+	// @interface DDLogEventCarrierInfo : NSObject
+	[BaseType (typeof(NSObject))]
 	[DisableDefaultCtor]
 	interface DDLogEventCarrierInfo
 	{
@@ -154,16 +170,17 @@ namespace DatadogMaui.iOS.Logs
 		[NullAllowed, Export ("carrierISOCountryCode")]
 		string CarrierISOCountryCode { get; }
 
-		// @property (readonly, nonatomic) int carrierAllowsVOIP;
+		// @property (readonly, nonatomic) BOOL carrierAllowsVOIP;
 		[Export ("carrierAllowsVOIP")]
-		int CarrierAllowsVOIP { get; }
+		bool CarrierAllowsVOIP { get; }
 
 		// @property (readonly, nonatomic) enum DDLogEventRadioAccessTechnology radioAccessTechnology;
 		[Export ("radioAccessTechnology")]
 		DDLogEventRadioAccessTechnology RadioAccessTechnology { get; }
 	}
 
-	// @interface DDLogEventDDDevice
+	// @interface DDLogEventDDDevice : NSObject
+	[BaseType (typeof(NSObject))]
 	[DisableDefaultCtor]
 	interface DDLogEventDDDevice
 	{
@@ -172,7 +189,8 @@ namespace DatadogMaui.iOS.Logs
 		string Architecture { get; }
 	}
 
-	// @interface DDLogEventDd
+	// @interface DDLogEventDd : NSObject
+	[BaseType (typeof(NSObject))]
 	[DisableDefaultCtor]
 	interface DDLogEventDd
 	{
@@ -181,7 +199,8 @@ namespace DatadogMaui.iOS.Logs
 		DDLogEventDDDevice Device { get; }
 	}
 
-	// @interface DDLogEventDevice
+	// @interface DDLogEventDevice : NSObject
+	[BaseType (typeof(NSObject))]
 	[DisableDefaultCtor]
 	interface DDLogEventDevice
 	{
@@ -196,6 +215,10 @@ namespace DatadogMaui.iOS.Logs
 		// @property (readonly, copy, nonatomic) NSString * _Nullable locale;
 		[NullAllowed, Export ("locale")]
 		string Locale { get; }
+
+		// @property (readonly, copy, nonatomic) NSArray<NSString *> * _Nullable locales;
+		[NullAllowed, Export ("locales", ArgumentSemantic.Copy)]
+		string[] Locales { get; }
 
 		// @property (readonly, copy, nonatomic) NSString * _Nullable model;
 		[NullAllowed, Export ("model")]
@@ -214,7 +237,8 @@ namespace DatadogMaui.iOS.Logs
 		DDLogEventDeviceDeviceType Type { get; }
 	}
 
-	// @interface DDLogEventError
+	// @interface DDLogEventError : NSObject
+	[BaseType (typeof(NSObject))]
 	[DisableDefaultCtor]
 	interface DDLogEventError
 	{
@@ -237,15 +261,24 @@ namespace DatadogMaui.iOS.Logs
 		// @property (copy, nonatomic) NSString * _Nullable fingerprint;
 		[NullAllowed, Export ("fingerprint")]
 		string Fingerprint { get; set; }
+
+		// @property (copy, nonatomic) NSArray<DDLogEventBinaryImage *> * _Nullable binaryImages;
+		[NullAllowed, Export ("binaryImages", ArgumentSemantic.Copy)]
+		DDLogEventBinaryImage[] BinaryImages { get; set; }
 	}
 
-	// @interface DDLogEventNetworkConnectionInfo
+	// @interface DDLogEventNetworkConnectionInfo : NSObject
+	[BaseType (typeof(NSObject))]
 	[DisableDefaultCtor]
 	interface DDLogEventNetworkConnectionInfo
 	{
 		// @property (readonly, nonatomic) enum DDLogEventReachability reachability;
 		[Export ("reachability")]
 		DDLogEventReachability Reachability { get; }
+
+		// @property (readonly, copy, nonatomic) NSArray<NSNumber *> * _Nullable availableInterfaces;
+		[NullAllowed, Export ("availableInterfaces", ArgumentSemantic.Copy)]
+		NSNumber[] AvailableInterfaces { get; }
 
 		// @property (readonly, nonatomic, strong) NSNumber * _Nullable supportsIPv4;
 		[NullAllowed, Export ("supportsIPv4", ArgumentSemantic.Strong)]
@@ -264,7 +297,8 @@ namespace DatadogMaui.iOS.Logs
 		NSNumber IsConstrained { get; }
 	}
 
-	// @interface DDLogEventOperatingSystem
+	// @interface DDLogEventOperatingSystem : NSObject
+	[BaseType (typeof(NSObject))]
 	[DisableDefaultCtor]
 	interface DDLogEventOperatingSystem
 	{
@@ -285,7 +319,8 @@ namespace DatadogMaui.iOS.Logs
 		string VersionMajor { get; }
 	}
 
-	// @interface DDLogEventUserInfo
+	// @interface DDLogEventUserInfo : NSObject
+	[BaseType (typeof(NSObject))]
 	[DisableDefaultCtor]
 	interface DDLogEventUserInfo
 	{
@@ -300,9 +335,14 @@ namespace DatadogMaui.iOS.Logs
 		// @property (readonly, copy, nonatomic) NSString * _Nullable email;
 		[NullAllowed, Export ("email")]
 		string Email { get; }
+
+		// @property (copy, nonatomic) NSDictionary<NSString *,id> * _Nonnull extraInfo;
+		[Export ("extraInfo", ArgumentSemantic.Copy)]
+		NSDictionary<NSString, NSObject> ExtraInfo { get; set; }
 	}
 
-	// @interface DDLogger
+	// @interface DDLogger : NSObject
+	[BaseType (typeof(NSObject))]
 	[DisableDefaultCtor]
 	interface DDLogger
 	{
@@ -310,73 +350,73 @@ namespace DatadogMaui.iOS.Logs
 		[Export ("debug:")]
 		void Debug (string message);
 
-		// -(void)debug:(NSString * _Nonnull)message attributes:(id)attributes;
+		// -(void)debug:(NSString * _Nonnull)message attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
 		[Export ("debug:attributes:")]
-		void Debug (string message, NSObject attributes);
+		void Debug (string message, NSDictionary<NSString, NSObject> attributes);
 
-		// -(void)debug:(NSString * _Nonnull)message error:(NSError * _Nonnull)error attributes:(id)attributes;
+		// -(void)debug:(NSString * _Nonnull)message error:(NSError * _Nonnull)error attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
 		[Export ("debug:error:attributes:")]
-		void Debug (string message, NSError error, NSObject attributes);
+		void Debug (string message, NSError error, NSDictionary<NSString, NSObject> attributes);
 
 		// -(void)info:(NSString * _Nonnull)message;
 		[Export ("info:")]
 		void Info (string message);
 
-		// -(void)info:(NSString * _Nonnull)message attributes:(id)attributes;
+		// -(void)info:(NSString * _Nonnull)message attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
 		[Export ("info:attributes:")]
-		void Info (string message, NSObject attributes);
+		void Info (string message, NSDictionary<NSString, NSObject> attributes);
 
-		// -(void)info:(NSString * _Nonnull)message error:(NSError * _Nonnull)error attributes:(id)attributes;
+		// -(void)info:(NSString * _Nonnull)message error:(NSError * _Nonnull)error attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
 		[Export ("info:error:attributes:")]
-		void Info (string message, NSError error, NSObject attributes);
+		void Info (string message, NSError error, NSDictionary<NSString, NSObject> attributes);
 
 		// -(void)notice:(NSString * _Nonnull)message;
 		[Export ("notice:")]
 		void Notice (string message);
 
-		// -(void)notice:(NSString * _Nonnull)message attributes:(id)attributes;
+		// -(void)notice:(NSString * _Nonnull)message attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
 		[Export ("notice:attributes:")]
-		void Notice (string message, NSObject attributes);
+		void Notice (string message, NSDictionary<NSString, NSObject> attributes);
 
-		// -(void)notice:(NSString * _Nonnull)message error:(NSError * _Nonnull)error attributes:(id)attributes;
+		// -(void)notice:(NSString * _Nonnull)message error:(NSError * _Nonnull)error attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
 		[Export ("notice:error:attributes:")]
-		void Notice (string message, NSError error, NSObject attributes);
+		void Notice (string message, NSError error, NSDictionary<NSString, NSObject> attributes);
 
 		// -(void)warn:(NSString * _Nonnull)message;
 		[Export ("warn:")]
 		void Warn (string message);
 
-		// -(void)warn:(NSString * _Nonnull)message attributes:(id)attributes;
+		// -(void)warn:(NSString * _Nonnull)message attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
 		[Export ("warn:attributes:")]
-		void Warn (string message, NSObject attributes);
+		void Warn (string message, NSDictionary<NSString, NSObject> attributes);
 
-		// -(void)warn:(NSString * _Nonnull)message error:(NSError * _Nonnull)error attributes:(id)attributes;
+		// -(void)warn:(NSString * _Nonnull)message error:(NSError * _Nonnull)error attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
 		[Export ("warn:error:attributes:")]
-		void Warn (string message, NSError error, NSObject attributes);
+		void Warn (string message, NSError error, NSDictionary<NSString, NSObject> attributes);
 
 		// -(void)error:(NSString * _Nonnull)message;
 		[Export ("error:")]
 		void Error (string message);
 
-		// -(void)error:(NSString * _Nonnull)message attributes:(id)attributes;
+		// -(void)error:(NSString * _Nonnull)message attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
 		[Export ("error:attributes:")]
-		void Error (string message, NSObject attributes);
+		void Error (string message, NSDictionary<NSString, NSObject> attributes);
 
-		// -(void)error:(NSString * _Nonnull)message error:(NSError * _Nonnull)error attributes:(id)attributes;
+		// -(void)error:(NSString * _Nonnull)message error:(NSError * _Nonnull)error attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
 		[Export ("error:error:attributes:")]
-		void Error (string message, NSError error, NSObject attributes);
+		void Error (string message, NSError error, NSDictionary<NSString, NSObject> attributes);
 
 		// -(void)critical:(NSString * _Nonnull)message;
 		[Export ("critical:")]
 		void Critical (string message);
 
-		// -(void)critical:(NSString * _Nonnull)message attributes:(id)attributes;
+		// -(void)critical:(NSString * _Nonnull)message attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
 		[Export ("critical:attributes:")]
-		void Critical (string message, NSObject attributes);
+		void Critical (string message, NSDictionary<NSString, NSObject> attributes);
 
-		// -(void)critical:(NSString * _Nonnull)message error:(NSError * _Nonnull)error attributes:(id)attributes;
+		// -(void)critical:(NSString * _Nonnull)message error:(NSError * _Nonnull)error attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
 		[Export ("critical:error:attributes:")]
-		void Critical (string message, NSError error, NSObject attributes);
+		void Critical (string message, NSError error, NSDictionary<NSString, NSObject> attributes);
 
 		// -(void)addAttributeForKey:(NSString * _Nonnull)key value:(id _Nonnull)value;
 		[Export ("addAttributeForKey:value:")]
@@ -408,17 +448,18 @@ namespace DatadogMaui.iOS.Logs
 		DDLogger CreateWith (DDLoggerConfiguration configuration);
 	}
 
-	// @interface DatadogLogs_Swift_1212 (DDLogger)
+	// @interface DatadogLogs_Swift_554 (DDLogger)
 	[Category]
 	[BaseType (typeof(DDLogger))]
-	interface DDLogger_DatadogLogs_Swift_1212
+	interface DDLogger_DatadogLogs_Swift_554
 	{
-		// -(void)_internal_sync_criticalWithMessage:(NSString * _Nonnull)message error:(NSError * _Nullable)error attributes:(id)attributes;
+		// -(void)_internal_sync_criticalWithMessage:(NSString * _Nonnull)message error:(NSError * _Nullable)error attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
 		[Export ("_internal_sync_criticalWithMessage:error:attributes:")]
-		void _internal_sync_criticalWithMessage (string message, [NullAllowed] NSError error, NSObject attributes);
+		void _internal_sync_criticalWithMessage (string message, [NullAllowed] NSError error, NSDictionary<NSString, NSObject> attributes);
 	}
 
-	// @interface DDLoggerConfiguration
+	// @interface DDLoggerConfiguration : NSObject
+	[BaseType (typeof(NSObject))]
 	interface DDLoggerConfiguration
 	{
 		// @property (copy, nonatomic) NSString * _Nullable service;
@@ -429,37 +470,38 @@ namespace DatadogMaui.iOS.Logs
 		[NullAllowed, Export ("name")]
 		string Name { get; set; }
 
-		// @property (nonatomic) int networkInfoEnabled;
+		// @property (nonatomic) BOOL networkInfoEnabled;
 		[Export ("networkInfoEnabled")]
-		int NetworkInfoEnabled { get; set; }
+		bool NetworkInfoEnabled { get; set; }
 
-		// @property (nonatomic) int bundleWithRumEnabled;
+		// @property (nonatomic) BOOL bundleWithRumEnabled;
 		[Export ("bundleWithRumEnabled")]
-		int BundleWithRumEnabled { get; set; }
+		bool BundleWithRumEnabled { get; set; }
 
-		// @property (nonatomic) int bundleWithTraceEnabled;
+		// @property (nonatomic) BOOL bundleWithTraceEnabled;
 		[Export ("bundleWithTraceEnabled")]
-		int BundleWithTraceEnabled { get; set; }
+		bool BundleWithTraceEnabled { get; set; }
 
 		// @property (nonatomic) float remoteSampleRate;
 		[Export ("remoteSampleRate")]
 		float RemoteSampleRate { get; set; }
 
-		// @property (nonatomic) int printLogsToConsole;
+		// @property (nonatomic) BOOL printLogsToConsole;
 		[Export ("printLogsToConsole")]
-		int PrintLogsToConsole { get; set; }
+		bool PrintLogsToConsole { get; set; }
 
 		// @property (nonatomic) enum DDLogLevel remoteLogThreshold;
 		[Export ("remoteLogThreshold", ArgumentSemantic.Assign)]
 		DDLogLevel RemoteLogThreshold { get; set; }
 
-		// -(instancetype _Nonnull)initWithService:(NSString * _Nullable)service name:(NSString * _Nullable)name networkInfoEnabled:(id)networkInfoEnabled bundleWithRumEnabled:(id)bundleWithRumEnabled bundleWithTraceEnabled:(id)bundleWithTraceEnabled remoteSampleRate:(float)remoteSampleRate remoteLogThreshold:(enum DDLogLevel)remoteLogThreshold printLogsToConsole:(id)printLogsToConsole __attribute__((objc_designated_initializer));
+		// -(instancetype _Nonnull)initWithService:(NSString * _Nullable)service name:(NSString * _Nullable)name networkInfoEnabled:(BOOL)networkInfoEnabled bundleWithRumEnabled:(BOOL)bundleWithRumEnabled bundleWithTraceEnabled:(BOOL)bundleWithTraceEnabled remoteSampleRate:(float)remoteSampleRate remoteLogThreshold:(enum DDLogLevel)remoteLogThreshold printLogsToConsole:(BOOL)printLogsToConsole __attribute__((objc_designated_initializer));
 		[Export ("initWithService:name:networkInfoEnabled:bundleWithRumEnabled:bundleWithTraceEnabled:remoteSampleRate:remoteLogThreshold:printLogsToConsole:")]
 		[DesignatedInitializer]
-		NativeHandle Constructor ([NullAllowed] string service, [NullAllowed] string name, NSObject networkInfoEnabled, NSObject bundleWithRumEnabled, NSObject bundleWithTraceEnabled, float remoteSampleRate, DDLogLevel remoteLogThreshold, NSObject printLogsToConsole);
+		NativeHandle Constructor ([NullAllowed] string service, [NullAllowed] string name, bool networkInfoEnabled, bool bundleWithRumEnabled, bool bundleWithTraceEnabled, float remoteSampleRate, DDLogLevel remoteLogThreshold, bool printLogsToConsole);
 	}
 
-	// @interface DDLogs
+	// @interface DDLogs : NSObject
+	[BaseType (typeof(NSObject))]
 	interface DDLogs
 	{
 		// +(void)enableWith:(DDLogsConfiguration * _Nonnull)configuration;
@@ -478,17 +520,18 @@ namespace DatadogMaui.iOS.Logs
 		void RemoveAttributeForKey (string key);
 	}
 
-	// @interface DDLogsConfiguration
+	// @interface DDLogsConfiguration : NSObject
+	[BaseType (typeof(NSObject))]
 	interface DDLogsConfiguration
 	{
-		// @property (copy, nonatomic) NSURL * _Nullable customEndpoint;
+		// @property (copy, nonatomic) NSUrl * _Nullable customEndpoint;
 		[NullAllowed, Export ("customEndpoint", ArgumentSemantic.Copy)]
-		NSURL CustomEndpoint { get; set; }
+		NSUrl CustomEndpoint { get; set; }
 
-		// -(instancetype _Nonnull)initWithCustomEndpoint:(NSURL * _Nullable)customEndpoint __attribute__((objc_designated_initializer));
+		// -(instancetype _Nonnull)initWithCustomEndpoint:(NSUrl * _Nullable)customEndpoint __attribute__((objc_designated_initializer));
 		[Export ("initWithCustomEndpoint:")]
 		[DesignatedInitializer]
-		NativeHandle Constructor ([NullAllowed] NSURL customEndpoint);
+		NativeHandle Constructor ([NullAllowed] NSUrl customEndpoint);
 
 		// -(void)setEventMapper:(DDLogEvent * _Nullable (^ _Nonnull)(DDLogEvent * _Nonnull))mapper;
 		[Export ("setEventMapper:")]

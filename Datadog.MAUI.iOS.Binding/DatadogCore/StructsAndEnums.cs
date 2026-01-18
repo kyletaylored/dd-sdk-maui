@@ -1,20 +1,25 @@
-namespace DatadogMaui.iOS.Core
+using ObjCRuntime;
+
+namespace Datadog.iOS.DatadogCore
 {
-	public enum DDBatchProcessingLevel
+	[Native]
+	public enum DDBatchProcessingLevel : long
 	{
 		Low = 0,
 		Medium = 1,
 		High = 2
 	}
 
-	public enum DDBatchSize
+	[Native]
+	public enum DDBatchSize : long
 	{
 		Small = 0,
 		Medium = 1,
 		Large = 2
 	}
 
-	public enum DDUploadFrequency
+	[Native]
+	public enum DDUploadFrequency : long
 	{
 		Frequent = 0,
 		Average = 1,

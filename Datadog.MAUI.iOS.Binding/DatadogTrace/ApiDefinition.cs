@@ -1,10 +1,14 @@
-using DatadogTrace;
+using System;
+using Datadog.iOS.DatadogCore;
+using Datadog.iOS.DatadogInternal;
 using Foundation;
 using ObjCRuntime;
 
-namespace DatadogMaui.iOS.Trace
+
+namespace Datadog.iOS.DatadogTrace
 {
-	// @interface OT
+	// @interface OT : NSObject
+	[BaseType (typeof(NSObject), Name = "_TtC12DatadogTrace2OT")]
 	interface OT
 	{
 		// @property (readonly, copy, nonatomic, class) NSString * _Nonnull formatTextMap;
@@ -13,20 +17,30 @@ namespace DatadogMaui.iOS.Trace
 		string FormatTextMap { get; }
 	}
 
-	// @interface DDB3HTTPHeadersWriter
+	// @interface DDB3HTTPHeadersWriter : NSObject
+	[BaseType (typeof(NSObject))]
 	[DisableDefaultCtor]
 	interface DDB3HTTPHeadersWriter
 	{
+		// @property (readonly, copy, nonatomic) NSDictionary<NSString *,NSString *> * _Nonnull traceHeaderFields;
+		[Export ("traceHeaderFields", ArgumentSemantic.Copy)]
+		NSDictionary<NSString, NSString> TraceHeaderFields { get; }
+
 		// -(instancetype _Nonnull)initWithInjectEncoding:(enum DDInjectEncoding)injectEncoding traceContextInjection:(enum DDTraceContextInjection)traceContextInjection __attribute__((objc_designated_initializer));
 		[Export ("initWithInjectEncoding:traceContextInjection:")]
 		[DesignatedInitializer]
 		NativeHandle Constructor (DDInjectEncoding injectEncoding, DDTraceContextInjection traceContextInjection);
 	}
 
-	// @interface DDHTTPHeadersWriter
+	// @interface DDHTTPHeadersWriter : NSObject
+	[BaseType (typeof(NSObject))]
 	[DisableDefaultCtor]
 	interface DDHTTPHeadersWriter
 	{
+		// @property (readonly, copy, nonatomic) NSDictionary<NSString *,NSString *> * _Nonnull traceHeaderFields;
+		[Export ("traceHeaderFields", ArgumentSemantic.Copy)]
+		NSDictionary<NSString, NSString> TraceHeaderFields { get; }
+
 		// -(instancetype _Nonnull)initWithTraceContextInjection:(enum DDTraceContextInjection)traceContextInjection __attribute__((objc_designated_initializer));
 		[Export ("initWithTraceContextInjection:")]
 		[DesignatedInitializer]
@@ -42,7 +56,9 @@ namespace DatadogMaui.iOS.Trace
   the generated interface. If consumers are not supposed to implement this
   protocol, then [Model] is redundant and will generate code that will never
   be used.
-*/[Protocol]
+*/
+[Protocol]
+[BaseType(typeof(NSObject))]
 	interface OTSpan
 	{
 		// @required @property (readonly, nonatomic, strong) id<OTSpanContext> _Nonnull context;
@@ -70,20 +86,20 @@ namespace DatadogMaui.iOS.Trace
 		[Export ("setTag:numberValue:")]
 		void SetTag (string key, NSNumber numberValue);
 
-		// @required -(void)setTag:(NSString * _Nonnull)key boolValue:(id)boolValue;
+		// @required -(void)setTag:(NSString * _Nonnull)key boolValue:(BOOL)boolValue;
 		[Abstract]
 		[Export ("setTag:boolValue:")]
-		void SetTag (string key, NSObject boolValue);
+		void SetTag (string key, bool boolValue);
 
-		// @required -(void)log:(id)fields;
+		// @required -(void)log:(NSDictionary<NSString *,NSObject *> * _Nonnull)fields;
 		[Abstract]
 		[Export ("log:")]
-		void Log (NSObject fields);
+		void Log (NSDictionary<NSString, NSObject> fields);
 
-		// @required -(void)log:(id)fields timestamp:(NSDate * _Nullable)timestamp;
+		// @required -(void)log:(NSDictionary<NSString *,NSObject *> * _Nonnull)fields timestamp:(NSDate * _Nullable)timestamp;
 		[Abstract]
 		[Export ("log:timestamp:")]
-		void Log (NSObject fields, [NullAllowed] NSDate timestamp);
+		void Log (NSDictionary<NSString, NSObject> fields, [NullAllowed] NSDate timestamp);
 
 		// @required -(id<OTSpan> _Nonnull)setBaggageItem:(NSString * _Nonnull)key value:(NSString * _Nonnull)value __attribute__((warn_unused_result("")));
 		[Abstract]
@@ -96,10 +112,10 @@ namespace DatadogMaui.iOS.Trace
 		[return: NullAllowed]
 		string GetBaggageItem (string key);
 
-		// @required -(void)setError:(id)error;
+		// @required -(void)setError:(NSError * _Nonnull)error;
 		[Abstract]
 		[Export ("setError:")]
-		void SetError (NSObject error);
+		void SetError (NSError error);
 
 		// @required -(void)setErrorWithKind:(NSString * _Nonnull)kind message:(NSString * _Nonnull)message stack:(NSString * _Nullable)stack;
 		[Abstract]
@@ -119,7 +135,7 @@ namespace DatadogMaui.iOS.Trace
 		// @required -(id<OTSpan> _Nonnull)setActive;
 		[Abstract]
 		[Export ("setActive")]
-		[Verify (MethodToProperty)]
+		
 		OTSpan SetActive { get; }
 	}
 
@@ -132,13 +148,15 @@ namespace DatadogMaui.iOS.Trace
   the generated interface. If consumers are not supposed to implement this
   protocol, then [Model] is redundant and will generate code that will never
   be used.
-*/[Protocol]
+*/
+[Protocol]
+[BaseType(typeof(NSObject))]
 	interface OTSpanContext
 	{
-		// @required -(void)forEachBaggageItem:(int)callback;
+		// @required -(void)forEachBaggageItem:(BOOL (^ _Nonnull)(NSString * _Nonnull, NSString * _Nonnull))callback;
 		[Abstract]
 		[Export ("forEachBaggageItem:")]
-		void ForEachBaggageItem (int callback);
+		void ForEachBaggageItem (Func<NSString, NSString, bool> callback);
 	}
 
 	// @protocol OTTracer
@@ -150,7 +168,9 @@ namespace DatadogMaui.iOS.Trace
   the generated interface. If consumers are not supposed to implement this
   protocol, then [Model] is redundant and will generate code that will never
   be used.
-*/[Protocol]
+*/
+[Protocol]
+[BaseType(typeof(NSObject))]
 	interface OTTracer
 	{
 		// @required -(id<OTSpan> _Nonnull)startSpan:(NSString * _Nonnull)operationName __attribute__((warn_unused_result("")));
@@ -158,43 +178,44 @@ namespace DatadogMaui.iOS.Trace
 		[Export ("startSpan:")]
 		OTSpan StartSpan (string operationName);
 
-		// @required -(id<OTSpan> _Nonnull)startSpan:(NSString * _Nonnull)operationName tags:(id)tags __attribute__((warn_unused_result("")));
+		// @required -(id<OTSpan> _Nonnull)startSpan:(NSString * _Nonnull)operationName tags:(NSDictionary * _Nullable)tags __attribute__((warn_unused_result("")));
 		[Abstract]
 		[Export ("startSpan:tags:")]
-		OTSpan StartSpan (string operationName, NSObject tags);
+		OTSpan StartSpan (string operationName, [NullAllowed] NSDictionary tags);
 
 		// @required -(id<OTSpan> _Nonnull)startSpan:(NSString * _Nonnull)operationName childOf:(id<OTSpanContext> _Nullable)parent __attribute__((warn_unused_result("")));
 		[Abstract]
 		[Export ("startSpan:childOf:")]
 		OTSpan StartSpan (string operationName, [NullAllowed] OTSpanContext parent);
 
-		// @required -(id<OTSpan> _Nonnull)startSpan:(NSString * _Nonnull)operationName childOf:(id<OTSpanContext> _Nullable)parent tags:(id)tags __attribute__((warn_unused_result("")));
+		// @required -(id<OTSpan> _Nonnull)startSpan:(NSString * _Nonnull)operationName childOf:(id<OTSpanContext> _Nullable)parent tags:(NSDictionary * _Nullable)tags __attribute__((warn_unused_result("")));
 		[Abstract]
 		[Export ("startSpan:childOf:tags:")]
-		OTSpan StartSpan (string operationName, [NullAllowed] OTSpanContext parent, NSObject tags);
+		OTSpan StartSpan (string operationName, [NullAllowed] OTSpanContext parent, [NullAllowed] NSDictionary tags);
 
-		// @required -(id<OTSpan> _Nonnull)startSpan:(NSString * _Nonnull)operationName childOf:(id<OTSpanContext> _Nullable)parent tags:(id)tags startTime:(NSDate * _Nullable)startTime __attribute__((warn_unused_result("")));
+		// @required -(id<OTSpan> _Nonnull)startSpan:(NSString * _Nonnull)operationName childOf:(id<OTSpanContext> _Nullable)parent tags:(NSDictionary * _Nullable)tags startTime:(NSDate * _Nullable)startTime __attribute__((warn_unused_result("")));
 		[Abstract]
 		[Export ("startSpan:childOf:tags:startTime:")]
-		OTSpan StartSpan (string operationName, [NullAllowed] OTSpanContext parent, NSObject tags, [NullAllowed] NSDate startTime);
+		OTSpan StartSpan (string operationName, [NullAllowed] OTSpanContext parent, [NullAllowed] NSDictionary tags, [NullAllowed] NSDate startTime);
 
-		// @required -(id<OTSpan> _Nonnull)startRootSpan:(NSString * _Nonnull)operationName tags:(id)tags startTime:(NSDate * _Nullable)startTime customSampleRate:(NSNumber * _Nullable)customSampleRate __attribute__((warn_unused_result("")));
+		// @required -(id<OTSpan> _Nonnull)startRootSpan:(NSString * _Nonnull)operationName tags:(NSDictionary * _Nullable)tags startTime:(NSDate * _Nullable)startTime customSampleRate:(NSNumber * _Nullable)customSampleRate __attribute__((warn_unused_result("")));
 		[Abstract]
 		[Export ("startRootSpan:tags:startTime:customSampleRate:")]
-		OTSpan StartRootSpan (string operationName, NSObject tags, [NullAllowed] NSDate startTime, [NullAllowed] NSNumber customSampleRate);
+		OTSpan StartRootSpan (string operationName, [NullAllowed] NSDictionary tags, [NullAllowed] NSDate startTime, [NullAllowed] NSNumber customSampleRate);
 
-		// @required -(id)inject:(id<OTSpanContext> _Nonnull)spanContext format:(NSString * _Nonnull)format carrier:(id _Nonnull)carrier error:(id)error;
+		// @required -(BOOL)inject:(id<OTSpanContext> _Nonnull)spanContext format:(NSString * _Nonnull)format carrier:(id _Nonnull)carrier error:(NSError * _Nullable * _Nullable)error;
 		[Abstract]
 		[Export ("inject:format:carrier:error:")]
-		NSObject Inject (OTSpanContext spanContext, string format, NSObject carrier, NSObject error);
+		bool Inject (OTSpanContext spanContext, string format, NSObject carrier, [NullAllowed] out NSError error);
 
-		// @required -(id)extractWithFormat:(NSString * _Nonnull)format carrier:(id _Nonnull)carrier error:(id)error;
+		// @required -(BOOL)extractWithFormat:(NSString * _Nonnull)format carrier:(id _Nonnull)carrier error:(NSError * _Nullable * _Nullable)error;
 		[Abstract]
 		[Export ("extractWithFormat:carrier:error:")]
-		NSObject ExtractWithFormat (string format, NSObject carrier, NSObject error);
+		bool ExtractWithFormat (string format, NSObject carrier, [NullAllowed] out NSError error);
 	}
 
-	// @interface DDTrace
+	// @interface DDTrace : NSObject
+	[BaseType (typeof(NSObject))]
 	interface DDTrace
 	{
 		// +(void)enableWith:(DDTraceConfiguration * _Nonnull)configuration;
@@ -203,7 +224,8 @@ namespace DatadogMaui.iOS.Trace
 		void EnableWith (DDTraceConfiguration configuration);
 	}
 
-	// @interface DDTraceConfiguration
+	// @interface DDTraceConfiguration : NSObject
+	[BaseType (typeof(NSObject))]
 	interface DDTraceConfiguration
 	{
 		// @property (nonatomic) float sampleRate;
@@ -214,49 +236,55 @@ namespace DatadogMaui.iOS.Trace
 		[NullAllowed, Export ("service")]
 		string Service { get; set; }
 
+		// @property (copy, nonatomic) NSDictionary<NSString *,id> * _Nullable tags;
+		[NullAllowed, Export ("tags", ArgumentSemantic.Copy)]
+		NSDictionary<NSString, NSObject> Tags { get; set; }
+
 		// -(void)setURLSessionTracking:(DDTraceURLSessionTracking * _Nonnull)tracking;
 		[Export ("setURLSessionTracking:")]
 		void SetURLSessionTracking (DDTraceURLSessionTracking tracking);
 
-		// @property (nonatomic) int bundleWithRumEnabled;
+		// @property (nonatomic) BOOL bundleWithRumEnabled;
 		[Export ("bundleWithRumEnabled")]
-		int BundleWithRumEnabled { get; set; }
+		bool BundleWithRumEnabled { get; set; }
 
-		// @property (nonatomic) int networkInfoEnabled;
+		// @property (nonatomic) BOOL networkInfoEnabled;
 		[Export ("networkInfoEnabled")]
-		int NetworkInfoEnabled { get; set; }
+		bool NetworkInfoEnabled { get; set; }
 
-		// @property (copy, nonatomic) NSURL * _Nullable customEndpoint;
+		// @property (copy, nonatomic) NSUrl * _Nullable customEndpoint;
 		[NullAllowed, Export ("customEndpoint", ArgumentSemantic.Copy)]
-		NSURL CustomEndpoint { get; set; }
+		NSUrl CustomEndpoint { get; set; }
 	}
 
-	// @interface DDTraceFirstPartyHostsTracing
+	// @interface DDTraceFirstPartyHostsTracing : NSObject
+	[BaseType (typeof(NSObject))]
 	[DisableDefaultCtor]
 	interface DDTraceFirstPartyHostsTracing
 	{
-		// -(instancetype _Nonnull)initWithHostsWithHeaderTypes:(id)hostsWithHeaderTypes __attribute__((objc_designated_initializer));
+		// -(instancetype _Nonnull)initWithHostsWithHeaderTypes:(NSDictionary<NSString *,NSSet<DDTracingHeaderType *> *> * _Nonnull)hostsWithHeaderTypes __attribute__((objc_designated_initializer));
 		[Export ("initWithHostsWithHeaderTypes:")]
 		[DesignatedInitializer]
-		NativeHandle Constructor (NSObject hostsWithHeaderTypes);
+		NativeHandle Constructor (NSDictionary<NSString, NSSet<DDTracingHeaderType>> hostsWithHeaderTypes);
 
-		// -(instancetype _Nonnull)initWithHostsWithHeaderTypes:(id)hostsWithHeaderTypes sampleRate:(float)sampleRate __attribute__((objc_designated_initializer));
+		// -(instancetype _Nonnull)initWithHostsWithHeaderTypes:(NSDictionary<NSString *,NSSet<DDTracingHeaderType *> *> * _Nonnull)hostsWithHeaderTypes sampleRate:(float)sampleRate __attribute__((objc_designated_initializer));
 		[Export ("initWithHostsWithHeaderTypes:sampleRate:")]
 		[DesignatedInitializer]
-		NativeHandle Constructor (NSObject hostsWithHeaderTypes, float sampleRate);
+		NativeHandle Constructor (NSDictionary<NSString, NSSet<DDTracingHeaderType>> hostsWithHeaderTypes, float sampleRate);
 
-		// -(instancetype _Nonnull)initWithHosts:(id)hosts __attribute__((objc_designated_initializer));
+		// -(instancetype _Nonnull)initWithHosts:(NSSet<NSString *> * _Nonnull)hosts __attribute__((objc_designated_initializer));
 		[Export ("initWithHosts:")]
 		[DesignatedInitializer]
-		NativeHandle Constructor (NSObject hosts);
+		NativeHandle Constructor (NSSet<NSString> hosts);
 
-		// -(instancetype _Nonnull)initWithHosts:(id)hosts sampleRate:(float)sampleRate __attribute__((objc_designated_initializer));
+		// -(instancetype _Nonnull)initWithHosts:(NSSet<NSString *> * _Nonnull)hosts sampleRate:(float)sampleRate __attribute__((objc_designated_initializer));
 		[Export ("initWithHosts:sampleRate:")]
 		[DesignatedInitializer]
-		NativeHandle Constructor (NSObject hosts, float sampleRate);
+		NativeHandle Constructor (NSSet<NSString> hosts, float sampleRate);
 	}
 
-	// @interface DDTraceURLSessionTracking
+	// @interface DDTraceURLSessionTracking : NSObject
+	[BaseType (typeof(NSObject))]
 	[DisableDefaultCtor]
 	interface DDTraceURLSessionTracking
 	{
@@ -270,53 +298,59 @@ namespace DatadogMaui.iOS.Trace
 		void SetFirstPartyHostsTracing (DDTraceFirstPartyHostsTracing firstPartyHostsTracing);
 	}
 
-	// @interface DDTracer <OTTracer>
+	// @interface DDTracer : NSObject <OTTracer>
+	[BaseType (typeof(NSObject))]
 	[DisableDefaultCtor]
-	interface DDTracer : IOTTracer
+	interface DDTracer : OTTracer
 	{
 		// +(id<OTTracer> _Nonnull)shared __attribute__((warn_unused_result("")));
 		[Static]
 		[Export ("shared")]
-		[Verify (MethodToProperty)]
+		
 		OTTracer Shared { get; }
 
 		// -(id<OTSpan> _Nonnull)startSpan:(NSString * _Nonnull)operationName __attribute__((warn_unused_result("")));
 		[Export ("startSpan:")]
 		OTSpan StartSpan (string operationName);
 
-		// -(id<OTSpan> _Nonnull)startSpan:(NSString * _Nonnull)operationName tags:(id)tags __attribute__((warn_unused_result("")));
+		// -(id<OTSpan> _Nonnull)startSpan:(NSString * _Nonnull)operationName tags:(NSDictionary * _Nullable)tags __attribute__((warn_unused_result("")));
 		[Export ("startSpan:tags:")]
-		OTSpan StartSpan (string operationName, NSObject tags);
+		OTSpan StartSpan (string operationName, [NullAllowed] NSDictionary tags);
 
 		// -(id<OTSpan> _Nonnull)startSpan:(NSString * _Nonnull)operationName childOf:(id<OTSpanContext> _Nullable)parent __attribute__((warn_unused_result("")));
 		[Export ("startSpan:childOf:")]
 		OTSpan StartSpan (string operationName, [NullAllowed] OTSpanContext parent);
 
-		// -(id<OTSpan> _Nonnull)startSpan:(NSString * _Nonnull)operationName childOf:(id<OTSpanContext> _Nullable)parent tags:(id)tags __attribute__((warn_unused_result("")));
+		// -(id<OTSpan> _Nonnull)startSpan:(NSString * _Nonnull)operationName childOf:(id<OTSpanContext> _Nullable)parent tags:(NSDictionary * _Nullable)tags __attribute__((warn_unused_result("")));
 		[Export ("startSpan:childOf:tags:")]
-		OTSpan StartSpan (string operationName, [NullAllowed] OTSpanContext parent, NSObject tags);
+		OTSpan StartSpan (string operationName, [NullAllowed] OTSpanContext parent, [NullAllowed] NSDictionary tags);
 
-		// -(id<OTSpan> _Nonnull)startSpan:(NSString * _Nonnull)operationName childOf:(id<OTSpanContext> _Nullable)parent tags:(id)tags startTime:(NSDate * _Nullable)startTime __attribute__((warn_unused_result("")));
+		// -(id<OTSpan> _Nonnull)startSpan:(NSString * _Nonnull)operationName childOf:(id<OTSpanContext> _Nullable)parent tags:(NSDictionary * _Nullable)tags startTime:(NSDate * _Nullable)startTime __attribute__((warn_unused_result("")));
 		[Export ("startSpan:childOf:tags:startTime:")]
-		OTSpan StartSpan (string operationName, [NullAllowed] OTSpanContext parent, NSObject tags, [NullAllowed] NSDate startTime);
+		OTSpan StartSpan (string operationName, [NullAllowed] OTSpanContext parent, [NullAllowed] NSDictionary tags, [NullAllowed] NSDate startTime);
 
-		// -(id<OTSpan> _Nonnull)startRootSpan:(NSString * _Nonnull)operationName tags:(id)tags startTime:(NSDate * _Nullable)startTime customSampleRate:(NSNumber * _Nullable)customSampleRate __attribute__((warn_unused_result("")));
+		// -(id<OTSpan> _Nonnull)startRootSpan:(NSString * _Nonnull)operationName tags:(NSDictionary * _Nullable)tags startTime:(NSDate * _Nullable)startTime customSampleRate:(NSNumber * _Nullable)customSampleRate __attribute__((warn_unused_result("")));
 		[Export ("startRootSpan:tags:startTime:customSampleRate:")]
-		OTSpan StartRootSpan (string operationName, NSObject tags, [NullAllowed] NSDate startTime, [NullAllowed] NSNumber customSampleRate);
+		OTSpan StartRootSpan (string operationName, [NullAllowed] NSDictionary tags, [NullAllowed] NSDate startTime, [NullAllowed] NSNumber customSampleRate);
 
-		// -(id)inject:(id<OTSpanContext> _Nonnull)spanContext format:(NSString * _Nonnull)format carrier:(id _Nonnull)carrier error:(id)error;
+		// -(BOOL)inject:(id<OTSpanContext> _Nonnull)spanContext format:(NSString * _Nonnull)format carrier:(id _Nonnull)carrier error:(NSError * _Nullable * _Nullable)error;
 		[Export ("inject:format:carrier:error:")]
-		NSObject Inject (OTSpanContext spanContext, string format, NSObject carrier, NSObject error);
+		bool Inject (OTSpanContext spanContext, string format, NSObject carrier, [NullAllowed] out NSError error);
 
-		// -(id)extractWithFormat:(NSString * _Nonnull)format carrier:(id _Nonnull)carrier error:(id)error;
+		// -(BOOL)extractWithFormat:(NSString * _Nonnull)format carrier:(id _Nonnull)carrier error:(NSError * _Nullable * _Nullable)error;
 		[Export ("extractWithFormat:carrier:error:")]
-		NSObject ExtractWithFormat (string format, NSObject carrier, NSObject error);
+		bool ExtractWithFormat (string format, NSObject carrier, [NullAllowed] out NSError error);
 	}
 
-	// @interface DDW3CHTTPHeadersWriter
+	// @interface DDW3CHTTPHeadersWriter : NSObject
+	[BaseType (typeof(NSObject))]
 	[DisableDefaultCtor]
 	interface DDW3CHTTPHeadersWriter
 	{
+		// @property (readonly, copy, nonatomic) NSDictionary<NSString *,NSString *> * _Nonnull traceHeaderFields;
+		[Export ("traceHeaderFields", ArgumentSemantic.Copy)]
+		NSDictionary<NSString, NSString> TraceHeaderFields { get; }
+
 		// -(instancetype _Nonnull)initWithTraceContextInjection:(enum DDTraceContextInjection)traceContextInjection __attribute__((objc_designated_initializer));
 		[Export ("initWithTraceContextInjection:")]
 		[DesignatedInitializer]

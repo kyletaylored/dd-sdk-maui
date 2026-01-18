@@ -1,8 +1,9 @@
 using Foundation;
 
-namespace DatadogMaui.iOS.CrashReporting
+namespace Datadog.iOS.DatadogCrashReporting
 {
-	// @interface DDCrashReporter
+	// @interface DDCrashReporter : NSObject
+	[BaseType (typeof(NSObject))]
 	interface DDCrashReporter
 	{
 		// +(void)enable;

@@ -1,6 +1,9 @@
-namespace DatadogMaui.iOS.Internal
+using ObjCRuntime;
+
+namespace Datadog.iOS.DatadogInternal
 {
-	public enum DDCoreLoggerLevel
+	[Native]
+	public enum DDCoreLoggerLevel : long
 	{
 		None = 0,
 		Debug = 1,

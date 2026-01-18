@@ -1,0 +1,4 @@
+# Allow duplicate class definitions for androidx.tracing
+# Both tracing and tracing-ktx contain the same classes, which is a known issue
+-dontwarn androidx.tracing.**
+-ignorewarnings

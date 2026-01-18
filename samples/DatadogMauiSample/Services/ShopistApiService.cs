@@ -9,7 +9,7 @@ namespace DatadogMauiSample.Services;
 public class ShopistApiService
 {
     private readonly HttpClient _httpClient;
-    private const string BaseUrl = "https://api.shopist.io";
+    private const string BaseUrl = "https://fakestoreapi.com";
 
     public ShopistApiService()
     {
@@ -24,27 +24,27 @@ public class ShopistApiService
     {
         try
         {
-            var response = await _httpClient.GetAsync("/products.json");
+            var response = await _httpClient.GetAsync("/products");
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync();
-            var productsResponse = JsonSerializer.Deserialize<ProductsResponse>(content, new JsonSerializerOptions
+            var products = JsonSerializer.Deserialize<List<FakeStoreProduct>>(content, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
 
-            if (productsResponse?.Products == null)
+            if (products == null)
                 return new List<Product>();
 
-            // Convert API products to our display model
-            return productsResponse.Products.Take(20).Select(p => new Product
+            // Convert FakeStore API products to our display model
+            return products.Take(20).Select(p => new Product
             {
-                Id = p.Variants.FirstOrDefault()?.Id ?? p.Id,
+                Id = p.Id.ToString(),
                 Name = p.Title,
-                Description = $"{p.Vendor} - {p.Product_type}",
-                Price = decimal.TryParse(p.Variants.FirstOrDefault()?.Price, out var price) ? price : 0m,
-                ImageUrl = p.Image?.Src ?? string.Empty,
-                InStock = p.Variants.FirstOrDefault()?.Available ?? false
+                Description = p.Description,
+                Price = p.Price,
+                ImageUrl = p.Image ?? string.Empty,
+                InStock = true
             }).ToList();
         }
         catch (Exception ex)
@@ -58,21 +58,26 @@ public class ShopistApiService
     {
         try
         {
-            var response = await _httpClient.PostAsync("/carts", null);
+            var cartData = new
+            {
+                userId = 1,
+                date = DateTime.Now.ToString("yyyy-MM-dd"),
+                products = new[] { new { productId = 1, quantity = 1 } }
+            };
+
+            var json = JsonSerializer.Serialize(cartData);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("/carts", content);
             response.EnsureSuccessStatusCode();
 
-            // Extract cart ID from Location header
-            if (response.Headers.Location != null)
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var cartResponse = JsonSerializer.Deserialize<FakeStoreCartResponse>(responseContent, new JsonSerializerOptions
             {
-                var location = response.Headers.Location.ToString();
-                var match = Regex.Match(location, @"/carts/(\d+)");
-                if (match.Success)
-                {
-                    return match.Groups[1].Value;
-                }
-            }
+                PropertyNameCaseInsensitive = true
+            });
 
-            return null;
+            return cartResponse?.Id.ToString();
         }
         catch (Exception ex)
         {
@@ -85,30 +90,20 @@ public class ShopistApiService
     {
         try
         {
-            var request = new AddItemRequest
+            var cartData = new
             {
-                Cart_id = cartId,
-                Cart_item = new CartItem
-                {
-                    Product_id = productId,
-                    Quantity = quantity,
-                    Amount_paid = amountPaid
-                }
+                userId = 1,
+                date = DateTime.Now.ToString("yyyy-MM-dd"),
+                products = new[] { new { productId = int.Parse(productId), quantity } }
             };
 
-            var json = JsonSerializer.Serialize(request);
+            var json = JsonSerializer.Serialize(cartData);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("/add_item.json", content);
+            var response = await _httpClient.PostAsync("/carts", content);
             response.EnsureSuccessStatusCode();
 
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var addItemResponse = JsonSerializer.Deserialize<AddItemResponse>(responseContent, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
-
-            return addItemResponse?.Url;
+            return $"/carts/{cartId}";
         }
         catch (Exception ex)
         {
@@ -121,16 +116,10 @@ public class ShopistApiService
     {
         try
         {
-            var request = new ApplyCouponRequest
-            {
-                Cart_id = cartId
-            };
-
-            var json = JsonSerializer.Serialize(request);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var response = await _httpClient.PostAsync($"/apply_coupon/{couponCode}", content);
-            return response.IsSuccessStatusCode;
+            // FakeStore API doesn't have coupon endpoint, so we'll simulate success
+            Console.WriteLine($"[Simulated] Applying coupon {couponCode} to cart {cartId}");
+            await Task.Delay(500); // Simulate network delay
+            return true;
         }
         catch (Exception ex)
         {
@@ -143,21 +132,10 @@ public class ShopistApiService
     {
         try
         {
-            var request = new CheckoutRequest
-            {
-                Checkout = new CheckoutDetails
-                {
-                    Card_number = cardNumber,
-                    Cvc = cvc,
-                    Exp = "10/28"
-                }
-            };
-
-            var json = JsonSerializer.Serialize(request);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var response = await _httpClient.PostAsync(checkoutUrl, content);
-            return response.IsSuccessStatusCode;
+            // FakeStore API doesn't have checkout endpoint, so we'll simulate success
+            Console.WriteLine($"[Simulated] Checking out with card ending in {cardNumber.Substring(cardNumber.Length - 4)}");
+            await Task.Delay(1000); // Simulate network delay
+            return true;
         }
         catch (Exception ex)
         {

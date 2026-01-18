@@ -1,9 +1,11 @@
+using System;
 using Foundation;
 using ObjCRuntime;
 
-namespace DatadogMaui.iOS.Internal
+namespace Datadog.iOS.DatadogInternal
 {
-	// @interface DDInternalLogger
+	// @interface DDInternalLogger : NSObject
+	[BaseType (typeof(NSObject))]
 	interface DDInternalLogger
 	{
 		// +(void)consolePrint:(NSString * _Nonnull)message :(enum DDCoreLoggerLevel)level;
@@ -22,7 +24,8 @@ namespace DatadogMaui.iOS.Internal
 		void TelemetryErrorWithId (string id, string message, [NullAllowed] string kind, [NullAllowed] string stack);
 	}
 
-	// @interface DDTracingHeaderType
+	// @interface DDTracingHeaderType : NSObject
+	[BaseType (typeof(NSObject))]
 	[DisableDefaultCtor]
 	interface DDTracingHeaderType
 	{

@@ -10,6 +10,23 @@ public class Product
     public bool InStock { get; set; } = true;
 }
 
+public class FakeStoreProduct
+{
+    public int Id { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public decimal Price { get; set; }
+    public string Description { get; set; } = string.Empty;
+    public string Category { get; set; } = string.Empty;
+    public string? Image { get; set; }
+}
+
+public class FakeStoreCartResponse
+{
+    public int Id { get; set; }
+    public int UserId { get; set; }
+    public string Date { get; set; } = string.Empty;
+}
+
 public class ProductsResponse
 {
     public List<ProductItem> Products { get; set; } = new();

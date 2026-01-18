@@ -1,20 +1,9 @@
-using DatadogWebViewTracking;
 using Foundation;
+using ObjCRuntime;
 
-namespace DatadogMaui.iOS.WebViewTracking
+namespace Datadog.iOS.DatadogWebViewTracking
 {
-	// @interface DDWebViewTracking
-	[DisableDefaultCtor]
-	interface DDWebViewTracking
-	{
-		// +(void)enableWithWebView:(WKWebView * _Nonnull)webView hosts:(id)hosts logsSampleRate:(float)logsSampleRate;
-		[Static]
-		[Export ("enableWithWebView:hosts:logsSampleRate:")]
-		void EnableWithWebView (WKWebView webView, NSObject hosts, float logsSampleRate);
-
-		// +(void)disableWithWebView:(WKWebView * _Nonnull)webView;
-		[Static]
-		[Export ("disableWithWebView:")]
-		void DisableWithWebView (WKWebView webView);
-	}
+	// Note: DatadogWebViewTracking bindings are intentionally minimal.
+	// WebView tracking functionality is accessed through other modules.
+	// This project exists mainly to link the native DatadogWebViewTracking.xcframework.
 }

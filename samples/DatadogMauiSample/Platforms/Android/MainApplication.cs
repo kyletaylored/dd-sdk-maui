@@ -7,7 +7,8 @@ using Com.Datadog.Android.Log;
 using Com.Datadog.Android.Ndk;
 using Com.Datadog.Android.Privacy;
 using Com.Datadog.Android.Rum;
-using Com.Datadog.Android.Sessionreplay;
+// Session Replay temporarily disabled due to dependency conflicts
+// using Com.Datadog.Android.Sessionreplay;
 using Com.Datadog.Android.Trace;
 using Com.Datadog.Android.Webview;
 using DatadogMauiSample.Config;
@@ -101,6 +102,8 @@ public class MainApplication : MauiApplication
             _ = GlobalRumMonitor.Get();
 
             // Enable Session Replay
+            // Temporarily disabled due to dependency conflicts with androidx.tracing library
+            /*
             try
             {
                 var sessionReplayConfig = new SessionReplayConfiguration.Builder(
@@ -118,6 +121,8 @@ public class MainApplication : MauiApplication
             {
                 Console.WriteLine($"[Datadog] Session Replay failed: {ex.Message}");
             }
+            */
+            Console.WriteLine("[Datadog] Session Replay skipped (disabled in sample due to dependency conflicts)");
 
             // Enable APM Tracing
             try
@@ -132,10 +137,13 @@ public class MainApplication : MauiApplication
             }
 
             // Enable WebView Tracking
+            // Note: WebViewTracking.Enable() requires a WebView instance and allowed hosts list.
+            // This should be called when you have a WebView instance, not during app initialization.
+            // Example: WebViewTracking.Enable(webView, new List<string> { "example.com" });
             try
             {
-                WebViewTracking.Enable();
-                Console.WriteLine("[Datadog] WebView tracking enabled");
+                // WebViewTracking.Enable(); // Commented out - requires WebView instance
+                Console.WriteLine("[Datadog] WebView tracking configuration skipped (call Enable when WebView is available)");
             }
             catch (Exception ex)
             {
