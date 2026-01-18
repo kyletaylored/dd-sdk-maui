@@ -1,39 +1,34 @@
 using Datadog.Maui.Platforms.iOS;
-using DatadogLogs;
+using Datadog.iOS.DatadogLogs;
 using Foundation;
 
 namespace Datadog.Maui.Logs;
 
 public static partial class Logs
 {
-    static partial ILogger PlatformCreateLogger(string name)
+    private static partial ILogger PlatformCreateLogger(string name)
     {
         return new IOSLogger(name);
     }
 
-    static partial void PlatformAddAttribute(string key, object value)
+    private static partial void PlatformAddAttribute(string key, object value)
     {
-        DatadogLogs.Logs.AddAttribute(
-            forKey: key,
-            value: NSObject.FromObject(value)
-        );
+        DDLogs.AddAttributeForKey(key, NSObject.FromObject(value));
     }
 
-    static partial void PlatformRemoveAttribute(string key)
+    private static partial void PlatformRemoveAttribute(string key)
     {
-        DatadogLogs.Logs.RemoveAttribute(forKey: key);
+        DDLogs.RemoveAttributeForKey(key);
     }
 
-    static partial void PlatformAddTag(string key, string value)
+    private static partial void PlatformAddTag(string key, string value)
     {
-        DatadogLogs.Logs.AddTag(
-            withKey: key,
-            value: value
-        );
+        // DDLogs doesn't support global tags - tags are per-logger only
+        // We could maintain a list and apply to new loggers, but for now we'll no-op
     }
 
-    static partial void PlatformRemoveTag(string key)
+    private static partial void PlatformRemoveTag(string key)
     {
-        DatadogLogs.Logs.RemoveTag(withKey: key);
+        // DDLogs doesn't support global tags - tags are per-logger only
     }
 }

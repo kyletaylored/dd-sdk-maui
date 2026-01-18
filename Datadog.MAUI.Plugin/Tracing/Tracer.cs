@@ -59,8 +59,8 @@ public static partial class Tracer
     }
 
     // Platform-specific partial methods
-    static partial ISpan PlatformStartSpan(string operationName, ISpan? parent, DateTimeOffset? startTime);
-    static partial ISpan? PlatformGetActiveSpan();
-    static partial void PlatformInject(IDictionary<string, string> headers, ISpan? span);
-    static partial ISpan? PlatformExtract(IDictionary<string, string> headers);
+    private static partial ISpan PlatformStartSpan(string operationName, ISpan? parent, DateTimeOffset? startTime);
+    private static partial ISpan? PlatformGetActiveSpan();
+    private static partial void PlatformInject(IDictionary<string, string> headers, ISpan? span);
+    private static partial ISpan? PlatformExtract(IDictionary<string, string> headers);
 }

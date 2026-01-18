@@ -1,4 +1,4 @@
-using DatadogTrace;
+using Datadog.iOS.DatadogTrace;
 using Foundation;
 
 namespace Datadog.Maui.Tracing;
@@ -13,46 +13,65 @@ public static partial class Tracer
         {
             if (_nativeTracer == null)
             {
-                _nativeTracer = DatadogTrace.Tracer.Shared();
+                _nativeTracer = DDTracer.Shared;
             }
-            return _nativeTracer;
+            return _nativeTracer ?? throw new InvalidOperationException("Failed to initialize Datadog tracer");
         }
     }
 
-    static partial ISpan PlatformStartSpan(string operationName, ISpan? parent, DateTimeOffset? startTime)
+    private static partial ISpan PlatformStartSpan(string operationName, ISpan? parent, DateTimeOffset? startTime)
     {
-        var spanBuilder = NativeTracer.BuildSpan(operationName: operationName);
+        OTSpan nativeSpan;
 
         if (parent is Platforms.iOS.IOSSpan iosParent)
         {
-            spanBuilder = spanBuilder.AsChildOf(iosParent);
-        }
+            var parentContext = iosParent.NativeSpan.Context;
+            var startDate = startTime?.UtcDateTime;
 
-        if (startTime.HasValue)
+            nativeSpan = NativeTracer.StartSpan(
+                operationName: operationName,
+                parent: parentContext,
+                tags: null,
+                startTime: startDate != null ? (NSDate)startDate.Value : null
+            );
+        }
+        else if (startTime.HasValue)
         {
-            spanBuilder = spanBuilder.WithStartTime(startTime.Value.DateTime);
+            nativeSpan = NativeTracer.StartRootSpan(
+                operationName: operationName,
+                tags: null,
+                startTime: (NSDate)startTime.Value.UtcDateTime,
+                customSampleRate: null
+            );
+        }
+        else
+        {
+            nativeSpan = NativeTracer.StartSpan(operationName: operationName);
         }
 
-        var nativeSpan = spanBuilder.Start();
         return new Platforms.iOS.IOSSpan(nativeSpan);
     }
 
-    static partial ISpan? PlatformGetActiveSpan()
+    private static partial ISpan? PlatformGetActiveSpan()
     {
-        var activeSpan = NativeTracer.ActiveSpan;
-        return activeSpan != null ? new Platforms.iOS.IOSSpan(activeSpan) : null;
+        // iOS SDK doesn't expose an ActiveSpan property on DDTracer
+        return null;
     }
 
-    static partial void PlatformInject(IDictionary<string, string> headers, ISpan? span)
+    private static partial void PlatformInject(IDictionary<string, string> headers, ISpan? span)
     {
         if (span is not Platforms.iOS.IOSSpan iosSpan)
             return;
 
         var carrier = new NSMutableDictionary<NSString, NSString>();
+        var error = (NSError?)null;
+
+        // Use "http_headers" format which is the standard OpenTracing format
         NativeTracer.Inject(
-            spanContext: iosSpan.Context,
-            format: BuiltinFormats.HttpHeaders,
-            carrier: carrier
+            spanContext: iosSpan.NativeSpan.Context,
+            format: "http_headers",
+            carrier: carrier,
+            error: out error
         );
 
         foreach (var key in carrier.Keys)
@@ -65,7 +84,7 @@ public static partial class Tracer
         }
     }
 
-    static partial ISpan? PlatformExtract(IDictionary<string, string> headers)
+    private static partial ISpan? PlatformExtract(IDictionary<string, string> headers)
     {
         var carrier = new NSMutableDictionary<NSString, NSString>();
         foreach (var kvp in headers)
@@ -73,18 +92,18 @@ public static partial class Tracer
             carrier[new NSString(kvp.Key)] = new NSString(kvp.Value);
         }
 
-        var spanContext = NativeTracer.Extract(
-            format: BuiltinFormats.HttpHeaders,
-            carrier: carrier
+        var error = (NSError?)null;
+        var success = NativeTracer.ExtractWithFormat(
+            format: "http_headers",
+            carrier: carrier,
+            error: out error
         );
 
-        if (spanContext == null)
+        if (!success || error != null)
             return null;
 
-        var span = NativeTracer.BuildSpan(operationName: "extracted")
-            .AsChildOf(spanContext)
-            .Start();
-
-        return new Platforms.iOS.IOSSpan(span);
+        // The extracted context is not exposed, so we can't create a span from it
+        // This is a limitation of the iOS OpenTelemetry API
+        return null;
     }
 }

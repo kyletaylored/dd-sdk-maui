@@ -62,9 +62,9 @@ public static partial class Logs
     }
 
     // Platform-specific partial methods
-    static partial ILogger PlatformCreateLogger(string name);
-    static partial void PlatformAddAttribute(string key, object value);
-    static partial void PlatformRemoveAttribute(string key);
-    static partial void PlatformAddTag(string key, string value);
-    static partial void PlatformRemoveTag(string key);
+    private static partial ILogger PlatformCreateLogger(string name);
+    private static partial void PlatformAddAttribute(string key, object value);
+    private static partial void PlatformRemoveAttribute(string key);
+    private static partial void PlatformAddTag(string key, string value);
+    private static partial void PlatformRemoveTag(string key);
 }

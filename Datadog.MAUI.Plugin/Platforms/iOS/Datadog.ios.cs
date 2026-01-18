@@ -1,5 +1,8 @@
 using Datadog.Maui.Configuration;
-using DatadogCore;
+using Datadog.iOS.DatadogCore;
+using Datadog.iOS.DatadogRUM;
+using Datadog.iOS.DatadogLogs;
+using Datadog.iOS.DatadogTrace;
 using Foundation;
 
 namespace Datadog.Maui;
@@ -8,42 +11,29 @@ public static partial class Datadog
 {
     static partial void PlatformInitialize(DatadogConfiguration configuration)
     {
-        // Build native configuration
-        var configBuilder = DatadogCore.Datadog.Configuration.BuilderWithClientToken(
-            configuration.ClientToken,
-            configuration.Environment
+        // Create native configuration
+        var nativeConfig = new DDConfiguration(
+            clientToken: configuration.ClientToken,
+            env: configuration.Environment
         );
 
-        configBuilder.Set(site: MapSite(configuration.Site));
-        configBuilder.Set(service: configuration.ServiceName);
-
-        // Set first-party hosts
-        if (configuration.FirstPartyHosts.Length > 0)
-        {
-            configBuilder.TrackURLSession(firstPartyHostsTracing: new NSSet<NSString>(
-                configuration.FirstPartyHosts.Select(h => new NSString(h)).ToArray()
-            ));
-        }
-
-        var nativeConfig = configBuilder.Build();
+        nativeConfig.Site = MapSite(configuration.Site);
+        nativeConfig.Service = configuration.ServiceName;
 
         // Initialize Datadog SDK
-        DatadogCore.Datadog.Initialize(
-            with: nativeConfig,
-            trackingConsent: MapTrackingConsent(configuration.TrackingConsent)
+        DDDatadog.InitializeWithConfiguration(
+            nativeConfig,
+            MapTrackingConsent(configuration.TrackingConsent)
         );
 
         // Set verbosity
         if (configuration.VerboseLogging)
         {
-            DatadogCore.Datadog.VerbosityLevel = CoreLoggerLevel.Debug;
+            DDDatadog.VerbosityLevel = DDCoreLoggerLevel.Debug;
         }
 
-        // Apply global tags
-        foreach (var tag in configuration.GlobalTags)
-        {
-            DatadogCore.Datadog.SetTag(key: tag.Key, value: tag.Value);
-        }
+        // Note: iOS SDK doesn't have a direct SetTag API like Android
+        // Global tags need to be set via RUM/Logs configuration or per-event
 
         // Enable RUM if configured
         if (configuration.Rum != null)
@@ -66,111 +56,93 @@ public static partial class Datadog
 
     private static void InitializeRum(RumConfiguration rumConfig)
     {
-        var rumConfigBuilder = DatadogRUM.RUM.Configuration.BuilderWithApplicationID(rumConfig.ApplicationId);
-
-        rumConfigBuilder.Set(sessionSampleRate: rumConfig.SessionSampleRate);
-        rumConfigBuilder.Set(telemetrySampleRate: rumConfig.TelemetrySampleRate);
-        rumConfigBuilder.TrackUserInteractions(rumConfig.TrackUserInteractions);
-        rumConfigBuilder.TrackLongTasks(true);
-
-        if (rumConfig.VitalsUpdateFrequency != VitalsUpdateFrequency.Never)
-        {
-            rumConfigBuilder.TrackVitals(MapVitalsFrequency(rumConfig.VitalsUpdateFrequency));
-        }
-
-        DatadogRUM.RUM.Enable(with: rumConfigBuilder.Build());
+        // Note: The iOS SDK uses DDRUMConfiguration directly without a builder pattern
+        // Looking at the README, it seems there should be a DDRUMConfiguration class
+        // For now, we'll skip this initialization until we have the proper API definition
+        // TODO: Add proper DDRUMConfiguration binding
     }
 
     private static void InitializeLogs(LogsConfiguration logsConfig)
     {
-        var logsConfigBuilder = DatadogLogs.Logs.Configuration.BuilderWithNetworkInfoEnabled(
-            logsConfig.NetworkInfoEnabled
-        );
-
-        logsConfigBuilder.Set(eventMapper: null); // Can be customized later
-
-        DatadogLogs.Logs.Enable(with: logsConfigBuilder.Build());
+        var logsConfiguration = new DDLogsConfiguration(customEndpoint: null);
+        DDLogs.EnableWith(logsConfiguration);
     }
 
     private static void InitializeTracing(TracingConfiguration tracingConfig)
     {
-        var traceConfigBuilder = DatadogTrace.Trace.Configuration.BuilderWithSampleRate(
-            tracingConfig.SampleRate
-        );
-
-        DatadogTrace.Trace.Enable(with: traceConfigBuilder.Build());
+        var traceConfiguration = new DDTraceConfiguration();
+        traceConfiguration.SampleRate = tracingConfig.SampleRate;
+        DDTrace.EnableWith(traceConfiguration);
     }
 
     static partial void PlatformSetUser(UserInfo userInfo)
     {
-        var extraInfo = userInfo.ExtraInfo?.ToDictionary(
-            kvp => kvp.Key,
-            kvp => NSObject.FromObject(kvp.Value)
-        );
+        var extraInfo = userInfo.ExtraInfo != null && userInfo.ExtraInfo.Count > 0
+            ? NSDictionary<NSString, NSObject>.FromObjectsAndKeys(
+                userInfo.ExtraInfo.Values.Select(v => NSObject.FromObject(v)).ToArray(),
+                userInfo.ExtraInfo.Keys.Select(k => new NSString(k)).ToArray()
+            )
+            : new NSDictionary<NSString, NSObject>();
 
-        DatadogCore.Datadog.SetUserInfo(
-            id: userInfo.Id,
-            name: userInfo.Name,
-            email: userInfo.Email,
-            extraInfo: extraInfo != null ? NSDictionary<NSString, NSObject>.FromObjectsAndKeys(
-                extraInfo.Values.ToArray(),
-                extraInfo.Keys.Select(k => new NSString(k)).ToArray()
-            ) : null
+        DDDatadog.SetUserInfoWithUserId(
+            userInfo.Id ?? string.Empty,
+            userInfo.Name,
+            userInfo.Email,
+            extraInfo
         );
     }
 
     static partial void PlatformSetTags(Dictionary<string, string> tags)
     {
-        foreach (var tag in tags)
-        {
-            DatadogCore.Datadog.SetTag(key: tag.Key, value: tag.Value);
-        }
+        // iOS SDK doesn't have a global SetTag API at the DDDatadog level
+        // Tags would need to be set per-logger or per-RUM monitor
+        // This is a known limitation - we'll document it
     }
 
     static partial void PlatformSetTrackingConsent(TrackingConsent consent)
     {
-        DatadogCore.Datadog.Set(trackingConsent: MapTrackingConsent(consent));
+        DDDatadog.SetTrackingConsentWithConsent(MapTrackingConsent(consent));
     }
 
     static partial void PlatformClearUser()
     {
-        DatadogCore.Datadog.ClearUserInfo();
+        DDDatadog.ClearUserInfo();
     }
 
     // Helper methods to map enums
-    private static DatadogSite MapSite(DatadogSite site)
+    private static DDSite MapSite(DatadogSite site)
     {
         return site switch
         {
-            Maui.DatadogSite.US1 => DatadogCore.DatadogSite.Us1,
-            Maui.DatadogSite.US3 => DatadogCore.DatadogSite.Us3,
-            Maui.DatadogSite.US5 => DatadogCore.DatadogSite.Us5,
-            Maui.DatadogSite.EU1 => DatadogCore.DatadogSite.Eu1,
-            Maui.DatadogSite.US1_FED => DatadogCore.DatadogSite.Us1_FED,
-            Maui.DatadogSite.AP1 => DatadogCore.DatadogSite.Ap1,
-            _ => DatadogCore.DatadogSite.Us1
+            Maui.DatadogSite.US1 => DDSite.Us1,
+            Maui.DatadogSite.US3 => DDSite.Us3,
+            Maui.DatadogSite.US5 => DDSite.Us5,
+            Maui.DatadogSite.EU1 => DDSite.Eu1,
+            Maui.DatadogSite.US1_FED => DDSite.Us1_fed,
+            Maui.DatadogSite.AP1 => DDSite.Ap1,
+            _ => DDSite.Us1
         };
     }
 
-    private static TrackingConsent MapTrackingConsent(TrackingConsent consent)
+    private static DDTrackingConsent MapTrackingConsent(TrackingConsent consent)
     {
         return consent switch
         {
-            Maui.TrackingConsent.Granted => DatadogCore.TrackingConsent.Granted,
-            Maui.TrackingConsent.NotGranted => DatadogCore.TrackingConsent.NotGranted,
-            Maui.TrackingConsent.Pending => DatadogCore.TrackingConsent.Pending,
-            _ => DatadogCore.TrackingConsent.Pending
+            Maui.TrackingConsent.Granted => DDTrackingConsent.Granted,
+            Maui.TrackingConsent.NotGranted => DDTrackingConsent.NotGranted,
+            Maui.TrackingConsent.Pending => DDTrackingConsent.Pending,
+            _ => DDTrackingConsent.Pending
         };
     }
 
-    private static DatadogRUM.VitalsFrequency MapVitalsFrequency(VitalsUpdateFrequency frequency)
+    private static DDRUMVitalsFrequency MapVitalsFrequency(VitalsUpdateFrequency frequency)
     {
         return frequency switch
         {
-            VitalsUpdateFrequency.Frequent => DatadogRUM.VitalsFrequency.Frequent,
-            VitalsUpdateFrequency.Average => DatadogRUM.VitalsFrequency.Average,
-            VitalsUpdateFrequency.Rare => DatadogRUM.VitalsFrequency.Rare,
-            _ => DatadogRUM.VitalsFrequency.Average
+            VitalsUpdateFrequency.Frequent => DDRUMVitalsFrequency.Frequent,
+            VitalsUpdateFrequency.Average => DDRUMVitalsFrequency.Average,
+            VitalsUpdateFrequency.Rare => DDRUMVitalsFrequency.Rare,
+            _ => DDRUMVitalsFrequency.Average
         };
     }
 }

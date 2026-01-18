@@ -25,4 +25,13 @@ namespace Datadog.iOS.DatadogCore
 		Average = 1,
 		Rare = 2
 	}
+
+	[Native]
+	public enum DDCoreLoggerLevel : long
+	{
+		Debug = 0,
+		Warn = 1,
+		Error = 2,
+		Critical = 3
+	}
 }
