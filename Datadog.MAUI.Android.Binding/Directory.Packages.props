@@ -1,12 +1,22 @@
 <Project>
+    <!-- CPM is disabled for binding projects due to Java Dependency Verification incompatibility -->
     <PropertyGroup>
-        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+        <ManagePackageVersionsCentrally Condition="'$(IsBindingProject)' != 'true'">true</ManagePackageVersionsCentrally>
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageVersion Include="Xamarin.AndroidX.Core" Version="1.17.0.1" />
         <PackageVersion Include="Xamarin.AndroidX.Annotation" Version="1.9.1.6" />
-        <PackageVersion Include="Xamarin.AndroidX.Collection" Version="1.4.5.2" />
+        <PackageVersion Include="Xamarin.AndroidX.Collection" Version="1.5.0.4" />
         <PackageVersion Include="Xamarin.AndroidX.Work.Runtime" Version="2.10.0" />
+        <PackageVersion Include="Xamarin.AndroidX.MultiDex" Version="2.0.1.35" />
+        <PackageVersion Include="Xamarin.AndroidX.Work.Runtime" Version="2.11.0.1" />
+        <PackageVersion Include="Xamarin.AndroidX.Tracing.Tracing.Ktx" Version="1.3.0.2" />
+        <PackageVersion Include="Xamarin.AndroidX.Navigation.Fragment" Version="2.7.7.6" />
+        <PackageVersion Include="Xamarin.AndroidX.Navigation.Runtime" Version="2.7.7.6" />
+        <PackageVersion Include="Xamarin.AndroidX.RecyclerView" Version="1.4.0.4" />
+        <PackageVersion Include="Xamarin.AndroidX.AppCompat" Version="1.7.1.2" />
+        <PackageVersion Include="Xamarin.AndroidX.Fragment" Version="1.8.9.1" />
 
         <PackageVersion Include="Xamarin.Kotlin.StdLib" Version="2.3.0.1" />
         <PackageVersion Include="Xamarin.Kotlin.Reflect" Version="2.3.0.1" />

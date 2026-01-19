@@ -20,46 +20,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-ndk" Version="$(DatadogSdkVersion)" />
-    <!-- Runtime Maven dependencies from POM -->
-    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-core" Version="3.5.0" Bind="false" />
-    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-internal" Version="3.5.0"
-      Bind="false" />
-    <AndroidMavenLibrary Include="com.lyft.kronos:kronos-android" Version="0.0.1-alpha11"
-      Bind="false" />
-  </ItemGroup>
-
-  <!-- Ignore test dependencies that are in the AAR metadata but not needed at runtime -->
-  <ItemGroup>
-    <!-- Shared dependencies provided by dd-sdk-android-core -->
-    <AndroidIgnoredJavaDependency Include="com.lyft.kronos:kronos-java:0.0.1-alpha11" />
-    <AndroidIgnoredJavaDependency Include="com.google.code.gson:gson:2.10.1" />
-    <AndroidIgnoredJavaDependency Include="org.jetbrains:annotations:13.0" />
-    <AndroidIgnoredJavaDependency Include="org.junit.platform:junit-platform-launcher:1.9.3" />
-    <AndroidIgnoredJavaDependency Include="org.junit.jupiter:junit-jupiter:5.9.3" />
-    <AndroidIgnoredJavaDependency Include="org.junit.vintage:junit-vintage-engine:5.9.3" />
-    <AndroidIgnoredJavaDependency Include="org.mockito:mockito-junit-jupiter:5.4.0" />
-    <AndroidIgnoredJavaDependency Include="org.assertj:assertj-core:3.18.1" />
-    <AndroidIgnoredJavaDependency Include="com.github.xgouchet.Elmyr:core:1.3.1" />
-    <AndroidIgnoredJavaDependency Include="com.github.xgouchet.Elmyr:inject:1.3.1" />
-    <AndroidIgnoredJavaDependency Include="com.github.xgouchet.Elmyr:junit5:1.3.1" />
-    <AndroidIgnoredJavaDependency Include="com.github.xgouchet.Elmyr:jvm:1.3.1" />
-    <AndroidIgnoredJavaDependency Include="org.mockito.kotlin:mockito-kotlin:5.1.0" />
-    <AndroidIgnoredJavaDependency Include="dd-sdk-android.tools:unit:unspecified" />
-    <!-- Kotlin stdlib is embedded in Datadog SDK AARs - specify highest version seen -->
-    <AndroidIgnoredJavaDependency Include="org.jetbrains.kotlin:kotlin-stdlib:2.0.21" />
-    <AndroidIgnoredJavaDependency Include="org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10" />
-    <AndroidIgnoredJavaDependency Include="org.jetbrains.kotlin:kotlin-stdlib-common:1.9.10" />
-    <AndroidIgnoredJavaDependency Include="org.jetbrains.kotlin:kotlin-reflect:2.0.21" />
+    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-ndk" Version="$(DatadogSdkVersion)" VerifyDependencies="false" />
+    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-core" Version="$(DatadogSdkVersion)" VerifyDependencies="false" />
+    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-internal" Version="$(DatadogSdkVersion)" Bind="false" VerifyDependencies="false" />
+    <AndroidMavenLibrary Include="com.lyft.kronos:kronos-android" Version="0.0.1-alpha11" Bind="false" VerifyDependencies="false" />
   </ItemGroup>
 
   <!-- AndroidX and Kotlin dependencies as NuGet packages -->
   <ItemGroup>
-    <PackageReference Include="Xamarin.AndroidX.Annotation" Version="1.9.1.2" />
-    <PackageReference Include="Xamarin.AndroidX.MultiDex" Version="2.0.1.10" />
-    <PackageReference Include="Xamarin.AndroidX.Collection" Version="1.4.5.2" />
-    <PackageReference Include="Xamarin.AndroidX.Work.Runtime" Version="2.10.0" />
-    <PackageReference Include="Square.OkHttp3" Version="4.12.0" />
+    <PackageReference Include="Xamarin.AndroidX.Annotation" />
+    <PackageReference Include="Xamarin.AndroidX.MultiDex" />
+    <PackageReference Include="Xamarin.AndroidX.Collection" />
+    <PackageReference Include="Xamarin.AndroidX.Work.Runtime" />
+    <PackageReference Include="Square.OkHttp3" />
   </ItemGroup>
 
   <!-- Metadata transforms for binding fixes -->

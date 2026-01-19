@@ -25,4 +25,7 @@
             <AndroidIgnoredJavaDependency Include="@(AndroidIgnoredJavaDependency)" />
         </ItemGroup>
     </Target>
+
+    <!-- Disable Java dependency verification in binding projects (incompatible with CPM) -->
+    <Target Name="_VerifyJavaDependencies" Condition="'$(IsBindingProject)' == 'true'" />
 </Project>

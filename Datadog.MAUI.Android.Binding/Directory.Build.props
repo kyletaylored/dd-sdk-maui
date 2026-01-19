@@ -2,4 +2,9 @@
   <PropertyGroup>
     <DatadogSdkVersion>3.5.0</DatadogSdkVersion>
   </PropertyGroup>
+
+  <!-- Disable CPM for binding projects due to JDV incompatibility -->
+  <PropertyGroup Condition="'$(IsBindingProject)' == 'true'">
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+  </PropertyGroup>
 </Project>
