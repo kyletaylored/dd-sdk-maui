@@ -17,33 +17,14 @@
 
   <ItemGroup>
     <!-- Internal package - included but no C# bindings generated -->
-    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-internal" Version="$(DatadogSdkVersion)" Bind="false" />
+    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-internal" Version="$(DatadogSdkVersion)" Bind="false" VerifyDependencies="false" />
   </ItemGroup>
 
   <!-- Kotlin and AndroidX dependencies as NuGet packages -->
   <ItemGroup>
-    <!-- Kotlin packages removed - Kotlin stdlib is embedded in Datadog SDK AARs -->
-    <PackageReference Include="Xamarin.AndroidX.Annotation" Version="1.9.1" />
-  </ItemGroup>
-
-  <!-- Ignore test dependencies that are in the AAR metadata but not needed at runtime -->
-  <ItemGroup>
-    <AndroidIgnoredJavaDependency Include="org.junit.platform:junit-platform-launcher:1.9.3" />
-    <AndroidIgnoredJavaDependency Include="org.junit.jupiter:junit-jupiter:5.9.3" />
-    <AndroidIgnoredJavaDependency Include="org.junit.vintage:junit-vintage-engine:5.9.3" />
-    <AndroidIgnoredJavaDependency Include="org.mockito:mockito-junit-jupiter:5.4.0" />
-    <AndroidIgnoredJavaDependency Include="org.assertj:assertj-core:3.18.1" />
-    <AndroidIgnoredJavaDependency Include="com.github.xgouchet.Elmyr:core:1.3.1" />
-    <AndroidIgnoredJavaDependency Include="com.github.xgouchet.Elmyr:inject:1.3.1" />
-    <AndroidIgnoredJavaDependency Include="com.github.xgouchet.Elmyr:junit5:1.3.1" />
-    <AndroidIgnoredJavaDependency Include="com.github.xgouchet.Elmyr:jvm:1.3.1" />
-    <AndroidIgnoredJavaDependency Include="org.mockito.kotlin:mockito-kotlin:5.1.0" />
-    <AndroidIgnoredJavaDependency Include="dd-sdk-android.tools:unit:unspecified" />
-    <!-- Kotlin stdlib is embedded in Datadog SDK AARs - specify highest version seen -->
-    <AndroidIgnoredJavaDependency Include="org.jetbrains.kotlin:kotlin-stdlib:2.0.21" />
-    <AndroidIgnoredJavaDependency Include="org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10" />
-    <AndroidIgnoredJavaDependency Include="org.jetbrains.kotlin:kotlin-stdlib-common:1.9.10" />
-    <AndroidIgnoredJavaDependency Include="org.jetbrains.kotlin:kotlin-reflect:2.0.21" />
+    <PackageReference Include="Xamarin.AndroidX.Annotation" />
+    <PackageReference Include="Xamarin.Kotlin.Reflect" />
+    <PackageReference Include="Xamarin.Kotlin.StdLib" />
   </ItemGroup>
 
   <!-- Metadata transforms for binding fixes -->

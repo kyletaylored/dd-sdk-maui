@@ -1,10 +1,5 @@
 <Project>
   <PropertyGroup>
-    <!-- Datadog Android SDK version -->
     <DatadogSdkVersion>3.5.0</DatadogSdkVersion>
-
-    <!-- Disable Java dependency verification for all Android binding projects -->
-    <!-- Kotlin stdlib is embedded in Datadog SDK AARs, causing verification errors -->
-    <AndroidVerifyJavaDependencies>false</AndroidVerifyJavaDependencies>
   </PropertyGroup>
 </Project>

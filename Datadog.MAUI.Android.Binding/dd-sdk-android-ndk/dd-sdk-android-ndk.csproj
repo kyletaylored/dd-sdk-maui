@@ -23,8 +23,10 @@
     <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-ndk" Version="$(DatadogSdkVersion)" />
     <!-- Runtime Maven dependencies from POM -->
     <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-core" Version="3.5.0" Bind="false" />
-    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-internal" Version="3.5.0" Bind="false" />
-    <AndroidMavenLibrary Include="com.lyft.kronos:kronos-android" Version="0.0.1-alpha11" Bind="false" />
+    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-internal" Version="3.5.0"
+      Bind="false" />
+    <AndroidMavenLibrary Include="com.lyft.kronos:kronos-android" Version="0.0.1-alpha11"
+      Bind="false" />
   </ItemGroup>
 
   <!-- Ignore test dependencies that are in the AAR metadata but not needed at runtime -->
@@ -57,7 +59,6 @@
     <PackageReference Include="Xamarin.AndroidX.MultiDex" Version="2.0.1.10" />
     <PackageReference Include="Xamarin.AndroidX.Collection" Version="1.4.5.2" />
     <PackageReference Include="Xamarin.AndroidX.Work.Runtime" Version="2.10.0" />
-    <!-- Kotlin packages removed - Kotlin stdlib is embedded in Datadog SDK AARs -->
     <PackageReference Include="Square.OkHttp3" Version="4.12.0" />
   </ItemGroup>
 
