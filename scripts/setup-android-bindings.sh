@@ -6,8 +6,12 @@
 # 1. Fetching dependencies from Maven POM files
 # 2. Building the project
 # 3. Parsing build errors to determine Maven vs NuGet dependencies
-# 4. Automatically updating .csproj files with required dependencies
-# 5. Iterating until build succeeds
+# 4. Providing guidance on updates needed for centralized configuration:
+#    - AndroidMavenLibrary entries for .csproj (using $(DatadogSdkVersion))
+#    - PackageVersion entries for Directory.Packages.props
+#    - AndroidIgnoredJavaDependency entries for Directory.Build.targets
+#
+# See docs/new_build_pack.md and docs/android_dep_research.md for architecture details.
 #
 # Usage:
 #   ./setup-android-bindings.sh [SDK_VERSION] [PROJECT_PATH]
@@ -133,39 +137,90 @@ parse_build_errors() {
   done <<< "$build_output"
 }
 
-# Update .csproj file with dependencies
-update_csproj() {
+# Output dependencies for centralized configuration
+output_dependencies() {
   local csproj_path=$1
   local -n maven_deps=$2
   local -n nuget_deps=$3
   local -n ignored_deps=$4
 
-  echo -e "${YELLOW}Updating $csproj_path...${NC}"
+  echo ""
+  echo -e "${BLUE}============================================${NC}"
+  echo -e "${BLUE}Dependencies Analysis${NC}"
+  echo -e "${BLUE}============================================${NC}"
+  echo ""
 
-  # TODO: This would need XML manipulation - for now, output what needs to be added
+  # Maven dependencies for .csproj
   if [ ${#maven_deps[@]} -gt 0 ]; then
-    echo -e "${GREEN}Maven dependencies to add:${NC}"
+    echo -e "${GREEN}[1] AndroidMavenLibrary entries for $csproj_path:${NC}"
+    echo ""
+    echo "  <ItemGroup>"
     for dep in "${!maven_deps[@]}"; do
       local version="${maven_deps[$dep]}"
-      echo "    <AndroidMavenLibrary Include=\"$dep\" Version=\"$version\" Bind=\"false\" />"
+      local group_id="${dep%%:*}"
+
+      # Use $(DatadogSdkVersion) for Datadog packages, hardcode version for others
+      if [[ "$group_id" == "com.datadoghq" ]]; then
+        echo "    <AndroidMavenLibrary Include=\"$dep\" Version=\"\$(DatadogSdkVersion)\" VerifyDependencies=\"false\" Bind=\"false\" />"
+      else
+        echo "    <AndroidMavenLibrary Include=\"$dep\" Version=\"$version\" VerifyDependencies=\"false\" Bind=\"false\" />"
+      fi
     done
+    echo "  </ItemGroup>"
+    echo ""
   fi
 
+  # NuGet packages for .csproj (WITHOUT version attributes)
   if [ ${#nuget_deps[@]} -gt 0 ]; then
-    echo -e "${GREEN}NuGet packages to add:${NC}"
+    echo -e "${GREEN}[2] PackageReference entries for $csproj_path:${NC}"
+    echo ""
+    echo "  <ItemGroup>"
+    echo "    <!-- AndroidX and runtime dependencies as NuGet packages -->"
     for dep in "${!nuget_deps[@]}"; do
       local pkg_version="${nuget_deps[$dep]}"
       IFS=':' read -r package version <<< "$pkg_version"
-      echo "    <PackageReference Include=\"$package\" Version=\"$version\" />"
+      echo "    <PackageReference Include=\"$package\" />"
     done
+    echo "  </ItemGroup>"
+    echo ""
+    echo "Note: No Version attribute needed - managed by Directory.Packages.props"
+    echo ""
+
+    # Also output PackageVersion entries for Directory.Packages.props
+    echo -e "${GREEN}[3] PackageVersion entries for Directory.Packages.props:${NC}"
+    echo ""
+    echo "Add these to Datadog.MAUI.Android.Binding/Directory.Packages.props if not already present:"
+    echo ""
+    echo "  <ItemGroup>"
+    for dep in "${!nuget_deps[@]}"; do
+      local pkg_version="${nuget_deps[$dep]}"
+      IFS=':' read -r package version <<< "$pkg_version"
+      echo "    <PackageVersion Include=\"$package\" Version=\"$version\" />"
+    done
+    echo "  </ItemGroup>"
+    echo ""
   fi
 
+  # Test dependencies to ignore - these should go in Directory.Build.targets
   if [ ${#ignored_deps[@]} -gt 0 ]; then
-    echo -e "${GREEN}Test dependencies to ignore:${NC}"
+    echo -e "${GREEN}[4] Test dependencies (likely already in Directory.Build.targets):${NC}"
+    echo ""
+    echo "These are already centrally ignored in Directory.Build.targets:"
+    echo ""
+    for dep in "${!ignored_deps[@]}"; do
+      local version="${ignored_deps[$dep]}"
+      echo "  - $dep:$version"
+    done
+    echo ""
+    echo "If missing, add to Datadog.MAUI.Android.Binding/Directory.Build.targets:"
+    echo ""
+    echo "  <ItemGroup Condition=\"'\$(IsBindingProject)' == 'true'\">"
     for dep in "${!ignored_deps[@]}"; do
       local version="${ignored_deps[$dep]}"
       echo "    <AndroidIgnoredJavaDependency Include=\"$dep:$version\" />"
     done
+    echo "  </ItemGroup>"
+    echo ""
   fi
 }
 
@@ -218,17 +273,24 @@ main() {
 
   echo ""
   echo -e "${BLUE}Step 3: Required dependencies:${NC}"
-  update_csproj "$csproj_file" maven_deps nuget_deps ignored_deps
+  output_dependencies "$csproj_file" maven_deps nuget_deps ignored_deps
 
   echo ""
-  echo -e "${YELLOW}=========================================="
-  echo "Next Steps:"
-  echo "==========================================${NC}"
-  echo "1. Review the dependencies listed above"
-  echo "2. Add them to $csproj_file"
-  echo "3. Run this script again to verify"
+  echo -e "${YELLOW}============================================${NC}"
+  echo -e "${YELLOW}Next Steps:${NC}"
+  echo -e "${YELLOW}============================================${NC}"
   echo ""
-  echo -e "${BLUE}Or use the output above to update your .csproj manually${NC}"
+  echo "1. Review the dependencies listed above"
+  echo ""
+  echo "2. Update files according to the centralized configuration:"
+  echo "   - Add AndroidMavenLibrary entries to $csproj_file"
+  echo "   - Add PackageReference entries to $csproj_file (NO Version attributes)"
+  echo "   - Add PackageVersion entries to Directory.Packages.props"
+  echo "   - Verify test dependencies in Directory.Build.targets"
+  echo ""
+  echo "3. Run this script again to verify the build"
+  echo ""
+  echo -e "${BLUE}See docs/new_build_pack.md and docs/android_dep_research.md for details${NC}"
 }
 
 main "$@"

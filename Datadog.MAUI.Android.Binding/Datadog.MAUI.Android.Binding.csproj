@@ -1,11 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>net9.0-android;net10.0-android</TargetFrameworks>
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
 
     <IsPackable>true</IsPackable>
     <IncludeBuildOutput>false</IncludeBuildOutput>
+
+    <!-- Disable CPM for this meta-package to allow Version attributes on PackageReferences -->
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
 
     <PackageId>Datadog.MAUI.Android.Binding</PackageId>
     <Title>Datadog Android Bindings for .NET MAUI</Title>
@@ -25,7 +28,7 @@
     <DatadogSdkVersion Condition="'$(DatadogSdkVersion)' == ''">3.5.0</DatadogSdkVersion>
   </PropertyGroup>
 
-  <!-- Meta-package dependencies: use PackageReference (NOT ProjectReference) -->
+  <!-- Meta-package dependencies: PackageReference to avoid duplicate class errors -->
   <ItemGroup>
     <PackageReference Include="Datadog.MAUI.Android.Internal" Version="$(DatadogSdkVersion)" />
     <PackageReference Include="Datadog.MAUI.Android.Core" Version="$(DatadogSdkVersion)" />

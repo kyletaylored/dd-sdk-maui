@@ -1,7 +1,14 @@
 <metadata>
   <!--
-    Add metadata transforms here to fix binding issues
-    Example:
-    <remove-node path="/api/package[@name='com.example']/class[@name='Foo']" />
+    Opt-in binding approach: Only expose interfaces and classes that are needed by users.
+
+    FlushableExecutorService is an internal interface used by the Datadog SDK but not needed
+    in the public API. It causes binding issues with generic/non-generic IList conversions
+    in the shutdownNow() method inherited from ExecutorService.
+
+    Since this is an internal interface not needed by SDK users, we remove it entirely.
   -->
+
+  <!-- Remove FlushableExecutorService interface - internal only, not needed in public API -->
+  <remove-node path="/api/package[@name='com.datadog.android.core.thread']/interface[@name='FlushableExecutorService']" />
 </metadata>

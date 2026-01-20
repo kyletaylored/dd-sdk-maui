@@ -1,12 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <!-- Meta-package: do NOT target net*-ios, and do NOT produce assemblies -->
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net9.0-ios;net10.0-ios</TargetFrameworks>
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
 
     <IsPackable>true</IsPackable>
     <IncludeBuildOutput>false</IncludeBuildOutput>
+
+    <!-- Disable CPM for this meta-package to allow Version attributes on PackageReferences -->
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
 
     <PackageId>Datadog.MAUI.iOS.Binding</PackageId>
     <Title>Datadog iOS Bindings for .NET MAUI</Title>
@@ -25,7 +28,7 @@
     <DatadogSdkVersion Condition="'$(DatadogSdkVersion)' == ''">3.5.0</DatadogSdkVersion>
   </PropertyGroup>
 
-  <!-- Meta-package dependencies: use PackageReference (NOT ProjectReference) -->
+  <!-- Meta-package dependencies: PackageReference to avoid duplicate class errors -->
   <ItemGroup>
     <PackageReference Include="Datadog.MAUI.iOS.Internal" Version="$(DatadogSdkVersion)" />
     <PackageReference Include="Datadog.MAUI.iOS.Core" Version="$(DatadogSdkVersion)" />

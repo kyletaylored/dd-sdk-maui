@@ -50,21 +50,44 @@ build-ios: ## Build iOS binding projects
 		echo "$(YELLOW)Please ensure XCFrameworks are in: Datadog.MAUI.iOS.Binding/artifacts/$(NC)"; \
 		exit 1; \
 	fi
-	@dotnet restore Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.sln
-	@dotnet build Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.sln --configuration Release --no-restore
-	@echo "$(GREEN)✓ iOS bindings built successfully$(NC)"
+	@cd Datadog.MAUI.iOS.Binding && \
+	for module in DatadogInternal DatadogCore DatadogLogs DatadogRUM DatadogTrace DatadogCrashReporting DatadogSessionReplay DatadogWebViewTracking DatadogFlags OpenTelemetryApi; do \
+		echo "  Building $$module..."; \
+		dotnet build $$module/$$module.csproj --configuration Release --verbosity quiet || exit 1; \
+	done
+	@echo "$(GREEN)✓ iOS binding modules built successfully$(NC)"
+	@echo "$(YELLOW)Note: Meta-package (Datadog.MAUI.iOS.Binding) skipped - only built during 'make pack'$(NC)"
 
-build-ios-debug: ## Build iOS binding projects in Debug mode
-	@echo "$(BLUE)Building iOS bindings (Debug)...$(NC)"
+build-ios-debug: ## Build iOS binding module projects in Debug mode
+	@echo "$(BLUE)Building iOS binding modules (Debug)...$(NC)"
 	@if [ "$$(uname)" != "Darwin" ]; then \
 		echo "$(RED)Error: iOS builds require macOS$(NC)"; \
 		exit 1; \
 	fi
-	@dotnet restore Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.sln
-	@dotnet build Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.sln --configuration Debug --no-restore
-	@echo "$(GREEN)✓ iOS bindings built successfully (Debug)$(NC)"
+	@cd Datadog.MAUI.iOS.Binding && \
+	for module in DatadogInternal DatadogCore DatadogLogs DatadogRUM DatadogTrace DatadogCrashReporting DatadogSessionReplay DatadogWebViewTracking DatadogFlags OpenTelemetryApi; do \
+		echo "  Building $$module..."; \
+		dotnet build $$module/$$module.csproj --configuration Debug --verbosity quiet || exit 1; \
+	done
+	@echo "$(GREEN)✓ iOS binding modules built successfully (Debug)$(NC)"
 
-pack-ios: build-ios ## Build and pack iOS NuGet packages
+build-ios-errors: ## Build iOS binding modules showing only errors (no warnings)
+	@echo "$(BLUE)Building iOS binding modules (errors only)...$(NC)"
+	@if [ "$$(uname)" != "Darwin" ]; then \
+		echo "$(RED)Error: iOS builds require macOS$(NC)"; \
+		exit 1; \
+	fi
+	@cd Datadog.MAUI.iOS.Binding && \
+	for module in DatadogInternal DatadogCore DatadogLogs DatadogRUM DatadogTrace DatadogCrashReporting DatadogSessionReplay DatadogWebViewTracking DatadogFlags OpenTelemetryApi; do \
+		echo "  Checking $$module..."; \
+		dotnet build $$module/$$module.csproj --configuration Release --verbosity quiet --nologo 2>&1 | grep -i "error" | grep -v "warning" || true; \
+	done
+	@echo "$(YELLOW)Note: If no errors shown above, build succeeded (warnings hidden)$(NC)"
+
+pack-ios: build-ios ## Build and pack iOS NuGet packages (DEPRECATED: use 'make pack' instead)
+	@echo "$(YELLOW)Warning: pack-ios is deprecated. Use 'make pack' for proper packaging.$(NC)"
+	@echo "$(YELLOW)See docs/new_build_pack.md for architecture details.$(NC)"
+	@echo ""
 	@echo "$(BLUE)Creating iOS NuGet packages...$(NC)"
 	@rm -rf ./local-packages
 	@mkdir -p ./local-packages
@@ -76,19 +99,38 @@ pack-ios: build-ios ## Build and pack iOS NuGet packages
 
 ##@ Android Build
 
-build-android: ## Build Android binding projects
-	@echo "$(BLUE)Building Android bindings...$(NC)"
-	@dotnet restore Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln
-	@dotnet build Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln --configuration Release --no-restore
-	@echo "$(GREEN)✓ Android bindings built successfully$(NC)"
+build-android: ## Build Android binding module projects (excludes meta-package)
+	@echo "$(BLUE)Building Android binding modules...$(NC)"
+	@cd Datadog.MAUI.Android.Binding && \
+	for module in dd-sdk-android-internal dd-sdk-android-core dd-sdk-android-logs dd-sdk-android-rum dd-sdk-android-trace dd-sdk-android-ndk dd-sdk-android-session-replay dd-sdk-android-webview dd-sdk-android-flags; do \
+		echo "  Building $$module..."; \
+		dotnet build $$module/$$module.csproj --configuration Release --verbosity quiet || exit 1; \
+	done
+	@echo "$(GREEN)✓ Android binding modules built successfully$(NC)"
+	@echo "$(YELLOW)Note: Meta-package (Datadog.MAUI.Android.Binding) skipped - only built during 'make pack'$(NC)"
 
-build-android-debug: ## Build Android binding projects in Debug mode
-	@echo "$(BLUE)Building Android bindings (Debug)...$(NC)"
-	@dotnet restore Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln
-	@dotnet build Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln --configuration Debug --no-restore
-	@echo "$(GREEN)✓ Android bindings built successfully (Debug)$(NC)"
+build-android-debug: ## Build Android binding module projects in Debug mode
+	@echo "$(BLUE)Building Android binding modules (Debug)...$(NC)"
+	@cd Datadog.MAUI.Android.Binding && \
+	for module in dd-sdk-android-internal dd-sdk-android-core dd-sdk-android-logs dd-sdk-android-rum dd-sdk-android-trace dd-sdk-android-ndk dd-sdk-android-session-replay dd-sdk-android-webview dd-sdk-android-flags; do \
+		echo "  Building $$module..."; \
+		dotnet build $$module/$$module.csproj --configuration Debug --verbosity quiet || exit 1; \
+	done
+	@echo "$(GREEN)✓ Android binding modules built successfully (Debug)$(NC)"
 
-pack-android: build-android ## Build and pack Android NuGet packages
+build-android-errors: ## Build Android binding modules showing only errors (no warnings)
+	@echo "$(BLUE)Building Android binding modules (errors only)...$(NC)"
+	@cd Datadog.MAUI.Android.Binding && \
+	for module in dd-sdk-android-internal dd-sdk-android-core dd-sdk-android-logs dd-sdk-android-rum dd-sdk-android-trace dd-sdk-android-ndk dd-sdk-android-session-replay dd-sdk-android-webview dd-sdk-android-flags; do \
+		echo "  Checking $$module..."; \
+		dotnet build $$module/$$module.csproj --configuration Release --verbosity quiet --nologo 2>&1 | grep -i "error" | grep -v "warning" || true; \
+	done
+	@echo "$(YELLOW)Note: If no errors shown above, build succeeded (warnings hidden)$(NC)"
+
+pack-android: build-android ## Build and pack Android NuGet packages (DEPRECATED: use 'make pack' instead)
+	@echo "$(YELLOW)Warning: pack-android is deprecated. Use 'make pack' for proper packaging.$(NC)"
+	@echo "$(YELLOW)See docs/new_build_pack.md for architecture details.$(NC)"
+	@echo ""
 	@echo "$(BLUE)Creating Android NuGet packages...$(NC)"
 	@rm -rf ./local-packages
 	@mkdir -p ./local-packages
@@ -102,11 +144,14 @@ pack-android: build-android ## Build and pack Android NuGet packages
 
 build-plugin: ## Build the MAUI plugin project
 	@echo "$(BLUE)Building MAUI Plugin...$(NC)"
-	@dotnet restore Datadog.MAUI.Plugin/Datadog.MAUI.Plugin.csproj
-	@dotnet build Datadog.MAUI.Plugin/Datadog.MAUI.Plugin.csproj --configuration Release --no-restore
+	@dotnet restore Datadog.MAUI.Plugin/Datadog.MAUI.Plugin.csproj --verbosity quiet
+	@dotnet build Datadog.MAUI.Plugin/Datadog.MAUI.Plugin.csproj --configuration Release --no-restore --verbosity minimal
 	@echo "$(GREEN)✓ MAUI Plugin built successfully$(NC)"
 
-pack-plugin: build-plugin ## Build and pack MAUI plugin NuGet package
+pack-plugin: build-plugin ## Build and pack MAUI plugin NuGet package (DEPRECATED: use 'make pack' instead)
+	@echo "$(YELLOW)Warning: pack-plugin is deprecated. Use 'make pack' for proper packaging.$(NC)"
+	@echo "$(YELLOW)See docs/new_build_pack.md for architecture details.$(NC)"
+	@echo ""
 	@echo "$(BLUE)Creating MAUI Plugin NuGet package...$(NC)"
 	@rm -rf ./local-packages
 	@mkdir -p ./local-packages
@@ -120,9 +165,28 @@ pack-plugin: build-plugin ## Build and pack MAUI plugin NuGet package
 
 build-all: build-android build-ios build-plugin ## Build all projects (Android, iOS, Plugin)
 
-pack-all: pack-android pack-ios pack-plugin ## Build and pack all NuGet packages
-
 build: build-all ## Alias for build-all
+
+build-errors: build-android-errors build-ios-errors ## Build all projects showing only errors and warnings
+
+##@ Packaging
+
+pack: build-all ## Build and pack all NuGet packages following proper dependency order
+	@echo "$(BLUE)Creating NuGet packages with proper dependency order...$(NC)"
+	@echo "$(YELLOW)Following packaging architecture from docs/new_build_pack.md$(NC)"
+	@echo ""
+	@chmod +x scripts/pack.sh
+	@./scripts/pack.sh Release ./artifacts
+	@echo ""
+	@echo "$(GREEN)✓ All packages created in ./artifacts$(NC)"
+
+pack-debug: ## Pack all packages in Debug configuration
+	@echo "$(BLUE)Creating NuGet packages (Debug)...$(NC)"
+	@chmod +x scripts/pack.sh
+	@./scripts/pack.sh Debug ./artifacts-debug
+
+pack-all: pack ## Build and pack all NuGet packages (DEPRECATED: use 'make pack' instead)
+	@echo "$(YELLOW)Note: pack-all now uses the new pack.sh script$(NC)"
 
 ##@ Sample App
 
@@ -219,6 +283,40 @@ format: ## Format code (run dotnet format)
 	@dotnet format Datadog.MAUI.sln
 	@echo "$(GREEN)✓ Code formatted$(NC)"
 
+##@ Android Binding Generation
+
+generate-android-deps: ## Analyze Maven POM and generate dependency entries for an Android module
+	@echo "$(BLUE)Analyzing Android Maven dependencies...$(NC)"
+	@echo ""
+	@if [ -z "$(MODULE)" ] || [ -z "$(VERSION)" ]; then \
+		echo "$(RED)Error: MODULE and VERSION parameters required$(NC)"; \
+		echo ""; \
+		echo "Usage: make generate-android-deps MODULE=<name> VERSION=<version>"; \
+		echo ""; \
+		echo "Example:"; \
+		echo "  make generate-android-deps MODULE=dd-sdk-android-core VERSION=3.5.0"; \
+		echo ""; \
+		exit 1; \
+	fi
+	@chmod +x scripts/generate-android-dependencies.sh
+	@./scripts/generate-android-dependencies.sh $(MODULE) $(VERSION)
+
+setup-android-binding: ## Analyze build errors and suggest dependency fixes for an Android binding
+	@echo "$(BLUE)Setting up Android binding...$(NC)"
+	@echo ""
+	@if [ -z "$(PROJECT)" ]; then \
+		echo "$(RED)Error: PROJECT parameter required$(NC)"; \
+		echo ""; \
+		echo "Usage: make setup-android-binding PROJECT=<path> [VERSION=<version>]"; \
+		echo ""; \
+		echo "Example:"; \
+		echo "  make setup-android-binding PROJECT=Datadog.MAUI.Android.Binding/dd-sdk-android-core VERSION=3.5.0"; \
+		echo ""; \
+		exit 1; \
+	fi
+	@chmod +x scripts/setup-android-bindings.sh
+	@./scripts/setup-android-bindings.sh $(VERSION) $(PROJECT)
+
 ##@ iOS Binding Generation
 
 generate-ios-bindings: ## Generate iOS bindings using Objective Sharpie
@@ -270,13 +368,13 @@ readme: ## Display quick reference README
 	@echo "  make status            - Show current state"
 	@echo "  make dev-setup         - First-time setup"
 	@echo "  make build             - Build all projects"
+	@echo "  make pack              - Create all NuGet packages (proper order)"
 	@echo "  make test              - Run unit tests"
 	@echo "  make clean             - Clean build artifacts"
 	@echo ""
 	@echo "$(GREEN)Platform-Specific:$(NC)"
 	@echo "  make build-android     - Build Android bindings"
 	@echo "  make build-ios         - Build iOS bindings (macOS only)"
-	@echo "  make pack-all          - Create all NuGet packages"
 	@echo ""
 	@echo "$(GREEN)Sample Apps:$(NC)"
 	@echo "  make sample-ios        - Run iOS sample app"
@@ -285,5 +383,15 @@ readme: ## Display quick reference README
 	@echo "$(GREEN)Development:$(NC)"
 	@echo "  make restore           - Restore all packages"
 	@echo "  make format            - Format code"
+	@echo ""
+	@echo "$(GREEN)Binding Generation:$(NC)"
+	@echo "  make generate-android-deps MODULE=<name> VERSION=<ver>"
+	@echo "                         - Analyze Maven POM for Android module"
+	@echo "  make setup-android-binding PROJECT=<path> [VERSION=<ver>]"
+	@echo "                         - Analyze build errors for Android binding"
 	@echo "  make generate-ios-bindings - Generate iOS bindings with Sharpie"
+	@echo ""
+	@echo "$(GREEN)Documentation:$(NC)"
+	@echo "  See docs/new_build_pack.md for packaging architecture"
+	@echo "  See docs/android_dep_research.md for Android dependency details"
 	@echo ""

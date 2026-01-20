@@ -65,16 +65,8 @@ dotnet build "$ROOT_DIR/Datadog.MAUI.Plugin/Datadog.MAUI.Plugin.csproj" -c "$CON
 # Step 4: Pack (if Release configuration)
 if [ "$CONFIGURATION" = "Release" ]; then
     echo -e "\n${CYAN}[4/4] Creating NuGet packages...${NC}"
-
-    PACKAGES_DIR="$ROOT_DIR/artifacts/packages"
-    mkdir -p "$PACKAGES_DIR"
-
-    dotnet pack "$ROOT_DIR/Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj" -c "$CONFIGURATION" -o "$PACKAGES_DIR" -v minimal || true
-    dotnet pack "$ROOT_DIR/Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.csproj" -c "$CONFIGURATION" -o "$PACKAGES_DIR" -v minimal || true
-    dotnet pack "$ROOT_DIR/Datadog.MAUI.Plugin/Datadog.MAUI.Plugin.csproj" -c "$CONFIGURATION" -o "$PACKAGES_DIR" -v minimal || true
-
-    echo -e "\n${GREEN}NuGet packages created in: $PACKAGES_DIR${NC}"
-    ls -lh "$PACKAGES_DIR"/*.nupkg 2>/dev/null || echo -e "${YELLOW}No packages were created${NC}"
+    echo -e "${YELLOW}To create packages, use: ./scripts/pack.sh${NC}"
+    echo -e "${YELLOW}See docs/new_build_pack.md for packaging architecture details${NC}"
 else
     echo -e "\n${YELLOW}[4/4] Skipping package creation (Debug build)${NC}"
 fi
@@ -88,8 +80,12 @@ echo -e "\n${CYAN}Summary:${NC}"
 echo "  Configuration: $CONFIGURATION"
 echo "  Solution: Datadog.MAUI.sln"
 
+echo -e "\n${CYAN}Next steps:${NC}"
 if [ "$CONFIGURATION" = "Release" ]; then
-    echo -e "\n${CYAN}Next steps:${NC}"
-    echo "  1. Test the packages locally"
-    echo "  2. Publish to NuGet: dotnet nuget push artifacts/packages/*.nupkg"
+    echo "  1. Create packages: ./scripts/pack.sh"
+    echo "  2. Test packages locally"
+    echo "  3. Publish to NuGet (see output of pack.sh for proper order)"
+else
+    echo "  1. Run tests: make test"
+    echo "  2. Build release: ./scripts/build.sh Release"
 fi
