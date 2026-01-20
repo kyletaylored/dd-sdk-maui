@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>net9.0-ios;net10.0-ios;net9.0-android;net10.0-android</TargetFrameworks>
     <UseMaui>true</UseMaui>
@@ -14,28 +13,30 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
 
-    <!-- Suppress MAUI warnings for library project -->
     <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
 
     <PackageId>Datadog.MAUI</PackageId>
     <Title>Datadog SDK for .NET MAUI</Title>
     <Description>Unofficial Datadog SDK for .NET MAUI applications. Provides Real User Monitoring (RUM), Log Collection, APM Tracing, Session Replay, and more for iOS and Android platforms.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <!-- Ensure plugin package version matches your binding set version -->
+    <DatadogSdkVersion Condition="'$(DatadogSdkVersion)' == ''">3.5.0</DatadogSdkVersion>
+    <Version>$(DatadogSdkVersion)</Version>
   </PropertyGroup>
 
-  <!-- iOS Binding References -->
-  <ItemGroup Condition="$(TargetFramework.Contains('-ios'))">
-    <ProjectReference Include="..\Datadog.MAUI.iOS.Binding\Datadog.MAUI.iOS.Binding.csproj" />
+  <!-- Android Binding meta-package (as a dependency, not a project build) -->
+  <ItemGroup Condition="$(TargetFramework.Contains('-android'))">
+    <PackageReference Include="Datadog.MAUI.Android.Binding" Version="$(DatadogSdkVersion)" />
   </ItemGroup>
 
-  <!-- Android Binding References -->
-  <ItemGroup Condition="$(TargetFramework.Contains('-android'))">
-    <ProjectReference Include="..\Datadog.MAUI.Android.Binding\Datadog.MAUI.Android.Binding.csproj" />
+  <!-- iOS Binding meta-package (same idea; when you have it published/packed locally) -->
+  <ItemGroup Condition="$(TargetFramework.Contains('-ios'))">
+    <PackageReference Include="Datadog.MAUI.iOS.Binding" Version="$(DatadogSdkVersion)" />
   </ItemGroup>
 
   <!-- Package README -->
   <ItemGroup>
     <None Include="..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
-
 </Project>

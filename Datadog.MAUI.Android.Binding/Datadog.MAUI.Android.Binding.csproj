@@ -1,11 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net9.0-android;net10.0-android</TargetFrameworks>
-    <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
 
-    <!-- Meta-package properties -->
+    <IsPackable>true</IsPackable>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+
     <PackageId>Datadog.MAUI.Android.Binding</PackageId>
     <Title>Datadog Android Bindings for .NET MAUI</Title>
     <Authors>Datadog</Authors>
@@ -13,22 +14,27 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/DataDog/dd-sdk-maui</RepositoryUrl>
     <PackageTags>.NET MAUI Android Datadog Mobile Binding RUM Logs Trace APM SessionReplay NDK</PackageTags>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 
-    <!-- This is a meta-package with no assemblies -->
-    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <!-- Optional but recommended: avoid warnings about missing lib/ files -->
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
   </PropertyGroup>
 
-  <!-- Reference all individual binding packages -->
+  <!-- Version for the dependency set -->
+  <PropertyGroup>
+    <!-- Use the same property you already have in Directory.Build.props -->
+    <DatadogSdkVersion Condition="'$(DatadogSdkVersion)' == ''">3.5.0</DatadogSdkVersion>
+  </PropertyGroup>
+
+  <!-- Meta-package dependencies: use PackageReference (NOT ProjectReference) -->
   <ItemGroup>
-    <ProjectReference Include="dd-sdk-android-internal\dd-sdk-android-internal.csproj" />
-    <ProjectReference Include="dd-sdk-android-core\dd-sdk-android-core.csproj" />
-    <ProjectReference Include="dd-sdk-android-rum\dd-sdk-android-rum.csproj" />
-    <ProjectReference Include="dd-sdk-android-logs\dd-sdk-android-logs.csproj" />
-    <ProjectReference Include="dd-sdk-android-trace\dd-sdk-android-trace.csproj" />
-    <ProjectReference Include="dd-sdk-android-ndk\dd-sdk-android-ndk.csproj" />
-    <ProjectReference Include="dd-sdk-android-session-replay\dd-sdk-android-session-replay.csproj" />
-    <ProjectReference Include="dd-sdk-android-webview\dd-sdk-android-webview.csproj" />
-    <ProjectReference Include="dd-sdk-android-flags\dd-sdk-android-flags.csproj" />
+    <PackageReference Include="Datadog.MAUI.Android.Internal" Version="$(DatadogSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.Android.Core" Version="$(DatadogSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.Android.Rum" Version="$(DatadogSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.Android.Logs" Version="$(DatadogSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.Android.Trace" Version="$(DatadogSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.Android.Ndk" Version="$(DatadogSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.Android.SessionReplay" Version="$(DatadogSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.Android.WebView" Version="$(DatadogSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.Android.Flags" Version="$(DatadogSdkVersion)" />
   </ItemGroup>
 </Project>

@@ -1,12 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net9.0-ios;net10.0-ios</TargetFrameworks>
-    <SupportedOSPlatformVersion>17.0</SupportedOSPlatformVersion>
-    <NoWarn>$(NoWarn);NETSDK1202</NoWarn>
+    <!-- Meta-package: do NOT target net*-ios, and do NOT produce assemblies -->
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
 
-    <!-- Meta-package properties -->
+    <IsPackable>true</IsPackable>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+
     <PackageId>Datadog.MAUI.iOS.Binding</PackageId>
     <Title>Datadog iOS Bindings for .NET MAUI</Title>
     <Authors>Datadog</Authors>
@@ -14,24 +15,27 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/DataDog/dd-sdk-maui</RepositoryUrl>
     <PackageTags>.NET MAUI iOS Datadog Mobile Binding RUM Logs Trace APM SessionReplay CrashReporting OpenTelemetry</PackageTags>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 
-    <!-- This is a meta-package with no assemblies -->
-    <IncludeBuildOutput>false</IncludeBuildOutput>
-    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <!-- Optional: avoid warnings about missing lib/ files -->
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
   </PropertyGroup>
 
-  <!-- Reference all individual binding packages -->
+  <!-- Version for the dependency set -->
+  <PropertyGroup>
+    <DatadogSdkVersion Condition="'$(DatadogSdkVersion)' == ''">3.5.0</DatadogSdkVersion>
+  </PropertyGroup>
+
+  <!-- Meta-package dependencies: use PackageReference (NOT ProjectReference) -->
   <ItemGroup>
-    <ProjectReference Include="DatadogInternal\DatadogInternal.csproj" />
-    <ProjectReference Include="DatadogCore\DatadogCore.csproj" />
-    <ProjectReference Include="DatadogRUM\DatadogRUM.csproj" />
-    <ProjectReference Include="DatadogLogs\DatadogLogs.csproj" />
-    <ProjectReference Include="DatadogTrace\DatadogTrace.csproj" />
-    <ProjectReference Include="DatadogCrashReporting\DatadogCrashReporting.csproj" />
-    <ProjectReference Include="DatadogSessionReplay\DatadogSessionReplay.csproj" />
-    <ProjectReference Include="DatadogWebViewTracking\DatadogWebViewTracking.csproj" />
-    <ProjectReference Include="DatadogFlags\DatadogFlags.csproj" />
-    <ProjectReference Include="OpenTelemetryApi\OpenTelemetryApi.csproj" />
+    <PackageReference Include="Datadog.MAUI.iOS.Internal" Version="$(DatadogSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.iOS.Core" Version="$(DatadogSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.iOS.RUM" Version="$(DatadogSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.iOS.Logs" Version="$(DatadogSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.iOS.Trace" Version="$(DatadogSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.iOS.CrashReporting" Version="$(DatadogSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.iOS.SessionReplay" Version="$(DatadogSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.iOS.WebViewTracking" Version="$(DatadogSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.iOS.Flags" Version="$(DatadogSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.iOS.OpenTelemetryApi" Version="$(DatadogSdkVersion)" />
   </ItemGroup>
 </Project>
