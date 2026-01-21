@@ -38,4 +38,15 @@
 
   <!-- Model classes that may be needed -->
   <attr path="/api/package[@name='com.datadog.android.trace.model']" name="visibility">public</attr>
+
+  <!-- OpenTracing API - expose the necessary interfaces -->
+  <attr path="/api/package[@name='io.opentracing']" name="visibility">public</attr>
+
+  <!-- Fix OpenTracing binding issues -->
+  <!-- Remove the entire io.opentracing.tag package - it has binding issues and we don't need it for basic tracing -->
+  <remove-node path="/api/package[@name='io.opentracing.tag']" />
+
+  <!-- Remove problematic util classes that have covariant return type issues -->
+  <remove-node path="/api/package[@name='io.opentracing.util']/class[@name='AutoFinishScopeManager']" />
+  <remove-node path="/api/package[@name='io.opentracing.util']/class[@name='ThreadLocalScopeManager']" />
 </metadata>

@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net9.0-android;net10.0-android</TargetFrameworks>
+    <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>true</ImplicitUsings>
+    <IsBindingProject>true</IsBindingProject>
+
+    <PackageId>Datadog.MAUI.Android.OpenTracingApi</PackageId>
+    <RootNamespace>Datadog.MAUI.Android.OpenTracingApi</RootNamespace>
+    <Authors>Datadog</Authors>
+    <Description>.NET bindings for OpenTracing API (io.opentracing:opentracing-api) used by Datadog Android SDK</Description>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/DataDog/dd-sdk-maui</RepositoryUrl>
+    <PackageTags>.NET MAUI Android Datadog OpenTracing Mobile Binding</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AndroidMavenLibrary Include="io.opentracing:opentracing-api" Version="0.32.0" VerifyDependencies="false" />
+    <AndroidMavenLibrary Include="io.opentracing:opentracing-noop" Version="0.32.0" VerifyDependencies="false" />
+    <AndroidMavenLibrary Include="io.opentracing:opentracing-util" Version="0.32.0" VerifyDependencies="false" />
+  </ItemGroup>
+
+  <!-- Metadata transforms for binding fixes -->
+  <ItemGroup>
+    <TransformFile Include="Transforms\Metadata.xml" />
+  </ItemGroup>
+</Project>

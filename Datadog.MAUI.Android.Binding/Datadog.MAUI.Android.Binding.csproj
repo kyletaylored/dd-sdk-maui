@@ -35,10 +35,10 @@
     <PackageReference Include="Datadog.MAUI.Android.Core" Version="$(DatadogSdkVersion)" />
 
     <!-- Feature packages -->
-    <PackageReference Include="Datadog.MAUI.Android.Rum" Version="$(DatadogSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.Android.RUM" Version="$(DatadogSdkVersion)" />
     <PackageReference Include="Datadog.MAUI.Android.Logs" Version="$(DatadogSdkVersion)" />
     <PackageReference Include="Datadog.MAUI.Android.Trace" Version="$(DatadogSdkVersion)" />
-    <PackageReference Include="Datadog.MAUI.Android.Ndk" Version="$(DatadogSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.Android.NDK" Version="$(DatadogSdkVersion)" />
     <PackageReference Include="Datadog.MAUI.Android.SessionReplay" Version="$(DatadogSdkVersion)" />
     <PackageReference Include="Datadog.MAUI.Android.WebView" Version="$(DatadogSdkVersion)" />
     <PackageReference Include="Datadog.MAUI.Android.Flags" Version="$(DatadogSdkVersion)" />
