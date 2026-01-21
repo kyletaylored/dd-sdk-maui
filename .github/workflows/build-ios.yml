@@ -398,9 +398,18 @@ jobs:
           ls -lh ./artifacts-combined/ || echo "No packages created"
         continue-on-error: true
 
+      - name: Verify combined packages before meta-package build
+        if: success()
+        run: |
+          echo "Checking artifacts-combined directory..."
+          ls -la ./artifacts-combined/ || echo "Directory does not exist"
+          echo "Package count: $(ls -1 ./artifacts-combined/*.nupkg 2>/dev/null | wc -l)"
+
       - name: Checkout repository for meta-package build
         if: success()
         uses: actions/checkout@v6
+        with:
+          path: repo
 
       - name: Setup .NET SDK 10 for meta-package
         if: success()
@@ -408,25 +417,15 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
-      - name: Install .NET iOS workload for meta-package
-        if: success()
-        run: dotnet workload install ios
-
-      - name: Add local NuGet source for meta-package
-        if: success()
-        run: |
-          LOCAL_SOURCE="$(pwd)/artifacts-combined"
-          echo "Adding local NuGet source: $LOCAL_SOURCE"
-          dotnet nuget add source "$LOCAL_SOURCE" --name local-packages
-
       - name: Build and pack iOS meta-package
         if: success()
         run: |
-          # Restore and pack the meta-package using combined packages
+          # Restore and pack the meta-package using combined packages from parent directory
           LOCAL_SOURCE="$(pwd)/artifacts-combined"
           echo "Restoring iOS meta-package from: $LOCAL_SOURCE"
-          dotnet restore Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj --source "$LOCAL_SOURCE" --source https://api.nuget.org/v3/index.json
-          dotnet pack Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj --configuration Release --output ./artifacts-combined --no-build
+          ls -la "$LOCAL_SOURCE/" || echo "Local source does not exist"
+          dotnet restore repo/Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj --source "$LOCAL_SOURCE" --source https://api.nuget.org/v3/index.json
+          dotnet pack repo/Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj --configuration Release --output ./artifacts-combined --no-build
         continue-on-error: true  # iOS bindings not complete yet
 
       - name: Upload combined iOS packages

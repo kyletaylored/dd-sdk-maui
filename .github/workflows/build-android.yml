@@ -295,8 +295,16 @@ jobs:
           echo "Combined packages:"
           ls -lh ./artifacts-combined/
 
+      - name: Verify combined packages before meta-package build
+        run: |
+          echo "Checking artifacts-combined directory..."
+          ls -la ./artifacts-combined/
+          echo "Package count: $(ls -1 ./artifacts-combined/*.nupkg 2>/dev/null | wc -l)"
+
       - name: Checkout repository for meta-package build
         uses: actions/checkout@v6
+        with:
+          path: repo
 
       - name: Setup .NET SDK 10 for meta-package
         uses: actions/setup-dotnet@v5
@@ -306,19 +314,14 @@ jobs:
       - name: Install .NET Android workload for meta-package
         run: dotnet workload install android
 
-      - name: Add local NuGet source for meta-package
-        run: |
-          LOCAL_SOURCE="$(pwd)/artifacts-combined"
-          echo "Adding local NuGet source: $LOCAL_SOURCE"
-          dotnet nuget add source "$LOCAL_SOURCE" --name local-packages
-
       - name: Build and pack meta-package
         run: |
-          # Restore and pack the meta-package using combined packages
+          # Restore and pack the meta-package using combined packages from parent directory
           LOCAL_SOURCE="$(pwd)/artifacts-combined"
           echo "Restoring meta-package from: $LOCAL_SOURCE"
-          dotnet restore Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.csproj --source "$LOCAL_SOURCE" --source https://api.nuget.org/v3/index.json
-          dotnet pack Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.csproj --configuration Release --output ./artifacts-combined --no-build
+          ls -la "$LOCAL_SOURCE/"
+          dotnet restore repo/Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.csproj --source "$LOCAL_SOURCE" --source https://api.nuget.org/v3/index.json
+          dotnet pack repo/Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.csproj --configuration Release --output ./artifacts-combined --no-build
 
       - name: Upload combined Android packages
         uses: actions/upload-artifact@v6
