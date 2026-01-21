@@ -2,7 +2,17 @@ name: Build Android Bindings
 
 on:
   workflow_call:  # Allow this workflow to be called by other workflows
+    inputs:
+      sdk-version:
+        description: 'SDK version to build (optional, reads from Directory.Build.props if not provided)'
+        required: false
+        type: string
   workflow_dispatch:  # Allow manual triggering
+    inputs:
+      sdk-version:
+        description: 'SDK version to build (optional, reads from Directory.Build.props if not provided)'
+        required: false
+        type: string
 
 env:
   JAVA_VERSION: '17'
@@ -20,14 +30,22 @@ jobs:
       - name: Get SDK version
         id: sdk-version
         run: |
-          VERSION=$(grep -oPm1 "(?<=<DatadogSdkVersion>)[^<]+" Directory.Build.props)
+          # Use input version if provided, otherwise read from Directory.Build.props
+          if [ -n "${{ inputs.sdk-version }}" ]; then
+            VERSION="${{ inputs.sdk-version }}"
+            echo "Using provided SDK version: $VERSION"
+          else
+            VERSION=$(grep -oPm1 "(?<=<DatadogSdkVersion>)[^<]+" Directory.Build.props)
+            echo "Read SDK version from Directory.Build.props: $VERSION"
+          fi
+
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Datadog Android SDK version: $VERSION"
 
       - name: Verify Java version
         run: |
           echo "Required Java version: ${{ env.JAVA_VERSION }}"
-          echo "This step ensures Android build requirements are met"
+          java -version 2>&1 | head -n 1
 
   # Build with .NET 9 for net9.0-android support
   build-android-net9:
@@ -148,7 +166,7 @@ jobs:
   build-android-net10:
     name: Build Android (net10.0-android)
     runs-on: ubuntu-latest
-    needs: verify-android-dependencies
+    needs: [verify-android-dependencies, build-android-net9]
 
     steps:
       - name: Checkout repository
@@ -203,6 +221,13 @@ jobs:
           key: ${{ runner.os }}-android-net10-packages-${{ steps.sdk-version.outputs.version }}-${{ hashFiles('Datadog.MAUI.Android.Binding/**/*.csproj') }}
           restore-keys: |
             ${{ runner.os }}-android-net10-packages-${{ steps.sdk-version.outputs.version }}-
+
+      - name: Download net9 artifacts for dependencies
+        if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
+        uses: actions/download-artifact@v7
+        with:
+          name: android-nuget-packages-net9
+          path: ./artifacts
 
       - name: Clean build artifacts
         if: steps.cache-nuget-net10.outputs.cache-hit != 'true'

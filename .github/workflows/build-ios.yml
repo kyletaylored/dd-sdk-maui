@@ -2,7 +2,17 @@ name: Build iOS Bindings
 
 on:
   workflow_call:  # Allow this workflow to be called by other workflows
+    inputs:
+      sdk-version:
+        description: 'SDK version to build (optional, reads from Directory.Build.props if not provided)'
+        required: false
+        type: string
   workflow_dispatch:  # Allow manual triggering
+    inputs:
+      sdk-version:
+        description: 'SDK version to build (optional, reads from Directory.Build.props if not provided)'
+        required: false
+        type: string
 
 env:
   XCODE_VERSION: '16.2'  # Must be one of https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md#xcode
@@ -17,12 +27,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Get Datadog SDK version from Directory.Build.props
+      - name: Get SDK version
         id: sdk-version
         run: |
-          VERSION=$(grep -E '<DatadogSdkVersion>.*</DatadogSdkVersion>' Directory.Build.props | sed 's/.*<DatadogSdkVersion>\(.*\)<\/DatadogSdkVersion>.*/\1/')
+          # Use input version if provided, otherwise read from Directory.Build.props
+          if [ -n "${{ inputs.sdk-version }}" ]; then
+            VERSION="${{ inputs.sdk-version }}"
+            echo "Using provided SDK version: $VERSION"
+          else
+            VERSION=$(grep -E '<DatadogSdkVersion>.*</DatadogSdkVersion>' Directory.Build.props | sed 's/.*<DatadogSdkVersion>\(.*\)<\/DatadogSdkVersion>.*/\1/')
+            echo "Read SDK version from Directory.Build.props: $VERSION"
+          fi
+
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Using Datadog iOS SDK version: $VERSION"
+          echo "Datadog iOS SDK version: $VERSION"
 
       - name: Cache XCFrameworks
         id: cache-xcframeworks

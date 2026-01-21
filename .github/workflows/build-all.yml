@@ -25,15 +25,114 @@ on:
     - cron: '0 9 * * 1'
 
 jobs:
+  # Verify SDK versions and alignment before building
+  verify-sdk-versions:
+    name: Verify SDK Versions
+    runs-on: ubuntu-latest
+    outputs:
+      sdk-version: ${{ steps.get-version.outputs.version }}
+      sdk-major-minor: ${{ steps.get-version.outputs.major-minor }}
+      ios-latest: ${{ steps.check-alignment.outputs.ios-latest }}
+      android-latest: ${{ steps.check-alignment.outputs.android-latest }}
+      versions-aligned: ${{ steps.check-alignment.outputs.aligned }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Get configured SDK version
+        id: get-version
+        run: |
+          VERSION=$(grep -oPm1 "(?<=<DatadogSdkVersion>)[^<]+" Directory.Build.props)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Configured Datadog SDK version: $VERSION"
+
+          # Extract major.minor version for comparison
+          MAJOR_MINOR=$(echo $VERSION | cut -d'.' -f1,2)
+          echo "major-minor=$MAJOR_MINOR" >> $GITHUB_OUTPUT
+          echo "Major.Minor version: $MAJOR_MINOR"
+
+      - name: Check iOS and Android SDK version alignment
+        id: check-alignment
+        run: |
+          echo "Checking iOS and Android SDK version alignment..."
+          echo ""
+
+          # Get latest dd-sdk-ios release
+          IOS_LATEST=$(curl -s https://api.github.com/repos/DataDog/dd-sdk-ios/releases/latest | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
+          IOS_VERSION=$(echo $IOS_LATEST | sed 's/^v//')
+          IOS_MAJOR_MINOR=$(echo $IOS_VERSION | cut -d'.' -f1,2)
+
+          echo "ios-latest=$IOS_VERSION" >> $GITHUB_OUTPUT
+          echo "Latest dd-sdk-ios release: $IOS_VERSION (major.minor: $IOS_MAJOR_MINOR)"
+
+          # Get latest dd-sdk-android release
+          ANDROID_LATEST=$(curl -s https://api.github.com/repos/DataDog/dd-sdk-android/releases/latest | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
+          ANDROID_VERSION=$(echo $ANDROID_LATEST | sed 's/^v//')
+          ANDROID_MAJOR_MINOR=$(echo $ANDROID_VERSION | cut -d'.' -f1,2)
+
+          echo "android-latest=$ANDROID_VERSION" >> $GITHUB_OUTPUT
+          echo "Latest dd-sdk-android release: $ANDROID_VERSION (major.minor: $ANDROID_MAJOR_MINOR)"
+          echo ""
+
+          # Compare major.minor versions
+          if [ "$IOS_MAJOR_MINOR" = "$ANDROID_MAJOR_MINOR" ]; then
+            echo "aligned=true" >> $GITHUB_OUTPUT
+            echo "✅ iOS and Android SDK versions are aligned (both $IOS_MAJOR_MINOR)"
+          else
+            echo "aligned=false" >> $GITHUB_OUTPUT
+            echo "⚠️  Warning: iOS ($IOS_MAJOR_MINOR) and Android ($ANDROID_MAJOR_MINOR) SDK versions differ"
+          fi
+
+          # Check if configured version matches latest
+          CONFIGURED_MAJOR_MINOR="${{ steps.get-version.outputs.major-minor }}"
+          echo ""
+          echo "Configured version: $CONFIGURED_MAJOR_MINOR"
+
+          if [ "$CONFIGURED_MAJOR_MINOR" = "$IOS_MAJOR_MINOR" ] && [ "$CONFIGURED_MAJOR_MINOR" = "$ANDROID_MAJOR_MINOR" ]; then
+            echo "✅ Configured version matches latest iOS and Android SDKs"
+          elif [ "$CONFIGURED_MAJOR_MINOR" = "$IOS_MAJOR_MINOR" ]; then
+            echo "✅ Configured version matches latest iOS SDK"
+            echo "ℹ️  Differs from latest Android SDK ($ANDROID_MAJOR_MINOR)"
+          elif [ "$CONFIGURED_MAJOR_MINOR" = "$ANDROID_MAJOR_MINOR" ]; then
+            echo "✅ Configured version matches latest Android SDK"
+            echo "ℹ️  Differs from latest iOS SDK ($IOS_MAJOR_MINOR)"
+          else
+            echo "ℹ️  Configured version differs from latest iOS ($IOS_MAJOR_MINOR) and Android ($ANDROID_MAJOR_MINOR) SDKs"
+          fi
+
+      - name: Generate version summary
+        run: |
+          echo "# SDK Version Information" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Configured Version**: ${{ steps.get-version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Latest Upstream Versions" >> $GITHUB_STEP_SUMMARY
+          echo "- **iOS**: ${{ steps.check-alignment.outputs.ios-latest }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Android**: ${{ steps.check-alignment.outputs.android-latest }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.check-alignment.outputs.aligned }}" = "true" ]; then
+            echo "✅ **Status**: iOS and Android versions are aligned" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ **Status**: iOS and Android versions differ" >> $GITHUB_STEP_SUMMARY
+          fi
+
   # Call the Android build workflow
   build-android:
     name: Build Android
+    needs: verify-sdk-versions
     uses: ./.github/workflows/build-android.yml
+    with:
+      sdk-version: ${{ needs.verify-sdk-versions.outputs.sdk-version }}
 
   # Call the iOS build workflow
   build-ios:
     name: Build iOS
+    needs: verify-sdk-versions
     uses: ./.github/workflows/build-ios.yml
+    with:
+      sdk-version: ${{ needs.verify-sdk-versions.outputs.sdk-version }}
 
   # Validate all builds completed successfully
   validate-builds:
