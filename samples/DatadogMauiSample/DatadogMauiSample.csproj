@@ -38,6 +38,17 @@
 		<AndroidVerifyJavaDependencies>false</AndroidVerifyJavaDependencies>
 	</PropertyGroup>
 
+	<!-- Android Release configuration with R8 code shrinking -->
+	<PropertyGroup Condition="$(TargetFramework.Contains('android')) And '$(Configuration)' == 'Release'">
+		<!-- Enable R8 code shrinker to generate mapping files -->
+		<AndroidEnableR8>True</AndroidEnableR8>
+		<AndroidLinkTool>r8</AndroidLinkTool>
+		<AndroidLinkMode>SdkOnly</AndroidLinkMode>
+		<AndroidPackageFormat>aab</AndroidPackageFormat>
+		<!-- Disable Java dependency verification - Kotlin stdlib is embedded in Datadog SDK AARs -->
+		<AndroidVerifyJavaDependencies>false</AndroidVerifyJavaDependencies>
+	</PropertyGroup>
+
 	<!-- Custom target to remove duplicate tracing AAR before dex compilation -->
 	<Target Name="RemoveDuplicateTracingAAR" BeforeTargets="_CompileToDalvik" Condition="'$(TargetFramework)' == 'net10.0-android'">
 		<Exec Command="find $(IntermediateOutputPath)lp -type d -name '12*' -o -name '16*' | while read dir; do if [ -f &quot;$$dir/jl/classes.jar&quot; ] &amp;&amp; unzip -l &quot;$$dir/jl/classes.jar&quot; 2&gt;/dev/null | grep -q 'androidx/tracing/TraceKt.class' &amp;&amp; echo &quot;$$dir&quot; | grep -q '/12'; then echo &quot;Removing duplicate tracing-android from $$dir&quot;; rm -rf &quot;$$dir/jl/classes.jar&quot;; fi; done"

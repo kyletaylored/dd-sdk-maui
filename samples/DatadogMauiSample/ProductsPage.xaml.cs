@@ -72,7 +72,7 @@ public partial class ProductsPage : ContentPage
             var duration = (DateTime.UtcNow - startTime).TotalMilliseconds;
             Rum.AddTiming($"products_load_time");
 
-            _logger.Info($"Successfully loaded {_products.Count} products in {duration}ms", new Dictionary<string, object>
+            _logger.Info($"Successfully loaded {_products.Count} products in {duration}ms", null, new Dictionary<string, object>
             {
                 { "product_count", _products.Count },
                 { "load_duration_ms", duration }
@@ -97,7 +97,7 @@ public partial class ProductsPage : ContentPage
                 }
             );
 
-            _logger.Error($"Error loading products: {ex.Message}", new Dictionary<string, object>
+            _logger.Error($"Error loading products: {ex.Message}", ex, new Dictionary<string, object>
             {
                 { "error_type", ex.GetType().Name },
                 { "stack_trace", ex.StackTrace ?? "N/A" }
@@ -124,7 +124,7 @@ public partial class ProductsPage : ContentPage
                 { "product_price", product.Price }
             });
 
-            _logger.Debug($"Product selected: {product.Name}", new Dictionary<string, object>
+            _logger.Debug($"Product selected: {product.Name}", null, new Dictionary<string, object>
             {
                 { "product_id", product.Id },
                 { "price", product.Price }

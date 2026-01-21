@@ -13,7 +13,7 @@
     <PackageId>Datadog.MAUI.Android.Binding</PackageId>
     <Title>Datadog Android Bindings for .NET MAUI</Title>
     <Authors>Datadog</Authors>
-    <Description>Complete .NET bindings for Datadog Android SDK - includes all core, feature, and integration modules (Internal, Core, RUM, Logs, Trace, NDK, SessionReplay, WebView, Flags, OkHttp, OpenTelemetry, Gradle Plugin). This is a convenience meta-package that references all individual Datadog.MAUI.Android.* packages.</Description>
+    <Description>Complete .NET bindings for Datadog Android SDK - includes all core, feature, and integration modules (Internal, Core, RUM, Logs, Trace, NDK, SessionReplay, WebView, Flags, OkHttp, OpenTelemetry). This is a convenience meta-package that references all individual Datadog.MAUI.Android.* packages.</Description>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/DataDog/dd-sdk-maui</RepositoryUrl>
     <PackageTags>.NET MAUI Android Datadog Mobile Binding RUM Logs Trace APM SessionReplay NDK OkHttp OpenTelemetry OTel</PackageTags>
@@ -49,7 +49,7 @@
     <PackageReference Include="Datadog.MAUI.Android.Trace.OpenTelemetry" Version="$(DatadogSdkVersion)" />
     <PackageReference Include="Datadog.MAUI.Android.OkHttp.OpenTelemetry" Version="$(DatadogSdkVersion)" />
 
-    <!-- Build-time tools (Gradle Plugin uses separate versioning) -->
-    <PackageReference Include="Datadog.MAUI.Android.GradlePlugin" Version="1.9.0" />
+    <!-- Note: Gradle Plugin is not included as it's incompatible with MAUI's MSBuild system.
+         For mapping file uploads, use datadog-ci CLI or Datadog API directly. -->
   </ItemGroup>
 </Project>
