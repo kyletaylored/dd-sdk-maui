@@ -518,9 +518,6 @@ jobs:
             exit 1
           fi
 
-      - name: Add local NuGet source
-        run: dotnet nuget add source $PWD/artifacts --name local
-
       - name: Restore MAUI workloads for sample app
         run: dotnet workload restore samples/DatadogMauiSample/DatadogMauiSample.csproj
 

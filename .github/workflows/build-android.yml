@@ -126,7 +126,7 @@ jobs:
           EOF
 
           # Restore individual packages using temp config (skips ./artifacts, uses nuget.org for external deps)
-          for dir in Datadog.MAUI.Android.Binding/dd-sdk-android-*; do
+          for dir in Datadog.MAUI.Android.Binding/dd-sdk-android-* Datadog.MAUI.Android.Binding/opentracing-api; do
             if [ -d "$dir" ]; then
               echo "Restoring $(basename $dir)..."
               dotnet restore "$dir" -p:TargetFrameworks=net9.0-android --configfile /tmp/nuget.temp.config
@@ -137,7 +137,7 @@ jobs:
         if: steps.cache-nuget-net9.outputs.cache-hit != 'true'
         run: |
           # Build individual packages, skip meta-package
-          for dir in Datadog.MAUI.Android.Binding/dd-sdk-android-*; do
+          for dir in Datadog.MAUI.Android.Binding/dd-sdk-android-* Datadog.MAUI.Android.Binding/opentracing-api; do
             if [ -d "$dir" ]; then
               echo "Building $(basename $dir)..."
               dotnet build "$dir" --configuration Release --no-restore -p:TargetFrameworks=net9.0-android
@@ -148,7 +148,7 @@ jobs:
         if: steps.cache-nuget-net9.outputs.cache-hit != 'true'
         run: |
           # Pack individual packages (excluding meta-package)
-          for dir in Datadog.MAUI.Android.Binding/dd-sdk-android-*; do
+          for dir in Datadog.MAUI.Android.Binding/dd-sdk-android-* Datadog.MAUI.Android.Binding/opentracing-api; do
             if [ -d "$dir" ]; then
               echo "Packing $(basename $dir)..."
               dotnet pack "$dir" --configuration Release --no-build --output ./artifacts-net9 -p:TargetFrameworks=net9.0-android
@@ -252,7 +252,7 @@ jobs:
           EOF
 
           # Restore individual packages using temp config (skips ./artifacts, uses nuget.org for external deps)
-          for dir in Datadog.MAUI.Android.Binding/dd-sdk-android-*; do
+          for dir in Datadog.MAUI.Android.Binding/dd-sdk-android-* Datadog.MAUI.Android.Binding/opentracing-api; do
             if [ -d "$dir" ]; then
               echo "Restoring $(basename $dir)..."
               dotnet restore "$dir" -p:TargetFrameworks=net10.0-android --configfile /tmp/nuget.temp.config
@@ -263,7 +263,7 @@ jobs:
         if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
         run: |
           # Build individual packages, skip meta-package
-          for dir in Datadog.MAUI.Android.Binding/dd-sdk-android-*; do
+          for dir in Datadog.MAUI.Android.Binding/dd-sdk-android-* Datadog.MAUI.Android.Binding/opentracing-api; do
             if [ -d "$dir" ]; then
               echo "Building $(basename $dir)..."
               dotnet build "$dir" --configuration Release --no-restore -p:TargetFrameworks=net10.0-android
@@ -274,7 +274,7 @@ jobs:
         if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
         run: |
           # Pack individual packages (excluding meta-package)
-          for dir in Datadog.MAUI.Android.Binding/dd-sdk-android-*; do
+          for dir in Datadog.MAUI.Android.Binding/dd-sdk-android-* Datadog.MAUI.Android.Binding/opentracing-api; do
             if [ -d "$dir" ]; then
               echo "Packing $(basename $dir)..."
               dotnet pack "$dir" --configuration Release --no-build --output ./artifacts-net10 -p:TargetFrameworks=net10.0-android
@@ -444,9 +444,6 @@ jobs:
           VERSION=$(echo "$PACKAGE" | grep -oP '\d+\.\d+\.\d+' | head -1)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Detected version: $VERSION from package: $PACKAGE"
-
-      - name: Add local NuGet source
-        run: dotnet nuget add source $PWD/artifacts --name local
 
       - name: Restore MAUI workloads for sample app
         run: dotnet workload restore samples/DatadogMauiSample/DatadogMauiSample.csproj
