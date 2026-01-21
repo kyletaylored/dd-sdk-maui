@@ -65,103 +65,6 @@ jobs:
           if-no-files-found: ignore
           retention-days: 3
 
-  # Build with .NET 8 for net8.0-ios support
-  build-ios-net8:
-    name: Build iOS (net8.0-ios)
-    runs-on: macos-26
-    needs: download-xcframeworks
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Download XCFrameworks
-        uses: actions/download-artifact@v7
-        with:
-          name: ios-xcframeworks
-          path: Datadog.MAUI.iOS.Binding/artifacts/
-
-      - name: Verify XCFrameworks
-        run: ls -la Datadog.MAUI.iOS.Binding/artifacts/
-
-      - name: Setup .NET SDK 8
-        uses: actions/setup-dotnet@v5
-        id: setup-dotnet-8
-        with:
-          dotnet-version: 8.0.x
-
-      - name: Create temporary global.json for SDK 8
-        run: echo '{"sdk":{"version":"${{ steps.setup-dotnet-8.outputs.dotnet-version }}","rollForward":"latestPatch"}}' > ./global.json
-
-      - name: Verify SDK version
-        run: dotnet --version
-
-      - name: Cache .NET workloads
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.dotnet/sdk-manifests
-            ~/.dotnet/metadata
-            ~/.dotnet/workloadsets
-            ~/.nuget/packages
-          key: ${{ runner.os }}-dotnet-workload-ios-${{ steps.setup-dotnet-8.outputs.dotnet-version }}
-          restore-keys: |
-            ${{ runner.os }}-dotnet-workload-ios-
-
-      - name: Install .NET iOS workload
-        run: dotnet workload install ios
-
-      - name: Get SDK version for cache key
-        id: sdk-version
-        run: |
-          VERSION=$(grep -E '<DatadogSdkVersion>.*</DatadogSdkVersion>' Directory.Build.props | sed 's/.*<DatadogSdkVersion>\(.*\)<\/DatadogSdkVersion>.*/\1/')
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Cache NuGet packages (net8.0-ios)
-        id: cache-nuget-net8
-        uses: actions/cache@v5
-        with:
-          path: ./artifacts-net8/*.nupkg
-          key: ${{ runner.os }}-ios-net8-packages-${{ steps.sdk-version.outputs.version }}-${{ hashFiles('Datadog.MAUI.iOS.Binding/**/*.csproj') }}
-          restore-keys: |
-            ${{ runner.os }}-ios-net8-packages-${{ steps.sdk-version.outputs.version }}-
-
-      - name: Restore dependencies
-        if: steps.cache-nuget-net8.outputs.cache-hit != 'true'
-        run: |
-          dotnet workload restore Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj
-          dotnet restore Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj
-
-      - name: Build iOS bindings (net8.0-ios)
-        if: steps.cache-nuget-net8.outputs.cache-hit != 'true'
-        run: dotnet build Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj --configuration Release --no-restore -p:TargetFrameworks=net8.0-ios
-        continue-on-error: true  # iOS bindings not complete yet
-
-      - name: Pack NuGet packages (net8.0-ios)
-        if: steps.cache-nuget-net8.outputs.cache-hit != 'true'
-        run: dotnet pack Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj --configuration Release --no-build --output ./artifacts-net8 -p:TargetFrameworks=net8.0-ios
-        continue-on-error: true  # iOS bindings not complete yet
-
-      - name: Upload net8.0-ios packages
-        if: success()
-        uses: actions/upload-artifact@v6
-        with:
-          name: ios-nuget-packages-net8
-          path: ./artifacts-net8/*.nupkg
-          if-no-files-found: warn
-          retention-days: 7
-
-      - name: Upload build logs on failure
-        if: failure()
-        uses: actions/upload-artifact@v6
-        with:
-          name: ios-net8-build-logs
-          path: |
-            **/*.binlog
-            **/bin/**/*.log
-          if-no-files-found: ignore
-          retention-days: 3
-
   # Build with .NET 9 for net9.0-ios support
   build-ios-net9:
     name: Build iOS (net9.0-ios)
@@ -360,7 +263,7 @@ jobs:
   combine-ios-packages:
     name: Combine iOS Packages
     runs-on: ubuntu-latest
-    needs: [build-ios-net8, build-ios-net9, build-ios-net10]
+    needs: [build-ios-net9, build-ios-net10]
     if: success() || failure()  # Run even if builds failed (iOS incomplete)
 
     steps:
@@ -369,14 +272,6 @@ jobs:
         run: |
           echo "Checking for iOS packages..."
           echo "packages_exist=false" >> $GITHUB_OUTPUT
-
-      - name: Download net8.0-ios packages
-        if: success()
-        uses: actions/download-artifact@v7
-        with:
-          name: ios-nuget-packages-net8
-          path: ./artifacts-net8
-        continue-on-error: true
 
       - name: Download net9.0-ios packages
         if: success()
@@ -400,13 +295,13 @@ jobs:
           mkdir -p ./artifacts-combined
           mkdir -p ./temp-extract
 
-          # Check if we have any packages to combine (try net8 first, then net9)
-          if [ -d "./artifacts-net8" ] && [ -n "$(ls -A ./artifacts-net8/*.nupkg 2>/dev/null)" ]; then
-            BASE_DIR="./artifacts-net8"
-            echo "Using net8.0-ios as base"
-          elif [ -d "./artifacts-net9" ] && [ -n "$(ls -A ./artifacts-net9/*.nupkg 2>/dev/null)" ]; then
+          # Check if we have any packages to combine (try net9 first, then net10)
+          if [ -d "./artifacts-net9" ] && [ -n "$(ls -A ./artifacts-net9/*.nupkg 2>/dev/null)" ]; then
             BASE_DIR="./artifacts-net9"
             echo "Using net9.0-ios as base"
+          elif [ -d "./artifacts-net10" ] && [ -n "$(ls -A ./artifacts-net10/*.nupkg 2>/dev/null)" ]; then
+            BASE_DIR="./artifacts-net10"
+            echo "Using net10.0-ios as base"
           else
             echo "No iOS packages found, skipping combine"
             exit 0
@@ -417,7 +312,6 @@ jobs:
             pkg_name=$(basename "$base_pkg" | sed 's/\.[0-9]\+\.[0-9]\+\.[0-9]\+.*\.nupkg$//')
             version=$(basename "$base_pkg" | sed -n 's/.*\.\([0-9]\+\.[0-9]\+\.[0-9]\+[^.]*\)\.nupkg$/\1/p')
 
-            net8_pkg="./artifacts-net8/${pkg_name}.${version}.nupkg"
             net9_pkg="./artifacts-net9/${pkg_name}.${version}.nupkg"
             net10_pkg="./artifacts-net10/${pkg_name}.${version}.nupkg"
 
@@ -425,18 +319,6 @@ jobs:
 
             # Extract base package
             unzip -q "$base_pkg" -d "./temp-extract/base"
-
-            # Copy net8.0-ios if it exists and we're not already using it as base
-            if [ -f "$net8_pkg" ] && [ "$BASE_DIR" != "./artifacts-net8" ]; then
-              unzip -q "$net8_pkg" -d "./temp-extract/net8"
-              for net8_dir in "./temp-extract/net8/lib"/net8.0-ios*; do
-                if [ -d "$net8_dir" ]; then
-                  cp -r "$net8_dir" "./temp-extract/base/lib/"
-                  echo "  Copied net8.0-ios framework"
-                fi
-              done
-              rm -rf "./temp-extract/net8"
-            fi
 
             # Copy net9.0-ios if it exists and we're not already using it as base
             if [ -f "$net9_pkg" ] && [ "$BASE_DIR" != "./artifacts-net9" ]; then
@@ -450,8 +332,8 @@ jobs:
               rm -rf "./temp-extract/net9"
             fi
 
-            # Copy net10.0-ios if it exists
-            if [ -f "$net10_pkg" ]; then
+            # Copy net10.0-ios if it exists and we're not already using it as base
+            if [ -f "$net10_pkg" ] && [ "$BASE_DIR" != "./artifacts-net10" ]; then
               unzip -q "$net10_pkg" -d "./temp-extract/net10"
               for net10_dir in "./temp-extract/net10/lib"/net10.0-ios*; do
                 if [ -d "$net10_dir" ]; then
@@ -493,7 +375,6 @@ jobs:
             echo "✅ iOS packages built successfully" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "Target frameworks included:" >> $GITHUB_STEP_SUMMARY
-            echo "- net8.0-ios" >> $GITHUB_STEP_SUMMARY
             echo "- net9.0-ios" >> $GITHUB_STEP_SUMMARY
             echo "- net10.0-ios" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY

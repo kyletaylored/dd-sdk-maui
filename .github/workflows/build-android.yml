@@ -71,19 +71,38 @@ jobs:
         if: steps.cache-nuget-net9.outputs.cache-hit != 'true'
         run: dotnet clean Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln --configuration Release -p:TargetFrameworks=net9.0-android
 
-      - name: Restore dependencies
+      - name: Restore dependencies (individual packages only)
         if: steps.cache-nuget-net9.outputs.cache-hit != 'true'
         run: |
-          dotnet workload restore Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln -p:TargetFrameworks=net9.0-android
-          dotnet restore Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln -p:TargetFrameworks=net9.0-android
+          # Restore individual packages, skip meta-package
+          for dir in Datadog.MAUI.Android.Binding/dd-sdk-android-*; do
+            if [ -d "$dir" ]; then
+              echo "Restoring $(basename $dir)..."
+              dotnet restore "$dir" -p:TargetFrameworks=net9.0-android
+            fi
+          done
 
       - name: Build Android bindings (net9.0-android)
         if: steps.cache-nuget-net9.outputs.cache-hit != 'true'
-        run: dotnet build Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln --configuration Release --no-restore --verbosity minimal -p:TargetFrameworks=net9.0-android
+        run: |
+          # Build individual packages, skip meta-package
+          for dir in Datadog.MAUI.Android.Binding/dd-sdk-android-*; do
+            if [ -d "$dir" ]; then
+              echo "Building $(basename $dir)..."
+              dotnet build "$dir" --configuration Release --no-restore -p:TargetFrameworks=net9.0-android
+            fi
+          done
 
       - name: Pack NuGet packages (net9.0-android)
         if: steps.cache-nuget-net9.outputs.cache-hit != 'true'
-        run: dotnet pack Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln --configuration Release --no-build --output ./artifacts-net9 -p:TargetFrameworks=net9.0-android
+        run: |
+          # Pack individual packages (excluding meta-package)
+          for dir in Datadog.MAUI.Android.Binding/dd-sdk-android-*; do
+            if [ -d "$dir" ]; then
+              echo "Packing $(basename $dir)..."
+              dotnet pack "$dir" --configuration Release --no-build --output ./artifacts-net9 -p:TargetFrameworks=net9.0-android
+            fi
+          done
 
       - name: Upload net9.0-android packages
         uses: actions/upload-artifact@v6
@@ -166,19 +185,38 @@ jobs:
         if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
         run: dotnet clean Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln --configuration Release -p:TargetFrameworks=net10.0-android
 
-      - name: Restore dependencies
+      - name: Restore dependencies (individual packages only)
         if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
         run: |
-          dotnet workload restore Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln -p:TargetFrameworks=net10.0-android
-          dotnet restore Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln -p:TargetFrameworks=net10.0-android
+          # Restore individual packages, skip meta-package
+          for dir in Datadog.MAUI.Android.Binding/dd-sdk-android-*; do
+            if [ -d "$dir" ]; then
+              echo "Restoring $(basename $dir)..."
+              dotnet restore "$dir" -p:TargetFrameworks=net10.0-android
+            fi
+          done
 
       - name: Build Android bindings (net10.0-android)
         if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
-        run: dotnet build Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln --configuration Release --no-restore --verbosity minimal -p:TargetFrameworks=net10.0-android
+        run: |
+          # Build individual packages, skip meta-package
+          for dir in Datadog.MAUI.Android.Binding/dd-sdk-android-*; do
+            if [ -d "$dir" ]; then
+              echo "Building $(basename $dir)..."
+              dotnet build "$dir" --configuration Release --no-restore -p:TargetFrameworks=net10.0-android
+            fi
+          done
 
       - name: Pack NuGet packages (net10.0-android)
         if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
-        run: dotnet pack Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln --configuration Release --no-build --output ./artifacts-net10 -p:TargetFrameworks=net10.0-android
+        run: |
+          # Pack individual packages (excluding meta-package)
+          for dir in Datadog.MAUI.Android.Binding/dd-sdk-android-*; do
+            if [ -d "$dir" ]; then
+              echo "Packing $(basename $dir)..."
+              dotnet pack "$dir" --configuration Release --no-build --output ./artifacts-net10 -p:TargetFrameworks=net10.0-android
+            fi
+          done
 
       - name: Upload net10.0-android packages
         uses: actions/upload-artifact@v6
@@ -256,6 +294,26 @@ jobs:
           echo ""
           echo "Combined packages:"
           ls -lh ./artifacts-combined/
+
+      - name: Checkout repository for meta-package build
+        uses: actions/checkout@v6
+
+      - name: Setup .NET SDK 10 for meta-package
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install .NET Android workload for meta-package
+        run: dotnet workload install android
+
+      - name: Add local NuGet source for meta-package
+        run: dotnet nuget add source $PWD/artifacts-combined --name local-packages
+
+      - name: Build and pack meta-package
+        run: |
+          # Restore and pack the meta-package using combined packages
+          dotnet restore Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.csproj --source local-packages --source https://api.nuget.org/v3/index.json
+          dotnet pack Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.csproj --configuration Release --output ./artifacts-combined --no-build
 
       - name: Upload combined Android packages
         uses: actions/upload-artifact@v6
