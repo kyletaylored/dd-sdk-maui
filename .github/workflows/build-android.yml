@@ -307,12 +307,17 @@ jobs:
         run: dotnet workload install android
 
       - name: Add local NuGet source for meta-package
-        run: dotnet nuget add source $PWD/artifacts-combined --name local-packages
+        run: |
+          LOCAL_SOURCE="$(pwd)/artifacts-combined"
+          echo "Adding local NuGet source: $LOCAL_SOURCE"
+          dotnet nuget add source "$LOCAL_SOURCE" --name local-packages
 
       - name: Build and pack meta-package
         run: |
           # Restore and pack the meta-package using combined packages
-          dotnet restore Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.csproj --source local-packages --source https://api.nuget.org/v3/index.json
+          LOCAL_SOURCE="$(pwd)/artifacts-combined"
+          echo "Restoring meta-package from: $LOCAL_SOURCE"
+          dotnet restore Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.csproj --source "$LOCAL_SOURCE" --source https://api.nuget.org/v3/index.json
           dotnet pack Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.csproj --configuration Release --output ./artifacts-combined --no-build
 
       - name: Upload combined Android packages

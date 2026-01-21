@@ -126,20 +126,40 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-ios-net9-packages-${{ steps.sdk-version.outputs.version }}-
 
-      - name: Restore dependencies
+      - name: Restore dependencies (individual packages only)
         if: steps.cache-nuget-net9.outputs.cache-hit != 'true'
         run: |
-          dotnet workload restore Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj
-          dotnet restore Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj
+          # Restore individual packages, skip meta-package
+          for dir in Datadog.MAUI.iOS.Binding/Datadog*; do
+            if [ -d "$dir" ] && [ -f "$dir"/*.csproj ] && [[ "$(basename $dir)" != "Datadog.MAUI.iOS.Binding" ]]; then
+              echo "Restoring $(basename $dir)..."
+              dotnet restore "$dir" -p:TargetFrameworks=net9.0-ios
+            fi
+          done
+        continue-on-error: true  # iOS bindings not complete yet
 
       - name: Build iOS bindings (net9.0-ios)
         if: steps.cache-nuget-net9.outputs.cache-hit != 'true'
-        run: dotnet build Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj --configuration Release --no-restore -p:TargetFrameworks=net9.0-ios
+        run: |
+          # Build individual packages, skip meta-package
+          for dir in Datadog.MAUI.iOS.Binding/Datadog*; do
+            if [ -d "$dir" ] && [ -f "$dir"/*.csproj ] && [[ "$(basename $dir)" != "Datadog.MAUI.iOS.Binding" ]]; then
+              echo "Building $(basename $dir)..."
+              dotnet build "$dir" --configuration Release --no-restore -p:TargetFrameworks=net9.0-ios
+            fi
+          done
         continue-on-error: true  # iOS bindings not complete yet
 
       - name: Pack NuGet packages (net9.0-ios)
         if: steps.cache-nuget-net9.outputs.cache-hit != 'true'
-        run: dotnet pack Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj --configuration Release --no-build --output ./artifacts-net9 -p:TargetFrameworks=net9.0-ios
+        run: |
+          # Pack individual packages (excluding meta-package)
+          for dir in Datadog.MAUI.iOS.Binding/Datadog*; do
+            if [ -d "$dir" ] && [ -f "$dir"/*.csproj ] && [[ "$(basename $dir)" != "Datadog.MAUI.iOS.Binding" ]]; then
+              echo "Packing $(basename $dir)..."
+              dotnet pack "$dir" --configuration Release --no-build --output ./artifacts-net9 -p:TargetFrameworks=net9.0-ios
+            fi
+          done
         continue-on-error: true  # iOS bindings not complete yet
 
       - name: Upload net9.0-ios packages
@@ -223,20 +243,40 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-ios-net10-packages-${{ steps.sdk-version.outputs.version }}-
 
-      - name: Restore dependencies
+      - name: Restore dependencies (individual packages only)
         if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
         run: |
-          dotnet workload restore Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj
-          dotnet restore Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj
+          # Restore individual packages, skip meta-package
+          for dir in Datadog.MAUI.iOS.Binding/Datadog*; do
+            if [ -d "$dir" ] && [ -f "$dir"/*.csproj ] && [[ "$(basename $dir)" != "Datadog.MAUI.iOS.Binding" ]]; then
+              echo "Restoring $(basename $dir)..."
+              dotnet restore "$dir" -p:TargetFrameworks=net10.0-ios
+            fi
+          done
+        continue-on-error: true  # iOS bindings not complete yet
 
       - name: Build iOS bindings (net10.0-ios)
         if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
-        run: dotnet build Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj --configuration Release --no-restore -p:TargetFrameworks=net10.0-ios
+        run: |
+          # Build individual packages, skip meta-package
+          for dir in Datadog.MAUI.iOS.Binding/Datadog*; do
+            if [ -d "$dir" ] && [ -f "$dir"/*.csproj ] && [[ "$(basename $dir)" != "Datadog.MAUI.iOS.Binding" ]]; then
+              echo "Building $(basename $dir)..."
+              dotnet build "$dir" --configuration Release --no-restore -p:TargetFrameworks=net10.0-ios
+            fi
+          done
         continue-on-error: true  # iOS bindings not complete yet
 
       - name: Pack NuGet packages (net10.0-ios)
         if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
-        run: dotnet pack Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj --configuration Release --no-build --output ./artifacts-net10 -p:TargetFrameworks=net10.0-ios
+        run: |
+          # Pack individual packages (excluding meta-package)
+          for dir in Datadog.MAUI.iOS.Binding/Datadog*; do
+            if [ -d "$dir" ] && [ -f "$dir"/*.csproj ] && [[ "$(basename $dir)" != "Datadog.MAUI.iOS.Binding" ]]; then
+              echo "Packing $(basename $dir)..."
+              dotnet pack "$dir" --configuration Release --no-build --output ./artifacts-net10 -p:TargetFrameworks=net10.0-ios
+            fi
+          done
         continue-on-error: true  # iOS bindings not complete yet
 
       - name: Upload net10.0-ios packages
@@ -357,6 +397,37 @@ jobs:
           echo "Combined packages:"
           ls -lh ./artifacts-combined/ || echo "No packages created"
         continue-on-error: true
+
+      - name: Checkout repository for meta-package build
+        if: success()
+        uses: actions/checkout@v6
+
+      - name: Setup .NET SDK 10 for meta-package
+        if: success()
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install .NET iOS workload for meta-package
+        if: success()
+        run: dotnet workload install ios
+
+      - name: Add local NuGet source for meta-package
+        if: success()
+        run: |
+          LOCAL_SOURCE="$(pwd)/artifacts-combined"
+          echo "Adding local NuGet source: $LOCAL_SOURCE"
+          dotnet nuget add source "$LOCAL_SOURCE" --name local-packages
+
+      - name: Build and pack iOS meta-package
+        if: success()
+        run: |
+          # Restore and pack the meta-package using combined packages
+          LOCAL_SOURCE="$(pwd)/artifacts-combined"
+          echo "Restoring iOS meta-package from: $LOCAL_SOURCE"
+          dotnet restore Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj --source "$LOCAL_SOURCE" --source https://api.nuget.org/v3/index.json
+          dotnet pack Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj --configuration Release --output ./artifacts-combined --no-build
+        continue-on-error: true  # iOS bindings not complete yet
 
       - name: Upload combined iOS packages
         if: success()
