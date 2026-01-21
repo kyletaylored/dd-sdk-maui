@@ -10,10 +10,10 @@ public static partial class Datadog
 {
     static partial void PlatformInitialize(DatadogConfiguration configuration)
     {
-        var context = Application.Context;
+        var context = Android.App.Application.Context;
 
         // Build native configuration
-        var configBuilder = new Configuration.Builder(
+        var configBuilder = new Com.Datadog.Android.Core.Configuration.Configuration.Builder(
             configuration.ClientToken,
             configuration.Environment,
             string.Empty, // variant
@@ -30,8 +30,8 @@ public static partial class Datadog
         }
 
         // Set batch upload configuration
-        configBuilder.SetBatchSize(BatchSize.Medium);
-        configBuilder.SetUploadFrequency(UploadFrequency.Average);
+        configBuilder.SetBatchSize(Com.Datadog.Android.Core.Configuration.BatchSize.Medium);
+        configBuilder.SetUploadFrequency(Com.Datadog.Android.Core.Configuration.UploadFrequency.Average);
 
         var nativeConfig = configBuilder.Build();
 
@@ -47,7 +47,7 @@ public static partial class Datadog
         // Apply global tags
         foreach (var tag in configuration.GlobalTags)
         {
-            Com.Datadog.Android.Datadog.AddRumGlobalAttribute(tag.Key, tag.Value);
+            Com.Datadog.Android.Rum.GlobalRumMonitor.Get().AddAttribute(tag.Key, new Java.Lang.String(tag.Value));
         }
 
         // Enable RUM if configured
@@ -75,8 +75,13 @@ public static partial class Datadog
 
         rumConfigBuilder.SetSessionSampleRate((float)rumConfig.SessionSampleRate);
         rumConfigBuilder.SetTelemetrySampleRate((float)rumConfig.TelemetrySampleRate);
-        rumConfigBuilder.TrackUserInteractions(rumConfig.TrackUserInteractions);
-        rumConfigBuilder.TrackLongTasks(true);
+
+        if (rumConfig.TrackUserInteractions)
+        {
+            rumConfigBuilder.TrackUserInteractions();
+        }
+
+        rumConfigBuilder.TrackLongTasks();
 
         if (rumConfig.VitalsUpdateFrequency != VitalsUpdateFrequency.Never)
         {
@@ -90,8 +95,8 @@ public static partial class Datadog
     {
         var logsConfigBuilder = new Com.Datadog.Android.Log.LogsConfiguration.Builder();
 
-        logsConfigBuilder.SetNetworkInfoEnabled(logsConfig.NetworkInfoEnabled);
-        logsConfigBuilder.SetBundleWithRumEnabled(logsConfig.BundleWithRum);
+        // Note: NetworkInfoEnabled and BundleWithRum settings are not available in Android SDK v3.x
+        // These features are enabled by default in the core configuration
 
         Com.Datadog.Android.Log.Logs.Enable(logsConfigBuilder.Build());
     }
@@ -100,7 +105,8 @@ public static partial class Datadog
     {
         var traceConfigBuilder = new Com.Datadog.Android.Trace.TraceConfiguration.Builder();
 
-        traceConfigBuilder.SetSampleRate((float)tracingConfig.SampleRate);
+        // Note: Sample rate is configured at tracer level, not at Trace configuration level
+        // The tracer is registered separately with GlobalDatadogTracer
 
         Com.Datadog.Android.Trace.Trace.Enable(traceConfigBuilder.Build());
     }
@@ -119,13 +125,14 @@ public static partial class Datadog
     {
         foreach (var tag in tags)
         {
-            Com.Datadog.Android.Datadog.AddRumGlobalAttribute(tag.Key, tag.Value);
+            Com.Datadog.Android.Rum.GlobalRumMonitor.Get().AddAttribute(tag.Key, new Java.Lang.String(tag.Value));
         }
     }
 
     static partial void PlatformSetTrackingConsent(TrackingConsent consent)
     {
-        Com.Datadog.Android.Datadog.SetTrackingConsent(MapTrackingConsent(consent));
+        var nativeConsent = MapTrackingConsent(consent);
+        Com.Datadog.Android.Datadog.SetTrackingConsent(nativeConsent);
     }
 
     static partial void PlatformClearUser()
@@ -134,7 +141,7 @@ public static partial class Datadog
     }
 
     // Helper methods to map enums
-    private static DatadogSite MapSite(DatadogSite site)
+    private static Com.Datadog.Android.DatadogSite MapSite(DatadogSite site)
     {
         return site switch
         {
@@ -148,7 +155,7 @@ public static partial class Datadog
         };
     }
 
-    private static TrackingConsent MapTrackingConsent(TrackingConsent consent)
+    private static Com.Datadog.Android.Privacy.TrackingConsent MapTrackingConsent(Maui.TrackingConsent consent)
     {
         return consent switch
         {
@@ -159,14 +166,14 @@ public static partial class Datadog
         };
     }
 
-    private static Com.Datadog.Android.Rum.Tracking.VitalsUpdateFrequency MapVitalsFrequency(VitalsUpdateFrequency frequency)
+    private static Com.Datadog.Android.Rum.Configuration.VitalsUpdateFrequency MapVitalsFrequency(VitalsUpdateFrequency frequency)
     {
         return frequency switch
         {
-            VitalsUpdateFrequency.Frequent => Com.Datadog.Android.Rum.Tracking.VitalsUpdateFrequency.Frequent,
-            VitalsUpdateFrequency.Average => Com.Datadog.Android.Rum.Tracking.VitalsUpdateFrequency.Average,
-            VitalsUpdateFrequency.Rare => Com.Datadog.Android.Rum.Tracking.VitalsUpdateFrequency.Rare,
-            _ => Com.Datadog.Android.Rum.Tracking.VitalsUpdateFrequency.Average
+            VitalsUpdateFrequency.Frequent => Com.Datadog.Android.Rum.Configuration.VitalsUpdateFrequency.Frequent,
+            VitalsUpdateFrequency.Average => Com.Datadog.Android.Rum.Configuration.VitalsUpdateFrequency.Average,
+            VitalsUpdateFrequency.Rare => Com.Datadog.Android.Rum.Configuration.VitalsUpdateFrequency.Rare,
+            _ => Com.Datadog.Android.Rum.Configuration.VitalsUpdateFrequency.Average
         };
     }
 }

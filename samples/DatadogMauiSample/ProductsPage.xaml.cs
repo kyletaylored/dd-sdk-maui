@@ -1,23 +1,45 @@
 using DatadogMauiSample.Models;
 using DatadogMauiSample.Services;
+using Datadog.Maui.Rum;
+using Datadog.Maui.Logs;
 
 namespace DatadogMauiSample;
 
 public partial class ProductsPage : ContentPage
 {
     private readonly ShopistApiService _apiService;
+    private readonly ILogger _logger;
     private List<Product> _products = new();
 
     public ProductsPage()
     {
         InitializeComponent();
         _apiService = new ShopistApiService();
+        _logger = Logs.CreateLogger("ProductsPage");
 
         // Add converters for data binding
         Resources.Add("StockStatusConverter", new StockStatusConverter());
         Resources.Add("StockColorConverter", new StockColorConverter());
 
+        // Start RUM view tracking
+        Rum.StartView("products", "Products Page", new Dictionary<string, object>
+        {
+            { "screen_class", "ProductsPage" }
+        });
+
+        _logger.Info("ProductsPage initialized");
+
         LoadProductsAsync();
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+
+        // Stop RUM view tracking when page disappears
+        Rum.StopView("products");
+
+        _logger.Debug("ProductsPage disappeared");
     }
 
     private async void OnRefreshClicked(object? sender, EventArgs e)
@@ -27,18 +49,60 @@ public partial class ProductsPage : ContentPage
 
     private async Task LoadProductsAsync()
     {
+        // Track the action in RUM
+        Rum.AddAction(RumActionType.Custom, "load_products", new Dictionary<string, object>
+        {
+            { "trigger", "user_action" }
+        });
+
+        // Add custom timing to RUM view
+        var startTime = DateTime.UtcNow;
+
         try
         {
             LoadingIndicator.IsVisible = true;
             LoadingIndicator.IsRunning = true;
 
+            _logger.Info("Starting to load products");
+
             _products = await _apiService.GetProductsAsync();
             ProductsCollectionView.ItemsSource = _products;
+
+            // Track successful load timing
+            var duration = (DateTime.UtcNow - startTime).TotalMilliseconds;
+            Rum.AddTiming($"products_load_time");
+
+            _logger.Info($"Successfully loaded {_products.Count} products in {duration}ms", new Dictionary<string, object>
+            {
+                { "product_count", _products.Count },
+                { "load_duration_ms", duration }
+            });
+
+            // Add custom attribute to RUM session
+            Rum.AddAttribute("last_product_count", _products.Count);
 
             await DisplayAlert("Success", $"Loaded {_products.Count} products", "OK");
         }
         catch (Exception ex)
         {
+            // Track error in RUM
+            Rum.AddError(
+                $"Failed to load products: {ex.Message}",
+                RumErrorSource.Source,
+                ex,
+                new Dictionary<string, object>
+                {
+                    { "operation", "load_products" },
+                    { "error_type", ex.GetType().Name }
+                }
+            );
+
+            _logger.Error($"Error loading products: {ex.Message}", new Dictionary<string, object>
+            {
+                { "error_type", ex.GetType().Name },
+                { "stack_trace", ex.StackTrace ?? "N/A" }
+            });
+
             await DisplayAlert("Error", $"Failed to load products: {ex.Message}", "OK");
         }
         finally
@@ -52,6 +116,20 @@ public partial class ProductsPage : ContentPage
     {
         if (e.CurrentSelection.FirstOrDefault() is Product product)
         {
+            // Track product selection in RUM
+            Rum.AddAction(RumActionType.Tap, "product_selected", new Dictionary<string, object>
+            {
+                { "product_id", product.Id },
+                { "product_name", product.Name },
+                { "product_price", product.Price }
+            });
+
+            _logger.Debug($"Product selected: {product.Name}", new Dictionary<string, object>
+            {
+                { "product_id", product.Id },
+                { "price", product.Price }
+            });
+
             var action = await DisplayActionSheet(
                 $"{product.Name}",
                 "Cancel",
@@ -62,10 +140,18 @@ public partial class ProductsPage : ContentPage
 
             if (action == "Add to Cart")
             {
+                Rum.AddAction(RumActionType.Tap, "add_to_cart_button", new Dictionary<string, object>
+                {
+                    { "product_id", product.Id }
+                });
                 await AddToCartAsync(product);
             }
             else if (action == "Buy Now")
             {
+                Rum.AddAction(RumActionType.Tap, "buy_now_button", new Dictionary<string, object>
+                {
+                    { "product_id", product.Id }
+                });
                 await PurchaseProductAsync(product);
             }
 

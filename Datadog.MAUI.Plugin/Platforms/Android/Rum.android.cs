@@ -52,14 +52,16 @@ public static partial class Rum
     static partial void PlatformStartResource(string key, string method, string url, Dictionary<string, object>? attributes)
     {
         var rumMonitor = GlobalRumMonitor.Get();
+        var resourceMethod = Com.Datadog.Android.Rum.RumResourceMethod.ValueOf(method.ToUpperInvariant());
+
         if (attributes != null && attributes.Count > 0)
         {
             var javaAttributes = attributes.ToDictionary(kvp => kvp.Key, kvp => (Java.Lang.Object)kvp.Value);
-            rumMonitor.StartResource(key, method, url, javaAttributes);
+            rumMonitor.StartResource(key, resourceMethod, url, javaAttributes);
         }
         else
         {
-            rumMonitor.StartResource(key, method, url, new Dictionary<string, Java.Lang.Object>());
+            rumMonitor.StartResource(key, resourceMethod, url, new Dictionary<string, Java.Lang.Object>());
         }
     }
 
@@ -67,15 +69,17 @@ public static partial class Rum
     {
         var rumMonitor = GlobalRumMonitor.Get();
         var resourceKind = MapResourceKind(kind);
+        var javaStatusCode = statusCode.HasValue ? Java.Lang.Integer.ValueOf(statusCode.Value) : null;
+        var javaSize = size.HasValue ? Java.Lang.Long.ValueOf(size.Value) : null;
 
         if (attributes != null && attributes.Count > 0)
         {
             var javaAttributes = attributes.ToDictionary(kvp => kvp.Key, kvp => (Java.Lang.Object)kvp.Value);
-            rumMonitor.StopResource(key, statusCode, size, resourceKind, javaAttributes);
+            rumMonitor.StopResource(key, javaStatusCode, javaSize, resourceKind, javaAttributes);
         }
         else
         {
-            rumMonitor.StopResource(key, statusCode, size, resourceKind, new Dictionary<string, Java.Lang.Object>());
+            rumMonitor.StopResource(key, javaStatusCode, javaSize, resourceKind, new Dictionary<string, Java.Lang.Object>());
         }
     }
 
@@ -87,11 +91,11 @@ public static partial class Rum
         if (attributes != null && attributes.Count > 0)
         {
             var javaAttributes = attributes.ToDictionary(kvp => kvp.Key, kvp => (Java.Lang.Object)kvp.Value);
-            rumMonitor.StopResourceWithError(key, null, error.Message, RumErrorSource.Network, throwable, javaAttributes);
+            rumMonitor.StopResourceWithError(key, null, error.Message, Com.Datadog.Android.Rum.RumErrorSource.Network, throwable, javaAttributes);
         }
         else
         {
-            rumMonitor.StopResourceWithError(key, null, error.Message, RumErrorSource.Network, throwable, new Dictionary<string, Java.Lang.Object>());
+            rumMonitor.StopResourceWithError(key, null, error.Message, Com.Datadog.Android.Rum.RumErrorSource.Network, throwable, new Dictionary<string, Java.Lang.Object>());
         }
     }
 
@@ -121,7 +125,8 @@ public static partial class Rum
     static partial void PlatformAddAttribute(string key, object value)
     {
         var rumMonitor = GlobalRumMonitor.Get();
-        rumMonitor.AddAttribute(key, value);
+        var javaValue = value as Java.Lang.Object ?? new Java.Lang.String(value?.ToString() ?? "");
+        rumMonitor.AddAttribute(key, javaValue);
     }
 
     static partial void PlatformRemoveAttribute(string key)
@@ -141,7 +146,7 @@ public static partial class Rum
         rumMonitor.StopSession();
     }
 
-    private static RumActionType MapActionType(Maui.Rum.RumActionType type)
+    private static Com.Datadog.Android.Rum.RumActionType MapActionType(Maui.Rum.RumActionType type)
     {
         return type switch
         {
@@ -154,7 +159,7 @@ public static partial class Rum
         };
     }
 
-    private static RumResourceKind MapResourceKind(Maui.Rum.RumResourceKind kind)
+    private static Com.Datadog.Android.Rum.RumResourceKind MapResourceKind(Maui.Rum.RumResourceKind kind)
     {
         return kind switch
         {
@@ -172,7 +177,7 @@ public static partial class Rum
         };
     }
 
-    private static RumErrorSource MapErrorSource(Maui.Rum.RumErrorSource source)
+    private static Com.Datadog.Android.Rum.RumErrorSource MapErrorSource(Maui.Rum.RumErrorSource source)
     {
         return source switch
         {

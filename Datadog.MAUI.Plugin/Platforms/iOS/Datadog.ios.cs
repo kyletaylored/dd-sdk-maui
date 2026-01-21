@@ -56,10 +56,14 @@ public static partial class Datadog
 
     private static void InitializeRum(RumConfiguration rumConfig)
     {
-        // Note: The iOS SDK uses DDRUMConfiguration directly without a builder pattern
-        // Looking at the README, it seems there should be a DDRUMConfiguration class
-        // For now, we'll skip this initialization until we have the proper API definition
-        // TODO: Add proper DDRUMConfiguration binding
+        var rumConfiguration = new DDRUMConfiguration(applicationID: rumConfig.ApplicationId);
+
+        rumConfiguration.SessionSampleRate = rumConfig.SessionSampleRate;
+        rumConfiguration.TrackFrustrations = rumConfig.TrackUserInteractions;
+        rumConfiguration.TrackBackgroundEvents = true;
+        rumConfiguration.VitalsUpdateFrequency = MapVitalsFrequency(rumConfig.VitalsUpdateFrequency);
+
+        DDRUM.EnableWith(rumConfiguration);
     }
 
     private static void InitializeLogs(LogsConfiguration logsConfig)

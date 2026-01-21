@@ -33,6 +33,7 @@
     <!-- Core packages -->
     <PackageReference Include="Datadog.MAUI.Android.Internal" Version="$(DatadogSdkVersion)" />
     <PackageReference Include="Datadog.MAUI.Android.Core" Version="$(DatadogSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.Android.OpenTracingApi" Version="$(DatadogSdkVersion)" />
 
     <!-- Feature packages -->
     <PackageReference Include="Datadog.MAUI.Android.RUM" Version="$(DatadogSdkVersion)" />

@@ -7,8 +7,20 @@
     in the shutdownNow() method inherited from ExecutorService.
 
     Since this is an internal interface not needed by SDK users, we remove it entirely.
+
+    The NDK module's JAR includes transitive dependencies from core (DatadogSite, TrackingConsent, etc.).
+    These types should only come from dd-sdk-android-core to avoid duplicate type definitions.
   -->
 
   <!-- Remove FlushableExecutorService interface - internal only, not needed in public API -->
   <remove-node path="/api/package[@name='com.datadog.android.core.thread']/interface[@name='FlushableExecutorService']" />
+
+  <!-- Remove duplicate types that should only come from dd-sdk-android-core -->
+  <remove-node path="/api/package[@name='com.datadog.android']/class[@name='Datadog']" />
+  <remove-node path="/api/package[@name='com.datadog.android']/class[@name='DatadogSite']" />
+  <remove-node path="/api/package[@name='com.datadog.android.core.configuration']/class[@name='Configuration']" />
+  <remove-node path="/api/package[@name='com.datadog.android.core.configuration']/class[@name='BatchSize']" />
+  <remove-node path="/api/package[@name='com.datadog.android.core.configuration']/class[@name='UploadFrequency']" />
+  <remove-node path="/api/package[@name='com.datadog.android.privacy']/class[@name='TrackingConsent']" />
+  <remove-node path="/api/package[@name='com.datadog.android.privacy']/interface[@name='TrackingConsentProviderCallback']" />
 </metadata>

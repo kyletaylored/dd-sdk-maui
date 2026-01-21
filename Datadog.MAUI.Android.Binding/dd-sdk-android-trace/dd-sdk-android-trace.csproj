@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\dd-sdk-android-core\dd-sdk-android-core.csproj" />
+    <ProjectReference Include="..\opentracing-api\opentracing-api.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,10 +30,10 @@
     <AndroidMavenLibrary Include="org.jctools:jctools-core" Version="3.3.0" Bind="false" VerifyDependencies="false" />
     <AndroidMavenLibrary Include="com.google.re2j:re2j" Version="1.7" Bind="false" VerifyDependencies="false" />
     <AndroidMavenLibrary Include="com.lyft.kronos:kronos-android" Version="0.0.1-alpha11" Bind="false" VerifyDependencies="false" />
-    <!-- OpenTracing dependencies - bind them to access the API -->
-    <AndroidMavenLibrary Include="io.opentracing:opentracing-api" Version="0.32.0" VerifyDependencies="false" />
-    <AndroidMavenLibrary Include="io.opentracing:opentracing-noop" Version="0.32.0" VerifyDependencies="false" Bind="false" />
-    <AndroidMavenLibrary Include="io.opentracing:opentracing-util" Version="0.32.0" VerifyDependencies="false" Bind="false" />
+    <!-- OpenTracing dependencies - provided by opentracing-api project reference -->
+    <AndroidMavenLibrary Include="io.opentracing:opentracing-api" Version="$(OpenTracingVersion)" VerifyDependencies="false" Bind="false" />
+    <AndroidMavenLibrary Include="io.opentracing:opentracing-noop" Version="$(OpenTracingVersion)" VerifyDependencies="false" Bind="false" />
+    <AndroidMavenLibrary Include="io.opentracing:opentracing-util" Version="$(OpenTracingVersion)" VerifyDependencies="false" Bind="false" />
   </ItemGroup>
 
   <!-- AndroidX and Kotlin dependencies as NuGet packages -->

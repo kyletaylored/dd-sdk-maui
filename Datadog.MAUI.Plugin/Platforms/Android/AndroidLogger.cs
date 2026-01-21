@@ -10,8 +10,7 @@ internal class AndroidLogger : ILogger
     public AndroidLogger(string name)
     {
         Name = name;
-        _nativeLogger = Logger.Builder
-            .Create()
+        _nativeLogger = new Logger.Builder()
             .SetName(name)
             .Build();
     }
@@ -65,7 +64,8 @@ internal class AndroidLogger : ILogger
 
     public void AddAttribute(string key, object value)
     {
-        _nativeLogger.AddAttribute(key, value);
+        var javaValue = value as Java.Lang.Object ?? new Java.Lang.String(value?.ToString() ?? "");
+        _nativeLogger.AddAttribute(key, javaValue);
     }
 
     public void RemoveAttribute(string key)
@@ -87,15 +87,15 @@ internal class AndroidLogger : ILogger
     {
         return level switch
         {
-            Logs.LogLevel.Debug => Com.Datadog.Android.Log.LogLevel.Debug,
-            Logs.LogLevel.Info => Com.Datadog.Android.Log.LogLevel.Info,
-            Logs.LogLevel.Notice => Com.Datadog.Android.Log.LogLevel.Info,
-            Logs.LogLevel.Warn => Com.Datadog.Android.Log.LogLevel.Warn,
-            Logs.LogLevel.Error => Com.Datadog.Android.Log.LogLevel.Error,
-            Logs.LogLevel.Critical => Com.Datadog.Android.Log.LogLevel.Error,
-            Logs.LogLevel.Alert => Com.Datadog.Android.Log.LogLevel.Error,
-            Logs.LogLevel.Emergency => Com.Datadog.Android.Log.LogLevel.Error,
-            _ => Com.Datadog.Android.Log.LogLevel.Info
+            Logs.LogLevel.Debug => (int)global::Android.Util.LogPriority.Debug,
+            Logs.LogLevel.Info => (int)global::Android.Util.LogPriority.Info,
+            Logs.LogLevel.Notice => (int)global::Android.Util.LogPriority.Info,
+            Logs.LogLevel.Warn => (int)global::Android.Util.LogPriority.Warn,
+            Logs.LogLevel.Error => (int)global::Android.Util.LogPriority.Error,
+            Logs.LogLevel.Critical => (int)global::Android.Util.LogPriority.Error,
+            Logs.LogLevel.Alert => (int)global::Android.Util.LogPriority.Error,
+            Logs.LogLevel.Emergency => (int)global::Android.Util.LogPriority.Error,
+            _ => (int)global::Android.Util.LogPriority.Info
         };
     }
 }

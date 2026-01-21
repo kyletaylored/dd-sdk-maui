@@ -16,9 +16,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <AndroidMavenLibrary Include="io.opentracing:opentracing-api" Version="0.32.0" VerifyDependencies="false" />
-    <AndroidMavenLibrary Include="io.opentracing:opentracing-noop" Version="0.32.0" VerifyDependencies="false" />
-    <AndroidMavenLibrary Include="io.opentracing:opentracing-util" Version="0.32.0" VerifyDependencies="false" />
+    <AndroidMavenLibrary Include="io.opentracing:opentracing-api" Version="$(OpenTracingVersion)" VerifyDependencies="false" />
+    <AndroidMavenLibrary Include="io.opentracing:opentracing-noop" Version="$(OpenTracingVersion)" VerifyDependencies="false" />
+    <AndroidMavenLibrary Include="io.opentracing:opentracing-util" Version="$(OpenTracingVersion)" VerifyDependencies="false" />
   </ItemGroup>
 
   <!-- Metadata transforms for binding fixes -->

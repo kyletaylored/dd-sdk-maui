@@ -1,6 +1,14 @@
 <metadata>
   <!--
-    This file is used to fix binding generation issues.
-    Add transforms here as needed during binding development.
+    Binding fixes for OpenTracing API (io.opentracing:opentracing-api)
+
+    Just remove the problematic classes and let everything else through with default visibility
   -->
+
+  <!-- Remove the entire io.opentracing.tag package - it has binding issues and we don't need it for basic tracing -->
+  <remove-node path="/api/package[@name='io.opentracing.tag']" />
+
+  <!-- Remove problematic util classes that have covariant return type issues -->
+  <remove-node path="/api/package[@name='io.opentracing.util']/class[@name='AutoFinishScopeManager']" />
+  <remove-node path="/api/package[@name='io.opentracing.util']/class[@name='ThreadLocalScopeManager']" />
 </metadata>

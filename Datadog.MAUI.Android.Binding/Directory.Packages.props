@@ -2,6 +2,9 @@
     <!-- Enable CPM for all projects including binding projects -->
     <PropertyGroup>
         <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+
+        <!-- Maven artifact versions for AndroidMavenLibrary bindings -->
+        <OpenTracingVersion>0.32.0</OpenTracingVersion>
     </PropertyGroup>
 
     <ItemGroup>

@@ -130,6 +130,14 @@ public class MainApplication : MauiApplication
                 var traceConfig = new TraceConfiguration.Builder().Build();
                 Trace.Enable(traceConfig, Com.Datadog.Android.Datadog.Instance);
                 Console.WriteLine("[Datadog] APM Tracing enabled");
+
+                // Register the Datadog tracer with GlobalDatadogTracer
+                // This allows Tracer.StartSpan() and other tracing APIs to work
+                var tracer = DatadogTracing.NewTracerBuilder()
+                    .WithPartialFlushMinSpans(1)
+                    .Build();
+                GlobalDatadogTracer.RegisterIfAbsent(tracer);
+                Console.WriteLine("[Datadog] Global tracer registered");
             }
             catch (Exception ex)
             {

@@ -4,28 +4,31 @@ namespace Datadog.Maui.Logs;
 
 public static partial class Logs
 {
-    static partial ILogger PlatformCreateLogger(string name)
+    private static partial ILogger PlatformCreateLogger(string name)
     {
         return new AndroidLogger(name);
     }
 
-    static partial void PlatformAddAttribute(string key, object value)
+    private static partial void PlatformAddAttribute(string key, object value)
     {
-        Com.Datadog.Android.Log.Logs.AddAttribute(key, value);
+        var javaValue = value as Java.Lang.Object ?? new Java.Lang.String(value?.ToString() ?? "");
+        Com.Datadog.Android.Log.Logs.AddAttribute(key, javaValue);
     }
 
-    static partial void PlatformRemoveAttribute(string key)
+    private static partial void PlatformRemoveAttribute(string key)
     {
         Com.Datadog.Android.Log.Logs.RemoveAttribute(key);
     }
 
-    static partial void PlatformAddTag(string key, string value)
+    private static partial void PlatformAddTag(string key, string value)
     {
-        Com.Datadog.Android.Log.Logs.AddTag(key, value);
+        // Note: Global tag support not available in Android SDK v3.x Logs API
+        // Tags should be added at the logger level
     }
 
-    static partial void PlatformRemoveTag(string key)
+    private static partial void PlatformRemoveTag(string key)
     {
-        Com.Datadog.Android.Log.Logs.RemoveTag(key);
+        // Note: Global tag support not available in Android SDK v3.x Logs API
+        // Tags should be removed at the logger level
     }
 }

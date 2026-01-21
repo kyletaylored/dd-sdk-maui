@@ -120,4 +120,105 @@ namespace Datadog.iOS.DatadogRUM
 		[Export("addTimingWithName:")]
 		void AddTiming(string name);
 	}
+
+	/// <summary>
+	/// DDRUM enables RUM (Real User Monitoring) feature in the Datadog SDK.
+	/// </summary>
+	[BaseType(typeof(NSObject))]
+	interface DDRUM
+	{
+		/// <summary>
+		/// Enables RUM with the specified configuration.
+		/// </summary>
+		[Static]
+		[Export("enableWith:")]
+		void EnableWith(DDRUMConfiguration configuration);
+	}
+
+	/// <summary>
+	/// Configuration for RUM feature.
+	/// </summary>
+	[BaseType(typeof(NSObject))]
+	[DisableDefaultCtor]
+	interface DDRUMConfiguration
+	{
+		/// <summary>
+		/// Initializes a new RUM configuration with the application ID.
+		/// </summary>
+		[Export("initWithApplicationID:")]
+		[DesignatedInitializer]
+		NativeHandle Constructor(string applicationID);
+
+		/// <summary>
+		/// The RUM application ID.
+		/// </summary>
+		[Export("applicationID")]
+		string ApplicationID { get; }
+
+		/// <summary>
+		/// The sampling rate for RUM sessions (0.0 to 100.0).
+		/// </summary>
+		[Export("sessionSampleRate")]
+		float SessionSampleRate { get; set; }
+
+		/// <summary>
+		/// The sampling rate for telemetry events (0.0 to 100.0).
+		/// </summary>
+		[Export("telemetrySampleRate")]
+		float TelemetrySampleRate { get; set; }
+
+		/// <summary>
+		/// Whether to track frustration signals (rage taps, dead clicks, etc.).
+		/// </summary>
+		[Export("trackFrustrations")]
+		bool TrackFrustrations { get; set; }
+
+		/// <summary>
+		/// Whether to track events while the app is in the background.
+		/// </summary>
+		[Export("trackBackgroundEvents")]
+		bool TrackBackgroundEvents { get; set; }
+
+		/// <summary>
+		/// Whether to track watchdog terminations.
+		/// </summary>
+		[Export("trackWatchdogTerminations")]
+		bool TrackWatchdogTerminations { get; set; }
+
+		/// <summary>
+		/// Threshold for long task detection in seconds.
+		/// </summary>
+		[Export("longTaskThreshold")]
+		double LongTaskThreshold { get; set; }
+
+		/// <summary>
+		/// Threshold for app hang detection in seconds.
+		/// </summary>
+		[Export("appHangThreshold")]
+		double AppHangThreshold { get; set; }
+
+		/// <summary>
+		/// Frequency for collecting vitals information.
+		/// </summary>
+		[Export("vitalsUpdateFrequency", ArgumentSemantic.Assign)]
+		DDRUMVitalsFrequency VitalsUpdateFrequency { get; set; }
+
+		/// <summary>
+		/// Custom endpoint for RUM data.
+		/// </summary>
+		[NullAllowed, Export("customEndpoint", ArgumentSemantic.Copy)]
+		NSUrl CustomEndpoint { get; set; }
+
+		/// <summary>
+		/// Whether to track anonymous users.
+		/// </summary>
+		[Export("trackAnonymousUser")]
+		bool TrackAnonymousUser { get; set; }
+
+		/// <summary>
+		/// Whether to track memory warnings.
+		/// </summary>
+		[Export("trackMemoryWarnings")]
+		bool TrackMemoryWarnings { get; set; }
+	}
 }
