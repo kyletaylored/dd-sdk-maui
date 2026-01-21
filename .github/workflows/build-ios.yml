@@ -464,7 +464,6 @@ jobs:
     name: Build iOS Sample App
     runs-on: macos-26  # macOS required for iOS app compilation
     needs: combine-ios-packages
-    if: false  # Disabled - Plugin implementation not complete yet
 
     steps:
       - name: Checkout repository
