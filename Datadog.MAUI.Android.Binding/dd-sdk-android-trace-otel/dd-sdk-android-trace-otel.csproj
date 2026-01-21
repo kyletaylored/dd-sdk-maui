@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net9.0-android;net10.0-android</TargetFrameworks>
+    <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>true</ImplicitUsings>
+    <IsBindingProject>true</IsBindingProject>
+
+    <PackageId>Datadog.MAUI.Android.Trace.OpenTelemetry</PackageId>
+    <RootNamespace>Datadog.MAUI.Android.Trace.OpenTelemetry</RootNamespace>
+    <Authors>Datadog</Authors>
+    <Description>.NET bindings for Datadog Android SDK OpenTelemetry Trace integration module</Description>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/DataDog/dd-sdk-maui</RepositoryUrl>
+    <PackageTags>.NET MAUI Android Datadog Mobile Binding OpenTelemetry OTel Trace</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\dd-sdk-android-core\dd-sdk-android-core.csproj" />
+    <ProjectReference Include="..\dd-sdk-android-trace\dd-sdk-android-trace.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-trace-otel" Version="$(DatadogSdkVersion)" VerifyDependencies="false" />
+    <!-- Runtime Maven dependencies from POM -->
+    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-core" Version="$(DatadogSdkVersion)" VerifyDependencies="false" Bind="false" />
+    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-internal" Version="$(DatadogSdkVersion)" VerifyDependencies="false" Bind="false" />
+    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-trace" Version="$(DatadogSdkVersion)" VerifyDependencies="false" Bind="false" />
+    <AndroidMavenLibrary Include="io.opentelemetry:opentelemetry-api" Version="1.44.1" VerifyDependencies="false" Bind="false" />
+    <AndroidMavenLibrary Include="io.opentelemetry:opentelemetry-context" Version="1.44.1" VerifyDependencies="false" Bind="false" />
+  </ItemGroup>
+
+  <!-- AndroidX and third-party dependencies as NuGet packages -->
+  <ItemGroup>
+    <PackageReference Include="Xamarin.AndroidX.Annotation" />
+  </ItemGroup>
+
+  <!-- Metadata transforms for binding fixes -->
+  <ItemGroup>
+    <TransformFile Include="Transforms\Metadata.xml" />
+  </ItemGroup>
+</Project>

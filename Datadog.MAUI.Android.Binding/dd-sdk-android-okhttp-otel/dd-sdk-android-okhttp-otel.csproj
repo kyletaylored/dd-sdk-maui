@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net9.0-android;net10.0-android</TargetFrameworks>
+    <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>true</ImplicitUsings>
+    <IsBindingProject>true</IsBindingProject>
+
+    <PackageId>Datadog.MAUI.Android.OkHttp.OpenTelemetry</PackageId>
+    <RootNamespace>Datadog.MAUI.Android.OkHttp.OpenTelemetry</RootNamespace>
+    <Authors>Datadog</Authors>
+    <Description>.NET bindings for Datadog Android SDK OkHttp + OpenTelemetry integration module</Description>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/DataDog/dd-sdk-maui</RepositoryUrl>
+    <PackageTags>.NET MAUI Android Datadog Mobile Binding OkHttp OpenTelemetry OTel</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\dd-sdk-android-trace\dd-sdk-android-trace.csproj" />
+    <ProjectReference Include="..\dd-sdk-android-okhttp\dd-sdk-android-okhttp.csproj" />
+    <ProjectReference Include="..\dd-sdk-android-trace-otel\dd-sdk-android-trace-otel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-okhttp-otel" Version="$(DatadogSdkVersion)" VerifyDependencies="false" />
+    <!-- Runtime Maven dependencies from POM -->
+    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-trace" Version="$(DatadogSdkVersion)" VerifyDependencies="false" Bind="false" />
+    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-okhttp" Version="$(DatadogSdkVersion)" VerifyDependencies="false" Bind="false" />
+    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-trace-otel" Version="$(DatadogSdkVersion)" VerifyDependencies="false" Bind="false" />
+  </ItemGroup>
+
+  <!-- AndroidX and third-party dependencies as NuGet packages -->
+  <ItemGroup>
+    <PackageReference Include="Square.OkHttp3" />
+  </ItemGroup>
+
+  <!-- Metadata transforms for binding fixes -->
+  <ItemGroup>
+    <TransformFile Include="Transforms\Metadata.xml" />
+  </ItemGroup>
+</Project>

@@ -62,6 +62,10 @@ ANDROID_MODULES=(
     "dd-sdk-android-session-replay/dd-sdk-android-session-replay.csproj"
     "dd-sdk-android-webview/dd-sdk-android-webview.csproj"
     "dd-sdk-android-flags/dd-sdk-android-flags.csproj"
+    "dd-sdk-android-okhttp/dd-sdk-android-okhttp.csproj"
+    "dd-sdk-android-trace-otel/dd-sdk-android-trace-otel.csproj"
+    "dd-sdk-android-okhttp-otel/dd-sdk-android-okhttp-otel.csproj"
+    "dd-sdk-android-gradle-plugin/dd-sdk-android-gradle-plugin.csproj"
 )
 
 for module in "${ANDROID_MODULES[@]}"; do

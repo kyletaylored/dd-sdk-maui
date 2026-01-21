@@ -245,7 +245,7 @@ jobs:
 
           This release includes the following NuGet packages:
 
-          ### Android Bindings
+          ### Android Bindings - Core & Features
           - Datadog.MAUI.Android.Core
           - Datadog.MAUI.Android.Internal
           - Datadog.MAUI.Android.RUM
@@ -255,6 +255,12 @@ jobs:
           - Datadog.MAUI.Android.NDK
           - Datadog.MAUI.Android.WebView
           - Datadog.MAUI.Android.Flags
+
+          ### Android Bindings - Integrations
+          - Datadog.MAUI.Android.OkHttp
+          - Datadog.MAUI.Android.Trace.OpenTelemetry
+          - Datadog.MAUI.Android.OkHttp.OpenTelemetry
+          - Datadog.MAUI.Android.GradlePlugin
 
           ### iOS Bindings
           - Datadog.MAUI.iOS.Binding (if available)

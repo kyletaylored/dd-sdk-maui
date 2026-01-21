@@ -13,10 +13,10 @@
     <PackageId>Datadog.MAUI.Android.Binding</PackageId>
     <Title>Datadog Android Bindings for .NET MAUI</Title>
     <Authors>Datadog</Authors>
-    <Description>Complete .NET bindings for Datadog Android SDK - includes all core and feature modules (Internal, Core, RUM, Logs, Trace, NDK, SessionReplay, WebView, Flags). This is a convenience meta-package that references all individual Datadog.MAUI.Android.* packages.</Description>
+    <Description>Complete .NET bindings for Datadog Android SDK - includes all core, feature, and integration modules (Internal, Core, RUM, Logs, Trace, NDK, SessionReplay, WebView, Flags, OkHttp, OpenTelemetry, Gradle Plugin). This is a convenience meta-package that references all individual Datadog.MAUI.Android.* packages.</Description>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/DataDog/dd-sdk-maui</RepositoryUrl>
-    <PackageTags>.NET MAUI Android Datadog Mobile Binding RUM Logs Trace APM SessionReplay NDK</PackageTags>
+    <PackageTags>.NET MAUI Android Datadog Mobile Binding RUM Logs Trace APM SessionReplay NDK OkHttp OpenTelemetry OTel</PackageTags>
 
     <!-- Optional but recommended: avoid warnings about missing lib/ files -->
     <NoWarn>$(NoWarn);NU5128</NoWarn>
@@ -30,8 +30,11 @@
 
   <!-- Meta-package dependencies: PackageReference to avoid duplicate class errors -->
   <ItemGroup>
+    <!-- Core packages -->
     <PackageReference Include="Datadog.MAUI.Android.Internal" Version="$(DatadogSdkVersion)" />
     <PackageReference Include="Datadog.MAUI.Android.Core" Version="$(DatadogSdkVersion)" />
+
+    <!-- Feature packages -->
     <PackageReference Include="Datadog.MAUI.Android.Rum" Version="$(DatadogSdkVersion)" />
     <PackageReference Include="Datadog.MAUI.Android.Logs" Version="$(DatadogSdkVersion)" />
     <PackageReference Include="Datadog.MAUI.Android.Trace" Version="$(DatadogSdkVersion)" />
@@ -39,5 +42,13 @@
     <PackageReference Include="Datadog.MAUI.Android.SessionReplay" Version="$(DatadogSdkVersion)" />
     <PackageReference Include="Datadog.MAUI.Android.WebView" Version="$(DatadogSdkVersion)" />
     <PackageReference Include="Datadog.MAUI.Android.Flags" Version="$(DatadogSdkVersion)" />
+
+    <!-- Integration packages -->
+    <PackageReference Include="Datadog.MAUI.Android.OkHttp" Version="$(DatadogSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.Android.Trace.OpenTelemetry" Version="$(DatadogSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.Android.OkHttp.OpenTelemetry" Version="$(DatadogSdkVersion)" />
+
+    <!-- Build-time tools (Gradle Plugin uses separate versioning) -->
+    <PackageReference Include="Datadog.MAUI.Android.GradlePlugin" Version="1.9.0" />
   </ItemGroup>
 </Project>

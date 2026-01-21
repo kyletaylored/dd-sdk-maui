@@ -1,0 +1,9 @@
+<metadata>
+  <!-- Opt-in approach: Remove Builder classes since they have complex generic signatures -->
+  <!-- Users can construct interceptors using factory methods or direct constructors instead -->
+  <remove-node path="/api/package[@name='com.datadog.android.okhttp']/class[@name='DatadogInterceptor.Builder']" />
+
+  <!-- Also remove other builder-related classes with binding issues -->
+  <remove-node path="/api/package[@name='com.datadog.android.okhttp.trace']/class[@name='TracingInterceptor.BaseBuilder']" />
+  <remove-node path="/api/package[@name='com.datadog.android.okhttp.trace']/class[@name='TracingInterceptor.Builder']" />
+</metadata>
