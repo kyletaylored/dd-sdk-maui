@@ -114,11 +114,22 @@ jobs:
       - name: Restore dependencies (individual packages only)
         if: steps.cache-nuget-net9.outputs.cache-hit != 'true'
         run: |
-          # Restore individual packages, skip meta-package
+          # Create temporary NuGet.Config without local artifacts source
+          cat > /tmp/nuget.temp.config << 'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <configuration>
+            <packageSources>
+              <clear />
+              <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
+            </packageSources>
+          </configuration>
+          EOF
+
+          # Restore individual packages using temp config (skips ./artifacts, uses nuget.org for external deps)
           for dir in Datadog.MAUI.Android.Binding/dd-sdk-android-*; do
             if [ -d "$dir" ]; then
               echo "Restoring $(basename $dir)..."
-              dotnet restore "$dir" -p:TargetFrameworks=net9.0-android
+              dotnet restore "$dir" -p:TargetFrameworks=net9.0-android --configfile /tmp/nuget.temp.config
             fi
           done
 
@@ -166,7 +177,7 @@ jobs:
   build-android-net10:
     name: Build Android (net10.0-android)
     runs-on: ubuntu-latest
-    needs: [verify-android-dependencies, build-android-net9]
+    needs: verify-android-dependencies
 
     steps:
       - name: Checkout repository
@@ -222,13 +233,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-android-net10-packages-${{ steps.sdk-version.outputs.version }}-
 
-      - name: Download net9 artifacts for dependencies
-        if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
-        uses: actions/download-artifact@v7
-        with:
-          name: android-nuget-packages-net9
-          path: ./artifacts
-
       - name: Clean build artifacts
         if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
         run: dotnet clean Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.sln --configuration Release -p:TargetFrameworks=net10.0-android
@@ -236,11 +240,22 @@ jobs:
       - name: Restore dependencies (individual packages only)
         if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
         run: |
-          # Restore individual packages, skip meta-package
+          # Create temporary NuGet.Config without local artifacts source
+          cat > /tmp/nuget.temp.config << 'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <configuration>
+            <packageSources>
+              <clear />
+              <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
+            </packageSources>
+          </configuration>
+          EOF
+
+          # Restore individual packages using temp config (skips ./artifacts, uses nuget.org for external deps)
           for dir in Datadog.MAUI.Android.Binding/dd-sdk-android-*; do
             if [ -d "$dir" ]; then
               echo "Restoring $(basename $dir)..."
-              dotnet restore "$dir" -p:TargetFrameworks=net10.0-android
+              dotnet restore "$dir" -p:TargetFrameworks=net10.0-android --configfile /tmp/nuget.temp.config
             fi
           done
 
