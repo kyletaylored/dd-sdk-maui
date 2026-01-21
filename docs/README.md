@@ -1,275 +1,246 @@
 # Datadog MAUI SDK Documentation
 
-Welcome to the Datadog MAUI SDK documentation. This directory contains comprehensive guides for maintaining and extending the SDK bindings.
-
-## Quick Links
-
-- **New to the project?** → [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)
-- **Want technical details?** → [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md)
-- **Having issues with dependencies?** → [ANDROID_DEPENDENCY_MANAGEMENT.md](ANDROID_DEPENDENCY_MANAGEMENT.md)
-- **Need quick answers?** → [DEPENDENCY_QUICK_REFERENCE.md](DEPENDENCY_QUICK_REFERENCE.md)
-- **Planning automation?** → [AUTOMATION_ROADMAP.md](AUTOMATION_ROADMAP.md)
-
-## Document Index
-
-### Project Documentation
-
-#### [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)
-
-**Quick overview and current status**
-
-High-level summary of the project with current state, accomplishments, and key metrics. Perfect for:
-
-- Getting a quick update on project progress
-- Understanding what's complete and what's in progress
-- Seeing key technical achievements
-- Finding the right documentation quickly
-
-**Read this when**:
-
-- You're new to the project
-- You want a quick status update
-- You need to understand the current state
-- You're looking for specific documentation
-
-#### [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md)
-
-**Comprehensive technical overview**
-
-Detailed technical documentation covering architecture, build system, decisions, and roadmap. Includes:
-
-- Complete architecture breakdown
-- Component descriptions
-- Build system and scripts
-- CI/CD pipeline design
-- Version management
-- Technical decisions and rationale
-- Implementation roadmap
-
-**Read this when**:
-
-- You need to understand the architecture
-- You're contributing to the project
-- You're planning significant changes
-- You need to understand technical decisions
-
-### Core Documentation
-
-#### [ANDROID_DEPENDENCY_MANAGEMENT.md](ANDROID_DEPENDENCY_MANAGEMENT.md)
-
-**Comprehensive guide to Android dependency management**
-
-Essential reading for understanding how dependencies work in the binding projects. Covers:
-
-- The dependency problem and why it exists
-- The centralized core pattern (our solution)
-- Dependency categories and classification
-- Step-by-step implementation guide
-- Troubleshooting common errors
-- Future update procedures
-- Key insights and gotchas
-
-**Read this when**:
-
-- Setting up binding projects for the first time
-- Encountering duplicate class errors
-- Updating to a new Datadog SDK version
-- Contributing dependency-related changes
-
-#### [DEPENDENCY_QUICK_REFERENCE.md](DEPENDENCY_QUICK_REFERENCE.md)
-
-**Fast lookup table and command reference**
-
-Quick answers without the theory. Includes:
-
-- Decision tree flowchart
-- Dependency lookup table
-- Project file templates
-- Error code meanings and fixes
-- Version update checklist
-- Common patterns
-
-**Read this when**:
-
-- You know what you're doing, just need the specifics
-- Looking up how to handle a specific dependency
-- Need a command or pattern quickly
-- Doing a routine SDK version update
-
-#### [AUTOMATION_ROADMAP.md](AUTOMATION_ROADMAP.md)
-
-**Future vision for dependency automation**
-
-Analysis of current vs. desired automation state. Covers:
-
-- Current script capabilities and limitations
-- Enhanced configuration-driven system design
-- Recommended system architecture
-- Configuration file design (deps-config.yaml)
-- Implementation plan (5 phases)
-- ROI analysis
-
-**Read this when**:
-
-- Planning to improve automation
-- Evaluating whether to invest in tooling
-- Designing the next generation of scripts
-- Understanding the long-term vision
-
-## Getting Started
-
-### For New Contributors
-
-1. Start with [ANDROID_DEPENDENCY_MANAGEMENT.md](ANDROID_DEPENDENCY_MANAGEMENT.md) sections:
-
-   - Overview
-   - The Dependency Problem
-   - The Solution Pattern
-
-2. Bookmark [DEPENDENCY_QUICK_REFERENCE.md](DEPENDENCY_QUICK_REFERENCE.md) for daily use
-
-3. When ready to improve tooling, read [AUTOMATION_ROADMAP.md](AUTOMATION_ROADMAP.md)
-
-### For SDK Version Updates
-
-1. Follow the checklist in [DEPENDENCY_QUICK_REFERENCE.md](DEPENDENCY_QUICK_REFERENCE.md#version-update-checklist)
-
-2. Reference [ANDROID_DEPENDENCY_MANAGEMENT.md](ANDROID_DEPENDENCY_MANAGEMENT.md#future-updates) for detailed procedures
-
-3. Document any new patterns or gotchas discovered
-
-### For Troubleshooting
-
-1. Check [DEPENDENCY_QUICK_REFERENCE.md](DEPENDENCY_QUICK_REFERENCE.md#error-code-cheat-sheet) for your specific error
-
-2. If not found, consult [ANDROID_DEPENDENCY_MANAGEMENT.md](ANDROID_DEPENDENCY_MANAGEMENT.md#troubleshooting)
-
-3. Still stuck? Review [Key Insights](ANDROID_DEPENDENCY_MANAGEMENT.md#key-insights) section
-
-## Current Status (January 2026)
-
-### ✅ What Works
-
-- **9/9 Android binding projects** build successfully
-- **Sample app** compiles and demonstrates SDK usage
-- **Dependency pattern** established and documented
-- **Duplicate issues** resolved (gson, jetbrains.annotations)
-- **Documentation** comprehensive and up-to-date
-
-### 🎯 Future Goals
-
-- Automated dependency categorization from POMs
-- NuGet package discovery via API
-- Project file generation from configuration
-- CI/CD integration for validation
-
-## Key Principles
-
-### 1. Centralize Shared Dependencies
-
-**Core provides, features consume**. Shared dependencies live in core as NuGet packages, feature modules declare them as ignored.
-
-### 2. Use NuGet When Available
-
-**Prefer NuGet over Maven bindings**. Xamarin/AndroidX packages are well-maintained and handle complex binding scenarios.
-
-### 3. Document the Why
-
-**Decisions have reasons**. Every dependency placement should have a documented rationale, especially for non-obvious cases.
-
-### 4. Automate Incrementally
-
-**Make common tasks easy**. Build tooling that saves time on repetitive tasks while allowing manual control for edge cases.
-
-### 5. Test Thoroughly
-
-**Build errors are better than runtime crashes**. Always test builds after dependency changes.
-
-## FAQ
-
-### Q: Why do we use GoogleGson NuGet instead of binding from Maven?
-
-**A**: Gson has complex Java generics and edge cases requiring extensive metadata transforms. The GoogleGson package has these built-in. Direct Maven binding fails with CS0534 errors about unimplemented abstract members.
-
-See: [ANDROID_DEPENDENCY_MANAGEMENT.md - Key Insights #2](ANDROID_DEPENDENCY_MANAGEMENT.md#2-googlegson-must-always-use-nuget-package)
-
-### Q: What's the difference between AndroidMavenLibrary and PackageReference?
-
-**A**:
-
-- `AndroidMavenLibrary` downloads Java AAR/JAR from Maven and optionally generates C# bindings
-- `PackageReference` references pre-built NuGet packages (which may contain bindings or native code)
-
-Use `PackageReference` when a good NuGet binding exists, `AndroidMavenLibrary` otherwise.
-
-### Q: When should I add AndroidIgnoredJavaDependency?
-
-**A**: Add it when a dependency is satisfied through another mechanism:
-
-- Transitively from core (via ProjectReference)
-- Transitively from MAUI
-- Via NuGet package (when Maven also lists it)
-
-This tells MSBuild "don't error about this missing Maven dependency, I've got it covered."
-
-### Q: How do I know if a dependency is in MAUI?
-
-**A**: Check the "MAUI Transitive" list in [DEPENDENCY_QUICK_REFERENCE.md](DEPENDENCY_QUICK_REFERENCE.md#common-dependencies-quick-lookup) or run:
-
-```bash
-dotnet list package --include-transitive | grep -i <package-name>
-```
-
-### Q: What if I encounter a new dependency not documented here?
-
-**A**:
-
-1. Check NuGet.org for Xamarin/AndroidX bindings
-2. Check if it's a Datadog internal module
-3. See if MAUI provides it transitively
-4. If none of above, it needs Maven download
-5. Document your findings in the appropriate guide
-
-## Contributing
-
-When contributing to these docs:
-
-1. **Keep quick reference quick** - Add only essential info
-2. **Keep comprehensive guide comprehensive** - Include rationale and context
-3. **Update all three docs** - Ensure consistency across guides
-4. **Include examples** - Show, don't just tell
-5. **Test commands** - Verify all commands work before documenting
-
-### Document Maintenance
-
-| Document                         | Update Frequency  | Trigger                                         |
-| -------------------------------- | ----------------- | ----------------------------------------------- |
-| ANDROID_DEPENDENCY_MANAGEMENT.md | Per major insight | New pattern discovered, breaking change         |
-| DEPENDENCY_QUICK_REFERENCE.md    | Per SDK update    | Version numbers, new common dependencies        |
-| AUTOMATION_ROADMAP.md            | Quarterly         | Progress on automation, architectural decisions |
-| This README                      | As needed         | New documents added, major changes              |
-
-## Version History
-
-| Version | Date       | Changes                                              |
-| ------- | ---------- | ---------------------------------------------------- |
-| 1.0     | 2026-01-16 | Initial documentation set created                    |
-|         |            | - Documented dependency management pattern           |
-|         |            | - Resolved gson and jetbrains.annotations duplicates |
-|         |            | - Established automation roadmap                     |
-
-## Feedback
-
-Documentation unclear? Found an error? Have suggestions?
-
-1. Open an issue on GitHub
-2. Submit a PR with improvements
-3. Add notes to the relevant section
-
-Good documentation is iterative - your feedback makes it better!
+Complete documentation for developers working on or using the Datadog MAUI SDK.
 
 ---
 
-**Documentation Version**: 1.0
-**SDK Version**: 3.5.0
-**Last Updated**: 2026-01-16
+## Quick Start
+
+**New to the project?** → [Project Guide](PROJECT_GUIDE.md)
+
+**Building packages?** → [Scripts Overview](SCRIPTS_OVERVIEW.md)
+
+**Working with Android?** → [Android Dependencies](ANDROID_DEPENDENCIES.md)
+
+**Working with iOS?** → [iOS Binding Strategy](IOS_BINDING_STRATEGY.md)
+
+---
+
+## Core Documentation
+
+### For SDK Users
+
+- **[Getting Started](GETTING_STARTED.md)** - Installation and basic usage
+- **[Unified API Design](UNIFIED_API_DESIGN.md)** - Cross-platform API reference
+
+### For SDK Developers
+
+- **[Project Guide](PROJECT_GUIDE.md)** - Architecture, status, and structure
+- **[Scripts Overview](SCRIPTS_OVERVIEW.md)** - Build automation and tools
+- **[Workflow Architecture](WORKFLOW_ARCHITECTURE.md)** - CI/CD pipelines
+- **[Packaging Architecture](PACKAGING_ARCHITECTURE.md)** - NuGet package structure
+
+### Android Development
+
+- **[Android Dependencies](ANDROID_DEPENDENCIES.md)** - Complete dependency management guide
+  - Maven to NuGet mapping
+  - Centralized core pattern
+  - Quick reference tables
+  - Troubleshooting
+- **[Android Integration Packages](ANDROID_INTEGRATION_PACKAGES.md)** - Optional integrations (OkHttp, OpenTelemetry)
+
+### iOS Development
+
+- **[iOS Binding Strategy](IOS_BINDING_STRATEGY.md)** - Complete approach and methodology
+  - Comparison of generated vs manual bindings
+  - API identification methodology
+  - Implementation checklist
+- **[Identifying User-Facing APIs](IDENTIFYING_USER_FACING_APIS.md)** - How to determine which APIs to expose
+- **[RUM Binding Comparison](RUM_BINDING_COMPARISON.md)** - Concrete before/after example
+
+### Maintenance
+
+- **[Changelog](CHANGELOG.md)** - Version history
+- **[Contributing](CONTRIBUTING.md)** - How to contribute
+- **[Automation Roadmap](AUTOMATION_ROADMAP.md)** - Future improvements
+
+---
+
+## Documentation by Task
+
+### Adding a New Android Package
+
+1. Read [Android Integration Packages](ANDROID_INTEGRATION_PACKAGES.md#adding-more-integration-packages)
+2. Use [Scripts Overview](SCRIPTS_OVERVIEW.md#adding-a-new-android-integration-package) workflow
+3. Reference [_reference/ANDROID_PACKAGES_ANALYSIS.md](_reference/ANDROID_PACKAGES_ANALYSIS.md) for available packages
+
+### Understanding Android Dependencies
+
+1. Start with [Android Dependencies](ANDROID_DEPENDENCIES.md#the-problem-and-solution)
+2. Use [Quick Reference](ANDROID_DEPENDENCIES.md#quick-reference) for lookups
+3. Check [Troubleshooting](ANDROID_DEPENDENCIES.md#troubleshooting) if stuck
+
+### Upgrading Datadog SDK Version
+
+1. Run `./scripts/update-sdk-version.sh NEW_VERSION`
+2. Follow [Version Updates](ANDROID_DEPENDENCIES.md#version-updates) guide
+3. Test with `./scripts/pack.sh`
+
+### Creating iOS Bindings
+
+1. Read [iOS Binding Strategy](IOS_BINDING_STRATEGY.md)
+2. Use [Identifying User-Facing APIs](IDENTIFYING_USER_FACING_APIS.md) methodology
+3. Reference [RUM Binding Comparison](RUM_BINDING_COMPARISON.md) for examples
+
+### Understanding the Build System
+
+1. Start with [Scripts Overview](SCRIPTS_OVERVIEW.md)
+2. Review [Workflow Architecture](WORKFLOW_ARCHITECTURE.md) for CI/CD
+3. See [Packaging Architecture](PACKAGING_ARCHITECTURE.md) for package structure
+
+---
+
+## Reference Documentation
+
+Historical and reference documentation in `_reference/` directory:
+
+- **[_reference/BUILD_PROCESS_VALIDATION.md](_reference/BUILD_PROCESS_VALIDATION.md)** - Build validation record
+- **[_reference/SCRIPT_AUDIT.md](_reference/SCRIPT_AUDIT.md)** - Original script audit
+- **[_reference/SCRIPT_FIXES_COMPLETE.md](_reference/SCRIPT_FIXES_COMPLETE.md)** - Bash compatibility fixes
+- **[_reference/ANDROID_PACKAGES_ANALYSIS.md](_reference/ANDROID_PACKAGES_ANALYSIS.md)** - All 27 available Android packages
+- **[_reference/NEW_ANDROID_PACKAGES_STATUS.md](_reference/NEW_ANDROID_PACKAGES_STATUS.md)** - Integration package implementation history
+- **[_reference/android_dep_research.md](_reference/android_dep_research.md)** - Dependency verification research
+
+---
+
+## Document Status
+
+| Document | Purpose | Status |
+|----------|---------|--------|
+| **Core Guides** |
+| [PROJECT_GUIDE.md](PROJECT_GUIDE.md) | Complete project overview | ✅ Complete |
+| [ANDROID_DEPENDENCIES.md](ANDROID_DEPENDENCIES.md) | Android dependency management | ✅ Complete |
+| [IOS_BINDING_STRATEGY.md](IOS_BINDING_STRATEGY.md) | iOS binding approach | ✅ Complete |
+| [SCRIPTS_OVERVIEW.md](SCRIPTS_OVERVIEW.md) | Build automation | ✅ Complete |
+| **Architecture** |
+| [WORKFLOW_ARCHITECTURE.md](WORKFLOW_ARCHITECTURE.md) | CI/CD pipelines | ✅ Complete |
+| [PACKAGING_ARCHITECTURE.md](PACKAGING_ARCHITECTURE.md) | Package structure | ✅ Complete |
+| **Platform-Specific** |
+| [ANDROID_INTEGRATION_PACKAGES.md](ANDROID_INTEGRATION_PACKAGES.md) | Android integrations | ✅ Complete |
+| [IDENTIFYING_USER_FACING_APIS.md](IDENTIFYING_USER_FACING_APIS.md) | API methodology | ✅ Complete |
+| [RUM_BINDING_COMPARISON.md](RUM_BINDING_COMPARISON.md) | iOS binding example | ✅ Complete |
+| **User Guides** |
+| [UNIFIED_API_DESIGN.md](UNIFIED_API_DESIGN.md) | API specification | 🚧 In Progress |
+| [GETTING_STARTED.md](GETTING_STARTED.md) | User setup guide | 🚧 In Progress |
+| **Planning** |
+| [CHANGELOG.md](CHANGELOG.md) | Version history | ✅ Complete |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution guide | ✅ Complete |
+| [AUTOMATION_ROADMAP.md](AUTOMATION_ROADMAP.md) | Future plans | ✅ Complete |
+
+**Legend**: ✅ Complete | 🚧 In Progress | 📝 Planned
+
+---
+
+## Documentation Philosophy
+
+### Single Source of Truth
+
+Each topic has ONE comprehensive document. No overlapping or redundant content.
+
+**Example**: Android dependencies
+- ✅ ONE doc: `ANDROID_DEPENDENCIES.md` (comprehensive with quick reference built-in)
+- ❌ NOT: Separate docs for "comprehensive", "quick reference", and "version mapping"
+
+### Progressive Disclosure
+
+Documents start with quick start, then provide depth for those who need it.
+
+**Structure**:
+1. Quick navigation at top
+2. Problem statement and solution
+3. Quick reference tables
+4. Detailed implementation guide
+5. Advanced topics
+6. Troubleshooting
+
+### Keep It Current
+
+- Update docs when code changes
+- Archive old docs to `_reference/` instead of deleting
+- Mark status in tables above
+- Date all major updates
+
+---
+
+## Contributing to Documentation
+
+### Before Adding a New Document
+
+**Ask yourself**:
+1. Does this content belong in an existing doc?
+2. Is this temporary (status update) or permanent (guide)?
+3. Will users actually need this 6 months from now?
+
+**If temporary**: Put in `_reference/` with date in filename
+
+**If adding value**: Create new doc and update this README
+
+### Document Template
+
+```markdown
+# Document Title
+
+Brief 1-sentence description of what this doc covers.
+
+---
+
+## Quick Start
+
+Links to jump to specific sections for common tasks.
+
+---
+
+## Main Content
+
+Organized logically with clear headers.
+
+---
+
+## Related Documentation
+
+Links to related docs.
+
+---
+
+**Last Updated**: YYYY-MM-DD
+```
+
+### Review Checklist
+
+- [ ] Clear purpose stated at top
+- [ ] Quick navigation/TOC for long docs
+- [ ] Code examples tested and working
+- [ ] Cross-references to related docs
+- [ ] No duplicate content
+- [ ] Updated this README with new doc
+
+---
+
+## External Resources
+
+- **[Datadog Mobile SDK Docs](https://docs.datadoghq.com/mobile/)** - Official Datadog documentation
+- **[dd-sdk-android GitHub](https://github.com/DataDog/dd-sdk-android)** - Native Android SDK
+- **[dd-sdk-ios GitHub](https://github.com/DataDog/dd-sdk-ios)** - Native iOS SDK
+- **[.NET MAUI Docs](https://learn.microsoft.com/en-us/dotnet/maui/)** - Microsoft MAUI
+- **[Android Bindings Guide](https://learn.microsoft.com/en-us/xamarin/android/platform/binding-java-library/)** - Xamarin Android bindings
+- **[iOS Bindings Guide](https://learn.microsoft.com/en-us/xamarin/ios/platform/binding-objective-c/)** - Xamarin iOS bindings
+
+---
+
+## Getting Help
+
+**For Package Users**:
+- Review [Getting Started](GETTING_STARTED.md)
+- Check [Unified API Design](UNIFIED_API_DESIGN.md)
+- File issues on GitHub
+
+**For SDK Developers**:
+- Start with [Project Guide](PROJECT_GUIDE.md)
+- Review platform-specific guide (Android/iOS)
+- Check [Scripts Overview](SCRIPTS_OVERVIEW.md) for build issues
+
+---
+
+**Last Updated**: 2026-01-20
+**Total Active Docs**: 17
+**Documentation Maintainer**: SDK Development Team
