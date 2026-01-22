@@ -1,3 +1,9 @@
+---
+layout: default
+title: RUM Binding Comparison
+nav_order: 33
+---
+
 # RUM Binding Comparison: Generated vs Manual
 
 This document shows the difference between what Objective Sharpie generated for RUM vs what users actually need.

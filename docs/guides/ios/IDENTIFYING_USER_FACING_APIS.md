@@ -1,3 +1,9 @@
+---
+layout: default
+title: Identifying User-Facing APIs
+nav_order: 32
+---
+
 # Methodology: Identifying User-Facing vs Internal APIs
 
 This document explains **how to determine which binding methods should be exposed and documented for users** vs which are internal implementation details.

@@ -1,3 +1,9 @@
+---
+layout: default
+title: Android Dependencies
+nav_order: 21
+---
+
 # Android Dependencies Guide
 
 Complete guide to managing Android dependencies in the Datadog MAUI SDK bindings.
@@ -416,9 +422,9 @@ Centralize all version numbers here. Single source of truth prevents version con
 
 ## Related Documentation
 
-- [Android Integration Packages](ANDROID_INTEGRATION_PACKAGES.md) - Adding optional packages
-- [Scripts Overview](SCRIPTS_OVERVIEW.md) - Build script details
-- [Packaging Architecture](PACKAGING_ARCHITECTURE.md) - NuGet package structure
+- [Android Integration Packages]() - Adding optional packages
+- [Scripts Overview]() - Build script details
+- [Packaging Architecture]() - NuGet package structure
 
 ---
 

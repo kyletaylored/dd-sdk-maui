@@ -1,6 +1,12 @@
 ---
 layout: default
 title: Getting Started
+nav_order: 3
+---
+
+---
+layout: default
+title: Getting Started
 nav_order: 2
 description: "Guide to developing and building the Datadog SDK for .NET MAUI"
 permalink: /getting-started
@@ -371,10 +377,10 @@ dotnet build -f net9.0-android
 
 ## Next Steps
 
-1. **Review Architecture**: Read [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md)
+1. **Review Architecture**: Read [PROJECT_OVERVIEW.md](../project/PROJECT_GUIDE.html)
 2. **Implement Features**: Start with core initialization
 3. **Write Tests**: Add unit and integration tests
-4. **Contribute**: See [CONTRIBUTING.md](CONTRIBUTING.md)
+4. **Contribute**: See [CONTRIBUTING.md]()
 5. **Ask Questions**: Open GitHub issues or discussions
 
 ## Useful Commands
@@ -405,10 +411,10 @@ git log --oneline --graph --decorate --all -10
 ## Resources
 
 ### Documentation
-- [Main README](README.md)
-- [Project Overview](PROJECT_OVERVIEW.md)
-- [Contributing Guide](CONTRIBUTING.md)
-- [Changelog](CHANGELOG.md)
+- [Documentation Index](../index.html)
+- [Project Overview](../project/PROJECT_GUIDE.html)
+- [Contributing Guide]()
+- [Changelog]()
 
 ### External Resources
 - [.NET MAUI Documentation](https://docs.microsoft.com/en-us/dotnet/maui/)
@@ -425,4 +431,4 @@ git log --oneline --graph --decorate --all -10
 
 **Happy Coding!** 🚀
 
-If you run into any issues, please check [CONTRIBUTING.md](CONTRIBUTING.md) or open an issue on GitHub.
+If you run into any issues, please check [CONTRIBUTING.md]() or open an issue on GitHub.

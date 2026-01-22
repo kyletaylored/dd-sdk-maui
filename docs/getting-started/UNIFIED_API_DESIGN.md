@@ -1,3 +1,9 @@
+---
+layout: default
+title: Unified API Design
+nav_order: 5
+---
+
 # Datadog MAUI Unified API Design
 
 ## Namespace Strategy

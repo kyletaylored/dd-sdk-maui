@@ -1,3 +1,9 @@
+---
+layout: default
+title: iOS Binding Strategy
+nav_order: 31
+---
+
 # iOS Binding Strategy
 
 Complete guide to iOS bindings for the Datadog MAUI SDK, including approach comparison and implementation methodology.
@@ -427,10 +433,10 @@ For each iOS framework:
 
 ## Related Documentation
 
-- [IDENTIFYING_USER_FACING_APIS.md](IDENTIFYING_USER_FACING_APIS.md) - Detailed methodology
-- [RUM_BINDING_COMPARISON.md](RUM_BINDING_COMPARISON.md) - Concrete before/after example
-- [UNIFIED_API_DESIGN.md](UNIFIED_API_DESIGN.md) - Cross-platform API design
-- [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) - Overall project architecture
+- [IDENTIFYING_USER_FACING_APIS.md]() - Detailed methodology
+- [RUM_BINDING_COMPARISON.md]() - Concrete before/after example
+- [UNIFIED_API_DESIGN.md]() - Cross-platform API design
+- [PROJECT_OVERVIEW.md](../../project/PROJECT_GUIDE.html) - Overall project architecture
 
 ---
 

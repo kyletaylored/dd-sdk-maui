@@ -1,3 +1,9 @@
+---
+layout: default
+title: Packaging Architecture
+nav_order: 11
+---
+
 # Packaging and Release Guide: Datadog .NET MAUI Bindings (Android + iOS)
 
 This repository produces .NET MAUI bindings for the Datadog native SDKs. The deliverables are published as NuGet packages and are designed for stable consumption in MAUI applications targeting Android and iOS.

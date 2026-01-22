@@ -1,3 +1,9 @@
+---
+layout: default
+title: Mapping File Uploads
+nav_order: 41
+---
+
 # Mapping File Uploads for MAUI Android
 
 When building MAUI Android apps with code obfuscation (ProGuard/R8) or native code (NDK), you'll need to upload mapping files to Datadog to get readable stack traces in RUM Error Tracking.

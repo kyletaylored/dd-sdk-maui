@@ -1,3 +1,9 @@
+---
+layout: default
+title: Android Integration Packages
+nav_order: 22
+---
+
 # Android Integration Packages
 
 Guide to optional Android integration packages for the Datadog MAUI SDK.
@@ -255,7 +261,7 @@ Want to add additional integration packages? Follow this process:
 
 ### 1. Check Available Packages
 
-See [_reference/ANDROID_PACKAGES_ANALYSIS.md](../docs/_reference/ANDROID_PACKAGES_ANALYSIS.md) for complete list of available Datadog Android SDK packages.
+See [_reference/ANDROID_PACKAGES_ANALYSIS.md](../_reference/ANDROID_PACKAGES_ANALYSIS.html) for complete list of available Datadog Android SDK packages.
 
 **High-priority candidates**:
 - `dd-sdk-android-rum-coroutines` - Kotlin coroutines RUM support
@@ -351,10 +357,10 @@ curl -s https://repo1.maven.org/maven2/com/datadoghq/dd-sdk-android-okhttp/3.5.0
 
 ## Related Documentation
 
-- [SCRIPTS_OVERVIEW.md](SCRIPTS_OVERVIEW.md) - Build scripts guide
-- [maven-nuget-version-mapping.md](maven-nuget-version-mapping.md) - Version compatibility
-- [PACKAGING_ARCHITECTURE.md](PACKAGING_ARCHITECTURE.md) - Package structure
-- [_reference/ANDROID_PACKAGES_ANALYSIS.md](../docs/_reference/ANDROID_PACKAGES_ANALYSIS.md) - All available packages
+- [SCRIPTS_OVERVIEW.md]() - Build scripts guide
+- [maven-nuget-version-mapping.md](../../guides/android/ANDROID_DEPENDENCIES.html) - Version compatibility
+- [PACKAGING_ARCHITECTURE.md]() - Package structure
+- [_reference/ANDROID_PACKAGES_ANALYSIS.md](../_reference/ANDROID_PACKAGES_ANALYSIS.html) - All available packages
 
 ---
 
@@ -375,6 +381,6 @@ curl -s https://repo1.maven.org/maven2/com/datadoghq/dd-sdk-android-okhttp/3.5.0
 If you encounter issues with integration packages:
 
 1. Check [Build Information](#build-information) for expected warnings
-2. Review [Troubleshooting](SCRIPTS_OVERVIEW.md#troubleshooting) in scripts overview
+2. Review [Troubleshooting](#troubleshooting) in scripts overview
 3. Verify dependencies using `./scripts/map-maven-to-nuget.sh`
 4. File an issue with build logs and package versions

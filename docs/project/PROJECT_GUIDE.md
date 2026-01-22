@@ -1,3 +1,9 @@
+---
+layout: default
+title: Project Guide
+nav_order: 2
+---
+
 # Project Guide
 
 Complete guide to the Datadog MAUI SDK project - architecture, structure, and current status.
@@ -47,7 +53,7 @@ Complete guide to the Datadog MAUI SDK project - architecture, structure, and cu
 - Following opt-in approach
 
 **Unified API**: Cross-platform MAUI plugin
-- Design complete (UNIFIED_API_DESIGN.md)
+- Design complete ()
 - Implementation pending iOS bindings
 
 ### 🎯 Next Steps
@@ -383,13 +389,13 @@ dd-sdk-maui/
 
 ## Related Documentation
 
-- [Android Dependencies](ANDROID_DEPENDENCIES.md) - Complete dependency guide
-- [Android Integration Packages](ANDROID_INTEGRATION_PACKAGES.md) - Optional integrations
-- [iOS Binding Strategy](IOS_BINDING_STRATEGY.md) - iOS implementation approach
-- [Scripts Overview](SCRIPTS_OVERVIEW.md) - Build automation details
-- [Workflow Architecture](WORKFLOW_ARCHITECTURE.md) - CI/CD pipeline
-- [Packaging Architecture](PACKAGING_ARCHITECTURE.md) - NuGet structure
-- [Unified API Design](UNIFIED_API_DESIGN.md) - Cross-platform API spec
+- [Android Dependencies]() - Complete dependency guide
+- [Android Integration Packages]() - Optional integrations
+- [iOS Binding Strategy]() - iOS implementation approach
+- [Scripts Overview]() - Build automation details
+- [Workflow Architecture]() - CI/CD pipeline
+- [Packaging Architecture]() - NuGet structure
+- [Unified API Design]() - Cross-platform API spec
 
 ---
 

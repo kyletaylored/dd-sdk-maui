@@ -104,6 +104,9 @@ exclude:
   - fixtures/
   - README.md
   - nuget # Safety: ensure feed output is never processed by Jekyll
+  - _archive/ # Archived documentation
+  - "*.sh" # Build and utility scripts
+  - _DOCS_CLEANUP_SUMMARY.md
 
 # Sass
 sass:

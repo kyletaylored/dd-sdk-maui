@@ -96,7 +96,7 @@ When adding or modifying the public API:
 2. Implement for both platforms:
    - [iOS implementation](Datadog.MAUI.Plugin/Platforms/iOS/DatadogSdkImplementation.cs)
    - [Android implementation](Datadog.MAUI.Plugin/Platforms/Android/DatadogSdkImplementation.cs)
-3. Update [README.md](README.md) with usage examples
+3. Update [Documentation Index](../index.html) with usage examples
 4. Add tests if applicable
 
 ## Testing

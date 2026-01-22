@@ -1,3 +1,9 @@
+---
+layout: default
+title: Scripts Overview
+nav_order: 12
+---
+
 # Build Scripts Overview
 
 Comprehensive guide to all build and automation scripts for the Datadog MAUI SDK.
@@ -98,7 +104,7 @@ io.opentelemetry:opentelemetry-api → OpenTelemetry.Api
 - Resolving version compatibility issues
 - Understanding why versions differ from Maven POMs
 
-**See also**: [maven-nuget-version-mapping.md](maven-nuget-version-mapping.md)
+**See also**: [maven-nuget-version-mapping.md](../guides/android/ANDROID_DEPENDENCIES.html)
 
 ---
 
@@ -443,10 +449,10 @@ curl -I https://repo1.maven.org/maven2/com/datadoghq/dd-sdk-android-rum/3.5.0/dd
 
 ## Related Documentation
 
-- [maven-nuget-version-mapping.md](maven-nuget-version-mapping.md) - Version compatibility guide
-- [PACKAGING_ARCHITECTURE.md](PACKAGING_ARCHITECTURE.md) - NuGet package structure
-- [WORKFLOW_ARCHITECTURE.md](WORKFLOW_ARCHITECTURE.md) - CI/CD pipeline details
-- [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) - Overall architecture
+- [maven-nuget-version-mapping.md](../guides/android/ANDROID_DEPENDENCIES.html) - Version compatibility guide
+- [PACKAGING_ARCHITECTURE.md]() - NuGet package structure
+- [WORKFLOW_ARCHITECTURE.md]() - CI/CD pipeline details
+- [PROJECT_OVERVIEW.md](../project/PROJECT_GUIDE.html) - Overall architecture
 
 ---
 
@@ -460,4 +466,4 @@ Planned improvements:
 4. **Dependency graph visualization**: Tool to show package relationships
 5. **iOS automation**: Objective Sharpie integration in workflows
 
-For current status, see [AUTOMATION_ROADMAP.md](AUTOMATION_ROADMAP.md)
+For current status, see [AUTOMATION_ROADMAP.md]()
