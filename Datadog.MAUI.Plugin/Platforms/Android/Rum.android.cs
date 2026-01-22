@@ -10,7 +10,7 @@ public static partial class Rum
         var rumMonitor = GlobalRumMonitor.Get();
         if (attributes != null && attributes.Count > 0)
         {
-            var javaAttributes = attributes.ToDictionary(kvp => kvp.Key, kvp => (Java.Lang.Object)kvp.Value);
+            var javaAttributes = attributes.ToDictionary(kvp => kvp.Key, kvp => ConvertToJavaObject(kvp.Value));
             rumMonitor.StartView(key, name, javaAttributes);
         }
         else
@@ -24,7 +24,7 @@ public static partial class Rum
         var rumMonitor = GlobalRumMonitor.Get();
         if (attributes != null && attributes.Count > 0)
         {
-            var javaAttributes = attributes.ToDictionary(kvp => kvp.Key, kvp => (Java.Lang.Object)kvp.Value);
+            var javaAttributes = attributes.ToDictionary(kvp => kvp.Key, kvp => ConvertToJavaObject(kvp.Value));
             rumMonitor.StopView(key, javaAttributes);
         }
         else
@@ -40,7 +40,7 @@ public static partial class Rum
 
         if (attributes != null && attributes.Count > 0)
         {
-            var javaAttributes = attributes.ToDictionary(kvp => kvp.Key, kvp => (Java.Lang.Object)kvp.Value);
+            var javaAttributes = attributes.ToDictionary(kvp => kvp.Key, kvp => ConvertToJavaObject(kvp.Value));
             rumMonitor.AddAction(actionType, name, javaAttributes);
         }
         else
@@ -56,7 +56,7 @@ public static partial class Rum
 
         if (attributes != null && attributes.Count > 0)
         {
-            var javaAttributes = attributes.ToDictionary(kvp => kvp.Key, kvp => (Java.Lang.Object)kvp.Value);
+            var javaAttributes = attributes.ToDictionary(kvp => kvp.Key, kvp => ConvertToJavaObject(kvp.Value));
             rumMonitor.StartResource(key, resourceMethod, url, javaAttributes);
         }
         else
@@ -74,7 +74,7 @@ public static partial class Rum
 
         if (attributes != null && attributes.Count > 0)
         {
-            var javaAttributes = attributes.ToDictionary(kvp => kvp.Key, kvp => (Java.Lang.Object)kvp.Value);
+            var javaAttributes = attributes.ToDictionary(kvp => kvp.Key, kvp => ConvertToJavaObject(kvp.Value));
             rumMonitor.StopResource(key, javaStatusCode, javaSize, resourceKind, javaAttributes);
         }
         else
@@ -90,7 +90,7 @@ public static partial class Rum
 
         if (attributes != null && attributes.Count > 0)
         {
-            var javaAttributes = attributes.ToDictionary(kvp => kvp.Key, kvp => (Java.Lang.Object)kvp.Value);
+            var javaAttributes = attributes.ToDictionary(kvp => kvp.Key, kvp => ConvertToJavaObject(kvp.Value));
             rumMonitor.StopResourceWithError(key, null, error.Message, Com.Datadog.Android.Rum.RumErrorSource.Network, throwable, javaAttributes);
         }
         else
@@ -107,7 +107,7 @@ public static partial class Rum
 
         if (attributes != null && attributes.Count > 0)
         {
-            var javaAttributes = attributes.ToDictionary(kvp => kvp.Key, kvp => (Java.Lang.Object)kvp.Value);
+            var javaAttributes = attributes.ToDictionary(kvp => kvp.Key, kvp => ConvertToJavaObject(kvp.Value));
             rumMonitor.AddError(message, errorSource, throwable, javaAttributes);
         }
         else
@@ -186,6 +186,29 @@ public static partial class Rum
             Maui.Rum.RumErrorSource.WebView => Com.Datadog.Android.Rum.RumErrorSource.Webview,
             Maui.Rum.RumErrorSource.Custom => Com.Datadog.Android.Rum.RumErrorSource.Source,
             _ => Com.Datadog.Android.Rum.RumErrorSource.Source
+        };
+    }
+
+    private static Java.Lang.Object ConvertToJavaObject(object value)
+    {
+        // If it's already a Java object, return as-is
+        if (value is Java.Lang.Object javaObj)
+        {
+            return javaObj;
+        }
+
+        // Convert .NET types to Java types
+        return value switch
+        {
+            string s => new Java.Lang.String(s),
+            int i => Java.Lang.Integer.ValueOf(i),
+            long l => Java.Lang.Long.ValueOf(l),
+            double d => Java.Lang.Double.ValueOf(d),
+            float f => Java.Lang.Float.ValueOf(f),
+            bool b => Java.Lang.Boolean.ValueOf(b),
+            byte by => Java.Lang.Byte.ValueOf((sbyte)by),
+            short sh => Java.Lang.Short.ValueOf(sh),
+            _ => new Java.Lang.String(value?.ToString() ?? "")
         };
     }
 }

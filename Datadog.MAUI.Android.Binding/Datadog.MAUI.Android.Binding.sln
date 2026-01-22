@@ -29,8 +29,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dd-sdk-android-trace-otel",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dd-sdk-android-okhttp-otel", "dd-sdk-android-okhttp-otel\dd-sdk-android-okhttp-otel.csproj", "{D7EA1FC9-3456-6789-01CD-EF0123456789}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dd-sdk-android-gradle-plugin", "dd-sdk-android-gradle-plugin\dd-sdk-android-gradle-plugin.csproj", "{E8FB20DA-4567-7890-12DE-F01234567890}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

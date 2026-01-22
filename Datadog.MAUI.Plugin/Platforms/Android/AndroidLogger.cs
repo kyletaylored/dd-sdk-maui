@@ -53,7 +53,7 @@ internal class AndroidLogger : ILogger
 
         if (attributes != null && attributes.Count > 0)
         {
-            var javaAttributes = attributes.ToDictionary(kvp => kvp.Key, kvp => (Java.Lang.Object)kvp.Value);
+            var javaAttributes = attributes.ToDictionary(kvp => kvp.Key, kvp => ConvertToJavaObject(kvp.Value));
             _nativeLogger.Log(nativeLevel, message, error?.ToJavaThrowable(), javaAttributes);
         }
         else
@@ -96,6 +96,29 @@ internal class AndroidLogger : ILogger
             Logs.LogLevel.Alert => (int)global::Android.Util.LogPriority.Error,
             Logs.LogLevel.Emergency => (int)global::Android.Util.LogPriority.Error,
             _ => (int)global::Android.Util.LogPriority.Info
+        };
+    }
+
+    private static Java.Lang.Object ConvertToJavaObject(object value)
+    {
+        // If it's already a Java object, return as-is
+        if (value is Java.Lang.Object javaObj)
+        {
+            return javaObj;
+        }
+
+        // Convert .NET types to Java types
+        return value switch
+        {
+            string s => new Java.Lang.String(s),
+            int i => Java.Lang.Integer.ValueOf(i),
+            long l => Java.Lang.Long.ValueOf(l),
+            double d => Java.Lang.Double.ValueOf(d),
+            float f => Java.Lang.Float.ValueOf(f),
+            bool b => Java.Lang.Boolean.ValueOf(b),
+            byte by => Java.Lang.Byte.ValueOf((sbyte)by),
+            short sh => Java.Lang.Short.ValueOf(sh),
+            _ => new Java.Lang.String(value?.ToString() ?? "")
         };
     }
 }
