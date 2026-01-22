@@ -7,6 +7,7 @@
         <OpenTracingVersion>0.32.0</OpenTracingVersion>
         <KronosVersion>0.0.1-alpha11</KronosVersion>
         <AndroidxMetricsVersion>1.0.0</AndroidxMetricsVersion>
+        <SquareupOkioVersion>3.6.0</SquareupOkioVersion>
     </PropertyGroup>
 
     <ItemGroup>

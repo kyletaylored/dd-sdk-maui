@@ -1,10 +1,7 @@
 <metadata>
   <!--
-    Remove classes that depend on androidx.metrics.performance.JankStats
-    These are internal vitals classes used for frame metrics tracking.
-    The functionality is optional and will gracefully degrade if not available.
+    Previously removed classes that depend on androidx.metrics.performance.JankStats
+    These have been re-enabled now that androidx.metrics is properly included from Google Maven.
+    These classes provide frame metrics tracking for slow frames monitoring in RUM.
   -->
-  <remove-node path="/api/package[@name='com.datadog.android.rum.internal.vitals']/interface[@name='FrameStateListener']" />
-  <remove-node path="/api/package[@name='com.datadog.android.rum.internal.vitals']/class[@name='FrameStatesAggregator']" />
-  <remove-node path="/api/package[@name='com.datadog.android.rum.internal.metric.slowframes']/class[@name='SlowFramesListener']" />
 </metadata>
