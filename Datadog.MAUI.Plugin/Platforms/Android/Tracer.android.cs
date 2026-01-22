@@ -81,107 +81,21 @@ public static partial class Tracer
 
     private static partial void PlatformInject(IDictionary<string, string> headers, ISpan? span)
     {
-        if (span is not Platforms.Android.AndroidSpan androidSpan)
-            return;
-
-        var textMapInject = new TextMapInjectAdapter(headers);
-
-        // Get BuiltinFormats.HTTP_HEADERS
-        var builtinFormatsClass = Java.Lang.Class.ForName("io.opentracing.propagation.Format$Builtin");
-        var httpHeadersField = builtinFormatsClass?.GetField("HTTP_HEADERS");
-        var httpHeadersFormat = httpHeadersField?.Get(null) as Java.Lang.Object;
-
-        // Call tracer.inject(spanContext, format, carrier)
-        var tracerClass = NativeTracer.Class;
-        var injectMethod = tracerClass?.GetMethod("inject",
-            Java.Lang.Class.FromType(typeof(Java.Lang.Object)),
-            Java.Lang.Class.FromType(typeof(Java.Lang.Object)),
-            Java.Lang.Class.FromType(typeof(Java.Lang.Object)));
-
-        var spanContext = androidSpan.GetContext();
-        injectMethod?.Invoke(NativeTracer, spanContext, httpHeadersFormat, textMapInject);
+        // TODO: Implement trace context injection
+        // Currently disabled due to OpenTracing TextMap binding conflicts
+        // The TextMapInjectAdapter class causes Java compilation errors with Iterable interface inheritance
+        throw new NotImplementedException(
+            "Trace context injection is not yet implemented on Android. " +
+            "This feature requires refactoring the OpenTracing TextMap adapters to avoid Iterable conflicts.");
     }
 
     private static partial ISpan? PlatformExtract(IDictionary<string, string> headers)
     {
-        var textMapExtract = new TextMapExtractAdapter(headers);
-
-        // Get BuiltinFormats.HTTP_HEADERS
-        var builtinFormatsClass = Java.Lang.Class.ForName("io.opentracing.propagation.Format$Builtin");
-        var httpHeadersField = builtinFormatsClass?.GetField("HTTP_HEADERS");
-        var httpHeadersFormat = httpHeadersField?.Get(null) as Java.Lang.Object;
-
-        // Call tracer.extract(format, carrier)
-        var tracerClass = NativeTracer.Class;
-        var extractMethod = tracerClass?.GetMethod("extract",
-            Java.Lang.Class.FromType(typeof(Java.Lang.Object)),
-            Java.Lang.Class.FromType(typeof(Java.Lang.Object)));
-
-        var spanContext = extractMethod?.Invoke(NativeTracer, httpHeadersFormat, textMapExtract) as Java.Lang.Object;
-
-        if (spanContext == null)
-            return null;
-
-        // Build a new span with the extracted context as parent
-        var buildSpanMethod = tracerClass?.GetMethod("buildSpan", Java.Lang.Class.FromType(typeof(Java.Lang.String)));
-        var spanBuilder = buildSpanMethod?.Invoke(NativeTracer, new Java.Lang.String("extracted")) as Java.Lang.Object;
-
-        if (spanBuilder == null)
-            return null;
-
-        var spanBuilderClass = spanBuilder.Class;
-        var asChildOfMethod = spanBuilderClass?.GetMethod("asChildOf", Java.Lang.Class.FromType(typeof(Java.Lang.Object)));
-        spanBuilder = asChildOfMethod?.Invoke(spanBuilder, spanContext) as Java.Lang.Object;
-
-        var startMethod = spanBuilderClass?.GetMethod("start");
-        var span = startMethod?.Invoke(spanBuilder) as Java.Lang.Object;
-
-        return span != null ? new Platforms.Android.AndroidSpan(span) : null;
-    }
-}
-
-// Adapter for injecting headers (write-only)
-internal class TextMapInjectAdapter : Java.Lang.Object, ITextMap
-{
-    private readonly IDictionary<string, string> _headers;
-
-    public TextMapInjectAdapter(IDictionary<string, string> headers)
-    {
-        _headers = headers;
-    }
-
-    public void Put(string? key, string? value)
-    {
-        if (key != null && value != null)
-        {
-            _headers[key] = value;
-        }
-    }
-
-    public Java.Util.IIterator? Iterator()
-    {
-        // Not used for injection
-        return null;
-    }
-}
-
-// Adapter for extracting headers (read-only)
-internal class TextMapExtractAdapter : Java.Lang.Object, ITextMapExtract
-{
-    private readonly IDictionary<string, string> _headers;
-
-    public TextMapExtractAdapter(IDictionary<string, string> headers)
-    {
-        _headers = headers;
-    }
-
-    public Java.Util.IIterator? Iterator()
-    {
-        var entries = new Java.Util.ArrayList();
-        foreach (var kvp in _headers)
-        {
-            entries.Add(new Java.Util.AbstractMap.SimpleEntry(kvp.Key, kvp.Value));
-        }
-        return entries.Iterator();
+        // TODO: Implement trace context extraction
+        // Currently disabled due to OpenTracing TextMap binding conflicts
+        // The TextMapExtractAdapter class causes Java compilation errors with Iterable interface inheritance
+        throw new NotImplementedException(
+            "Trace context extraction is not yet implemented on Android. " +
+            "This feature requires refactoring the OpenTracing TextMap adapters to avoid Iterable conflicts.");
     }
 }

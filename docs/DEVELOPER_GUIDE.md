@@ -330,6 +330,28 @@ Press `Ctrl+C` to stop.
 
 ## iOS Binding Development
 
+### Download iOS XCFrameworks
+
+```bash
+make download-ios-frameworks
+```
+
+Downloads XCFrameworks from the Datadog iOS SDK GitHub releases. The version is automatically read from `Directory.Build.props`.
+
+This command is **smart**:
+- Checks if XCFrameworks are already downloaded
+- Verifies the version matches `Directory.Build.props`
+- Only downloads if missing or version mismatch
+- Automatically called by `make build-ios` and `make pack`
+
+Requirements:
+- macOS
+- Internet connection
+
+The XCFrameworks will be downloaded to `Datadog.MAUI.iOS.Binding/artifacts/`.
+
+**Note**: You typically don't need to run this manually - `make pack` will automatically download frameworks if needed.
+
 ### Generate iOS Bindings with Objective Sharpie
 
 ```bash
@@ -368,12 +390,17 @@ Press `Ctrl+C` to stop.
 
 ### Missing XCFrameworks for iOS
 
-**Problem**: `make build-ios` fails with "No XCFrameworks found"
+**Problem**: `make build-ios` or `make pack` fails with "No XCFrameworks found"
 
 **Solution**:
-1. Download XCFrameworks from Datadog iOS SDK releases
-2. Place them in `Datadog.MAUI.iOS.Binding/artifacts/`
-3. Run the GitHub workflow `build-ios.yml` which handles this automatically
+This should happen automatically now. The `make build-ios` and `make pack` commands automatically download XCFrameworks if they're missing or out of date.
+
+If you need to manually trigger a download:
+```bash
+make download-ios-frameworks
+```
+
+**Note**: The GitHub workflow `build-ios.yml` also handles this automatically.
 
 ### OpenTracingApi Package Missing
 
@@ -450,6 +477,7 @@ See [docs/MAPPING_FILE_UPLOADS.md](MAPPING_FILE_UPLOADS.md) for complete guide.
 | Task | Command |
 |------|---------|
 | First-time setup | `make dev-setup` |
+| Download iOS XCFrameworks | `make download-ios-frameworks` |
 | Build everything | `make build` or `make build-all` |
 | Build Android only | `make build-android` |
 | Build iOS only | `make build-ios` |

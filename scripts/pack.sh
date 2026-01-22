@@ -64,8 +64,8 @@ ANDROID_MODULES=(
     "dd-sdk-android-flags/dd-sdk-android-flags.csproj"
     "dd-sdk-android-okhttp/dd-sdk-android-okhttp.csproj"
     "dd-sdk-android-trace-otel/dd-sdk-android-trace-otel.csproj"
-    "dd-sdk-android-okhttp-otel/dd-sdk-android-okhttp-otel.csproj"
-    "dd-sdk-android-gradle-plugin/dd-sdk-android-gradle-plugin.csproj"
+    # "dd-sdk-android-okhttp-otel/dd-sdk-android-okhttp-otel.csproj"  # Not yet implemented
+    # "dd-sdk-android-gradle-plugin/dd-sdk-android-gradle-plugin.csproj"  # Archived - incompatible with MAUI
 )
 
 for module in "${ANDROID_MODULES[@]}"; do

@@ -1,26 +1,44 @@
 <metadata>
   <!--
-    Opt-in binding approach: Only expose interfaces and classes that are needed by users.
-
-    FlushableExecutorService is an internal interface used by the Datadog SDK but not needed
-    in the public API. It causes binding issues with generic/non-generic IList conversions
-    in the shutdownNow() method inherited from ExecutorService.
-
-    Since this is an internal interface not needed by SDK users, we remove it entirely.
-
-    The NDK module's JAR includes transitive dependencies from core (DatadogSite, TrackingConsent, etc.).
-    These types should only come from dd-sdk-android-core to avoid duplicate type definitions.
+    The NDK module's JAR embeds the entire core SDK as a transitive dependency.
+    These core packages cause duplicate type definitions since we bind them separately
+    in dd-sdk-android-core. We remove all core-related packages here, keeping only
+    NDK-specific types (com.datadog.android.ndk.*).
   -->
 
-  <!-- Remove FlushableExecutorService interface - internal only, not needed in public API -->
-  <remove-node path="/api/package[@name='com.datadog.android.core.thread']/interface[@name='FlushableExecutorService']" />
-
-  <!-- Remove duplicate types that should only come from dd-sdk-android-core -->
-  <remove-node path="/api/package[@name='com.datadog.android']/class[@name='Datadog']" />
-  <remove-node path="/api/package[@name='com.datadog.android']/class[@name='DatadogSite']" />
-  <remove-node path="/api/package[@name='com.datadog.android.core.configuration']/class[@name='Configuration']" />
-  <remove-node path="/api/package[@name='com.datadog.android.core.configuration']/class[@name='BatchSize']" />
-  <remove-node path="/api/package[@name='com.datadog.android.core.configuration']/class[@name='UploadFrequency']" />
-  <remove-node path="/api/package[@name='com.datadog.android.privacy']/class[@name='TrackingConsent']" />
-  <remove-node path="/api/package[@name='com.datadog.android.privacy']/interface[@name='TrackingConsentProviderCallback']" />
+  <!-- Remove core packages embedded in NDK AAR to prevent duplicates -->
+  <remove-node path="/api/package[@name='com.datadog.android']" />
+  <remove-node path="/api/package[@name='com.datadog.android.api']" />
+  <remove-node path="/api/package[@name='com.datadog.android.api.context']" />
+  <remove-node path="/api/package[@name='com.datadog.android.api.feature']" />
+  <remove-node path="/api/package[@name='com.datadog.android.api.instrumentation.network']" />
+  <remove-node path="/api/package[@name='com.datadog.android.api.net']" />
+  <remove-node path="/api/package[@name='com.datadog.android.api.storage']" />
+  <remove-node path="/api/package[@name='com.datadog.android.api.storage.datastore']" />
+  <remove-node path="/api/package[@name='com.datadog.android.core']" />
+  <remove-node path="/api/package[@name='com.datadog.android.core.configuration']" />
+  <remove-node path="/api/package[@name='com.datadog.android.core.constraints']" />
+  <remove-node path="/api/package[@name='com.datadog.android.core.feature.event']" />
+  <remove-node path="/api/package[@name='com.datadog.android.core.internal']" />
+  <remove-node path="/api/package[@name='com.datadog.android.core.internal.account']" />
+  <remove-node path="/api/package[@name='com.datadog.android.core.internal.configuration']" />
+  <remove-node path="/api/package[@name='com.datadog.android.core.internal.constraints']" />
+  <remove-node path="/api/package[@name='com.datadog.android.core.internal.data.upload']" />
+  <remove-node path="/api/package[@name='com.datadog.android.core.internal.lifecycle']" />
+  <remove-node path="/api/package[@name='com.datadog.android.core.internal.logger']" />
+  <remove-node path="/api/package[@name='com.datadog.android.core.internal.metrics']" />
+  <remove-node path="/api/package[@name='com.datadog.android.core.internal.net']" />
+  <remove-node path="/api/package[@name='com.datadog.android.core.internal.persistence']" />
+  <remove-node path="/api/package[@name='com.datadog.android.core.internal.system']" />
+  <remove-node path="/api/package[@name='com.datadog.android.core.internal.time']" />
+  <remove-node path="/api/package[@name='com.datadog.android.core.internal.utils']" />
+  <remove-node path="/api/package[@name='com.datadog.android.core.metrics']" />
+  <remove-node path="/api/package[@name='com.datadog.android.core.persistence']" />
+  <remove-node path="/api/package[@name='com.datadog.android.core.sampling']" />
+  <remove-node path="/api/package[@name='com.datadog.android.core.thread']" />
+  <remove-node path="/api/package[@name='com.datadog.android.event']" />
+  <remove-node path="/api/package[@name='com.datadog.android.lint']" />
+  <remove-node path="/api/package[@name='com.datadog.android.privacy']" />
+  <remove-node path="/api/package[@name='com.datadog.android.security']" />
+  <remove-node path="/api/package[@name='com.datadog.android._generated']" />
 </metadata>

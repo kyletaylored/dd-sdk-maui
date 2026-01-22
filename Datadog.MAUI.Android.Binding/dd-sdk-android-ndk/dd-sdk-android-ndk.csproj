@@ -21,7 +21,7 @@
 
   <ItemGroup>
     <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-ndk" Version="$(DatadogSdkVersion)" VerifyDependencies="false" />
-    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-core" Version="$(DatadogSdkVersion)" VerifyDependencies="false" />
+    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-core" Version="$(DatadogSdkVersion)" Bind="false" VerifyDependencies="false" />
     <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-internal" Version="$(DatadogSdkVersion)" Bind="false" VerifyDependencies="false" />
     <AndroidMavenLibrary Include="com.lyft.kronos:kronos-android" Version="0.0.1-alpha11" Bind="false" VerifyDependencies="false" />
   </ItemGroup>

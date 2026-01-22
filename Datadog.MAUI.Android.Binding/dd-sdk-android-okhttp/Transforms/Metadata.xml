@@ -6,4 +6,7 @@
   <!-- Also remove other builder-related classes with binding issues -->
   <remove-node path="/api/package[@name='com.datadog.android.okhttp.trace']/class[@name='TracingInterceptor.BaseBuilder']" />
   <remove-node path="/api/package[@name='com.datadog.android.okhttp.trace']/class[@name='TracingInterceptor.Builder']" />
+
+  <!-- Remove TracedRequestListener interface - has default/abstract method binding issues -->
+  <remove-node path="/api/package[@name='com.datadog.android.okhttp.trace']/interface[@name='TracedRequestListener']" />
 </metadata>

@@ -49,7 +49,5 @@
     <PackageReference Include="Datadog.MAUI.Android.Trace.OpenTelemetry" Version="$(DatadogSdkVersion)" />
     <PackageReference Include="Datadog.MAUI.Android.OkHttp.OpenTelemetry" Version="$(DatadogSdkVersion)" />
 
-    <!-- Note: Gradle Plugin is not included as it's incompatible with MAUI's MSBuild system.
-         For mapping file uploads, use datadog-ci CLI or Datadog API directly. -->
   </ItemGroup>
 </Project>
