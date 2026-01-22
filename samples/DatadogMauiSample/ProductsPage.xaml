@@ -5,7 +5,7 @@
              Title="Products">
     <Grid RowDefinitions="Auto,*" Padding="10">
         <!-- Header with refresh and test purchase buttons -->
-        <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" Margin="0,0,0,10">
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto,Auto" Margin="0,0,0,10">
             <Label Grid.Column="0"
                    Text="Shopist Products"
                    FontSize="24"
@@ -13,11 +13,24 @@
                    VerticalOptions="Center"/>
 
             <Button Grid.Column="1"
+                    x:Name="RefreshButton"
+                    AutomationId="refresh_products_button"
                     Text="Refresh"
                     Clicked="OnRefreshClicked"
                     Margin="5,0"/>
 
             <Button Grid.Column="2"
+                    x:Name="ViewCartButton"
+                    AutomationId="view_cart_button"
+                    Text="View Cart"
+                    Clicked="OnViewCartClicked"
+                    BackgroundColor="#2196F3"
+                    TextColor="White"
+                    Margin="5,0"/>
+
+            <Button Grid.Column="3"
+                    x:Name="TestPurchaseButton"
+                    AutomationId="test_purchase_button"
                     Text="Test Purchase"
                     Clicked="OnTestPurchaseClicked"
                     BackgroundColor="#4CAF50"
@@ -27,6 +40,7 @@
         <!-- Products List -->
         <CollectionView Grid.Row="1"
                         x:Name="ProductsCollectionView"
+                        AutomationId="products_list"
                         SelectionMode="Single"
                         SelectionChanged="OnProductSelected">
             <CollectionView.ItemTemplate>

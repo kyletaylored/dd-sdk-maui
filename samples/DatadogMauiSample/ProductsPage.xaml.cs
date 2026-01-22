@@ -8,6 +8,7 @@ namespace DatadogMauiSample;
 public partial class ProductsPage : ContentPage
 {
     private readonly ShopistApiService _apiService;
+    private readonly CartService _cartService;
     private readonly ILogger _logger;
     private List<Product> _products = new();
 
@@ -15,6 +16,7 @@ public partial class ProductsPage : ContentPage
     {
         InitializeComponent();
         _apiService = new ShopistApiService();
+        _cartService = CartService.Instance;
         _logger = Logs.CreateLogger("ProductsPage");
 
         // Add converters for data binding
@@ -164,28 +166,52 @@ public partial class ProductsPage : ContentPage
     {
         try
         {
+            // Add to local cart
+            _cartService.AddItem(product);
+
+            // Track in RUM with readable action name
+            Rum.AddAction(RumActionType.Custom, "add_to_cart", new Dictionary<string, object>
+            {
+                { "product_id", product.Id },
+                { "product_name", product.Name },
+                { "product_price", product.Price },
+                { "cart_item_count", _cartService.ItemCount }
+            });
+
+            _logger.Info($"Added {product.Name} to cart", null, new Dictionary<string, object>
+            {
+                { "product_id", product.Id },
+                { "cart_item_count", _cartService.ItemCount }
+            });
+
+            // Also call the API for demo purposes
             var cartId = await _apiService.CreateCartAsync();
             if (cartId != null)
             {
-                var checkoutUrl = await _apiService.AddItemToCartAsync(cartId, product.Id);
-                if (checkoutUrl != null)
-                {
-                    await DisplayAlert("Success", $"Added {product.Name} to cart!", "OK");
-                }
-                else
-                {
-                    await DisplayAlert("Error", "Failed to add item to cart", "OK");
-                }
+                await _apiService.AddItemToCartAsync(cartId, product.Id);
             }
-            else
-            {
-                await DisplayAlert("Error", "Failed to create cart", "OK");
-            }
+
+            await DisplayAlert("Success", $"Added {product.Name} to cart!\n\nTotal items: {_cartService.ItemCount}", "OK");
         }
         catch (Exception ex)
         {
+            _logger.Error($"Error adding to cart: {ex.Message}", ex);
             await DisplayAlert("Error", $"Error: {ex.Message}", "OK");
         }
+    }
+
+    private async void OnViewCartClicked(object? sender, EventArgs e)
+    {
+        // Track RUM action
+        Rum.AddAction(RumActionType.Tap, "view_cart_button", new Dictionary<string, object>
+        {
+            { "cart_item_count", _cartService.ItemCount }
+        });
+
+        _logger.Debug("Navigating to cart page");
+
+        // Navigate to cart page
+        await Shell.Current.GoToAsync("//CartPage");
     }
 
     private async Task PurchaseProductAsync(Product product)

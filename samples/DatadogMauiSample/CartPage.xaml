@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="DatadogMauiSample.CartPage"
+             Title="Shopping Cart">
+    <Grid RowDefinitions="Auto,*,Auto" Padding="10">
+        <!-- Header -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,10">
+            <Label Grid.Column="0"
+                   Text="Shopping Cart"
+                   FontSize="24"
+                   FontAttributes="Bold"
+                   VerticalOptions="Center"/>
+
+            <Button Grid.Column="1"
+                    x:Name="ClearCartButton"
+                    AutomationId="clear_cart_button"
+                    Text="Clear Cart"
+                    Clicked="OnClearCartClicked"
+                    BackgroundColor="#F44336"
+                    TextColor="White"/>
+        </Grid>
+
+        <!-- Cart Items List -->
+        <CollectionView Grid.Row="1"
+                        x:Name="CartCollectionView"
+                        AutomationId="cart_items_list">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Padding="10" RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="80,*,Auto">
+                        <!-- Product Image -->
+                        <Image Grid.Row="0" Grid.RowSpan="2" Grid.Column="0"
+                               Source="{Binding Product.ImageUrl}"
+                               Aspect="AspectFill"
+                               WidthRequest="80"
+                               HeightRequest="80"
+                               Margin="0,0,10,0">
+                            <Image.Clip>
+                                <RoundRectangleGeometry Rect="0,0,80,80" CornerRadius="8"/>
+                            </Image.Clip>
+                        </Image>
+
+                        <!-- Product Info -->
+                        <VerticalStackLayout Grid.Row="0" Grid.Column="1">
+                            <Label Text="{Binding Product.Name}"
+                                   FontSize="16"
+                                   FontAttributes="Bold"
+                                   LineBreakMode="TailTruncation"
+                                   MaxLines="1"/>
+
+                            <Label Text="{Binding Product.Price, StringFormat='${0:F2} each'}"
+                                   FontSize="12"
+                                   TextColor="Gray"
+                                   Margin="0,5,0,0"/>
+                        </VerticalStackLayout>
+
+                        <!-- Quantity Controls -->
+                        <HorizontalStackLayout Grid.Row="1" Grid.Column="1" Spacing="10" Margin="0,10,0,0">
+                            <Button Text="-"
+                                    AutomationId="decrease_quantity_button"
+                                    Clicked="OnDecreaseQuantityClicked"
+                                    CommandParameter="{Binding Product.Id}"
+                                    WidthRequest="40"
+                                    HeightRequest="40"
+                                    FontSize="20"
+                                    BackgroundColor="#E0E0E0"
+                                    TextColor="Black"/>
+
+                            <Label Text="{Binding Quantity}"
+                                   FontSize="16"
+                                   VerticalOptions="Center"
+                                   WidthRequest="30"
+                                   HorizontalTextAlignment="Center"/>
+
+                            <Button Text="+"
+                                    AutomationId="increase_quantity_button"
+                                    Clicked="OnIncreaseQuantityClicked"
+                                    CommandParameter="{Binding Product.Id}"
+                                    WidthRequest="40"
+                                    HeightRequest="40"
+                                    FontSize="20"
+                                    BackgroundColor="#E0E0E0"
+                                    TextColor="Black"/>
+
+                            <Button Text="Remove"
+                                    AutomationId="remove_item_button"
+                                    Clicked="OnRemoveItemClicked"
+                                    CommandParameter="{Binding Product.Id}"
+                                    BackgroundColor="#F44336"
+                                    TextColor="White"
+                                    Margin="10,0,0,0"/>
+                        </HorizontalStackLayout>
+
+                        <!-- Subtotal -->
+                        <Label Grid.Row="0" Grid.Column="2"
+                               Text="{Binding Subtotal, StringFormat='${0:F2}'}"
+                               FontSize="16"
+                               FontAttributes="Bold"
+                               TextColor="#2196F3"
+                               VerticalOptions="Start"
+                               HorizontalOptions="End"/>
+
+                        <!-- Separator -->
+                        <BoxView Grid.Row="2" Grid.ColumnSpan="3"
+                                 HeightRequest="1"
+                                 Color="LightGray"
+                                 Margin="0,10,0,0"/>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+            <CollectionView.EmptyView>
+                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                    <Label Text="Your cart is empty"
+                           FontSize="18"
+                           TextColor="Gray"
+                           HorizontalTextAlignment="Center"/>
+                    <Label Text="Add items from the Products page"
+                           FontSize="14"
+                           TextColor="Gray"
+                           HorizontalTextAlignment="Center"
+                           Margin="0,10,0,0"/>
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+        </CollectionView>
+
+        <!-- Cart Summary and Checkout -->
+        <Grid Grid.Row="2"
+              RowDefinitions="Auto,Auto,Auto,Auto"
+              ColumnDefinitions="*,Auto"
+              Padding="10"
+              BackgroundColor="#F5F5F5"
+              Margin="0,10,0,0">
+
+            <Label Grid.Row="0" Grid.Column="0"
+                   Text="Item Count:"
+                   FontSize="14"/>
+            <Label Grid.Row="0" Grid.Column="1"
+                   x:Name="ItemCountLabel"
+                   Text="0"
+                   FontSize="14"
+                   FontAttributes="Bold"
+                   HorizontalOptions="End"/>
+
+            <Label Grid.Row="1" Grid.Column="0"
+                   Text="Total Amount:"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   Margin="0,10,0,0"/>
+            <Label Grid.Row="1" Grid.Column="1"
+                   x:Name="TotalAmountLabel"
+                   Text="$0.00"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   TextColor="#2196F3"
+                   HorizontalOptions="End"
+                   Margin="0,10,0,0"/>
+
+            <Button Grid.Row="2" Grid.ColumnSpan="2"
+                    x:Name="CheckoutButton"
+                    AutomationId="checkout_button"
+                    Text="Proceed to Checkout"
+                    Clicked="OnCheckoutClicked"
+                    BackgroundColor="#4CAF50"
+                    TextColor="White"
+                    FontSize="16"
+                    HeightRequest="50"
+                    Margin="0,15,0,0"/>
+        </Grid>
+    </Grid>
+</ContentPage>

@@ -7,8 +7,7 @@ using Com.Datadog.Android.Log;
 using Com.Datadog.Android.Ndk;
 using Com.Datadog.Android.Privacy;
 using Com.Datadog.Android.Rum;
-// Session Replay temporarily disabled due to dependency conflicts
-// using Com.Datadog.Android.Sessionreplay;
+using Com.Datadog.Android.Sessionreplay;
 using Com.Datadog.Android.Trace;
 using Com.Datadog.Android.Webview;
 using DatadogMauiSample.Config;
@@ -110,8 +109,6 @@ public class MainApplication : MauiApplication
             _ = GlobalRumMonitor.Get();
 
             // Enable Session Replay
-            // Temporarily disabled due to dependency conflicts with androidx.tracing library
-            /*
             try
             {
                 var sessionReplayConfig = new SessionReplayConfiguration.Builder(
@@ -129,8 +126,6 @@ public class MainApplication : MauiApplication
             {
                 Console.WriteLine($"[Datadog] Session Replay failed: {ex.Message}");
             }
-            */
-            Console.WriteLine("[Datadog] Session Replay skipped (disabled in sample due to dependency conflicts)");
 
             // Enable APM Tracing
             try

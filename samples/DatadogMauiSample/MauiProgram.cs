@@ -19,6 +19,13 @@ public static class MauiProgram
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+			})
+			.ConfigureMauiHandlers(handlers =>
+			{
+#if ANDROID
+				// Register custom WebView handler for Android to enable Datadog tracking
+				handlers.AddHandler<WebView, Platforms.Android.DatadogWebViewHandler>();
+#endif
 			});
 
 		// Note: Datadog is initialized platform-specifically:

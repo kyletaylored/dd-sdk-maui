@@ -12,6 +12,21 @@ Guides for developers using the Datadog MAUI SDK in their applications.
 
 ## Available Guides
 
+### RUM Action Naming
+
+**[RUM Action Naming](RUM_ACTION_NAMING.html)** - Improve RUM action names for better observability:
+
+- **AutomationId Property**: Tag MAUI elements with readable identifiers
+- **Manual Action Tracking**: Add custom RUM actions with rich context
+- **Best Practices**: Naming conventions and implementation patterns
+- **Examples**: Complete cart implementation with proper naming
+
+**Key Topics**:
+- Why action names are cryptic by default
+- Using AutomationId for automatic tracking
+- Manual RUM action tracking with attributes
+- Hybrid approach for comprehensive tracking
+
 ### Mapping File Uploads
 
 **[Mapping File Uploads](../../guides/user/MAPPING_FILE_UPLOADS.html)** - Upload mapping files for crash symbolication:
@@ -32,14 +47,18 @@ Guides for developers using the Datadog MAUI SDK in their applications.
 
 ### For MAUI App Developers
 
-1. **Using RUM Error Tracking?** → Read [Mapping File Uploads](../../guides/user/MAPPING_FILE_UPLOADS.html)
-2. **Using ProGuard/R8?** → See [R8 Configuration](MAPPING_FILE_UPLOADS.html#prerequisites-enable-r8-code-shrinking)
-3. **Using Native Code (NDK)?** → See [NDK Symbol Upload](MAPPING_FILE_UPLOADS.html#ndk-symbol-files)
+1. **Want readable RUM action names?** → Read [RUM Action Naming](RUM_ACTION_NAMING.html)
+2. **Using RUM Error Tracking?** → Read [Mapping File Uploads](../../guides/user/MAPPING_FILE_UPLOADS.html)
+3. **Using ProGuard/R8?** → See [R8 Configuration](MAPPING_FILE_UPLOADS.html#prerequisites-enable-r8-code-shrinking)
+4. **Using Native Code (NDK)?** → See [NDK Symbol Upload](MAPPING_FILE_UPLOADS.html#ndk-symbol-files)
 
 ### Common Tasks
 
 | Task | Guide Section |
 |------|---------------|
+| Improve RUM action names | [RUM Action Naming](RUM_ACTION_NAMING.html) |
+| Add AutomationId to elements | [RUM Action Naming - AutomationId](RUM_ACTION_NAMING.html#solution-1-automationid-property) |
+| Track custom actions | [RUM Action Naming - Manual Tracking](RUM_ACTION_NAMING.html#solution-2-manual-rum-action-tracking) |
 | Enable R8 | [Mapping Files - Prerequisites](MAPPING_FILE_UPLOADS.html#prerequisites-enable-r8-code-shrinking) |
 | Find mapping file | [Mapping Files - File Locations](../../guides/user/MAPPING_FILE_UPLOADS.html) |
 | Upload with CLI | [Mapping Files - Datadog CLI](MAPPING_FILE_UPLOADS.html#method-1-datadog-cli) |
