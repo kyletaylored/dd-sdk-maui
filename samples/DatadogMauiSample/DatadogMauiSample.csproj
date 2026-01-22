@@ -77,21 +77,71 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.9" />
-		<PackageReference Include="DotNetEnv" Version="3.1.1" />
+	</ItemGroup>
 
+	<!-- Android-specific package exclusions -->
+	<ItemGroup Condition="$(TargetFramework.Contains('android'))">
 		<!-- Exclude JVM variant of Compose runtime annotations to prevent R8 duplicate class errors -->
 		<PackageReference Include="Xamarin.AndroidX.Compose.Runtime.Annotation.Jvm" Version="1.10.0.1" ExcludeAssets="All" />
+
+		<!-- Force consistent SavedState version to prevent duplicate class errors -->
+		<PackageReference Include="Xamarin.AndroidX.SavedState" Version="1.4.0.1" />
+		<PackageReference Include="Xamarin.AndroidX.SavedState.SavedState.Ktx" Version="1.3.1.1" ExcludeAssets="compile;runtime;native" />
 	</ItemGroup>
 
-
-	<ItemGroup>
-		<!-- Include .env file as a raw asset so it's bundled with the app -->
-		<MauiAsset Include=".env" LogicalName=".env" />
-	</ItemGroup>
 
 	<!-- Reference Datadog.MAUI unified plugin -->
 	<ItemGroup>
 		<ProjectReference Include="..\..\Datadog.MAUI.Plugin\Datadog.MAUI.Plugin.csproj" />
+	</ItemGroup>
+
+	<!-- ================================================================ -->
+	<!-- MSBuild Targets for Platform-Specific RUM Configuration         -->
+	<!-- ================================================================ -->
+
+	<!-- Property resolution: Read from environment if not set via command line -->
+	<PropertyGroup>
+		<AndroidClientToken Condition="'$(AndroidClientToken)' == ''">$(DD_RUM_ANDROID_CLIENT_TOKEN)</AndroidClientToken>
+		<AndroidApplicationId Condition="'$(AndroidApplicationId)' == ''">$(DD_RUM_ANDROID_APPLICATION_ID)</AndroidApplicationId>
+		<IosClientToken Condition="'$(IosClientToken)' == ''">$(DD_RUM_IOS_CLIENT_TOKEN)</IosClientToken>
+		<IosApplicationId Condition="'$(IosApplicationId)' == ''">$(DD_RUM_IOS_APPLICATION_ID)</IosApplicationId>
+	</PropertyGroup>
+
+	<!-- Generate Android config file before build -->
+	<Target Name="GenerateAndroidRumConfig" BeforeTargets="BeforeBuild" Condition="$(TargetFramework.Contains('android'))">
+		<Message Text="🐕 Generating Android RUM config file..." Importance="high" Condition="'$(AndroidClientToken)' != ''" />
+		<Message Text="  Client Token: $(AndroidClientToken)" Importance="high" Condition="'$(AndroidClientToken)' != ''" />
+		<Message Text="  Application ID: $(AndroidApplicationId)" Importance="high" Condition="'$(AndroidApplicationId)' != ''" />
+		<Message Text="⚠️  No Android RUM credentials found! App will use placeholder values." Importance="high" Condition="'$(AndroidClientToken)' == ''" />
+
+		<WriteLinesToFile
+			File="$(MSBuildProjectDirectory)/Config/datadog-rum-android.config"
+			Lines="DD_RUM_ANDROID_CLIENT_TOKEN=$(AndroidClientToken);DD_RUM_ANDROID_APPLICATION_ID=$(AndroidApplicationId)"
+			Overwrite="true"
+			Condition="'$(AndroidClientToken)' != ''" />
+	</Target>
+
+	<!-- Generate iOS config file before build -->
+	<Target Name="GenerateIosRumConfig" BeforeTargets="BeforeBuild" Condition="$(TargetFramework.Contains('ios'))">
+		<Message Text="🐕 Generating iOS RUM config file..." Importance="high" Condition="'$(IosClientToken)' != ''" />
+		<Message Text="  Client Token: $(IosClientToken)" Importance="high" Condition="'$(IosClientToken)' != ''" />
+		<Message Text="  Application ID: $(IosApplicationId)" Importance="high" Condition="'$(IosApplicationId)' != ''" />
+		<Message Text="⚠️  No iOS RUM credentials found! App will use placeholder values." Importance="high" Condition="'$(IosClientToken)' == ''" />
+
+		<WriteLinesToFile
+			File="$(MSBuildProjectDirectory)/Config/datadog-rum-ios.config"
+			Lines="DD_RUM_IOS_CLIENT_TOKEN=$(IosClientToken);DD_RUM_IOS_APPLICATION_ID=$(IosApplicationId)"
+			Overwrite="true"
+			Condition="'$(IosClientToken)' != ''" />
+	</Target>
+
+	<!-- Embed config files as resources -->
+	<ItemGroup Condition="$(TargetFramework.Contains('android'))">
+		<EmbeddedResource Include="Config/datadog-rum-android.config" Condition="Exists('Config/datadog-rum-android.config')" />
+	</ItemGroup>
+
+	<ItemGroup Condition="$(TargetFramework.Contains('ios'))">
+		<EmbeddedResource Include="Config/datadog-rum-ios.config" Condition="Exists('Config/datadog-rum-ios.config')" />
 	</ItemGroup>
 
 </Project>

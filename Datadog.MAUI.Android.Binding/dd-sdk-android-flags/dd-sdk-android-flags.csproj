@@ -24,7 +24,7 @@
     <!-- Runtime Maven dependencies from POM -->
     <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-core" Version="$(DatadogSdkVersion)" Bind="false" VerifyDependencies="false" />
     <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-internal" Version="$(DatadogSdkVersion)" Bind="false" VerifyDependencies="false" />
-    <AndroidMavenLibrary Include="com.lyft.kronos:kronos-android" Version="0.0.1-alpha11" Bind="false" VerifyDependencies="false" />
+    <AndroidMavenLibrary Include="com.lyft.kronos:kronos-android" Version="$(KronosVersion)" Bind="false" VerifyDependencies="false" />
   </ItemGroup>
 
   <!-- AndroidX and runtime dependencies as NuGet packages -->

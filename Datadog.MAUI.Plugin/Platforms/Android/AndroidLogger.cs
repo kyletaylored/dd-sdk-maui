@@ -58,7 +58,7 @@ internal class AndroidLogger : ILogger
         }
         else
         {
-            _nativeLogger.Log(nativeLevel, message, error?.ToJavaThrowable(), null);
+            _nativeLogger.Log(nativeLevel, message, error?.ToJavaThrowable(), new Dictionary<string, Java.Lang.Object>());
         }
     }
 

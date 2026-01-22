@@ -1,4 +1,5 @@
-.PHONY: help build-android build-ios build-all clean clean-all test status check-prereqs dev-setup sample-ios sample-android download-ios-frameworks
+.PHONY: help build-android build-ios build-all clean clean-all test status check-prereqs dev-setup sample-ios sample-android download-ios-frameworks \
+        sample-logs-android sample-logs-android-all sample-logs-clear
 
 # Default target
 .DEFAULT_GOAL := help
@@ -257,6 +258,35 @@ sample-build-android: ## Build Android sample without running
 		dotnet build -f net10.0-android -c Debug
 	@echo "$(GREEN)✓ Android sample app built$(NC)"
 
+sample-logs-android: ## View Android logs (filtered for Datadog and app)
+	@echo "$(BLUE)Viewing Android logs (filtering for Datadog and app output)...$(NC)"
+	@echo "$(YELLOW)Press Ctrl+C to exit$(NC)"
+	@if command -v adb >/dev/null 2>&1; then \
+		adb logcat | grep -E "\[Datadog\]|mono-stdout|DatadogMauiSample|DOTNET"; \
+	else \
+		echo "$(RED)❌ adb not found in PATH$(NC)"; \
+		echo "Try: ~/Library/Android/sdk/platform-tools/adb logcat | grep '\\[Datadog\\]'"; \
+	fi
+
+sample-logs-android-all: ## View all Android logs
+	@echo "$(BLUE)Viewing all Android logs...$(NC)"
+	@echo "$(YELLOW)Press Ctrl+C to exit$(NC)"
+	@if command -v adb >/dev/null 2>&1; then \
+		adb logcat; \
+	else \
+		echo "$(RED)❌ adb not found in PATH$(NC)"; \
+		echo "Try: ~/Library/Android/sdk/platform-tools/adb logcat"; \
+	fi
+
+sample-logs-clear: ## Clear Android logs
+	@echo "$(BLUE)Clearing Android logs...$(NC)"
+	@if command -v adb >/dev/null 2>&1; then \
+		adb logcat -c; \
+		echo "$(GREEN)✓ Logs cleared$(NC)"; \
+	else \
+		echo "$(RED)❌ adb not found in PATH$(NC)"; \
+	fi
+
 ##@ Testing
 
 test: ## Run unit tests
@@ -406,6 +436,11 @@ readme: ## Display quick reference README
 	@echo "$(GREEN)Sample Apps:$(NC)"
 	@echo "  make sample-ios        - Run iOS sample app"
 	@echo "  make sample-android    - Run Android sample app"
+	@echo ""
+	@echo "$(GREEN)Logs & Debugging:$(NC)"
+	@echo "  make sample-logs-android      - View Android logs (filtered)"
+	@echo "  make sample-logs-android-all  - View all Android logs"
+	@echo "  make sample-logs-clear        - Clear Android logs"
 	@echo ""
 	@echo "$(GREEN)Development:$(NC)"
 	@echo "  make restore           - Restore all packages"

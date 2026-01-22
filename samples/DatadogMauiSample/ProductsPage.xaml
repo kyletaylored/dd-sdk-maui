@@ -31,7 +31,7 @@
                         SelectionChanged="OnProductSelected">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Grid Padding="10" RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="80,*,Auto">
+                    <Grid Padding="10" RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="80,*,Auto">
                         <!-- Product Image -->
                         <Image Grid.Row="0" Grid.RowSpan="3" Grid.Column="0"
                                Source="{Binding ImageUrl}"
@@ -49,14 +49,16 @@
                                Text="{Binding Name}"
                                FontSize="16"
                                FontAttributes="Bold"
-                               LineBreakMode="TailTruncation"/>
+                               LineBreakMode="TailTruncation"
+                               MaxLines="1"/>
 
                         <!-- Product Description -->
                         <Label Grid.Row="1" Grid.Column="1"
                                Text="{Binding Description}"
                                FontSize="12"
                                TextColor="Gray"
-                               LineBreakMode="TailTruncation"/>
+                               LineBreakMode="TailTruncation"
+                               MaxLines="2"/>
 
                         <!-- Product Price -->
                         <Label Grid.Row="2" Grid.Column="1"
@@ -72,7 +74,8 @@
                                FontSize="12"
                                TextColor="{Binding InStock, Converter={StaticResource StockColorConverter}}"
                                VerticalOptions="Start"
-                               HorizontalOptions="End"/>
+                               HorizontalOptions="End"
+                               Margin="5,0,0,0"/>
 
                         <!-- Separator -->
                         <BoxView Grid.Row="3" Grid.ColumnSpan="3"

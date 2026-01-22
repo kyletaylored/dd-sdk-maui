@@ -23,7 +23,7 @@
     <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-webview" Version="$(DatadogSdkVersion)" VerifyDependencies="false" />
     <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-core" Version="$(DatadogSdkVersion)" VerifyDependencies="false" Bind="false" />
     <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-internal" Version="$(DatadogSdkVersion)" VerifyDependencies="false" Bind="false" />
-    <AndroidMavenLibrary Include="com.lyft.kronos:kronos-android" Version="0.0.1-alpha11" VerifyDependencies="false" Bind="false" />
+    <AndroidMavenLibrary Include="com.lyft.kronos:kronos-android" Version="$(KronosVersion)" Bind="false" VerifyDependencies="false" />
   </ItemGroup>
 
   <!-- AndroidX and Kotlin dependencies as NuGet packages -->

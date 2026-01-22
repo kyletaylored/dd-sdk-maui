@@ -134,12 +134,18 @@ download:
   - groupId: com.lyft.kronos
     artifactId: kronos-android
     version: 0.0.1-alpha11
-    note: NTP time synchronization - no NuGet binding available
+    note: NTP time synchronization - no NuGet binding available. Version managed by $(KronosVersion) in Directory.Packages.props
 
   - groupId: com.lyft.kronos
     artifactId: kronos-java
     version: 0.0.1-alpha11
-    note: NTP time synchronization - no NuGet binding available
+    note: NTP time synchronization - no NuGet binding available. Version managed by $(KronosVersion) in Directory.Packages.props
+
+  - groupId: androidx.metrics
+    artifactId: metrics-performance
+    version: 1.0.0
+    repository: Google Maven (use Repository="Google" attribute)
+    note: Frame performance metrics for RUM. Version managed by $(AndroidxMetricsVersion) in Directory.Packages.props
 
   - groupId: com.squareup.okio
     artifactId: okio
@@ -210,11 +216,13 @@ ignore:
     version: unspecified
     reason: Test dependency
 
-  # AndroidX Metrics - not available on Maven Central, only Google Maven
+  # AndroidX Metrics - UPDATED: Now downloaded from Google Maven Repository
+  # NOTE: As of latest update, this is included as AndroidMavenLibrary with Repository="Google"
+  # in dd-sdk-android-rum.csproj to resolve RUM initialization issues
   - groupId: androidx.metrics
     artifactId: metrics-performance
     version: 1.0.0-beta03
-    reason: Not available on Maven Central, RUM doesn't require it at runtime
+    reason: Historically ignored, but now included from Google Maven (use Repository="Google" attribute)
 
   # Kotlin stdlib versions - embedded in Datadog SDK AARs
   # IMPORTANT: These must include exact versions as seen in build errors

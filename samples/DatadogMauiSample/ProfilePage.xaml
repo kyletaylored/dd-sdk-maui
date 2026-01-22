@@ -141,6 +141,13 @@
                            TextColor="#616161"/>
                 </VerticalStackLayout>
             </Frame>
+
+            <!-- Debug Info Button -->
+            <Button Text="View Datadog Configuration"
+                    Clicked="OnDebugInfoClicked"
+                    BackgroundColor="#673AB7"
+                    TextColor="White"
+                    Margin="0,10,0,20"/>
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

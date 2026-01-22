@@ -1,4 +1,4 @@
-using DotNetEnv;
+using System.Reflection;
 
 namespace DatadogMauiSample.Config;
 
@@ -9,13 +9,79 @@ public static class DatadogConfig
     public static string ServiceName { get; set; } = "shopist-maui-demo";
     public static bool VerboseLogging { get; set; } = true;
 
-    // Android settings
-    public static string AndroidClientToken { get; set; } = string.Empty;
-    public static string AndroidRumApplicationId { get; set; } = string.Empty;
+    // Placeholder defaults (used if config file not found)
+    private const string DefaultAndroidClientToken = "PLACEHOLDER_ANDROID_CLIENT_TOKEN";
+    private const string DefaultAndroidApplicationId = "PLACEHOLDER_ANDROID_APPLICATION_ID";
+    private const string DefaultIosClientToken = "PLACEHOLDER_IOS_CLIENT_TOKEN";
+    private const string DefaultIosApplicationId = "PLACEHOLDER_IOS_APPLICATION_ID";
 
-    // iOS settings
-    public static string IosClientToken { get; set; } = string.Empty;
-    public static string IosRumApplicationId { get; set; } = string.Empty;
+    // Lazy-loaded credentials from embedded config file
+    private static readonly Lazy<Dictionary<string, string>> _credentials = new(LoadCredentials);
+
+    // Android settings - 3-tier priority: Embedded Config > Environment Variable > Placeholder
+    public static string AndroidClientToken
+    {
+        get
+        {
+            // Priority 1: Embedded config file (build-time injected)
+            if (_credentials.Value.TryGetValue("DD_RUM_ANDROID_CLIENT_TOKEN", out var configToken))
+                return configToken;
+
+            // Priority 2: Runtime environment variable
+            var envToken = System.Environment.GetEnvironmentVariable("DD_RUM_ANDROID_CLIENT_TOKEN");
+            if (!string.IsNullOrEmpty(envToken))
+                return envToken;
+
+            // Priority 3: Placeholder
+            return DefaultAndroidClientToken;
+        }
+    }
+
+    public static string AndroidRumApplicationId
+    {
+        get
+        {
+            if (_credentials.Value.TryGetValue("DD_RUM_ANDROID_APPLICATION_ID", out var configId))
+                return configId;
+
+            var envId = System.Environment.GetEnvironmentVariable("DD_RUM_ANDROID_APPLICATION_ID");
+            if (!string.IsNullOrEmpty(envId))
+                return envId;
+
+            return DefaultAndroidApplicationId;
+        }
+    }
+
+    // iOS settings - 3-tier priority: Embedded Config > Environment Variable > Placeholder
+    public static string IosClientToken
+    {
+        get
+        {
+            if (_credentials.Value.TryGetValue("DD_RUM_IOS_CLIENT_TOKEN", out var configToken))
+                return configToken;
+
+            var envToken = System.Environment.GetEnvironmentVariable("DD_RUM_IOS_CLIENT_TOKEN");
+            if (!string.IsNullOrEmpty(envToken))
+                return envToken;
+
+            return DefaultIosClientToken;
+        }
+    }
+
+    public static string IosRumApplicationId
+    {
+        get
+        {
+            if (_credentials.Value.TryGetValue("DD_RUM_IOS_APPLICATION_ID", out var configId))
+                return configId;
+
+            var envId = System.Environment.GetEnvironmentVariable("DD_RUM_IOS_APPLICATION_ID");
+            if (!string.IsNullOrEmpty(envId))
+                return envId;
+
+            return DefaultIosApplicationId;
+        }
+    }
 
     // Sample rates
     public static float SessionSampleRate { get; set; } = 100f;
@@ -28,49 +94,75 @@ public static class DatadogConfig
         "shopist.io"
     };
 
-    public static void LoadFromEnvironment()
+    /// <summary>
+    /// Load credentials from embedded config file (generated at build time by MSBuild targets)
+    /// </summary>
+    private static Dictionary<string, string> LoadCredentials()
     {
-        // Load .env file from app package
+        var creds = new Dictionary<string, string>();
+
+        // Platform-specific resource name (determined at compile time)
+#if ANDROID
+        var resourceName = "DatadogMauiSample.Config.datadog-rum-android.config";
+#elif IOS
+        var resourceName = "DatadogMauiSample.Config.datadog-rum-ios.config";
+#else
+        var resourceName = "";
+#endif
+
+        if (string.IsNullOrEmpty(resourceName))
+            return creds;
+
         try
         {
-            // Try to read .env file as a MAUI asset
-            using var stream = Microsoft.Maui.Storage.FileSystem.OpenAppPackageFileAsync(".env").Result;
-            using var reader = new StreamReader(stream);
-            var envContent = reader.ReadToEnd();
+            // Load from embedded resource using reflection
+            var assembly = Assembly.GetExecutingAssembly();
+            using var stream = assembly.GetManifestResourceStream(resourceName);
 
-            // Parse .env content manually since DotNetEnv expects a file path
-            foreach (var line in envContent.Split('\n'))
+            if (stream != null)
             {
-                var trimmedLine = line.Trim();
-                if (string.IsNullOrEmpty(trimmedLine) || trimmedLine.StartsWith("#"))
-                    continue;
+                using var reader = new StreamReader(stream);
+                var content = reader.ReadToEnd();
 
-                var parts = trimmedLine.Split('=', 2);
-                if (parts.Length == 2)
+                // Parse KEY=VALUE format (semicolon-separated for multiple entries)
+                foreach (var line in content.Split(new[] { ';', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries))
                 {
-                    var key = parts[0].Trim();
-                    var value = parts[1].Trim();
-                    System.Environment.SetEnvironmentVariable(key, value);
+                    var parts = line.Trim().Split('=', 2);
+                    if (parts.Length == 2)
+                    {
+                        var key = parts[0].Trim();
+                        var value = parts[1].Trim();
+                        if (!string.IsNullOrEmpty(key) && !string.IsNullOrEmpty(value))
+                        {
+                            creds[key] = value;
+                        }
+                    }
                 }
-            }
 
-            Console.WriteLine("[Datadog] Loaded .env file from app package");
+                Console.WriteLine($"[Datadog] Loaded {creds.Count} credentials from embedded config");
+            }
+            else
+            {
+                Console.WriteLine($"[Datadog] No embedded config file found ({resourceName})");
+            }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[Datadog] Failed to load .env file: {ex.Message}");
+            Console.WriteLine($"[Datadog] Failed to load embedded config: {ex.GetType().Name} - {ex.Message}");
         }
 
-        // Load from environment variables
+        return creds;
+    }
+
+    /// <summary>
+    /// Optional: Load additional settings from environment variables
+    /// (Credentials are loaded from embedded config, this is for other settings)
+    /// </summary>
+    public static void LoadFromEnvironment()
+    {
+        // Load general settings from environment variables
         Environment = GetEnvVar("DD_ENV", Environment);
         ServiceName = GetEnvVar("DD_SERVICE_NAME", ServiceName);
-
-        AndroidClientToken = GetEnvVar("DD_RUM_ANDROID_CLIENT_TOKEN", AndroidClientToken);
-        AndroidRumApplicationId = GetEnvVar("DD_RUM_ANDROID_APPLICATION_ID", AndroidRumApplicationId);
-
-        IosClientToken = GetEnvVar("DD_RUM_IOS_CLIENT_TOKEN", IosClientToken);
-        IosRumApplicationId = GetEnvVar("DD_RUM_IOS_APPLICATION_ID", IosRumApplicationId);
-
         VerboseLogging = GetEnvVar("DD_VERBOSE_LOGGING", "true").ToLower() == "true";
 
         if (float.TryParse(GetEnvVar("DD_SESSION_SAMPLE_RATE", "100"), out var sessionRate))

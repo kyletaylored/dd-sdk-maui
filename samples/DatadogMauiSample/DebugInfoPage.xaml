@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="DatadogMauiSample.DebugInfoPage"
+             Title="Debug Info">
+    <ScrollView Padding="20">
+        <VerticalStackLayout Spacing="15">
+            <!-- Header -->
+            <Label Text="Datadog Configuration"
+                   FontSize="24"
+                   FontAttributes="Bold"
+                   Margin="0,0,0,10"/>
+
+            <!-- Platform -->
+            <Frame BorderColor="LightGray" Padding="15" CornerRadius="8">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="Platform" FontAttributes="Bold" FontSize="16"/>
+                    <Label x:Name="PlatformLabel" TextColor="Gray"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Environment -->
+            <Frame BorderColor="LightGray" Padding="15" CornerRadius="8">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="Environment" FontAttributes="Bold" FontSize="16"/>
+                    <Label x:Name="EnvironmentLabel" TextColor="Gray"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Service Name -->
+            <Frame BorderColor="LightGray" Padding="15" CornerRadius="8">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="Service Name" FontAttributes="Bold" FontSize="16"/>
+                    <Label x:Name="ServiceNameLabel" TextColor="Gray"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- RUM Application ID -->
+            <Frame BorderColor="LightGray" Padding="15" CornerRadius="8">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="RUM Application ID" FontAttributes="Bold" FontSize="16"/>
+                    <Label x:Name="ApplicationIdLabel"
+                           TextColor="Gray"
+                           LineBreakMode="CharacterWrap"
+                           MaxLines="2"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Client Token (masked) -->
+            <Frame BorderColor="LightGray" Padding="15" CornerRadius="8">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="Client Token" FontAttributes="Bold" FontSize="16"/>
+                    <Label x:Name="ClientTokenLabel"
+                           TextColor="Gray"
+                           LineBreakMode="CharacterWrap"
+                           MaxLines="2"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Session Sample Rate -->
+            <Frame BorderColor="LightGray" Padding="15" CornerRadius="8">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="Session Sample Rate" FontAttributes="Bold" FontSize="16"/>
+                    <Label x:Name="SessionSampleRateLabel" TextColor="Gray"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Session Replay Sample Rate -->
+            <Frame BorderColor="LightGray" Padding="15" CornerRadius="8">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="Session Replay Sample Rate" FontAttributes="Bold" FontSize="16"/>
+                    <Label x:Name="SessionReplaySampleRateLabel" TextColor="Gray"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Verbose Logging -->
+            <Frame BorderColor="LightGray" Padding="15" CornerRadius="8">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="Verbose Logging" FontAttributes="Bold" FontSize="16"/>
+                    <Label x:Name="VerboseLoggingLabel" TextColor="Gray"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- First Party Hosts -->
+            <Frame BorderColor="LightGray" Padding="15" CornerRadius="8">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="First Party Hosts" FontAttributes="Bold" FontSize="16"/>
+                    <Label x:Name="FirstPartyHostsLabel"
+                           TextColor="Gray"
+                           LineBreakMode="WordWrap"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- SDK Version Info -->
+            <Frame BorderColor="LightGray" Padding="15" CornerRadius="8" BackgroundColor="#F0F8FF">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="SDK Info" FontAttributes="Bold" FontSize="16"/>
+                    <Label Text="Datadog MAUI SDK"
+                           FontSize="12"
+                           TextColor="Gray"/>
+                    <Label Text="Platform-specific initialization"
+                           FontSize="11"
+                           TextColor="Gray"
+                           Margin="0,5,0,0"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Close Button -->
+            <Button Text="Close"
+                    Clicked="OnCloseClicked"
+                    BackgroundColor="#512BD4"
+                    TextColor="White"
+                    Margin="0,10,0,0"/>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

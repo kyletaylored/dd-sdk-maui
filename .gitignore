@@ -91,3 +91,6 @@ _reference/
 .env
 *.env
 !.env.example
+
+# Generated Datadog RUM config files (contain credentials)
+**/Config/datadog-rum-*.config

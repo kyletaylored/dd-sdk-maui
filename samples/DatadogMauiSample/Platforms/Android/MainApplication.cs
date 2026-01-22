@@ -40,7 +40,15 @@ public class MainApplication : MauiApplication
             Console.WriteLine($"[Datadog] Initializing for Android");
             Console.WriteLine($"[Datadog] - Environment: {DatadogConfig.Environment}");
             Console.WriteLine($"[Datadog] - Service: {DatadogConfig.ServiceName}");
-            Console.WriteLine($"[Datadog] - Client Token: {DatadogConfig.AndroidClientToken.Substring(0, 10)}...{DatadogConfig.AndroidClientToken.Substring(DatadogConfig.AndroidClientToken.Length - 4)}");
+
+            // Safely mask the client token
+            var maskedToken = string.IsNullOrEmpty(DatadogConfig.AndroidClientToken)
+                ? "NOT_CONFIGURED"
+                : DatadogConfig.AndroidClientToken.Length > 14
+                    ? $"{DatadogConfig.AndroidClientToken.Substring(0, 10)}...{DatadogConfig.AndroidClientToken.Substring(DatadogConfig.AndroidClientToken.Length - 4)}"
+                    : "***CONFIGURED***";
+
+            Console.WriteLine($"[Datadog] - Client Token: {maskedToken}");
             Console.WriteLine($"[Datadog] - RUM Application ID: {DatadogConfig.AndroidRumApplicationId}");
 
             // Create Datadog configuration

@@ -1,7 +1,10 @@
 <metadata>
   <!--
-    Add metadata transforms here to fix binding issues
-    Example:
-    <remove-node path="/api/package[@name='com.example']/class[@name='Foo']" />
+    Remove classes that depend on androidx.metrics.performance.JankStats
+    These are internal vitals classes used for frame metrics tracking.
+    The functionality is optional and will gracefully degrade if not available.
   -->
+  <remove-node path="/api/package[@name='com.datadog.android.rum.internal.vitals']/interface[@name='FrameStateListener']" />
+  <remove-node path="/api/package[@name='com.datadog.android.rum.internal.vitals']/class[@name='FrameStatesAggregator']" />
+  <remove-node path="/api/package[@name='com.datadog.android.rum.internal.metric.slowframes']/class[@name='SlowFramesListener']" />
 </metadata>

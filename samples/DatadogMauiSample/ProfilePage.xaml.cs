@@ -106,4 +106,9 @@ public partial class ProfilePage : ContentPage
         LoginForm.IsVisible = isGuest;
         LoggedInActions.IsVisible = !isGuest;
     }
+
+    private async void OnDebugInfoClicked(object? sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new DebugInfoPage());
+    }
 }
