@@ -481,7 +481,7 @@ jobs:
   build-ios-sample:
     name: Build iOS Sample App
     runs-on: macos-26  # macOS required for iOS app compilation
-    needs: combine-ios-packages
+    needs: [combine-ios-packages, download-xcframeworks]
 
     steps:
       - name: Checkout repository
@@ -497,6 +497,15 @@ jobs:
 
       - name: Install .NET iOS workload
         run: dotnet workload install ios
+
+      - name: Download XCFrameworks for sample app
+        uses: actions/download-artifact@v7
+        with:
+          name: ios-xcframeworks
+          path: Datadog.MAUI.iOS.Binding/artifacts/
+
+      - name: Verify XCFrameworks
+        run: ls -la Datadog.MAUI.iOS.Binding/artifacts/
 
       - name: Download iOS packages
         uses: actions/download-artifact@v7

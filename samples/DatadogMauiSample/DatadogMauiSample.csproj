@@ -47,6 +47,8 @@
 		<AndroidPackageFormat>aab</AndroidPackageFormat>
 		<!-- Disable Java dependency verification - Kotlin stdlib is embedded in Datadog SDK AARs -->
 		<AndroidVerifyJavaDependencies>false</AndroidVerifyJavaDependencies>
+		<!-- Disable AOT for sample app to avoid compilation issues with bindings -->
+		<RunAOTCompilation>false</RunAOTCompilation>
 	</PropertyGroup>
 
 	<!-- Custom target to remove duplicate tracing AAR before dex compilation -->
