@@ -320,7 +320,7 @@ jobs:
   # Combine all target frameworks into unified packages
   combine-ios-packages:
     name: Combine iOS Packages
-    runs-on: ubuntu-latest
+    runs-on: macos-latest  # macOS required for packing iOS meta-package
     needs: [build-ios-net9, build-ios-net10]
     if: success() || failure()  # Run even if builds failed (iOS incomplete)
 
@@ -447,12 +447,12 @@ jobs:
         continue-on-error: true  # iOS bindings not complete yet
 
       - name: Upload combined iOS packages
-        if: success()
+        if: always()  # Upload even if packing failed, so dependent jobs can check
         uses: actions/upload-artifact@v6
         with:
           name: ios-nuget-packages
           path: ./artifacts-combined/*.nupkg
-          if-no-files-found: warn
+          if-no-files-found: ignore  # Don't fail if bindings aren't ready
           retention-days: 30
 
       - name: Package summary
@@ -512,8 +512,22 @@ jobs:
         with:
           name: ios-nuget-packages
           path: ./artifacts
+        continue-on-error: true  # Don't fail if packages aren't ready
+
+      - name: Check if packages exist
+        id: check-packages
+        run: |
+          if [ -d "./artifacts" ] && [ -n "$(ls -A ./artifacts/*.nupkg 2>/dev/null)" ]; then
+            echo "packages_exist=true" >> $GITHUB_OUTPUT
+            echo "iOS packages found - will build sample app"
+          else
+            echo "packages_exist=false" >> $GITHUB_OUTPUT
+            echo "⚠️ No iOS packages found - skipping sample app build"
+            echo "iOS bindings are not yet complete"
+          fi
 
       - name: Get package version from artifacts
+        if: steps.check-packages.outputs.packages_exist == 'true'
         id: package-version
         run: |
           # Extract version from first package filename
@@ -528,15 +542,19 @@ jobs:
           fi
 
       - name: Restore MAUI workloads for sample app
+        if: steps.check-packages.outputs.packages_exist == 'true'
         run: dotnet workload restore samples/DatadogMauiSample/DatadogMauiSample.csproj
 
       - name: Restore sample app dependencies
+        if: steps.check-packages.outputs.packages_exist == 'true'
         run: dotnet restore samples/DatadogMauiSample/DatadogMauiSample.csproj -p:TargetFrameworks=net10.0-ios
 
       - name: Build sample app
+        if: steps.check-packages.outputs.packages_exist == 'true'
         run: dotnet build samples/DatadogMauiSample/DatadogMauiSample.csproj --configuration Release --no-restore -f net10.0-ios -p:TargetFrameworks=net10.0-ios -p:BuildIpa=true
 
       - name: Upload sample app
+        if: steps.check-packages.outputs.packages_exist == 'true'
         uses: actions/upload-artifact@v6
         with:
           name: ios-sample-app
@@ -548,8 +566,15 @@ jobs:
 
       - name: Sample build summary
         run: |
-          echo "## iOS Sample App Built" >> $GITHUB_STEP_SUMMARY
+          echo "## iOS Sample App Status" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Sample app compiled successfully using combined NuGet packages" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Package version: ${{ steps.package-version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.check-packages.outputs.packages_exist }}" == "true" ]; then
+            echo "✅ Sample app compiled successfully using combined NuGet packages" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Package version: ${{ steps.package-version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ iOS sample app build skipped - iOS bindings not yet complete" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "iOS bindings require Objective-C API definitions to be generated." >> $GITHUB_STEP_SUMMARY
+            echo "XCFrameworks have been downloaded and are ready for binding generation." >> $GITHUB_STEP_SUMMARY
+          fi

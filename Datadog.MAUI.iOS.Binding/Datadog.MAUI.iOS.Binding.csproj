@@ -1,12 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <!-- Meta-package: do NOT target net*-ios, and do NOT produce assemblies -->
-    <TargetFrameworks>net9.0-ios;net10.0-ios</TargetFrameworks>
+    <!-- Meta-package: uses netstandard for cross-platform compatibility, does NOT produce assemblies -->
+    <TargetFramework>netstandard2.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
 
     <IsPackable>true</IsPackable>
     <IncludeBuildOutput>false</IncludeBuildOutput>
+    <SuppressDependenciesWhenPacking>false</SuppressDependenciesWhenPacking>
 
     <!-- Disable CPM for this meta-package to allow Version attributes on PackageReferences -->
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
