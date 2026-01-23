@@ -33,8 +33,8 @@ Datadog Trace (APM) provides:
 In your `AppDelegate.cs` after Core SDK initialization:
 
 ```csharp
-using DatadogCore;
-using DatadogTrace;
+using Datadog.iOS.Core;
+using Datadog.iOS.Trace;
 
 // Initialize Core first
 DDDatadog.Initialize(config, DDTrackingConsent.Granted);
@@ -261,8 +261,8 @@ In Datadog RUM Explorer:
 ```csharp
 using Foundation;
 using UIKit;
-using DatadogCore;
-using DatadogTrace;
+using Datadog.iOS.Core;
+using Datadog.iOS.Trace;
 
 [Register("AppDelegate")]
 public class AppDelegate : MauiUIApplicationDelegate

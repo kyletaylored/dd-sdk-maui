@@ -34,9 +34,9 @@ Crash Reporting provides:
 In your `AppDelegate.cs` after Core and RUM initialization:
 
 ```csharp
-using DatadogCore;
-using DatadogRUM;
-using DatadogCrashReporting;
+using Datadog.iOS.Core;
+using Datadog.iOS.RUM;
+using Datadog.iOS.CrashReporting;
 
 // Initialize Core first
 DDDatadog.Initialize(config, DDTrackingConsent.Granted);
@@ -169,9 +169,9 @@ View in Datadog:
 ```csharp
 using Foundation;
 using UIKit;
-using DatadogCore;
-using DatadogRUM;
-using DatadogCrashReporting;
+using Datadog.iOS.Core;
+using Datadog.iOS.RUM;
+using Datadog.iOS.CrashReporting;
 
 [Register("AppDelegate")]
 public class AppDelegate : MauiUIApplicationDelegate

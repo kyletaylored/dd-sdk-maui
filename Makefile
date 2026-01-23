@@ -402,11 +402,11 @@ generate-ios-bindings: ## Generate iOS bindings using Objective Sharpie
 		echo "$(RED)Error: iOS binding generation requires macOS$(NC)"; \
 		exit 1; \
 	fi
-	@if [ ! -f "Datadog.MAUI.iOS.Binding/generate-ios-bindings-sharpie.sh" ]; then \
-		echo "$(RED)Error: generate-ios-bindings-sharpie.sh not found$(NC)"; \
+	@if [ ! -f "scripts/generate-ios-bindings-sharpie.sh" ]; then \
+		echo "$(RED)Error: scripts/generate-ios-bindings-sharpie.sh not found$(NC)"; \
 		exit 1; \
 	fi
-	@cd Datadog.MAUI.iOS.Binding && chmod +x generate-ios-bindings-sharpie.sh && ./generate-ios-bindings-sharpie.sh
+	@chmod +x scripts/generate-ios-bindings-sharpie.sh && ./scripts/generate-ios-bindings-sharpie.sh
 	@echo "$(GREEN)✓ iOS bindings generated$(NC)"
 
 ##@ Utilities

@@ -33,9 +33,9 @@ WebView Tracking provides:
 In your `AppDelegate.cs` after Core and RUM initialization:
 
 ```csharp
-using DatadogCore;
-using DatadogRUM;
-using DatadogWebViewTracking;
+using Datadog.iOS.Core;
+using Datadog.iOS.RUM;
+using Datadog.iOS.WebViewTracking;
 using WebKit;
 
 // Initialize Core and RUM first
@@ -80,9 +80,9 @@ WebView events appear in your RUM session as:
 using Foundation;
 using UIKit;
 using WebKit;
-using DatadogCore;
-using DatadogRUM;
-using DatadogWebViewTracking;
+using Datadog.iOS.Core;
+using Datadog.iOS.RUM;
+using Datadog.iOS.WebViewTracking;
 
 [Register("AppDelegate")]
 public class AppDelegate : MauiUIApplicationDelegate

@@ -33,9 +33,9 @@ Session Replay provides:
 In your `AppDelegate.cs` after Core and RUM initialization:
 
 ```csharp
-using DatadogCore;
-using DatadogRUM;
-using DatadogSessionReplay;
+using Datadog.iOS.Core;
+using Datadog.iOS.RUM;
+using Datadog.iOS.SessionReplay;
 
 // Initialize Core first
 DDDatadog.Initialize(config, DDTrackingConsent.Granted);
@@ -166,9 +166,9 @@ public enum DDTouchPrivacy
 ```csharp
 using Foundation;
 using UIKit;
-using DatadogCore;
-using DatadogRUM;
-using DatadogSessionReplay;
+using Datadog.iOS.Core;
+using Datadog.iOS.RUM;
+using Datadog.iOS.SessionReplay;
 
 [Register("AppDelegate")]
 public class AppDelegate : MauiUIApplicationDelegate

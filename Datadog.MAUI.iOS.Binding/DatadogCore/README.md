@@ -34,7 +34,7 @@ In your iOS `AppDelegate.cs`:
 ```csharp
 using Foundation;
 using UIKit;
-using DatadogCore;
+using Datadog.iOS.Core;
 
 [Register("AppDelegate")]
 public class AppDelegate : MauiUIApplicationDelegate
@@ -310,7 +310,7 @@ Here's a complete example from a real MAUI app:
 ```csharp
 using Foundation;
 using UIKit;
-using DatadogCore;
+using Datadog.iOS.Core;
 
 namespace DatadogMauiSample;
 

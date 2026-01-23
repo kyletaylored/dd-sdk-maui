@@ -34,8 +34,8 @@ RUM (Real User Monitoring) provides:
 In your `AppDelegate.cs` after Core SDK initialization:
 
 ```csharp
-using DatadogCore;
-using DatadogRUM;
+using Datadog.iOS.Core;
+using Datadog.iOS.RUM;
 
 // Initialize Core first
 DDDatadog.Initialize(config, DDTrackingConsent.Granted);
@@ -420,8 +420,8 @@ public enum DDRUMVitalsFrequency
 ```csharp
 using Foundation;
 using UIKit;
-using DatadogCore;
-using DatadogRUM;
+using Datadog.iOS.Core;
+using Datadog.iOS.RUM;
 
 [Register("AppDelegate")]
 public class AppDelegate : MauiUIApplicationDelegate

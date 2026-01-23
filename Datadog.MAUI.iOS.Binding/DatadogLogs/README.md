@@ -33,8 +33,8 @@ Datadog Logs provides:
 In your `AppDelegate.cs` after Core SDK initialization:
 
 ```csharp
-using DatadogCore;
-using DatadogLogs;
+using Datadog.iOS.Core;
+using Datadog.iOS.Logs;
 
 // Initialize Core first
 DDDatadog.Initialize(config, DDTrackingConsent.Granted);
@@ -300,8 +300,8 @@ DDLogs.Enable(logsConfig);
 ```csharp
 using Foundation;
 using UIKit;
-using DatadogCore;
-using DatadogLogs;
+using Datadog.iOS.Core;
+using Datadog.iOS.Logs;
 
 [Register("AppDelegate")]
 public class AppDelegate : MauiUIApplicationDelegate
