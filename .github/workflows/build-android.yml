@@ -470,13 +470,12 @@ jobs:
             echo "Plugin package is built by the build-plugin job in build-all.yml workflow."
           fi
 
-      - name: Restore sample app dependencies
+      - name: Build sample app (using Makefile for consistency)
         if: steps.check-plugin.outputs.plugin_exists == 'true'
-        run: dotnet restore samples/DatadogMauiSample/DatadogMauiSample.csproj -p:TargetFrameworks=net10.0-android
-
-      - name: Build sample app
-        if: steps.check-plugin.outputs.plugin_exists == 'true'
-        run: dotnet build samples/DatadogMauiSample/DatadogMauiSample.csproj --configuration Release --no-restore -f net10.0-android -p:TargetFrameworks=net10.0-android
+        run: |
+          cd samples/DatadogMauiSample
+          dotnet restore
+          dotnet build -f net10.0-android -c Release
 
       - name: Upload sample APK
         if: steps.check-plugin.outputs.plugin_exists == 'true'

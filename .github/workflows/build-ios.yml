@@ -559,13 +559,12 @@ jobs:
         if: steps.check-packages.outputs.packages_exist == 'true'
         run: dotnet workload restore samples/DatadogMauiSample/DatadogMauiSample.csproj
 
-      - name: Restore sample app dependencies
+      - name: Build sample app (using Makefile for consistency)
         if: steps.check-packages.outputs.packages_exist == 'true'
-        run: dotnet restore samples/DatadogMauiSample/DatadogMauiSample.csproj -p:TargetFrameworks=net10.0-ios
-
-      - name: Build sample app
-        if: steps.check-packages.outputs.packages_exist == 'true'
-        run: dotnet build samples/DatadogMauiSample/DatadogMauiSample.csproj --configuration Release --no-restore -f net10.0-ios -p:TargetFrameworks=net10.0-ios -p:BuildIpa=true
+        run: |
+          cd samples/DatadogMauiSample
+          dotnet restore
+          dotnet build -f net10.0-ios -c Release -p:BuildIpa=true
 
       - name: Upload sample app
         if: steps.check-packages.outputs.packages_exist == 'true'
