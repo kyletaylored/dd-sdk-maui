@@ -26,7 +26,7 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # Use absolute paths based on project root
 ARTIFACTS_DIR="$PROJECT_ROOT/Datadog.MAUI.iOS.Binding/artifacts"
-OUTPUT_DIR="$PROJECT_ROOT/Datadog.MAUI.iOS.Binding/Generated"
+BINDINGS_DIR="$PROJECT_ROOT/Datadog.MAUI.iOS.Binding"
 PLATFORM_DIR="ios-arm64_x86_64-simulator"  # Use simulator architecture for Sharpie compatibility
 
 # Check if sharpie is installed
@@ -89,21 +89,28 @@ else
     echo -e "${GREEN}Found iOS SDK: $SDK${NC}"
 fi
 
-# Create output directory
-mkdir -p "$OUTPUT_DIR"
+# Automatically discover all XCFrameworks in the artifacts directory
+echo -e "${CYAN}Discovering XCFrameworks in $ARTIFACTS_DIR...${NC}"
+FRAMEWORKS=()
+if [ -d "$ARTIFACTS_DIR" ]; then
+    while IFS= read -r -d '' xcframework; do
+        # Extract framework name (remove .xcframework extension)
+        framework_name=$(basename "$xcframework" .xcframework)
+        FRAMEWORKS+=("$framework_name")
+        echo -e "  ${GREEN}Found:${NC} $framework_name"
+    done < <(find "$ARTIFACTS_DIR" -maxdepth 1 -name "*.xcframework" -type d -print0 | sort -z)
+else
+    echo -e "${RED}Error: Artifacts directory not found: $ARTIFACTS_DIR${NC}"
+    exit 1
+fi
 
-# List of frameworks to process
-FRAMEWORKS=(
-    "DatadogCore"
-    "DatadogInternal"
-    "DatadogRUM"
-    "DatadogLogs"
-    "DatadogTrace"
-    "DatadogCrashReporting"
-    "DatadogSessionReplay"
-    "DatadogWebViewTracking"
-)
+if [ ${#FRAMEWORKS[@]} -eq 0 ]; then
+    echo -e "${RED}Error: No XCFrameworks found in $ARTIFACTS_DIR${NC}"
+    echo -e "${YELLOW}Run 'make download-ios-frameworks' first to download the frameworks${NC}"
+    exit 1
+fi
 
+echo -e "${GREEN}Found ${#FRAMEWORKS[@]} XCFrameworks to process${NC}"
 echo -e "${CYAN}Using iOS SDK: $SDK${NC}\n"
 
 for FRAMEWORK in "${FRAMEWORKS[@]}"; do
@@ -133,9 +140,15 @@ for FRAMEWORK in "${FRAMEWORKS[@]}"; do
         continue
     fi
 
-    # Create framework-specific output directory
-    FRAMEWORK_OUTPUT="$OUTPUT_DIR/$FRAMEWORK"
-    mkdir -p "$FRAMEWORK_OUTPUT"
+    # Determine binding project directory name
+    BINDING_PROJECT_DIR="$BINDINGS_DIR/$FRAMEWORK"
+
+    # Check if binding project directory exists
+    if [ ! -d "$BINDING_PROJECT_DIR" ]; then
+        echo -e "${RED}  ✗ Binding project directory not found: $BINDING_PROJECT_DIR${NC}"
+        echo -e "${YELLOW}  ⚠ Skipping $FRAMEWORK (project doesn't exist)${NC}"
+        continue
+    fi
 
     # Strip "Datadog" prefix from framework name for cleaner C# namespaces
     # Examples: DatadogCore → Core, DatadogRUM → RUM, OpenTelemetryApi → OpenTelemetryApi
@@ -145,37 +158,49 @@ for FRAMEWORK in "${FRAMEWORKS[@]}"; do
         NAMESPACE_SUFFIX="$FRAMEWORK"
     fi
 
+    # Create temporary directory for Sharpie output
+    TEMP_OUTPUT="/tmp/sharpie-$FRAMEWORK-$$"
+    mkdir -p "$TEMP_OUTPUT"
+
     # Run Objective Sharpie
     echo -e "  Generating bindings with namespace: Datadog.iOS.$NAMESPACE_SUFFIX"
     sharpie bind \
-        --output="$FRAMEWORK_OUTPUT" \
+        --output="$TEMP_OUTPUT" \
         --namespace="Datadog.iOS.$NAMESPACE_SUFFIX" \
         --sdk="$SDK" \
         -scope "$HEADERS_PATH" \
         "$HEADER_TO_BIND" \
         2>&1 | grep -v "warning:" || true
 
-    if [ -f "$FRAMEWORK_OUTPUT/ApiDefinitions.cs" ]; then
-        echo -e "${GREEN}  ✓ Generated ApiDefinitions.cs${NC}"
+    # Copy generated files to binding project directory
+    if [ -f "$TEMP_OUTPUT/ApiDefinitions.cs" ]; then
+        # Rename ApiDefinitions.cs to ApiDefinition.cs (singular)
+        cp "$TEMP_OUTPUT/ApiDefinitions.cs" "$BINDING_PROJECT_DIR/ApiDefinition.cs"
+        echo -e "${GREEN}  ✓ Generated ApiDefinition.cs → $BINDING_PROJECT_DIR/ApiDefinition.cs${NC}"
     else
         echo -e "${RED}  ✗ Failed to generate ApiDefinitions.cs${NC}"
     fi
 
-    if [ -f "$FRAMEWORK_OUTPUT/StructsAndEnums.cs" ]; then
-        echo -e "${GREEN}  ✓ Generated StructsAndEnums.cs${NC}"
+    if [ -f "$TEMP_OUTPUT/StructsAndEnums.cs" ]; then
+        cp "$TEMP_OUTPUT/StructsAndEnums.cs" "$BINDING_PROJECT_DIR/StructsAndEnums.cs"
+        echo -e "${GREEN}  ✓ Generated StructsAndEnums.cs → $BINDING_PROJECT_DIR/StructsAndEnums.cs${NC}"
     else
         echo -e "${YELLOW}  ⚠ No StructsAndEnums.cs generated (may not be needed)${NC}"
     fi
+
+    # Clean up temporary directory
+    rm -rf "$TEMP_OUTPUT"
 
     echo ""
 done
 
 echo -e "${GREEN}Binding generation complete!${NC}"
-echo -e "${CYAN}Generated bindings are in: $OUTPUT_DIR${NC}"
+echo -e "${CYAN}Generated bindings have been written directly to binding project directories${NC}"
 echo ""
 echo -e "${YELLOW}Next steps:${NC}"
-echo "1. Review the generated files in $OUTPUT_DIR"
+echo "1. Review the generated ApiDefinition.cs and StructsAndEnums.cs files in each binding project"
 echo "2. Look for [Verify] attributes that need manual attention"
-echo "3. Consolidate the bindings into Datadog.MAUI.iOS.Binding/ApiDefinition.cs"
+echo "3. Test the bindings by building the projects"
+echo "4. Commit the changes if everything looks good"
 echo "4. Consolidate enums/structs into Datadog.MAUI.iOS.Binding/StructsAndEnums.cs"
 echo "5. Build the iOS binding project: dotnet build Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj"
