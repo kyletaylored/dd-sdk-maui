@@ -3,7 +3,7 @@ using System;
 using Foundation;
 using ObjCRuntime;
 
-namespace Datadog.iOS.DatadogLogs
+namespace Datadog.iOS.Logs
 {
 	// @interface DDLogEvent : NSObject
 	[BaseType (typeof(NSObject))]

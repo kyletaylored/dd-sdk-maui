@@ -244,19 +244,39 @@ sample-ios-simulator: ## Build and run iOS sample on specific simulator
 	@cd samples/DatadogMauiSample && \
 		dotnet build -f net9.0-ios -c Debug -t:Run /p:_DeviceName=:v2:udid=5A1AB396-285D-464E-B00C-267CEE8F9F8D
 
-sample-build-ios: ## Build iOS sample without running
-	@echo "$(BLUE)Building iOS sample app...$(NC)"
+sample-build-ios: ## Build iOS sample without running (Debug mode - uses ProjectReference)
+	@echo "$(BLUE)Building iOS sample app (Debug)...$(NC)"
 	@cd samples/DatadogMauiSample && \
 		dotnet restore && \
 		dotnet build -f net9.0-ios -c Debug
-	@echo "$(GREEN)✓ iOS sample app built$(NC)"
+	@echo "$(GREEN)✓ iOS sample app built (Debug)$(NC)"
 
-sample-build-android: ## Build Android sample without running
-	@echo "$(BLUE)Building Android sample app...$(NC)"
+sample-build-ios-release: pack ## Build iOS sample with Release packages (tests actual NuGet packages)
+	@echo "$(BLUE)Building iOS sample app (Release)...$(NC)"
+	@echo "$(YELLOW)This uses NuGet packages from ./artifacts$(NC)"
+	@if [ "$$(uname)" != "Darwin" ]; then \
+		echo "$(RED)Error: iOS builds require macOS$(NC)"; \
+		exit 1; \
+	fi
+	@cd samples/DatadogMauiSample && \
+		dotnet restore && \
+		dotnet build -f net10.0-ios -c Release
+	@echo "$(GREEN)✓ iOS sample app built with Release packages$(NC)"
+
+sample-build-android: ## Build Android sample without running (Debug mode - uses ProjectReference)
+	@echo "$(BLUE)Building Android sample app (Debug)...$(NC)"
 	@cd samples/DatadogMauiSample && \
 		dotnet restore && \
 		dotnet build -f net10.0-android -c Debug
-	@echo "$(GREEN)✓ Android sample app built$(NC)"
+	@echo "$(GREEN)✓ Android sample app built (Debug)$(NC)"
+
+sample-build-android-release: pack ## Build Android sample with Release packages (tests actual NuGet packages)
+	@echo "$(BLUE)Building Android sample app (Release)...$(NC)"
+	@echo "$(YELLOW)This uses NuGet packages from ./artifacts$(NC)"
+	@cd samples/DatadogMauiSample && \
+		dotnet restore && \
+		dotnet build -f net10.0-android -c Release
+	@echo "$(GREEN)✓ Android sample app built with Release packages$(NC)"
 
 sample-logs-android: ## View Android logs (filtered for Datadog and app)
 	@echo "$(BLUE)Viewing Android logs (filtering for Datadog and app output)...$(NC)"

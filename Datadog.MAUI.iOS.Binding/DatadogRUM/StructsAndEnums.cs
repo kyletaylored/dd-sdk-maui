@@ -1,6 +1,6 @@
 using ObjCRuntime;
 
-namespace Datadog.iOS.DatadogRUM
+namespace Datadog.iOS.RUM
 {
 	[Native]
 	public enum DDRUMActionEventActionActionType : long

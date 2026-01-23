@@ -21,8 +21,7 @@
 
   <ItemGroup>
     <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-session-replay" Version="$(DatadogSdkVersion)" VerifyDependencies="false" />
-    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-core" Version="$(DatadogSdkVersion)" VerifyDependencies="false" Bind="false" />
-    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-internal" Version="$(DatadogSdkVersion)" VerifyDependencies="false" Bind="false" />
+    <!-- Runtime Maven dependencies from POM -->
     <AndroidMavenLibrary Include="com.lyft.kronos:kronos-android" Version="$(KronosVersion)" Bind="false" VerifyDependencies="false" />
   </ItemGroup>
 

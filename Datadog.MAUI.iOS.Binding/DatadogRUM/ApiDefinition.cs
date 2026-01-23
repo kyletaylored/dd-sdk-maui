@@ -1,7 +1,7 @@
 using Foundation;
 using ObjCRuntime;
 
-namespace Datadog.iOS.DatadogRUM
+namespace Datadog.iOS.RUM
 {
 	/// <summary>
 	/// RUM monitor for manually tracking views, actions, resources, and errors.

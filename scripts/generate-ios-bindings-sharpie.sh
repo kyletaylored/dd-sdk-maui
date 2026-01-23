@@ -137,11 +137,19 @@ for FRAMEWORK in "${FRAMEWORKS[@]}"; do
     FRAMEWORK_OUTPUT="$OUTPUT_DIR/$FRAMEWORK"
     mkdir -p "$FRAMEWORK_OUTPUT"
 
+    # Strip "Datadog" prefix from framework name for cleaner C# namespaces
+    # Examples: DatadogCore → Core, DatadogRUM → RUM, OpenTelemetryApi → OpenTelemetryApi
+    if [[ "$FRAMEWORK" == Datadog* ]]; then
+        NAMESPACE_SUFFIX="${FRAMEWORK#Datadog}"
+    else
+        NAMESPACE_SUFFIX="$FRAMEWORK"
+    fi
+
     # Run Objective Sharpie
-    echo -e "  Generating bindings..."
+    echo -e "  Generating bindings with namespace: Datadog.iOS.$NAMESPACE_SUFFIX"
     sharpie bind \
         --output="$FRAMEWORK_OUTPUT" \
-        --namespace="Datadog.iOS.$FRAMEWORK" \
+        --namespace="Datadog.iOS.$NAMESPACE_SUFFIX" \
         --sdk="$SDK" \
         -scope "$HEADERS_PATH" \
         "$HEADER_TO_BIND" \

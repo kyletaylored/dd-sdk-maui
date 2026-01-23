@@ -1,7 +1,7 @@
 using Foundation;
 using ObjCRuntime;
 
-namespace Datadog.iOS.DatadogWebViewTracking
+namespace Datadog.iOS.WebViewTracking
 {
 	// Note: DatadogWebViewTracking bindings are intentionally minimal.
 	// WebView tracking functionality is accessed through other modules.

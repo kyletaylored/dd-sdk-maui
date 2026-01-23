@@ -23,11 +23,6 @@
 
   <ItemGroup>
     <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-okhttp" Version="$(DatadogSdkVersion)" VerifyDependencies="false" />
-    <!-- Runtime Maven dependencies from POM -->
-    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-core" Version="$(DatadogSdkVersion)" VerifyDependencies="false" Bind="false" />
-    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-internal" Version="$(DatadogSdkVersion)" VerifyDependencies="false" Bind="false" />
-    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-rum" Version="$(DatadogSdkVersion)" VerifyDependencies="false" Bind="false" />
-    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-trace" Version="$(DatadogSdkVersion)" VerifyDependencies="false" Bind="false" />
   </ItemGroup>
 
   <!-- AndroidX and third-party dependencies as NuGet packages -->

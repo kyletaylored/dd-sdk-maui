@@ -92,10 +92,28 @@
 	</ItemGroup>
 
 
-	<!-- Reference Datadog.MAUI unified plugin -->
-	<ItemGroup>
+	<!-- ================================================================ -->
+	<!-- Datadog.MAUI Plugin Reference Strategy                           -->
+	<!-- ================================================================ -->
+	<!-- Debug builds: Use ProjectReference for fast iteration            -->
+	<!-- Release builds: Use PackageReference to test actual NuGet packages -->
+	<!-- CI builds: Use PackageReference from pipeline artifacts          -->
+
+	<!-- Debug: Use ProjectReference for fast local development -->
+	<ItemGroup Condition="'$(Configuration)' == 'Debug'">
 		<ProjectReference Include="..\..\Datadog.MAUI.Plugin\Datadog.MAUI.Plugin.csproj" />
 	</ItemGroup>
+
+	<!-- Release: Use PackageReference from local artifacts or CI artifacts -->
+	<ItemGroup Condition="'$(Configuration)' == 'Release'">
+		<PackageReference Include="Datadog.MAUI" Version="$(DatadogSdkVersion)" />
+	</ItemGroup>
+
+	<!-- Local NuGet source for Release builds (points to ./artifacts) -->
+	<!-- CI builds will override this via nuget.config or command-line restore -->
+	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+		<RestoreAdditionalProjectSources>$(MSBuildProjectDirectory)/../../artifacts;$(RestoreAdditionalProjectSources)</RestoreAdditionalProjectSources>
+	</PropertyGroup>
 
 	<!-- ================================================================ -->
 	<!-- MSBuild Targets for Platform-Specific RUM Configuration         -->

@@ -1,6 +1,6 @@
 using ObjCRuntime;
 
-namespace Datadog.iOS.DatadogLogs
+namespace Datadog.iOS.Logs
 {
 	[Native]
 	public enum DDLogEventDeviceDeviceType : long

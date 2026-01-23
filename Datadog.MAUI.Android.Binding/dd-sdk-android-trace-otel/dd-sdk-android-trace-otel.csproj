@@ -23,9 +23,6 @@
   <ItemGroup>
     <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-trace-otel" Version="$(DatadogSdkVersion)" VerifyDependencies="false" />
     <!-- Runtime Maven dependencies from POM -->
-    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-core" Version="$(DatadogSdkVersion)" VerifyDependencies="false" Bind="false" />
-    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-internal" Version="$(DatadogSdkVersion)" VerifyDependencies="false" Bind="false" />
-    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-trace" Version="$(DatadogSdkVersion)" VerifyDependencies="false" Bind="false" />
     <AndroidMavenLibrary Include="io.opentelemetry:opentelemetry-api" Version="1.44.1" VerifyDependencies="false" Bind="false" />
     <AndroidMavenLibrary Include="io.opentelemetry:opentelemetry-context" Version="1.44.1" VerifyDependencies="false" Bind="false" />
   </ItemGroup>

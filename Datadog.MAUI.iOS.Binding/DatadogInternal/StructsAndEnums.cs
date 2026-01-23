@@ -1,6 +1,6 @@
 using ObjCRuntime;
 
-namespace Datadog.iOS.DatadogInternal
+namespace Datadog.iOS.Internal
 {
 	[Native]
 	public enum DDCoreLoggerLevel : long

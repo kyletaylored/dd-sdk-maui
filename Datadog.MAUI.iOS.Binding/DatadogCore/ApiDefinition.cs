@@ -2,9 +2,9 @@ using System;
 using Foundation;
 using ObjCRuntime;
 using UIKit;
-using Datadog.iOS.DatadogInternal;
+using Datadog.iOS.Internal;
 
-namespace Datadog.iOS.DatadogCore
+namespace Datadog.iOS.Core
 {
 	// @interface DDCrossPlatformExtension : NSObject
 	[BaseType (typeof(NSObject))]

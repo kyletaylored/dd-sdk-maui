@@ -1,6 +1,6 @@
 using ObjCRuntime;
 
-namespace Datadog.iOS.DatadogCore
+namespace Datadog.iOS.Core
 {
 	[Native]
 	public enum DDBatchProcessingLevel : long

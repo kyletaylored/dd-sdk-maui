@@ -1,6 +1,6 @@
-using Datadog.iOS.DatadogRUM;
+using Datadog.iOS.RUM;
 using Foundation;
-using Datadog.iOS.DatadogInternal;
+using Datadog.iOS.Internal;
 
 namespace Datadog.Maui.Rum;
 

@@ -1,6 +1,6 @@
 using Foundation;
 
-namespace Datadog.iOS.DatadogCrashReporting
+namespace Datadog.iOS.CrashReporting
 {
 	// @interface DDCrashReporter : NSObject
 	[BaseType (typeof(NSObject))]

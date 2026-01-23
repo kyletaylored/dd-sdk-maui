@@ -23,9 +23,7 @@
   <ItemGroup>
     <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-trace" Version="$(DatadogSdkVersion)" VerifyDependencies="false" />
     <!-- Runtime Maven dependencies from POM -->
-    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-core" Version="$(DatadogSdkVersion)" VerifyDependencies="false" Bind="false" />
     <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-trace-api" Version="$(DatadogSdkVersion)" VerifyDependencies="false" Bind="false" />
-    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-internal" Version="$(DatadogSdkVersion)" VerifyDependencies="false" Bind="false" />
     <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-trace-internal" Version="$(DatadogSdkVersion)" VerifyDependencies="false" Bind="false" />
     <AndroidMavenLibrary Include="org.jctools:jctools-core" Version="3.3.0" Bind="false" VerifyDependencies="false" />
     <AndroidMavenLibrary Include="com.google.re2j:re2j" Version="1.7" Bind="false" VerifyDependencies="false" />

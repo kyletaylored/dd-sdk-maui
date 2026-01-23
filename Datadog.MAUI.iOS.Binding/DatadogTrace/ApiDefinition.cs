@@ -1,11 +1,11 @@
 using System;
-using Datadog.iOS.DatadogCore;
-using Datadog.iOS.DatadogInternal;
+using Datadog.iOS.Core;
+using Datadog.iOS.Internal;
 using Foundation;
 using ObjCRuntime;
 
 
-namespace Datadog.iOS.DatadogTrace
+namespace Datadog.iOS.Trace
 {
 	// @interface OT : NSObject
 	[BaseType (typeof(NSObject), Name = "_TtC12DatadogTrace2OT")]

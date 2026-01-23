@@ -1,8 +1,8 @@
 using Datadog.Maui.Configuration;
-using Datadog.iOS.DatadogCore;
-using Datadog.iOS.DatadogRUM;
-using Datadog.iOS.DatadogLogs;
-using Datadog.iOS.DatadogTrace;
+using Datadog.iOS.Core;
+using Datadog.iOS.RUM;
+using Datadog.iOS.Logs;
+using Datadog.iOS.Trace;
 using Foundation;
 
 namespace Datadog.Maui;

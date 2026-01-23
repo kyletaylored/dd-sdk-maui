@@ -1,4 +1,4 @@
-using Datadog.iOS.DatadogTrace;
+using Datadog.iOS.Trace;
 using Foundation;
 
 namespace Datadog.Maui.Tracing;

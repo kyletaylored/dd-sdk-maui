@@ -2,7 +2,7 @@ using System;
 using Foundation;
 using ObjCRuntime;
 
-namespace Datadog.iOS.DatadogInternal
+namespace Datadog.iOS.Internal
 {
 	// @interface DDInternalLogger : NSObject
 	[BaseType (typeof(NSObject))]

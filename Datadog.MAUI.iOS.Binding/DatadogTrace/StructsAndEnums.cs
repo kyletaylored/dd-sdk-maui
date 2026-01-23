@@ -1,6 +1,6 @@
 using ObjCRuntime;
 
-namespace Datadog.iOS.DatadogTrace
+namespace Datadog.iOS.Trace
 {
 	[Native]
 	public enum DDInjectEncoding : long
