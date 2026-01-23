@@ -252,6 +252,9 @@ sample-build-ios: ## Build iOS sample without running (Debug mode - uses Project
 	@echo "$(GREEN)✓ iOS sample app built (Debug)$(NC)"
 
 sample-build-ios-release: pack ## Build iOS sample with Release packages (tests actual NuGet packages)
+	@$(MAKE) sample-build-ios-release-only
+
+sample-build-ios-release-only: ## Build iOS sample with Release packages (assumes packages already exist in ./artifacts)
 	@echo "$(BLUE)Building iOS sample app (Release)...$(NC)"
 	@echo "$(YELLOW)This uses NuGet packages from ./artifacts$(NC)"
 	@if [ "$$(uname)" != "Darwin" ]; then \
@@ -271,6 +274,9 @@ sample-build-android: ## Build Android sample without running (Debug mode - uses
 	@echo "$(GREEN)✓ Android sample app built (Debug)$(NC)"
 
 sample-build-android-release: pack ## Build Android sample with Release packages (tests actual NuGet packages)
+	@$(MAKE) sample-build-android-release-only
+
+sample-build-android-release-only: ## Build Android sample with Release packages (assumes packages already exist in ./artifacts)
 	@echo "$(BLUE)Building Android sample app (Release)...$(NC)"
 	@echo "$(YELLOW)This uses NuGet packages from ./artifacts$(NC)"
 	@cd samples/DatadogMauiSample && \

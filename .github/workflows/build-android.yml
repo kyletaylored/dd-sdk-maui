@@ -470,12 +470,12 @@ jobs:
             echo "Plugin package is built by the build-plugin job in build-all.yml workflow."
           fi
 
-      - name: Build sample app (using Makefile for consistency)
+      - name: Build sample app (using Makefile)
         if: steps.check-plugin.outputs.plugin_exists == 'true'
-        run: |
-          cd samples/DatadogMauiSample
-          dotnet restore
-          dotnet build -f net10.0-android -c Release
+        env:
+          DD_RUM_ANDROID_CLIENT_TOKEN: ${{ secrets.DD_RUM_ANDROID_CLIENT_TOKEN }}
+          DD_RUM_ANDROID_APPLICATION_ID: ${{ secrets.DD_RUM_ANDROID_APPLICATION_ID }}
+        run: make sample-build-android-release-only
 
       - name: Upload sample APK
         if: steps.check-plugin.outputs.plugin_exists == 'true'

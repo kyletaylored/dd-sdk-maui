@@ -147,6 +147,7 @@ public class AppDelegate : MauiUIApplicationDelegate
                 env: DatadogConfig.Environment
             );
             configuration.Service = DatadogConfig.ServiceName;
+            configuration.Site = GetDatadogSite(DatadogConfig.Site);
             configuration.BatchSize = DDBatchSize.Small;
             configuration.UploadFrequency = DDUploadFrequency.Frequent;
 
@@ -236,6 +237,20 @@ public class AppDelegate : MauiUIApplicationDelegate
             Console.WriteLine($"[Datadog] Initialization failed: {ex.Message}");
             Console.WriteLine($"[Datadog] Stack trace: {ex.StackTrace}");
         }
+    }
+
+    private static DDSite GetDatadogSite(string site)
+    {
+        return site.ToUpperInvariant() switch
+        {
+            "US1" => DDSite.Us1,
+            "US3" => DDSite.Us3,
+            "US5" => DDSite.Us5,
+            "EU1" => DDSite.Eu1,
+            "AP1" => DDSite.Ap1,
+            "GOV" => DDSite.Us1_fed,
+            _ => DDSite.Us1
+        };
     }
 
     protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();

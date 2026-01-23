@@ -7,6 +7,12 @@ public static class DatadogConfig
     // General settings
     public static string Environment { get; set; } = "dev";
     public static string ServiceName { get; set; } = "shopist-maui-demo";
+
+    /// <summary>
+    /// Datadog site to send data to. Options: US1 (default), US3, US5, EU1, AP1, GOV
+    /// </summary>
+    public static string Site { get; set; } = "US1";
+
     public static bool VerboseLogging { get; set; } = true;
 
     // Placeholder defaults (used if config file not found)
@@ -52,7 +58,9 @@ public static class DatadogConfig
         }
     }
 
-    // iOS settings - 3-tier priority: Embedded Config > Environment Variable > Placeholder
+    ///<Summary>
+    /// iOS settings - 3-tier priority: Embedded Config > Environment Variable > Placeholder
+    ///</Summary>
     public static string IosClientToken
     {
         get
@@ -68,6 +76,9 @@ public static class DatadogConfig
         }
     }
 
+    ///<Summary>
+    /// Sets RUM Application ID in iOS.
+    ///</Summary>
     public static string IosRumApplicationId
     {
         get
@@ -163,6 +174,7 @@ public static class DatadogConfig
         // Load general settings from environment variables
         Environment = GetEnvVar("DD_ENV", Environment);
         ServiceName = GetEnvVar("DD_SERVICE_NAME", ServiceName);
+        Site = GetEnvVar("DD_SITE", Site);
         VerboseLogging = GetEnvVar("DD_VERBOSE_LOGGING", "true").ToLower() == "true";
 
         if (float.TryParse(GetEnvVar("DD_SESSION_SAMPLE_RATE", "100"), out var sessionRate))
