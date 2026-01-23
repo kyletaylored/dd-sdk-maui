@@ -13,28 +13,24 @@
     <TabBar>
         <ShellContent
             Title="Products"
-            Icon="dotnet_bot.png"
             ContentTemplate="{DataTemplate local:ProductsPage}"
             Route="ProductsPage"
             AutomationId="tab_products" />
 
         <ShellContent
             Title="Cart"
-            Icon="dotnet_bot.png"
             ContentTemplate="{DataTemplate local:CartPage}"
             Route="CartPage"
             AutomationId="tab_cart" />
 
         <ShellContent
             Title="Store"
-            Icon="dotnet_bot.png"
             ContentTemplate="{DataTemplate local:WebViewPage}"
             Route="WebViewPage"
             AutomationId="tab_store" />
 
         <ShellContent
             Title="Profile"
-            Icon="dotnet_bot.png"
             ContentTemplate="{DataTemplate local:ProfilePage}"
             Route="ProfilePage"
             AutomationId="tab_profile" />
