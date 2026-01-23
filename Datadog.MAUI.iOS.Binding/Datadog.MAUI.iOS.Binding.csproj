@@ -18,6 +18,7 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/DataDog/dd-sdk-maui</RepositoryUrl>
     <PackageTags>.NET MAUI iOS Datadog Mobile Binding RUM Logs Trace APM SessionReplay CrashReporting OpenTelemetry</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
 
     <!-- Optional: avoid warnings about missing lib/ files -->
     <NoWarn>$(NoWarn);NU5128</NoWarn>
@@ -40,5 +41,10 @@
     <PackageReference Include="Datadog.MAUI.iOS.WebViewTracking" Version="$(DatadogSdkVersion)" />
     <PackageReference Include="Datadog.MAUI.iOS.Flags" Version="$(DatadogSdkVersion)" />
     <PackageReference Include="Datadog.MAUI.iOS.OpenTelemetryApi" Version="$(DatadogSdkVersion)" />
+  </ItemGroup>
+
+  <!-- Package README -->
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>

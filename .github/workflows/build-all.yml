@@ -134,11 +134,81 @@ jobs:
     with:
       sdk-version: ${{ needs.verify-sdk-versions.outputs.sdk-version }}
 
+  # Build unified Datadog.MAUI plugin package
+  build-plugin:
+    name: Build Datadog.MAUI Plugin
+    runs-on: macos-latest
+    needs: [build-android, build-ios, verify-sdk-versions]
+    if: needs.build-android.result == 'success'  # Require Android to succeed, iOS is optional
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup .NET SDK 10
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install .NET workloads
+        run: |
+          dotnet workload install android
+          dotnet workload install ios
+
+      - name: Download Android packages
+        uses: actions/download-artifact@v7
+        with:
+          name: android-nuget-packages
+          path: ./artifacts/android
+
+      - name: Download iOS packages
+        uses: actions/download-artifact@v7
+        with:
+          name: ios-nuget-packages
+          path: ./artifacts/ios
+        continue-on-error: true  # iOS might not be ready yet
+
+      - name: Setup local NuGet source
+        run: |
+          # Create a local NuGet source with all built packages
+          mkdir -p ./artifacts/all
+          cp -r ./artifacts/android/*.nupkg ./artifacts/all/ 2>/dev/null || true
+          cp -r ./artifacts/ios/*.nupkg ./artifacts/all/ 2>/dev/null || true
+
+          # Add local source
+          dotnet nuget add source ./artifacts/all --name LocalArtifacts || true
+
+      - name: Restore plugin dependencies
+        run: dotnet restore Datadog.MAUI.Plugin/Datadog.MAUI.Plugin.csproj
+
+      - name: Build plugin
+        run: dotnet build Datadog.MAUI.Plugin/Datadog.MAUI.Plugin.csproj --configuration Release --no-restore
+
+      - name: Pack plugin
+        run: dotnet pack Datadog.MAUI.Plugin/Datadog.MAUI.Plugin.csproj --configuration Release --no-build --output ./artifacts/plugin
+
+      - name: Upload plugin package
+        uses: actions/upload-artifact@v6
+        with:
+          name: datadog-maui-plugin
+          path: ./artifacts/plugin/*.nupkg
+          retention-days: 30
+
+      - name: Plugin build summary
+        run: |
+          echo "## Datadog.MAUI Plugin Package" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Plugin package built successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Package**: Datadog.MAUI.${{ needs.verify-sdk-versions.outputs.sdk-version }}.nupkg" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "This package provides a unified C# API over Android and iOS bindings." >> $GITHUB_STEP_SUMMARY
+
   # Validate all builds completed successfully
   validate-builds:
     name: Validate All Builds
     runs-on: ubuntu-latest
-    needs: [build-android, build-ios]
+    needs: [build-android, build-ios, build-plugin]
     if: always()  # Run even if some builds failed
 
     steps:
@@ -250,7 +320,7 @@ jobs:
           if [ "${{ steps.check-ios.outputs.ios_success }}" == "true" ]; then
             echo "- ✅ **iOS**: All modules built successfully" >> $GITHUB_STEP_SUMMARY
           else
-            echo "- ⚠️ **iOS**: Builds skipped (bindings not yet complete)" >> $GITHUB_STEP_SUMMARY
+            echo "- ⚠️ **iOS**: Builds skipped (requires Objective-C API definitions)" >> $GITHUB_STEP_SUMMARY
           fi
 
           echo "" >> $GITHUB_STEP_SUMMARY

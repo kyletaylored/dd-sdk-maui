@@ -439,6 +439,13 @@ jobs:
           name: android-nuget-packages
           path: ./artifacts
 
+      - name: Download plugin package
+        uses: actions/download-artifact@v7
+        with:
+          name: datadog-maui-plugin
+          path: ./artifacts
+        continue-on-error: true  # Plugin might not be built yet
+
       - name: Get package version from artifacts
         id: package-version
         run: |
@@ -451,13 +458,28 @@ jobs:
       - name: Restore MAUI workloads for sample app
         run: dotnet workload restore samples/DatadogMauiSample/DatadogMauiSample.csproj
 
+      - name: Check if Datadog.MAUI plugin package exists
+        id: check-plugin
+        run: |
+          if ls ./artifacts/Datadog.MAUI.*.nupkg 1> /dev/null 2>&1; then
+            echo "plugin_exists=true" >> $GITHUB_OUTPUT
+            echo "✅ Datadog.MAUI plugin package found"
+          else
+            echo "plugin_exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️ Datadog.MAUI plugin package not found - skipping sample app build"
+            echo "Plugin package is built by the build-plugin job in build-all.yml workflow."
+          fi
+
       - name: Restore sample app dependencies
+        if: steps.check-plugin.outputs.plugin_exists == 'true'
         run: dotnet restore samples/DatadogMauiSample/DatadogMauiSample.csproj -p:TargetFrameworks=net10.0-android
 
       - name: Build sample app
+        if: steps.check-plugin.outputs.plugin_exists == 'true'
         run: dotnet build samples/DatadogMauiSample/DatadogMauiSample.csproj --configuration Release --no-restore -f net10.0-android -p:TargetFrameworks=net10.0-android
 
       - name: Upload sample APK
+        if: steps.check-plugin.outputs.plugin_exists == 'true'
         uses: actions/upload-artifact@v6
         with:
           name: android-sample-apk
@@ -467,8 +489,15 @@ jobs:
 
       - name: Sample build summary
         run: |
-          echo "## Android Sample App Built" >> $GITHUB_STEP_SUMMARY
+          echo "## Android Sample App" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Sample app compiled successfully using combined NuGet packages" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Package version: ${{ steps.package-version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.check-plugin.outputs.plugin_exists }}" == "true" ]; then
+            echo "✅ Sample app compiled successfully using combined NuGet packages" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Package version: ${{ steps.package-version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ **Sample app build skipped**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The sample app requires the Datadog.MAUI plugin package built by build-all.yml workflow." >> $GITHUB_STEP_SUMMARY
+            echo "Individual binding packages were built successfully and can be used directly." >> $GITHUB_STEP_SUMMARY
+          fi

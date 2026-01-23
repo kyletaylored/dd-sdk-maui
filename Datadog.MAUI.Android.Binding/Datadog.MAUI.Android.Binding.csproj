@@ -18,6 +18,7 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/DataDog/dd-sdk-maui</RepositoryUrl>
     <PackageTags>.NET MAUI Android Datadog Mobile Binding RUM Logs Trace APM SessionReplay NDK OkHttp OpenTelemetry OTel</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
 
     <!-- Optional but recommended: avoid warnings about missing lib/ files -->
     <NoWarn>$(NoWarn);NU5128</NoWarn>
@@ -50,5 +51,10 @@
     <PackageReference Include="Datadog.MAUI.Android.Trace.OpenTelemetry" Version="$(DatadogSdkVersion)" />
     <PackageReference Include="Datadog.MAUI.Android.OkHttp.OpenTelemetry" Version="$(DatadogSdkVersion)" />
 
+  </ItemGroup>
+
+  <!-- Package README -->
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>

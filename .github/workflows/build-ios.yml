@@ -471,7 +471,7 @@ jobs:
             ls -1 ./artifacts-combined/*.nupkg | xargs -n1 basename >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
           else
-            echo "⚠️ iOS bindings not yet complete - builds skipped" >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ iOS bindings skipped - requires Objective-C API definitions" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "iOS bindings require Objective-C API definitions to be generated." >> $GITHUB_STEP_SUMMARY
             echo "XCFrameworks have been downloaded and cached successfully." >> $GITHUB_STEP_SUMMARY
@@ -514,16 +514,30 @@ jobs:
           path: ./artifacts
         continue-on-error: true  # Don't fail if packages aren't ready
 
+      - name: Download plugin package
+        uses: actions/download-artifact@v7
+        with:
+          name: datadog-maui-plugin
+          path: ./artifacts
+        continue-on-error: true  # Plugin might not be built yet
+
       - name: Check if packages exist
         id: check-packages
         run: |
           if [ -d "./artifacts" ] && [ -n "$(ls -A ./artifacts/*.nupkg 2>/dev/null)" ]; then
-            echo "packages_exist=true" >> $GITHUB_OUTPUT
-            echo "iOS packages found - will build sample app"
+            # Check if Datadog.MAUI plugin package exists
+            if ls ./artifacts/Datadog.MAUI.*.nupkg 1> /dev/null 2>&1; then
+              echo "packages_exist=true" >> $GITHUB_OUTPUT
+              echo "✅ iOS packages and Datadog.MAUI plugin found - will build sample app"
+            else
+              echo "packages_exist=false" >> $GITHUB_OUTPUT
+              echo "⚠️ Datadog.MAUI plugin package not found - skipping sample app build"
+              echo "Plugin package is built by the build-plugin job in build-all.yml workflow."
+            fi
           else
             echo "packages_exist=false" >> $GITHUB_OUTPUT
             echo "⚠️ No iOS packages found - skipping sample app build"
-            echo "iOS bindings are not yet complete"
+            echo "iOS bindings require Objective-C API definitions to be generated."
           fi
 
       - name: Get package version from artifacts
@@ -573,8 +587,8 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "Package version: ${{ steps.package-version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
           else
-            echo "⚠️ iOS sample app build skipped - iOS bindings not yet complete" >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ **iOS sample app build skipped**" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "iOS bindings require Objective-C API definitions to be generated." >> $GITHUB_STEP_SUMMARY
-            echo "XCFrameworks have been downloaded and are ready for binding generation." >> $GITHUB_STEP_SUMMARY
+            echo "The sample app requires the Datadog.MAUI plugin package built by build-all.yml workflow." >> $GITHUB_STEP_SUMMARY
+            echo "Individual binding packages can be used directly once iOS bindings are generated." >> $GITHUB_STEP_SUMMARY
           fi
