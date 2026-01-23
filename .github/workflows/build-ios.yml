@@ -15,7 +15,7 @@ on:
         type: string
 
 env:
-  XCODE_VERSION: '16.2'  # Must be one of https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md#xcode
+  XCODE_VERSION: '26.2'  # Must be one of https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md#xcode
 
 jobs:
   # Download XCFrameworks once and share across builds (requires macOS)
