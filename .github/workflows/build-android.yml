@@ -336,10 +336,13 @@ jobs:
               unzip -q "$net9_pkg" -d "./temp-extract/net9"
               unzip -q "$net10_pkg" -d "./temp-extract/net10"
 
-              # Copy net10.0-android libs to net9 package structure
-              if [ -d "./temp-extract/net10/lib/net10.0-android" ]; then
-                cp -r "./temp-extract/net10/lib/net10.0-android" "./temp-extract/net9/lib/"
-              fi
+              # Copy net10.0-android* libs to net9 package structure (handles net10.0-android35.0)
+              for net10_dir in "./temp-extract/net10/lib"/net10.0-android*; do
+                if [ -d "$net10_dir" ]; then
+                  cp -r "$net10_dir" "./temp-extract/net9/lib/"
+                  echo "  Copied $(basename $net10_dir) framework"
+                fi
+              done
 
               # Repackage the combined content
               (cd "./temp-extract/net9" && zip -q -r "../../artifacts-combined/${pkg_name}.${version}.nupkg" *)

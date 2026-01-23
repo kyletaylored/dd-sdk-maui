@@ -1,13 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <!-- Meta-package: uses netstandard for cross-platform compatibility, does NOT produce assemblies -->
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <!-- Meta-package: targets Android frameworks but does NOT produce assemblies -->
+    <TargetFrameworks>net9.0-android;net10.0-android</TargetFrameworks>
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
 
     <IsPackable>true</IsPackable>
     <IncludeBuildOutput>false</IncludeBuildOutput>
-    <SuppressDependenciesWhenPacking>false</SuppressDependenciesWhenPacking>
 
     <!-- Disable CPM for this meta-package to allow Version attributes on PackageReferences -->
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
