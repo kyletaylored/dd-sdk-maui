@@ -6,12 +6,14 @@ This document outlines the best practices used in our CI/CD workflows for buildi
 
 ### Runner Configuration
 
-**Runner**: `macos-26` (macOS 15 Sequoia ARM64)
+**Runner**: `macos-latest` (macOS 15 Sequoia ARM64)
+
 - Provides multiple Xcode versions
 - ARM64 architecture for better performance
 - See available versions: https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md
 
 **Xcode Version**: `16.2`
+
 - Explicitly selected via `sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer`
 - Must match one of the available versions in the runner image
 - Update `env.XCODE_VERSION` when upgrading
@@ -77,10 +79,11 @@ jobs:
 ### XCFramework Management
 
 **Strategy**: Download once, share across jobs
+
 ```yaml
 jobs:
   download-xcframeworks:
-    runs-on: macos-26
+    runs-on: macos-latest
     steps:
       - name: Cache XCFrameworks
         uses: actions/cache@v5
@@ -110,7 +113,7 @@ jobs:
 jobs:
   combine-ios-packages:
     needs: [build-ios-net8, build-ios-net9, build-ios-net10]
-    runs-on: ubuntu-latest  # Package manipulation doesn't need macOS
+    runs-on: ubuntu-latest # Package manipulation doesn't need macOS
     steps:
       - name: Combine packages for all target frameworks
         run: |
@@ -135,6 +138,7 @@ jobs:
 ### Runner Configuration
 
 **Runner**: `ubuntu-latest`
+
 - Android builds don't require macOS
 - Linux runners are faster and cheaper
 - Ubuntu provides all necessary Android SDK tools
@@ -142,6 +146,7 @@ jobs:
 ### Multi-Target Framework Build
 
 Android uses a similar strategy but with fewer complications:
+
 - net9.0-android and net10.0-android can be built together
 - No need for strict SDK isolation like iOS
 - Can use latest .NET SDK for both targets
@@ -151,6 +156,7 @@ Android uses a similar strategy but with fewer complications:
 ### Caching Strategy
 
 **NuGet Packages**:
+
 ```yaml
 - name: Cache NuGet packages
   uses: actions/cache@v5
@@ -160,6 +166,7 @@ Android uses a similar strategy but with fewer complications:
 ```
 
 **Workloads**:
+
 ```yaml
 - name: Cache .NET workloads
   uses: actions/cache@v5
@@ -184,7 +191,7 @@ Android uses a similar strategy but with fewer complications:
 ```yaml
 - name: Build iOS bindings
   run: dotnet build ...
-  continue-on-error: true  # Only for incomplete bindings
+  continue-on-error: true # Only for incomplete bindings
 
 - name: Upload build logs on failure
   if: failure()
@@ -201,6 +208,7 @@ Android uses a similar strategy but with fewer complications:
 ### Datadog SDK Version
 
 Stored in `Directory.Build.props`:
+
 ```xml
 <PropertyGroup>
   <DatadogSdkVersion>3.5.0</DatadogSdkVersion>
@@ -208,6 +216,7 @@ Stored in `Directory.Build.props`:
 ```
 
 Retrieved in workflows:
+
 ```bash
 VERSION=$(grep -E '<DatadogSdkVersion>.*</DatadogSdkVersion>' Directory.Build.props | sed 's/.*<DatadogSdkVersion>\(.*\)<\/DatadogSdkVersion>.*/\1/')
 ```
@@ -215,6 +224,7 @@ VERSION=$(grep -E '<DatadogSdkVersion>.*</DatadogSdkVersion>' Directory.Build.pr
 ### Package Versioning
 
 Format: `{MajorVersion}.{MinorVersion}.{PatchVersion}`
+
 - Matches Datadog SDK version
 - Example: `3.5.0`
 

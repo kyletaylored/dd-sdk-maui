@@ -313,6 +313,71 @@ sample-logs-clear: ## Clear Android logs
 		echo "$(RED)❌ adb not found in PATH$(NC)"; \
 	fi
 
+##@ Symbol Upload
+
+upload-symbols-android: ## Upload Android R8 mapping file to Datadog
+	@echo "$(BLUE)Uploading Android symbols to Datadog...$(NC)"
+	@if [ -z "$(DD_API_KEY)" ]; then \
+		echo "$(RED)Error: DD_API_KEY environment variable not set$(NC)"; \
+		echo "Set it with: export DD_API_KEY=your_api_key"; \
+		exit 1; \
+	fi
+	@MAPPING_FILE=$$(find samples/DatadogMauiSample/obj/Release -name "mapping.txt" | head -1); \
+	if [ -z "$$MAPPING_FILE" ]; then \
+		echo "$(RED)Error: mapping.txt not found. Build the app in Release mode first.$(NC)"; \
+		echo "Run: make sample-build-android-release"; \
+		exit 1; \
+	fi; \
+	echo "$(YELLOW)Found mapping file: $$MAPPING_FILE$(NC)"; \
+	npx @datadog/datadog-ci flutter-symbols upload \
+		--service shopist-maui-demo \
+		--android-mapping "$$MAPPING_FILE"
+	@echo "$(GREEN)✓ Android symbols uploaded$(NC)"
+
+upload-symbols-ios: ## Upload iOS dSYM files to Datadog
+	@echo "$(BLUE)Uploading iOS symbols to Datadog...$(NC)"
+	@if [ -z "$(DD_API_KEY)" ]; then \
+		echo "$(RED)Error: DD_API_KEY environment variable not set$(NC)"; \
+		echo "Set it with: export DD_API_KEY=your_api_key"; \
+		exit 1; \
+	fi
+	@DSYM_DIR=$$(find samples/DatadogMauiSample/bin/Release -type d -name "*.app.dSYM" | head -1); \
+	if [ -z "$$DSYM_DIR" ]; then \
+		echo "$(RED)Error: dSYM files not found. Build the app in Release mode first.$(NC)"; \
+		echo "Run: make sample-build-ios-release"; \
+		exit 1; \
+	fi; \
+	echo "$(YELLOW)Found dSYM directory: $$DSYM_DIR$(NC)"; \
+	npx @datadog/datadog-ci flutter-symbols upload \
+		--service shopist-maui-demo \
+		--ios-dsyms "$$DSYM_DIR"
+	@echo "$(GREEN)✓ iOS symbols uploaded$(NC)"
+
+upload-symbols: ## Upload both Android and iOS symbols to Datadog
+	@echo "$(BLUE)Uploading all symbols to Datadog...$(NC)"
+	@if [ -z "$(DD_API_KEY)" ]; then \
+		echo "$(RED)Error: DD_API_KEY environment variable not set$(NC)"; \
+		echo "Set it with: export DD_API_KEY=your_api_key"; \
+		exit 1; \
+	fi
+	@MAPPING_FILE=$$(find samples/DatadogMauiSample/obj/Release -name "mapping.txt" | head -1); \
+	DSYM_DIR=$$(find samples/DatadogMauiSample/bin/Release -type d -name "*.app.dSYM" | head -1); \
+	if [ -z "$$MAPPING_FILE" ] && [ -z "$$DSYM_DIR" ]; then \
+		echo "$(RED)Error: No symbol files found. Build the apps in Release mode first.$(NC)"; \
+		exit 1; \
+	fi; \
+	CMD="npx @datadog/datadog-ci flutter-symbols upload --service shopist-maui-demo"; \
+	if [ -n "$$MAPPING_FILE" ]; then \
+		echo "$(YELLOW)Found Android mapping: $$MAPPING_FILE$(NC)"; \
+		CMD="$$CMD --android-mapping \"$$MAPPING_FILE\""; \
+	fi; \
+	if [ -n "$$DSYM_DIR" ]; then \
+		echo "$(YELLOW)Found iOS dSYM: $$DSYM_DIR$(NC)"; \
+		CMD="$$CMD --ios-dsyms \"$$DSYM_DIR\""; \
+	fi; \
+	eval $$CMD
+	@echo "$(GREEN)✓ All symbols uploaded$(NC)"
+
 ##@ Testing
 
 test: ## Run unit tests
@@ -467,6 +532,11 @@ readme: ## Display quick reference README
 	@echo "  make sample-logs-android      - View Android logs (filtered)"
 	@echo "  make sample-logs-android-all  - View all Android logs"
 	@echo "  make sample-logs-clear        - Clear Android logs"
+	@echo ""
+	@echo "$(GREEN)Symbol Upload:$(NC)"
+	@echo "  make upload-symbols-android   - Upload Android R8 mapping to Datadog"
+	@echo "  make upload-symbols-ios       - Upload iOS dSYM files to Datadog"
+	@echo "  make upload-symbols           - Upload both Android and iOS symbols"
 	@echo ""
 	@echo "$(GREEN)Development:$(NC)"
 	@echo "  make restore           - Restore all packages"

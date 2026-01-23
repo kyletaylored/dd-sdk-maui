@@ -412,7 +412,7 @@ jobs:
   # Build sample app using combined packages
   build-android-sample:
     name: Build Android Sample App
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     needs: combine-android-packages
 
     steps:

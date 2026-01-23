@@ -38,8 +38,8 @@
     <ProjectReference Include="../Datadog.MAUI.Android.Binding/dd-sdk-android-webview/dd-sdk-android-webview.csproj" />
     <ProjectReference Include="../Datadog.MAUI.Android.Binding/dd-sdk-android-flags/dd-sdk-android-flags.csproj" />
     <ProjectReference Include="../Datadog.MAUI.Android.Binding/dd-sdk-android-okhttp/dd-sdk-android-okhttp.csproj" />
-    <ProjectReference Include="../Datadog.MAUI.Android.Binding/dd-sdk-android-trace-opentelemetry/dd-sdk-android-trace-opentelemetry.csproj" />
-    <ProjectReference Include="../Datadog.MAUI.Android.Binding/dd-sdk-android-okhttp-opentelemetry/dd-sdk-android-okhttp-opentelemetry.csproj" />
+    <ProjectReference Include="../Datadog.MAUI.Android.Binding/dd-sdk-android-trace-otel/dd-sdk-android-trace-otel.csproj" />
+    <ProjectReference Include="../Datadog.MAUI.Android.Binding/dd-sdk-android-okhttp-otel/dd-sdk-android-okhttp-otel.csproj" />
   </ItemGroup>
 
   <!-- iOS Binding project references for testing (temporary) -->
