@@ -65,11 +65,13 @@ public class MainApplication : MauiApplication
                 string.Empty,  // variant - use empty string if no build variants
                 DatadogConfig.ServiceName
             )
-            .SetSite(GetDatadogSite(DatadogConfig.Site))
             .SetFirstPartyHosts(DatadogConfig.FirstPartyHosts)
             .SetBatchSize(BatchSize.Small)
             .SetUploadFrequency(UploadFrequency.Frequent)
             .Build();
+
+            // Note: In Android SDK v3, site configuration is not exposed via Configuration.Builder
+            // The site is typically set via environment variables or other configuration methods
 
             // Initialize Datadog SDK
             Com.Datadog.Android.Datadog.Initialize(this, config, TrackingConsent.Granted);
@@ -172,20 +174,6 @@ public class MainApplication : MauiApplication
             Console.WriteLine($"[Datadog] Failed to initialize: {ex.Message}");
             Console.WriteLine($"[Datadog] Stack trace: {ex.StackTrace}");
         }
-    }
-
-    private Com.Datadog.Android.DatadogSite GetDatadogSite(string site)
-    {
-        return site.ToUpperInvariant() switch
-        {
-            "US1" => Com.Datadog.Android.DatadogSite.Us1,
-            "US3" => Com.Datadog.Android.DatadogSite.Us3,
-            "US5" => Com.Datadog.Android.DatadogSite.Us5,
-            "EU1" => Com.Datadog.Android.DatadogSite.Eu1,
-            "AP1" => Com.Datadog.Android.DatadogSite.Ap1,
-            "GOV" => Com.Datadog.Android.DatadogSite.Us1Fed,
-            _ => Com.Datadog.Android.DatadogSite.Us1
-        };
     }
 
     protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();

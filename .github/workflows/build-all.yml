@@ -138,7 +138,7 @@ jobs:
   build-plugin:
     name: Build Datadog.MAUI Plugin
     runs-on: macos-latest
-    needs: [build-android, build-ios, verify-sdk-versions]
+    needs: [build-android, build-ios]
     if: needs.build-android.result == 'success'  # Require Android to succeed, iOS is optional
 
     steps:
@@ -204,80 +204,118 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "This package provides a unified C# API over Android and iOS bindings." >> $GITHUB_STEP_SUMMARY
 
+  # Build sample apps using the unified plugin package
+  build-sample-apps:
+    name: Build Sample Apps
+    runs-on: macos-latest
+    needs: build-plugin
+    if: needs.build-plugin.result == 'success'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup .NET SDK 10
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install MAUI workload
+        run: dotnet workload install maui
+
+      - name: Download plugin package
+        uses: actions/download-artifact@v7
+        with:
+          name: datadog-maui-plugin
+          path: ./artifacts
+
+      - name: Build Android sample app
+        env:
+          DD_RUM_ANDROID_CLIENT_TOKEN: ${{ secrets.DD_RUM_ANDROID_CLIENT_TOKEN }}
+          DD_RUM_ANDROID_APPLICATION_ID: ${{ secrets.DD_RUM_ANDROID_APPLICATION_ID }}
+        run: make sample-build-android-release-only
+
+      - name: Build iOS sample app
+        env:
+          DD_RUM_IOS_CLIENT_TOKEN: ${{ secrets.DD_RUM_IOS_CLIENT_TOKEN }}
+          DD_RUM_IOS_APPLICATION_ID: ${{ secrets.DD_RUM_IOS_APPLICATION_ID }}
+        run: make sample-build-ios-release-only
+
+      - name: Upload Android sample APK
+        uses: actions/upload-artifact@v6
+        with:
+          name: android-sample-apk-unified
+          path: samples/DatadogMauiSample/bin/Release/**/*.apk
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload iOS sample app
+        uses: actions/upload-artifact@v6
+        with:
+          name: ios-sample-app-unified
+          path: |
+            samples/DatadogMauiSample/bin/Release/**/*.app
+            samples/DatadogMauiSample/bin/Release/**/*.ipa
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Sample apps summary
+        run: |
+          echo "## Sample Apps" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Android and iOS sample apps built successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Built with unified Datadog.MAUI.${{ needs.verify-sdk-versions.outputs.sdk-version }}" >> $GITHUB_STEP_SUMMARY
+
   # Validate all builds completed successfully
   validate-builds:
     name: Validate All Builds
     runs-on: ubuntu-latest
-    needs: [build-android, build-ios, build-plugin]
+    needs: [build-plugin, build-sample-apps]
     if: always()  # Run even if some builds failed
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Check Android build status
-        id: check-android
+      - name: Check plugin build status
+        id: check-plugin
         run: |
-          if [ "${{ needs.build-android.result }}" == "success" ]; then
-            echo "android_success=true" >> $GITHUB_OUTPUT
-            echo "Android builds succeeded"
+          if [ "${{ needs.build-plugin.result }}" == "success" ]; then
+            echo "plugin_success=true" >> $GITHUB_OUTPUT
+            echo "✅ Plugin build succeeded"
           else
-            echo "android_success=false" >> $GITHUB_OUTPUT
-            echo "Android builds failed or were skipped"
+            echo "plugin_success=false" >> $GITHUB_OUTPUT
+            echo "❌ Plugin build failed"
           fi
 
-      - name: Check iOS build status
-        id: check-ios
+      - name: Check sample apps build status
+        id: check-samples
         run: |
-          if [ "${{ needs.build-ios.result }}" == "success" ]; then
-            echo "ios_success=true" >> $GITHUB_OUTPUT
-            echo "iOS builds succeeded"
+          if [ "${{ needs.build-sample-apps.result }}" == "success" ]; then
+            echo "samples_success=true" >> $GITHUB_OUTPUT
+            echo "✅ Sample apps build succeeded"
           else
-            echo "ios_success=false" >> $GITHUB_OUTPUT
-            echo "iOS builds failed or were skipped (bindings incomplete)"
+            echo "samples_success=false" >> $GITHUB_OUTPUT
+            echo "❌ Sample apps build failed or skipped"
           fi
 
-      - name: Download Android artifacts
-        if: needs.build-android.result == 'success'
+      - name: Download plugin package
+        if: needs.build-plugin.result == 'success'
         uses: actions/download-artifact@v7
         with:
-          name: android-nuget-packages
-          path: ./artifacts/android
+          name: datadog-maui-plugin
+          path: ./artifacts
         continue-on-error: true
 
-      - name: Download iOS artifacts
-        if: needs.build-ios.result == 'success'
-        uses: actions/download-artifact@v7
-        with:
-          name: ios-nuget-packages
-          path: ./artifacts/ios
-        continue-on-error: true
-
-      - name: List all packages
+      - name: List plugin package
         run: |
-          echo "=== Android Packages ==="
-          if [ -d "./artifacts/android" ]; then
-            ls -lh ./artifacts/android/ || echo "No Android packages found"
-            ANDROID_COUNT=$(ls -1 ./artifacts/android/*.nupkg 2>/dev/null | wc -l || echo "0")
+          echo "=== Plugin Package ==="
+          if [ -d "./artifacts" ]; then
+            ls -lh ./artifacts/*.nupkg 2>/dev/null || echo "No plugin package found"
           else
-            echo "Android artifacts directory not found"
-            ANDROID_COUNT=0
+            echo "Artifacts directory not found"
           fi
-
-          echo ""
-          echo "=== iOS Packages ==="
-          if [ -d "./artifacts/ios" ]; then
-            ls -lh ./artifacts/ios/ || echo "No iOS packages found"
-            IOS_COUNT=$(ls -1 ./artifacts/ios/*.nupkg 2>/dev/null | wc -l || echo "0")
-          else
-            echo "iOS artifacts directory not found"
-            IOS_COUNT=0
-          fi
-
-          echo ""
-          echo "=== Package Count ==="
-          echo "Android: $ANDROID_COUNT packages"
-          echo "iOS: $IOS_COUNT packages"
 
       - name: Verify package versions
         run: |
@@ -311,44 +349,31 @@ jobs:
           echo "## Build Status" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          if [ "${{ steps.check-android.outputs.android_success }}" == "true" ]; then
-            echo "- ✅ **Android**: All modules built successfully" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.check-plugin.outputs.plugin_success }}" == "true" ]; then
+            echo "- ✅ **Plugin**: Built successfully" >> $GITHUB_STEP_SUMMARY
           else
-            echo "- ❌ **Android**: Build failed" >> $GITHUB_STEP_SUMMARY
+            echo "- ❌ **Plugin**: Build failed" >> $GITHUB_STEP_SUMMARY
           fi
 
-          if [ "${{ steps.check-ios.outputs.ios_success }}" == "true" ]; then
-            echo "- ✅ **iOS**: All modules built successfully" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.check-samples.outputs.samples_success }}" == "true" ]; then
+            echo "- ✅ **Sample Apps**: Both platforms built successfully" >> $GITHUB_STEP_SUMMARY
           else
-            echo "- ⚠️ **iOS**: Builds skipped (requires Objective-C API definitions)" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          # Package Counts
-          echo "## Packages Created" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          if [ -d "./artifacts/android" ]; then
-            ANDROID_COUNT=$(ls -1 ./artifacts/android/*.nupkg 2>/dev/null | wc -l | tr -d ' ')
-            echo "**Android**: $ANDROID_COUNT packages" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            ls -1 ./artifacts/android/*.nupkg 2>/dev/null | xargs -n1 basename || echo "None"
-            echo '```' >> $GITHUB_STEP_SUMMARY
-          else
-            echo "**Android**: 0 packages" >> $GITHUB_STEP_SUMMARY
+            echo "- ❌ **Sample Apps**: Build failed or skipped" >> $GITHUB_STEP_SUMMARY
           fi
 
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          if [ -d "./artifacts/ios" ]; then
-            IOS_COUNT=$(ls -1 ./artifacts/ios/*.nupkg 2>/dev/null | wc -l | tr -d ' ')
-            echo "**iOS**: $IOS_COUNT packages" >> $GITHUB_STEP_SUMMARY
+          # Plugin Package
+          echo "## Plugin Package" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -d "./artifacts" ] && ls ./artifacts/Datadog.MAUI.3*.nupkg >/dev/null 2>&1; then
+            echo "**Datadog.MAUI Plugin**: ✅ Created" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
-            ls -1 ./artifacts/ios/*.nupkg 2>/dev/null | xargs -n1 basename || echo "None"
+            ls -1 ./artifacts/Datadog.MAUI.3*.nupkg 2>/dev/null | xargs -n1 basename
             echo '```' >> $GITHUB_STEP_SUMMARY
           else
-            echo "**iOS**: 0 packages (bindings incomplete)" >> $GITHUB_STEP_SUMMARY
+            echo "**Datadog.MAUI Plugin**: ❌ Not found" >> $GITHUB_STEP_SUMMARY
           fi
 
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -365,9 +390,9 @@ jobs:
           echo "*Build triggered by: ${{ github.event_name }}*" >> $GITHUB_STEP_SUMMARY
 
       - name: Fail if critical builds failed
-        if: needs.build-android.result != 'success'
+        if: needs.build-plugin.result != 'success'
         run: |
-          echo "❌ Android builds failed - this is a critical failure"
+          echo "❌ Plugin build failed - this is a critical failure"
           exit 1
 
   # Optional: Create GitHub release (when tagged)

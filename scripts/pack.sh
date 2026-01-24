@@ -55,6 +55,7 @@ echo -e "${GREEN}Packing Android modules:${NC}"
 ANDROID_MODULES=(
     "dd-sdk-android-internal/dd-sdk-android-internal.csproj"
     "dd-sdk-android-core/dd-sdk-android-core.csproj"
+    "opentracing-api/opentracing-api.csproj"
     "dd-sdk-android-logs/dd-sdk-android-logs.csproj"
     "dd-sdk-android-rum/dd-sdk-android-rum.csproj"
     "dd-sdk-android-trace/dd-sdk-android-trace.csproj"
@@ -64,7 +65,7 @@ ANDROID_MODULES=(
     "dd-sdk-android-flags/dd-sdk-android-flags.csproj"
     "dd-sdk-android-okhttp/dd-sdk-android-okhttp.csproj"
     "dd-sdk-android-trace-otel/dd-sdk-android-trace-otel.csproj"
-    # "dd-sdk-android-okhttp-otel/dd-sdk-android-okhttp-otel.csproj"  # Not yet implemented
+    "dd-sdk-android-okhttp-otel/dd-sdk-android-okhttp-otel.csproj"
     # "dd-sdk-android-gradle-plugin/dd-sdk-android-gradle-plugin.csproj"  # Archived - incompatible with MAUI
 )
 
@@ -87,6 +88,7 @@ if [ "$(uname)" = "Darwin" ]; then
     IOS_MODULES=(
         "DatadogInternal/DatadogInternal.csproj"
         "DatadogCore/DatadogCore.csproj"
+        "OpenTelemetryApi/OpenTelemetryApi.csproj"
         "DatadogLogs/DatadogLogs.csproj"
         "DatadogRUM/DatadogRUM.csproj"
         "DatadogTrace/DatadogTrace.csproj"
@@ -122,6 +124,12 @@ echo -e "\n${CYAN}[Step B] Packing platform meta packages...${NC}\n"
 echo -e "${GREEN}Packing Android meta-package:${NC}"
 ANDROID_META="$ROOT_DIR/Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.csproj"
 if [ -f "$ANDROID_META" ]; then
+    echo -e "  Restoring: Datadog.MAUI.Android.Binding..."
+    # Restore with --source to find the module packages we just packed
+    dotnet restore "$ANDROID_META" --source "$OUTPUT_DIR" --source https://api.nuget.org/v3/index.json -v minimal || {
+        echo -e "${RED}  ✗ Failed to restore Android meta-package${NC}"
+        exit 1
+    }
     echo -e "  Packing: Datadog.MAUI.Android.Binding..."
     # IMPORTANT: Use --source to allow the meta-package to find the module packages we just packed
     # Use --no-build since meta-packages don't produce assemblies
@@ -138,6 +146,12 @@ if [ "$(uname)" = "Darwin" ]; then
     echo -e "\n${GREEN}Packing iOS meta-package:${NC}"
     IOS_META="$ROOT_DIR/Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj"
     if [ -f "$IOS_META" ]; then
+        echo -e "  Restoring: Datadog.MAUI.iOS.Binding..."
+        # Restore with --source to find the module packages we just packed
+        dotnet restore "$IOS_META" --source "$OUTPUT_DIR" --source https://api.nuget.org/v3/index.json -v minimal || {
+            echo -e "${RED}  ✗ Failed to restore iOS meta-package${NC}"
+            exit 1
+        }
         echo -e "  Packing: Datadog.MAUI.iOS.Binding..."
         # Use --no-build since meta-packages don't produce assemblies
         dotnet pack "$IOS_META" -c "$CONFIGURATION" -o "$OUTPUT_DIR" --source "$OUTPUT_DIR" --no-build -v minimal || {
