@@ -367,8 +367,8 @@ jobs:
 
           # Process each package
           for base_pkg in $BASE_DIR/*.nupkg; do
-            pkg_name=$(basename "$base_pkg" | sed 's/\.[0-9]\+\.[0-9]\+\.[0-9]\+.*\.nupkg$//')
-            version=$(basename "$base_pkg" | sed -n 's/.*\.\([0-9]\+\.[0-9]\+\.[0-9]\+[^.]*\)\.nupkg$/\1/p')
+            pkg_name=$(basename "$base_pkg" | sed 's/\.[0-9]\+\.[0-9]\+\.[0-9]\+\.nupkg$//')
+            version=$(basename "$base_pkg" | sed -n 's/.*\.\([0-9]\+\.[0-9]\+\.[0-9]\+\)\.nupkg$/\1/p')
 
             net9_pkg="./artifacts-net9/${pkg_name}.${version}.nupkg"
             net10_pkg="./artifacts-net10/${pkg_name}.${version}.nupkg"

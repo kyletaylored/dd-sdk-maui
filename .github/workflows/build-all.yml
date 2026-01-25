@@ -188,6 +188,20 @@ jobs:
           path: Datadog.MAUI.iOS.Binding/artifacts/
         continue-on-error: true  # iOS might not be ready yet
 
+      - name: Fix iOS package filenames if malformed
+        if: steps.cache-plugin.outputs.cache-hit != 'true'
+        run: |
+          # Fix any double-extension filenames (.nupkg..nupkg -> .nupkg)
+          if [ -d "./artifacts/ios" ]; then
+            for file in ./artifacts/ios/*.nupkg..nupkg 2>/dev/null; do
+              if [ -f "$file" ]; then
+                newname="${file%.nupkg}"
+                mv "$file" "$newname"
+                echo "Renamed: $(basename $file) -> $(basename $newname)"
+              fi
+            done
+          fi
+
       - name: Check iOS availability for plugin build
         id: check-ios-for-plugin
         if: steps.cache-plugin.outputs.cache-hit != 'true'
@@ -307,6 +321,17 @@ jobs:
         with:
           name: datadog-maui-plugin
           path: ./artifacts
+
+      - name: Fix iOS package filenames if malformed
+        run: |
+          # Fix any double-extension filenames (.nupkg..nupkg -> .nupkg)
+          for file in ./artifacts/*.nupkg..nupkg 2>/dev/null; do
+            if [ -f "$file" ]; then
+              newname="${file%.nupkg}"
+              mv "$file" "$newname"
+              echo "Renamed: $(basename $file) -> $(basename $newname)"
+            fi
+          done
 
       - name: Check iOS packages availability
         id: check-ios
