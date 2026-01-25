@@ -166,6 +166,13 @@ jobs:
           path: ./artifacts/ios
         continue-on-error: true  # iOS might not be ready yet
 
+      - name: Download iOS XCFrameworks
+        uses: actions/download-artifact@v7
+        with:
+          name: ios-xcframeworks
+          path: Datadog.MAUI.iOS.Binding/artifacts/
+        continue-on-error: true  # iOS might not be ready yet
+
       - name: Setup local NuGet source
         run: |
           # Create a local NuGet source with all built packages
