@@ -145,21 +145,34 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Cache plugin package
+        id: cache-plugin
+        uses: actions/cache@v5
+        with:
+          path: ./artifacts/plugin/*.nupkg
+          key: ${{ runner.os }}-plugin-package-${{ needs.verify-sdk-versions.outputs.sdk-version }}-${{ hashFiles('Datadog.MAUI.Plugin/**/*.csproj', 'Datadog.MAUI.Plugin/**/*.cs') }}
+          restore-keys: |
+            ${{ runner.os }}-plugin-package-${{ needs.verify-sdk-versions.outputs.sdk-version }}-
+
       - name: Setup .NET SDK 10
+        if: steps.cache-plugin.outputs.cache-hit != 'true'
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.x
 
       - name: Install .NET workloads
+        if: steps.cache-plugin.outputs.cache-hit != 'true'
         run: dotnet workload install maui
 
       - name: Download Android packages
+        if: steps.cache-plugin.outputs.cache-hit != 'true'
         uses: actions/download-artifact@v7
         with:
           name: android-nuget-packages
           path: ./artifacts/android
 
       - name: Download iOS packages
+        if: steps.cache-plugin.outputs.cache-hit != 'true'
         uses: actions/download-artifact@v7
         with:
           name: ios-nuget-packages
@@ -167,6 +180,7 @@ jobs:
         continue-on-error: true  # iOS might not be ready yet
 
       - name: Download iOS XCFrameworks
+        if: steps.cache-plugin.outputs.cache-hit != 'true'
         uses: actions/download-artifact@v7
         with:
           name: ios-xcframeworks
@@ -174,6 +188,7 @@ jobs:
         continue-on-error: true  # iOS might not be ready yet
 
       - name: Setup local NuGet source
+        if: steps.cache-plugin.outputs.cache-hit != 'true'
         run: |
           # Create a local NuGet source with all built packages
           mkdir -p ./artifacts/all
@@ -184,12 +199,15 @@ jobs:
           dotnet nuget add source ./artifacts/all --name LocalArtifacts || true
 
       - name: Restore plugin dependencies
+        if: steps.cache-plugin.outputs.cache-hit != 'true'
         run: dotnet restore Datadog.MAUI.Plugin/Datadog.MAUI.Plugin.csproj
 
       - name: Build plugin
+        if: steps.cache-plugin.outputs.cache-hit != 'true'
         run: dotnet build Datadog.MAUI.Plugin/Datadog.MAUI.Plugin.csproj --configuration Release --no-restore
 
       - name: Pack plugin
+        if: steps.cache-plugin.outputs.cache-hit != 'true'
         run: dotnet pack Datadog.MAUI.Plugin/Datadog.MAUI.Plugin.csproj --configuration Release --no-build --output ./artifacts/plugin
 
       - name: Upload plugin package
