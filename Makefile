@@ -262,7 +262,7 @@ sample-build-ios-release-only: ## Build iOS sample with Release packages (assume
 		exit 1; \
 	fi
 	@cd samples/DatadogMauiSample && \
-		dotnet restore -f net10.0-ios && \
+		dotnet restore /p:TargetFramework=net10.0-ios && \
 		dotnet build -f net10.0-ios -c Release
 	@echo "$(GREEN)✓ iOS sample app built with Release packages$(NC)"
 
@@ -280,7 +280,7 @@ sample-build-android-release-only: ## Build Android sample with Release packages
 	@echo "$(BLUE)Building Android sample app (Release)...$(NC)"
 	@echo "$(YELLOW)This uses NuGet packages from ./artifacts$(NC)"
 	@cd samples/DatadogMauiSample && \
-		dotnet restore -f net10.0-android && \
+		dotnet restore /p:TargetFramework=net10.0-android && \
 		dotnet build -f net10.0-android -c Release
 	@echo "$(GREEN)✓ Android sample app built with Release packages$(NC)"
 
