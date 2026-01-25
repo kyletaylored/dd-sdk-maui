@@ -151,9 +151,7 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Install .NET workloads
-        run: |
-          dotnet workload install android
-          dotnet workload install ios
+        run: dotnet workload install maui
 
       - name: Download Android packages
         uses: actions/download-artifact@v7
