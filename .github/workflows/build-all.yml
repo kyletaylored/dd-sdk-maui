@@ -232,7 +232,7 @@ jobs:
 
       - name: Restore plugin dependencies (Android only)
         if: steps.cache-plugin.outputs.cache-hit != 'true' && steps.check-ios-for-plugin.outputs.ios_ready != 'true'
-        run: dotnet restore Datadog.MAUI.Plugin/Datadog.MAUI.Plugin.csproj /p:TargetFrameworks="net9.0-android;net10.0-android"
+        run: dotnet restore Datadog.MAUI.Plugin/Datadog.MAUI.Plugin.csproj /p:TargetFrameworks=\"net9.0-android;net10.0-android\"
 
       - name: Build plugin (iOS + Android)
         if: steps.cache-plugin.outputs.cache-hit != 'true' && steps.check-ios-for-plugin.outputs.ios_ready == 'true'
@@ -240,7 +240,7 @@ jobs:
 
       - name: Build plugin (Android only)
         if: steps.cache-plugin.outputs.cache-hit != 'true' && steps.check-ios-for-plugin.outputs.ios_ready != 'true'
-        run: dotnet build Datadog.MAUI.Plugin/Datadog.MAUI.Plugin.csproj --configuration Release --no-restore -p:TargetFrameworks="net9.0-android;net10.0-android"
+        run: dotnet build Datadog.MAUI.Plugin/Datadog.MAUI.Plugin.csproj --configuration Release --no-restore /p:TargetFrameworks=\"net9.0-android;net10.0-android\"
 
       - name: Pack plugin (iOS + Android)
         if: steps.cache-plugin.outputs.cache-hit != 'true' && steps.check-ios-for-plugin.outputs.ios_ready == 'true'
