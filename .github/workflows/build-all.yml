@@ -138,7 +138,7 @@ jobs:
   build-plugin:
     name: Build Datadog.MAUI Plugin
     runs-on: macos-latest
-    needs: [build-android, build-ios]
+    needs: [build-android, build-ios, verify-sdk-versions]
     if: needs.build-android.result == 'success'  # Require Android to succeed, iOS is optional
 
     steps:
