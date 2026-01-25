@@ -322,7 +322,7 @@ upload-symbols-android: ## Upload Android R8 mapping file to Datadog
 		echo "Set it with: export DD_API_KEY=your_api_key"; \
 		exit 1; \
 	fi
-	@MAPPING_FILE=$$(find samples/DatadogMauiSample/obj/Release -name "mapping.txt" | head -1); \
+	@MAPPING_FILE=$$(find samples/DatadogMauiSample/bin/Release -name "mapping.txt" | head -1); \
 	if [ -z "$$MAPPING_FILE" ]; then \
 		echo "$(RED)Error: mapping.txt not found. Build the app in Release mode first.$(NC)"; \
 		echo "Run: make sample-build-android-release"; \
@@ -330,8 +330,10 @@ upload-symbols-android: ## Upload Android R8 mapping file to Datadog
 	fi; \
 	echo "$(YELLOW)Found mapping file: $$MAPPING_FILE$(NC)"; \
 	npx @datadog/datadog-ci flutter-symbols upload \
-		--service shopist-maui-demo \
-		--android-mapping "$$MAPPING_FILE"
+		--service-name shopist-maui-demo \
+		--version 1.0 \
+		--android-mapping \
+		--android-mapping-location "$$MAPPING_FILE"
 	@echo "$(GREEN)✓ Android symbols uploaded$(NC)"
 
 upload-symbols-ios: ## Upload iOS dSYM files to Datadog
@@ -349,8 +351,10 @@ upload-symbols-ios: ## Upload iOS dSYM files to Datadog
 	fi; \
 	echo "$(YELLOW)Found dSYM directory: $$DSYM_DIR$(NC)"; \
 	npx @datadog/datadog-ci flutter-symbols upload \
-		--service shopist-maui-demo \
-		--ios-dsyms "$$DSYM_DIR"
+		--service-name shopist-maui-demo \
+		--version 1.0 \
+		--ios-dsyms \
+		--ios-dsyms-location "$$DSYM_DIR"
 	@echo "$(GREEN)✓ iOS symbols uploaded$(NC)"
 
 upload-symbols: ## Upload both Android and iOS symbols to Datadog
@@ -360,20 +364,20 @@ upload-symbols: ## Upload both Android and iOS symbols to Datadog
 		echo "Set it with: export DD_API_KEY=your_api_key"; \
 		exit 1; \
 	fi
-	@MAPPING_FILE=$$(find samples/DatadogMauiSample/obj/Release -name "mapping.txt" | head -1); \
+	@MAPPING_FILE=$$(find samples/DatadogMauiSample/bin/Release -name "mapping.txt" | head -1); \
 	DSYM_DIR=$$(find samples/DatadogMauiSample/bin/Release -type d -name "*.app.dSYM" | head -1); \
 	if [ -z "$$MAPPING_FILE" ] && [ -z "$$DSYM_DIR" ]; then \
 		echo "$(RED)Error: No symbol files found. Build the apps in Release mode first.$(NC)"; \
 		exit 1; \
 	fi; \
-	CMD="npx @datadog/datadog-ci flutter-symbols upload --service shopist-maui-demo"; \
+	CMD="npx @datadog/datadog-ci flutter-symbols upload --service-name shopist-maui-demo --version 1.0"; \
 	if [ -n "$$MAPPING_FILE" ]; then \
 		echo "$(YELLOW)Found Android mapping: $$MAPPING_FILE$(NC)"; \
-		CMD="$$CMD --android-mapping \"$$MAPPING_FILE\""; \
+		CMD="$$CMD --android-mapping --android-mapping-location \"$$MAPPING_FILE\""; \
 	fi; \
 	if [ -n "$$DSYM_DIR" ]; then \
 		echo "$(YELLOW)Found iOS dSYM: $$DSYM_DIR$(NC)"; \
-		CMD="$$CMD --ios-dsyms \"$$DSYM_DIR\""; \
+		CMD="$$CMD --ios-dsyms --ios-dsyms-location \"$$DSYM_DIR\""; \
 	fi; \
 	eval $$CMD
 	@echo "$(GREEN)✓ All symbols uploaded$(NC)"
