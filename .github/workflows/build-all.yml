@@ -265,22 +265,43 @@ jobs:
           name: datadog-maui-plugin
           path: ./artifacts
 
+      - name: Check iOS packages availability
+        id: check-ios
+        run: |
+          if ls ./artifacts/Datadog.MAUI.iOS.*.nupkg 1> /dev/null 2>&1; then
+            echo "ios_available=true" >> $GITHUB_OUTPUT
+            echo "✅ iOS packages found"
+          else
+            echo "ios_available=false" >> $GITHUB_OUTPUT
+            echo "⚠️  iOS packages not found - sample app builds will be skipped"
+          fi
+
       - name: Verify artifacts
         run: |
           echo "Packages available for sample app build:"
           ls -lh ./artifacts/*.nupkg
 
       - name: Build Android sample app
+        if: steps.check-ios.outputs.ios_available == 'true'
         env:
           DD_RUM_ANDROID_CLIENT_TOKEN: ${{ secrets.DD_RUM_ANDROID_CLIENT_TOKEN }}
           DD_RUM_ANDROID_APPLICATION_ID: ${{ secrets.DD_RUM_ANDROID_APPLICATION_ID }}
         run: make sample-build-android-release-only
 
       - name: Build iOS sample app
+        if: steps.check-ios.outputs.ios_available == 'true'
         env:
           DD_RUM_IOS_CLIENT_TOKEN: ${{ secrets.DD_RUM_IOS_CLIENT_TOKEN }}
           DD_RUM_IOS_APPLICATION_ID: ${{ secrets.DD_RUM_IOS_APPLICATION_ID }}
         run: make sample-build-ios-release-only
+
+      - name: Sample apps skipped
+        if: steps.check-ios.outputs.ios_available != 'true'
+        run: |
+          echo "⚠️  Sample app builds skipped - iOS packages not available yet"
+          echo ""
+          echo "iOS bindings require Objective-C API definitions to be generated."
+          echo "Once iOS bindings are complete, sample apps will build automatically."
 
       - name: Upload Android sample APK
         uses: actions/upload-artifact@v6
