@@ -228,11 +228,29 @@ jobs:
       - name: Install MAUI workload
         run: dotnet workload install maui
 
+      - name: Download Android packages
+        uses: actions/download-artifact@v7
+        with:
+          name: android-nuget-packages
+          path: ./artifacts
+
+      - name: Download iOS packages
+        uses: actions/download-artifact@v7
+        with:
+          name: ios-nuget-packages
+          path: ./artifacts
+        continue-on-error: true  # iOS might not be ready yet
+
       - name: Download plugin package
         uses: actions/download-artifact@v7
         with:
           name: datadog-maui-plugin
           path: ./artifacts
+
+      - name: Verify artifacts
+        run: |
+          echo "Packages available for sample app build:"
+          ls -lh ./artifacts/*.nupkg
 
       - name: Build Android sample app
         env:
