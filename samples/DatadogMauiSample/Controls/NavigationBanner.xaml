@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="DatadogMauiSample.Controls.NavigationBanner"
+             BackgroundColor="#512BD4">
+    <Grid Padding="15,10" ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto">
+
+        <!-- App Logo/Icon -->
+        <Label Grid.Column="0"
+               Text="🛍️"
+               FontSize="28"
+               VerticalOptions="Center"
+               Margin="0,0,10,0"/>
+
+        <!-- App Name -->
+        <Label Grid.Column="1"
+               Text="Shopist Demo"
+               FontSize="20"
+               FontAttributes="Bold"
+               TextColor="White"
+               VerticalOptions="Center"/>
+
+        <!-- User Info Section -->
+        <HorizontalStackLayout Grid.Column="2"
+                              Spacing="10"
+                              VerticalOptions="Center"
+                              x:Name="UserInfoSection">
+            <Label x:Name="UserNameLabel"
+                   Text=""
+                   FontSize="14"
+                   TextColor="White"
+                   VerticalOptions="Center"
+                   IsVisible="False"/>
+
+            <Border StrokeThickness="0"
+                    BackgroundColor="#6B40D4"
+                    Padding="8,4"
+                    StrokeShape="RoundRectangle 12"
+                    x:Name="UserBadge"
+                    IsVisible="False">
+                <Label x:Name="UserInitialsLabel"
+                       Text=""
+                       FontSize="12"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       VerticalOptions="Center"
+                       HorizontalOptions="Center"/>
+            </Border>
+        </HorizontalStackLayout>
+    </Grid>
+</ContentView>

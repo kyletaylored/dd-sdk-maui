@@ -34,6 +34,12 @@
             ContentTemplate="{DataTemplate local:ProfilePage}"
             Route="ProfilePage"
             AutomationId="tab_profile" />
+
+        <ShellContent
+            Title="Testing"
+            ContentTemplate="{DataTemplate local:ErrorTestingPage}"
+            Route="ErrorTestingPage"
+            AutomationId="tab_testing" />
     </TabBar>
 
 </Shell>

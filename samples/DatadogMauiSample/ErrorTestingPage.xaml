@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="DatadogMauiSample.ErrorTestingPage"
+             Title="Error Testing"
+             BackgroundColor="#F5F5F5">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+
+            <Label
+                Text="Error &amp; Crash Testing"
+                FontSize="28"
+                FontAttributes="Bold"
+                TextColor="#512BD4"
+                Margin="0,0,0,10" />
+
+            <Label
+                Text="Test Datadog error tracking, logging, and crash reporting by triggering different error scenarios."
+                FontSize="14"
+                TextColor="#666"
+                Margin="0,0,0,20" />
+
+            <!-- Exception Errors Section -->
+            <Frame BackgroundColor="White" Padding="15" CornerRadius="10" HasShadow="True">
+                <VerticalStackLayout Spacing="10">
+                    <Label
+                        Text="🔥 Exception Errors"
+                        FontSize="18"
+                        FontAttributes="Bold"
+                        TextColor="#333" />
+
+                    <Button
+                        Text="Null Reference Exception"
+                        Clicked="OnNullReferenceException"
+                        BackgroundColor="#FF6B6B"
+                        TextColor="White"
+                        CornerRadius="8"
+                        AutomationId="btn_null_reference" />
+
+                    <Button
+                        Text="Division By Zero"
+                        Clicked="OnDivisionByZero"
+                        BackgroundColor="#FF6B6B"
+                        TextColor="White"
+                        CornerRadius="8"
+                        AutomationId="btn_division_zero" />
+
+                    <Button
+                        Text="Index Out of Range"
+                        Clicked="OnIndexOutOfRange"
+                        BackgroundColor="#FF6B6B"
+                        TextColor="White"
+                        CornerRadius="8"
+                        AutomationId="btn_index_out_range" />
+
+                    <Button
+                        Text="Invalid Operation"
+                        Clicked="OnInvalidOperation"
+                        BackgroundColor="#FF6B6B"
+                        TextColor="White"
+                        CornerRadius="8"
+                        AutomationId="btn_invalid_operation" />
+
+                    <Button
+                        Text="Argument Exception"
+                        Clicked="OnArgumentException"
+                        BackgroundColor="#FF6B6B"
+                        TextColor="White"
+                        CornerRadius="8"
+                        AutomationId="btn_argument_exception" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Async Errors Section -->
+            <Frame BackgroundColor="White" Padding="15" CornerRadius="10" HasShadow="True">
+                <VerticalStackLayout Spacing="10">
+                    <Label
+                        Text="⏱️ Async Errors"
+                        FontSize="18"
+                        FontAttributes="Bold"
+                        TextColor="#333" />
+
+                    <Button
+                        Text="Task Cancellation"
+                        Clicked="OnTaskCancellation"
+                        BackgroundColor="#FFA726"
+                        TextColor="White"
+                        CornerRadius="8"
+                        AutomationId="btn_task_cancellation" />
+
+                    <Button
+                        Text="Unhandled Task Exception"
+                        Clicked="OnUnhandledTaskException"
+                        BackgroundColor="#FFA726"
+                        TextColor="White"
+                        CornerRadius="8"
+                        AutomationId="btn_unhandled_task" />
+
+                    <Button
+                        Text="Aggregate Exception"
+                        Clicked="OnAggregateException"
+                        BackgroundColor="#FFA726"
+                        TextColor="White"
+                        CornerRadius="8"
+                        AutomationId="btn_aggregate_exception" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Network/API Errors Section -->
+            <Frame BackgroundColor="White" Padding="15" CornerRadius="10" HasShadow="True">
+                <VerticalStackLayout Spacing="10">
+                    <Label
+                        Text="🌐 Network Errors"
+                        FontSize="18"
+                        FontAttributes="Bold"
+                        TextColor="#333" />
+
+                    <Button
+                        Text="HTTP Request Timeout"
+                        Clicked="OnHttpTimeout"
+                        BackgroundColor="#AB47BC"
+                        TextColor="White"
+                        CornerRadius="8"
+                        AutomationId="btn_http_timeout" />
+
+                    <Button
+                        Text="HTTP 404 Not Found"
+                        Clicked="OnHttp404"
+                        BackgroundColor="#AB47BC"
+                        TextColor="White"
+                        CornerRadius="8"
+                        AutomationId="btn_http_404" />
+
+                    <Button
+                        Text="HTTP 500 Server Error"
+                        Clicked="OnHttp500"
+                        BackgroundColor="#AB47BC"
+                        TextColor="White"
+                        CornerRadius="8"
+                        AutomationId="btn_http_500" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Logging Tests Section -->
+            <Frame BackgroundColor="White" Padding="15" CornerRadius="10" HasShadow="True">
+                <VerticalStackLayout Spacing="10">
+                    <Label
+                        Text="📝 Logging Tests"
+                        FontSize="18"
+                        FontAttributes="Bold"
+                        TextColor="#333" />
+
+                    <Button
+                        Text="Log Error Message"
+                        Clicked="OnLogError"
+                        BackgroundColor="#5C6BC0"
+                        TextColor="White"
+                        CornerRadius="8"
+                        AutomationId="btn_log_error" />
+
+                    <Button
+                        Text="Log Warning Message"
+                        Clicked="OnLogWarning"
+                        BackgroundColor="#5C6BC0"
+                        TextColor="White"
+                        CornerRadius="8"
+                        AutomationId="btn_log_warning" />
+
+                    <Button
+                        Text="Log Info with Attributes"
+                        Clicked="OnLogInfoWithAttributes"
+                        BackgroundColor="#5C6BC0"
+                        TextColor="White"
+                        CornerRadius="8"
+                        AutomationId="btn_log_info_attrs" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Critical Crashes Section -->
+            <Frame BackgroundColor="White" Padding="15" CornerRadius="10" HasShadow="True" Margin="0,0,0,20">
+                <VerticalStackLayout Spacing="10">
+                    <Label
+                        Text="💥 Critical Crashes"
+                        FontSize="18"
+                        FontAttributes="Bold"
+                        TextColor="#333" />
+
+                    <Label
+                        Text="WARNING: These will terminate the app"
+                        FontSize="12"
+                        TextColor="#FF0000"
+                        FontAttributes="Italic" />
+
+                    <Button
+                        Text="Native Crash (Platform-Specific)"
+                        Clicked="OnNativeCrash"
+                        BackgroundColor="#D32F2F"
+                        TextColor="White"
+                        CornerRadius="8"
+                        AutomationId="btn_native_crash" />
+
+                    <Button
+                        Text="Fatal Unhandled Exception"
+                        Clicked="OnFatalException"
+                        BackgroundColor="#D32F2F"
+                        TextColor="White"
+                        CornerRadius="8"
+                        AutomationId="btn_fatal_exception" />
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

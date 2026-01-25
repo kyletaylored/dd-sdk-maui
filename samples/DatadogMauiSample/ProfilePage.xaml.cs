@@ -53,12 +53,11 @@ public partial class ProfilePage : ContentPage
             AvatarUrl = $"https://api.dicebear.com/7.x/avataaars/svg?seed={email}"
         };
 
-        // TODO: Set user in Datadog RUM
-        // On Android:
-        // GlobalRumMonitor.Get().SetUser(new UserInfo(_currentUser.Id, _currentUser.Name, _currentUser.Email))
-        //
-        // On iOS:
-        // RUMMonitor.shared().setUserInfo(id: _currentUser.Id, name: _currentUser.Name, email: _currentUser.Email)
+        // Set user in Datadog RUM and update app state
+        if (App.Current is App app)
+        {
+            app.SetCurrentUser(_currentUser.Name);
+        }
 
         Console.WriteLine($"[Datadog] User signed in: {_currentUser.Name} ({_currentUser.Email})");
 
@@ -70,12 +69,11 @@ public partial class ProfilePage : ContentPage
     {
         _currentUser = User.Guest;
 
-        // TODO: Clear user in Datadog RUM
-        // On Android:
-        // GlobalRumMonitor.Get().SetUser(null)
-        //
-        // On iOS:
-        // RUMMonitor.shared().setUserInfo(id: nil, name: nil, email: nil)
+        // Clear user in Datadog RUM and update app state
+        if (App.Current is App app)
+        {
+            app.SetCurrentUser(string.Empty);
+        }
 
         Console.WriteLine("[Datadog] User signed out");
 

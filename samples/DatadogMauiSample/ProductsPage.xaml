@@ -1,44 +1,47 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:DatadogMauiSample.Controls"
              x:Class="DatadogMauiSample.ProductsPage"
              Title="Products">
-    <Grid RowDefinitions="Auto,*" Padding="10">
-        <!-- Header with refresh and test purchase buttons -->
-        <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto,Auto" Margin="0,0,0,10">
-            <Label Grid.Column="0"
+    <Grid RowDefinitions="Auto,Auto,Auto,*">
+        <!-- Navigation Banner -->
+        <controls:NavigationBanner Grid.Row="0"/>
+
+        <Grid Grid.Row="1" RowDefinitions="Auto,Auto" Padding="10,10,10,0">
+            <!-- Header Title -->
+            <Label Grid.Row="0"
                    Text="Shopist Products"
                    FontSize="24"
                    FontAttributes="Bold"
-                   VerticalOptions="Center"/>
+                   Margin="0,0,0,10"/>
 
-            <Button Grid.Column="1"
-                    x:Name="RefreshButton"
-                    AutomationId="refresh_products_button"
-                    Text="Refresh"
-                    Clicked="OnRefreshClicked"
-                    Margin="5,0"/>
+            <!-- Action Buttons Row -->
+            <HorizontalStackLayout Grid.Row="1" Spacing="10" Margin="0,0,0,10">
+                <Button x:Name="RefreshButton"
+                        AutomationId="refresh_products_button"
+                        Text="Refresh"
+                        Clicked="OnRefreshClicked"/>
 
-            <Button Grid.Column="2"
-                    x:Name="ViewCartButton"
-                    AutomationId="view_cart_button"
-                    Text="View Cart"
-                    Clicked="OnViewCartClicked"
-                    BackgroundColor="#2196F3"
-                    TextColor="White"
-                    Margin="5,0"/>
+                <Button x:Name="ViewCartButton"
+                        AutomationId="view_cart_button"
+                        Text="View Cart"
+                        Clicked="OnViewCartClicked"
+                        BackgroundColor="#2196F3"
+                        TextColor="White"/>
 
-            <Button Grid.Column="3"
-                    x:Name="TestPurchaseButton"
-                    AutomationId="test_purchase_button"
-                    Text="Test Purchase"
-                    Clicked="OnTestPurchaseClicked"
-                    BackgroundColor="#4CAF50"
-                    TextColor="White"/>
+                <Button x:Name="TestPurchaseButton"
+                        AutomationId="test_purchase_button"
+                        Text="Test Purchase"
+                        Clicked="OnTestPurchaseClicked"
+                        BackgroundColor="#4CAF50"
+                        TextColor="White"/>
+            </HorizontalStackLayout>
         </Grid>
 
         <!-- Products List -->
-        <CollectionView Grid.Row="1"
+        <CollectionView Grid.Row="2"
+                        Margin="10,0,10,10"
                         x:Name="ProductsCollectionView"
                         AutomationId="products_list"
                         SelectionMode="Single"
@@ -116,7 +119,7 @@
         </CollectionView>
 
         <!-- Loading Indicator -->
-        <ActivityIndicator Grid.Row="1"
+        <ActivityIndicator Grid.Row="3"
                           x:Name="LoadingIndicator"
                           IsRunning="False"
                           IsVisible="False"
