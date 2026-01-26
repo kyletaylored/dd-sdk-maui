@@ -252,6 +252,7 @@ jobs:
         if: steps.cache-plugin.outputs.cache-hit != 'true' && steps.check-ios-for-plugin.outputs.ios_ready != 'true'
         run: |
           dotnet pack Datadog.MAUI.Plugin/Datadog.MAUI.Plugin.csproj --configuration Release --no-build --output ./artifacts/plugin /p:TargetFrameworks="net9.0-android;net10.0-android"
+          
 
       - name: Upload plugin package
         uses: actions/upload-artifact@v6
