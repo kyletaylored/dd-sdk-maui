@@ -12,10 +12,10 @@
 		<Nullable>enable</Nullable>
 
 		<!-- Display name -->
-		<ApplicationTitle>Shopist Demo</ApplicationTitle>
+		<ApplicationTitle>MAUI Shopist Demo</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.datadog.shopist.demo</ApplicationId>
+		<ApplicationId>com.datadog.datadog-maui-shopist.demo</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>

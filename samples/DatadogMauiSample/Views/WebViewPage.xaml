@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="DatadogMauiSample.WebViewPage"
+             xmlns:controls="clr-namespace:DatadogMauiSample.Controls"
+             x:Class="DatadogMauiSample.Views.WebViewPage"
              Title="Shopist Store">
-    <Grid RowDefinitions="Auto,*">
+    <Grid RowDefinitions="Auto,Auto,*">
+        <!-- Navigation Banner -->
+        <controls:NavigationBanner Grid.Row="0"/>
+
         <!-- Header with URL bar -->
-        <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" Padding="10" BackgroundColor="#F5F5F5">
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" Padding="10" BackgroundColor="#F5F5F5">
             <Entry Grid.Column="0"
                    x:Name="UrlEntry"
                    Text="https://shopist.io"
@@ -25,14 +29,14 @@
         </Grid>
 
         <!-- WebView -->
-        <WebView Grid.Row="1"
+        <WebView Grid.Row="2"
                  x:Name="ShopistWebView"
                  Source="https://shopist.io"
                  Navigating="OnNavigating"
                  Navigated="OnNavigated"/>
 
         <!-- Loading Indicator -->
-        <ActivityIndicator Grid.Row="1"
+        <ActivityIndicator Grid.Row="2"
                           x:Name="LoadingIndicator"
                           IsRunning="False"
                           IsVisible="False"

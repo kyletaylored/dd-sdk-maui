@@ -1,4 +1,4 @@
-namespace DatadogMauiSample;
+namespace DatadogMauiSample.Views;
 
 public partial class WebViewPage : ContentPage
 {

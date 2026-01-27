@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="DatadogMauiSample.CartPage"
+             xmlns:controls="clr-namespace:DatadogMauiSample.Controls"
+             x:Class="DatadogMauiSample.Views.CartPage"
              Title="Shopping Cart">
-    <Grid RowDefinitions="Auto,*,Auto" Padding="10">
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+        <!-- Navigation Banner -->
+        <controls:NavigationBanner Grid.Row="0"/>
+
         <!-- Header -->
-        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,10">
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Padding="10,10,10,0" Margin="0,0,0,10">
             <Label Grid.Column="0"
                    Text="Shopping Cart"
                    FontSize="24"
@@ -22,7 +26,7 @@
         </Grid>
 
         <!-- Cart Items List -->
-        <CollectionView Grid.Row="1"
+        <CollectionView Grid.Row="2"
                         x:Name="CartCollectionView"
                         AutomationId="cart_items_list">
             <CollectionView.ItemTemplate>
@@ -125,7 +129,7 @@
         </CollectionView>
 
         <!-- Cart Summary and Checkout -->
-        <Grid Grid.Row="2"
+        <Grid Grid.Row="3"
               RowDefinitions="Auto,Auto,Auto,Auto"
               ColumnDefinitions="*,Auto"
               Padding="10"

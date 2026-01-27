@@ -3,7 +3,7 @@
     x:Class="DatadogMauiSample.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:DatadogMauiSample"
+    xmlns:views="clr-namespace:DatadogMauiSample.Views"
     Title="Shopist Demo"
     Shell.TabBarBackgroundColor="#512BD4"
     Shell.TabBarForegroundColor="White"
@@ -13,31 +13,31 @@
     <TabBar>
         <ShellContent
             Title="Products"
-            ContentTemplate="{DataTemplate local:ProductsPage}"
+            ContentTemplate="{DataTemplate views:ProductsPage}"
             Route="ProductsPage"
             AutomationId="tab_products" />
 
         <ShellContent
             Title="Cart"
-            ContentTemplate="{DataTemplate local:CartPage}"
+            ContentTemplate="{DataTemplate views:CartPage}"
             Route="CartPage"
             AutomationId="tab_cart" />
 
         <ShellContent
             Title="Store"
-            ContentTemplate="{DataTemplate local:WebViewPage}"
+            ContentTemplate="{DataTemplate views:WebViewPage}"
             Route="WebViewPage"
             AutomationId="tab_store" />
 
         <ShellContent
             Title="Profile"
-            ContentTemplate="{DataTemplate local:ProfilePage}"
+            ContentTemplate="{DataTemplate views:ProfilePage}"
             Route="ProfilePage"
             AutomationId="tab_profile" />
 
         <ShellContent
             Title="Testing"
-            ContentTemplate="{DataTemplate local:ErrorTestingPage}"
+            ContentTemplate="{DataTemplate views:ErrorTestingPage}"
             Route="ErrorTestingPage"
             AutomationId="tab_testing" />
     </TabBar>

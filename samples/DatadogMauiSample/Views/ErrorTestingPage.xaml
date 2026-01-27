@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="DatadogMauiSample.ErrorTestingPage"
+             xmlns:controls="clr-namespace:DatadogMauiSample.Controls"
+             x:Class="DatadogMauiSample.Views.ErrorTestingPage"
              Title="Error Testing"
              BackgroundColor="#F5F5F5">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="15">
+    <Grid RowDefinitions="Auto,*">
+        <!-- Navigation Banner -->
+        <controls:NavigationBanner Grid.Row="0"/>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="20" Spacing="15">
 
             <Label
                 Text="Error &amp; Crash Testing"
@@ -210,6 +215,7 @@
                 </VerticalStackLayout>
             </Frame>
 
-        </VerticalStackLayout>
-    </ScrollView>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
 </ContentPage>

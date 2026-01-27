@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace DatadogMauiSample;
+namespace DatadogMauiSample.Views;
 
 public partial class ErrorTestingPage : ContentPage
 {

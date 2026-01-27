@@ -1,6 +1,6 @@
 using DatadogMauiSample.Models;
 
-namespace DatadogMauiSample;
+namespace DatadogMauiSample.Views;
 
 public partial class ProfilePage : ContentPage
 {

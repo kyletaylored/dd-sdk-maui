@@ -3,7 +3,7 @@ using DatadogMauiSample.Services;
 using Datadog.Maui.Rum;
 using Datadog.Maui.Logs;
 
-namespace DatadogMauiSample;
+namespace DatadogMauiSample.Views;
 
 public partial class ProductsPage : ContentPage
 {

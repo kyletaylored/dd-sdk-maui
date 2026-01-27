@@ -1,6 +1,6 @@
 using DatadogMauiSample.Config;
 
-namespace DatadogMauiSample;
+namespace DatadogMauiSample.Views;
 
 public partial class DebugInfoPage : ContentPage
 {
