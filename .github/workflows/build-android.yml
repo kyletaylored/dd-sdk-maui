@@ -83,6 +83,9 @@ jobs:
       - name: Verify SDK version
         run: dotnet --version
 
+      - name: Install .NET MAUI Android workload
+        run: dotnet workload install maui-android
+
       - name: Cache .NET workloads
         uses: actions/cache@v5
         with:
@@ -94,9 +97,6 @@ jobs:
           key: ${{ runner.os }}-dotnet-workload-android-${{ steps.setup-dotnet-9.outputs.dotnet-version }}
           restore-keys: |
             ${{ runner.os }}-dotnet-workload-android-
-
-      - name: Install .NET Android workload
-        run: dotnet workload install android
 
       - name: Cache NuGet packages (net9.0-android)
         id: cache-nuget-net9
@@ -209,6 +209,9 @@ jobs:
       - name: Verify SDK version
         run: dotnet --version
 
+      - name: Install .NET MAUI Android workload
+        run: dotnet workload install maui-android
+
       - name: Cache .NET workloads
         uses: actions/cache@v5
         with:
@@ -220,9 +223,6 @@ jobs:
           key: ${{ runner.os }}-dotnet-workload-android-${{ steps.setup-dotnet-10.outputs.dotnet-version }}
           restore-keys: |
             ${{ runner.os }}-dotnet-workload-android-
-
-      - name: Install .NET Android workload
-        run: dotnet workload install android
 
       - name: Cache NuGet packages (net10.0-android)
         id: cache-nuget-net10
@@ -377,8 +377,8 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
-      - name: Install .NET Android workload for meta-package
-        run: dotnet workload install android
+      - name: Install .NET MAUI Android workload
+        run: dotnet workload install maui-android
 
       - name: Build and pack meta-package
         run: |

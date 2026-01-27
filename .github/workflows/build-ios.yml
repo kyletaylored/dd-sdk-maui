@@ -230,6 +230,9 @@ jobs:
 
       - name: Verify SDK version
         run: dotnet --version
+        
+      - name: Install .NET MAUI iOS workload
+        run: dotnet workload install maui-ios
 
       - name: Cache .NET workloads
         uses: actions/cache@v5
@@ -242,9 +245,6 @@ jobs:
           key: ${{ runner.os }}-dotnet-workload-ios-${{ steps.setup-dotnet-10.outputs.dotnet-version }}
           restore-keys: |
             ${{ runner.os }}-dotnet-workload-ios-
-
-      - name: Install .NET iOS workload
-        run: dotnet workload install ios
 
       - name: Get SDK version for cache key
         id: sdk-version
