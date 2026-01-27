@@ -53,9 +53,7 @@
 
 	<!-- Custom target to remove duplicate tracing AAR before dex compilation -->
 	<Target Name="RemoveDuplicateTracingAAR" BeforeTargets="_CompileToDalvik" Condition="'$(TargetFramework)' == 'net10.0-android'">
-		<Exec Command="find $(IntermediateOutputPath)lp -type d -name '12*' -o -name '16*' | while read dir; do if [ -f &quot;$$dir/jl/classes.jar&quot; ] &amp;&amp; unzip -l &quot;$$dir/jl/classes.jar&quot; 2&gt;/dev/null | grep -q 'androidx/tracing/TraceKt.class' &amp;&amp; echo &quot;$$dir&quot; | grep -q '/12'; then echo &quot;Removing duplicate tracing-android from $$dir&quot;; rm -rf &quot;$$dir/jl/classes.jar&quot;; fi; done"
-			  IgnoreExitCode="true"
-			  Condition="Exists('$(IntermediateOutputPath)lp')" />
+		<Exec Command="find $(IntermediateOutputPath)lp -type d -name '12*' -o -name '16*' | while read dir; do if [ -f &quot;$$dir/jl/classes.jar&quot; ] &amp;&amp; unzip -l &quot;$$dir/jl/classes.jar&quot; 2&gt;/dev/null | grep -q 'androidx/tracing/TraceKt.class' &amp;&amp; echo &quot;$$dir&quot; | grep -q '/12'; then echo &quot;Removing duplicate tracing-android from $$dir&quot;; rm -rf &quot;$$dir/jl/classes.jar&quot;; fi; done" IgnoreExitCode="true" Condition="Exists('$(IntermediateOutputPath)lp')" />
 	</Target>
 
 	<ItemGroup>
@@ -68,7 +66,7 @@
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
 		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
-		
+
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />
 
@@ -135,11 +133,7 @@
 		<Message Text="  Application ID: $(AndroidApplicationId)" Importance="high" Condition="'$(AndroidApplicationId)' != ''" />
 		<Message Text="⚠️  No Android RUM credentials found! App will use placeholder values." Importance="high" Condition="'$(AndroidClientToken)' == ''" />
 
-		<WriteLinesToFile
-			File="$(MSBuildProjectDirectory)/Config/datadog-rum-android.config"
-			Lines="DD_RUM_ANDROID_CLIENT_TOKEN=$(AndroidClientToken);DD_RUM_ANDROID_APPLICATION_ID=$(AndroidApplicationId)"
-			Overwrite="true"
-			Condition="'$(AndroidClientToken)' != ''" />
+		<WriteLinesToFile File="$(MSBuildProjectDirectory)/Config/datadog-rum-android.config" Lines="DD_RUM_ANDROID_CLIENT_TOKEN=$(AndroidClientToken);DD_RUM_ANDROID_APPLICATION_ID=$(AndroidApplicationId)" Overwrite="true" Condition="'$(AndroidClientToken)' != ''" />
 	</Target>
 
 	<!-- Generate iOS config file before build -->
@@ -149,11 +143,7 @@
 		<Message Text="  Application ID: $(IosApplicationId)" Importance="high" Condition="'$(IosApplicationId)' != ''" />
 		<Message Text="⚠️  No iOS RUM credentials found! App will use placeholder values." Importance="high" Condition="'$(IosClientToken)' == ''" />
 
-		<WriteLinesToFile
-			File="$(MSBuildProjectDirectory)/Config/datadog-rum-ios.config"
-			Lines="DD_RUM_IOS_CLIENT_TOKEN=$(IosClientToken);DD_RUM_IOS_APPLICATION_ID=$(IosApplicationId)"
-			Overwrite="true"
-			Condition="'$(IosClientToken)' != ''" />
+		<WriteLinesToFile File="$(MSBuildProjectDirectory)/Config/datadog-rum-ios.config" Lines="DD_RUM_IOS_CLIENT_TOKEN=$(IosClientToken);DD_RUM_IOS_APPLICATION_ID=$(IosApplicationId)" Overwrite="true" Condition="'$(IosClientToken)' != ''" />
 	</Target>
 
 	<!-- Embed config files as resources -->
@@ -164,5 +154,112 @@
 	<ItemGroup Condition="$(TargetFramework.Contains('ios'))">
 		<EmbeddedResource Include="Config/datadog-rum-ios.config" Condition="Exists('Config/datadog-rum-ios.config')" />
 	</ItemGroup>
+
+	<!-- ================================================================ -->
+	<!-- START: Datadog.MAUI Gradle Mapping Upload.                       -->
+	<!-- ================================================================ -->
+
+	<!-- ================================================================ -->
+	<!-- Datadog: Android mapping upload (Release only)                   -->
+	<!-- ================================================================ -->
+
+	<PropertyGroup>
+		<!-- Master switch (you can override on CLI: /p:DatadogUploadSymbols=false) -->
+		<DatadogUploadSymbols Condition="'$(DatadogUploadSymbols)' == ''">true</DatadogUploadSymbols>
+
+		<!-- Platform-specific service names -->
+		<DatadogAndroidService Condition="'$(DatadogAndroidService)' == ''">datadog-maui-android</DatadogAndroidService>
+		<DatadogIosService Condition="'$(DatadogIosService)' == ''">datadog-maui-ios</DatadogIosService>
+
+		<!-- Standard tags -->
+		<DatadogEnv Condition="'$(DatadogEnv)' == ''">release</DatadogEnv>
+		<DatadogVersion Condition="'$(DatadogVersion)' == ''">$(ApplicationDisplayVersion)</DatadogVersion>
+
+		<!-- Gradle wrapper command, OS-aware -->
+		<DatadogGradleCmd Condition="'$(OS)' == 'Windows_NT'">gradlew.bat</DatadogGradleCmd>
+		<DatadogGradleCmd Condition="'$(OS)' != 'Windows_NT'">./gradlew</DatadogGradleCmd>
+	</PropertyGroup>
+
+	<!-- Generate datadog.buildId and include it as an Android asset (Release Android only) -->
+	<Target Name="Datadog_GenerateAndroidBuildId" BeforeTargets="_CollectAndroidAssets" Condition="'$(DatadogUploadSymbols)' == 'true' AND $(TargetFramework.Contains('android')) AND '$(Configuration)' == 'Release'">
+
+		<PropertyGroup>
+			<DatadogBuildId>$([System.Guid]::NewGuid().ToString())</DatadogBuildId>
+			<DatadogBuildIdFile>$(IntermediateOutputPath)datadog.buildId</DatadogBuildIdFile>
+		</PropertyGroup>
+
+		<Message Text="🐕 Datadog Android build_id: $(DatadogBuildId)" Importance="high" />
+
+		<WriteLinesToFile File="$(DatadogBuildIdFile)" Lines="$(DatadogBuildId)" Overwrite="true" />
+
+		<ItemGroup>
+			<AndroidAsset Include="$(DatadogBuildIdFile)">
+				<LogicalName>datadog.buildId</LogicalName>
+			</AndroidAsset>
+		</ItemGroup>
+	</Target>
+
+	<!-- Upload mapping after Android package build (works for AAB or APK) -->
+	<Target Name="Datadog_UploadAndroidMapping" AfterTargets="BuildAndroidAppBundle;BuildAndroidPackage" Condition="'$(DatadogUploadSymbols)' == 'true' AND $(TargetFramework.Contains('android')) AND '$(Configuration)' == 'Release'">
+
+		<!-- Deterministic location: you already verified this exists -->
+		<PropertyGroup>
+			<DatadogMappingFile>$(TargetDir)mapping.txt</DatadogMappingFile>
+		</PropertyGroup>
+
+		<Message Text="🐕 Datadog mapping expected at: $(DatadogMappingFile)" Importance="high" />
+
+		<!-- Hard fail with a clear message if mapping is missing -->
+		<Error Condition="!Exists('$(DatadogMappingFile)')" Text="Datadog mapping upload failed: mapping.txt not found at $(DatadogMappingFile). Ensure R8 is enabled and you are building Android Release." />
+
+		<!-- Call Gradle helper project -->
+		<Exec WorkingDirectory="$(MSBuildProjectDirectory)/datadog-upload" Command="$(DatadogGradleCmd) uploadMappingRelease --info" EnvironmentVariables="DD_MAPPING_FILE=$(DatadogMappingFile);DD_API_KEY=$(DD_API_KEY);DD_ANDROID_SITE=$(DD_ANDROID_SITE);DD_SERVICE=$(DatadogAndroidService);DD_ENV=$(DatadogEnv);DD_VERSION=$(DatadogVersion);DD_BUILD_ID=$(DatadogBuildId)" />
+	</Target>
+
+	<!-- ================================================================ -->
+	<!-- Datadog: Import non-secret symbol config from datadog-symbols.props -->
+	<!-- ================================================================ -->
+
+	<!-- Import the committed props file if it exists (safe, non-secret config) -->
+	<Import Project="$(MSBuildProjectDirectory)/datadog-symbols.props" Condition="Exists('$(MSBuildProjectDirectory)/datadog-symbols.props')" />
+
+	<!-- Provide safe defaults if the props didn't set them -->
+	<PropertyGroup>
+		<DatadogEnv Condition="'$(DatadogEnv)'==''">release</DatadogEnv>
+		<DatadogVersion Condition="'$(DatadogVersion)'==''">$(ApplicationDisplayVersion)</DatadogVersion>
+
+		<DD_ANDROID_SITE Condition="'$(DD_ANDROID_SITE)'==''">US1</DD_ANDROID_SITE>
+		<DatadogAndroidService Condition="'$(DatadogAndroidService)'==''">datadog-maui-android</DatadogAndroidService>
+
+		<DATADOG_SITE Condition="'$(DATADOG_SITE)'==''">datadoghq.com</DATADOG_SITE>
+		<DatadogIosService Condition="'$(DatadogIosService)'==''">datadog-maui-ios</DatadogIosService>
+	</PropertyGroup>
+
+	<!-- ================================================================ -->
+	<!-- Datadog: iOS dSYM upload (Release iOS only)                      -->
+	<!-- ================================================================ -->
+
+	<Target Name="Datadog_UploadIosDsyms" AfterTargets="Build" Condition="'$(DatadogUploadSymbols)' == 'true' AND $(TargetFramework.Contains('ios')) AND '$(Configuration)' == 'Release'">
+
+		<!-- Collect candidate dSYM directories from the output path -->
+		<ItemGroup>
+			<_IosDsymCandidates Include="$(TargetDir)**\*.dSYM" />
+		</ItemGroup>
+
+		<PropertyGroup>
+			<DatadogIosDsymDir Condition="'@(_IosDsymCandidates)' != ''">@(_IosDsymCandidates->'%(FullPath)')</DatadogIosDsymDir>
+		</PropertyGroup>
+
+		<Message Text="🐕 iOS dSYM candidates: @(_IosDsymCandidates)" Importance="high" />
+
+		<Error Condition="'@(_IosDsymCandidates)' == ''" Text="Datadog iOS symbol upload failed: no .dSYM found under $(TargetDir). Build an iOS Release archive/app that produces dSYMs." />
+
+		<!-- Run datadog-ci to upload dSYMs. datadog-ci reads DATADOG_API_KEY and DATADOG_SITE -->
+		<Exec Command="npx --yes @datadog/datadog-ci dsyms upload &quot;$(DatadogIosDsymDir)&quot; --service &quot;$(DatadogIosService)&quot; --env &quot;$(DatadogEnv)&quot; --release-version &quot;$(DatadogVersion)&quot;" EnvironmentVariables="DATADOG_API_KEY=$(DD_API_KEY);DATADOG_SITE=$(DATADOG_SITE)" />
+	</Target>
+
+	<!-- ================================================================ -->
+	<!-- END: Datadog.MAUI Gradle Mapping Upload & iOS dSYM Upload       -->
+	<!-- ================================================================ -->
 
 </Project>

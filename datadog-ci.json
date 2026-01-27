@@ -1,0 +1,18 @@
+{
+    "site": "datadoghq.com",
+    "application": {
+        "name": "com.datadog.datadog-maui-shopist.demo",
+        "version": "1.0.0",
+        "build": "1"
+    },
+    "dsyms": {
+        "service": "datadog-maui-ios",
+        "version": "1.0.0",
+        "build": "1",
+        "files": [
+            "artifacts/ios/*.dSYM.zip",
+            "artifacts/ios/*.dSYM"
+        ]
+    },
+    "notes": "Datadog CI config. Keep secrets (DD_API_KEY) out of this file; provide them via environment variables in CI."
+}

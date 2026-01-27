@@ -1,0 +1,15 @@
+<Project>
+    <PropertyGroup>
+        <!-- non-secret symbol upload config (safe to commit) -->
+        <DatadogEnv>dev</DatadogEnv>
+        <DatadogVersion>1.0</DatadogVersion>
+
+        <!-- Android -->
+        <DD_ANDROID_SITE>US1</DD_ANDROID_SITE>
+        <DatadogAndroidService>datadog-maui-android</DatadogAndroidService>
+
+        <!-- iOS -->
+        <DATADOG_SITE>datadoghq.com</DATADOG_SITE>
+        <DatadogIosService>datadog-maui-ios</DatadogIosService>
+    </PropertyGroup>
+</Project>

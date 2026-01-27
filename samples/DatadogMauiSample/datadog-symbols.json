@@ -1,0 +1,12 @@
+{
+    "env": "dev",
+    "version": "1.0",
+    "android": {
+        "site": "US1",
+        "service": "datadog-maui-android"
+    },
+    "ios": {
+        "site": "datadoghq.com",
+        "service": "datadog-maui-ios"
+    }
+}
