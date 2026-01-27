@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IncludeBuildOutput>true</IncludeBuildOutput>
+
+    <!-- NuGet Package Metadata -->
+    <PackageId>Datadog.MAUI.Symbols</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Datadog</Authors>
+    <Company>Datadog</Company>
+    <Description>MSBuild SDK for automatically uploading .NET MAUI debug symbols (dSYMs and Proguard mapping files) to Datadog during build/publish.</Description>
+    <PackageTags>Datadog;MAUI;Symbols;dSYM;Proguard;Symbolication;MSBuild</PackageTags>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/DataDog/dd-sdk-dotnet</RepositoryUrl>
+    <PackageProjectUrl>https://docs.datadoghq.com/</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <!-- MSBuild SDK Package Settings -->
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- MSBuild Dependencies -->
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.0.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="17.0.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Include the .targets file in the build folder of the NuGet package -->
+    <None Include="build\Datadog.MAUI.Symbols.targets" Pack="true" PackagePath="build\" />
+    <None Include="build\Datadog.MAUI.Symbols.targets" Pack="true" PackagePath="buildTransitive\" />
+
+    <!-- Include README in the package -->
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>
