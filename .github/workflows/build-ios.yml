@@ -155,9 +155,6 @@ jobs:
 
       - name: Restore dependencies (individual packages only)
         run: |
-          # Fix NU1301: Create artifacts dir to satisfy NuGet.Config
-          mkdir -p ./artifacts
-
           # Restore individual packages from solution file
           echo "${{ needs.download-xcframeworks.outputs.projects }}" | while read -r project; do
             if [ -n "$project" ]; then
@@ -260,9 +257,6 @@ jobs:
 
       - name: Restore dependencies (individual packages only)
         run: |
-          # Fix NU1301: Create artifacts dir to satisfy NuGet.Config
-          mkdir -p ./artifacts
-
           # Restore individual packages from solution file
           echo "${{ needs.download-xcframeworks.outputs.projects }}" | while read -r project; do
             if [ -n "$project" ]; then

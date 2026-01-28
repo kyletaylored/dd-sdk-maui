@@ -27,6 +27,7 @@ bld/
 project.lock.json
 project.fragment.lock.json
 artifacts/
+!artifacts/.gitkeep
 
 # ASP.NET Scaffolding
 ScaffoldingReadMe.txt
@@ -63,6 +64,7 @@ xcuserdata/
 # XCFrameworks and artifacts (downloaded separately)
 *.xcframework/
 **/artifacts/
+!**/artifacts/.gitkeep
 **/Generated/
 
 # Android
