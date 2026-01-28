@@ -167,12 +167,14 @@ Use environment variables for secrets:
 </PropertyGroup>
 ```
 
+{% raw %}
 ```yaml
 # GitHub Actions
 env:
   DD_API_KEY: ${{ secrets.DATADOG_API_KEY }}
   DD_SITE: us5.datadoghq.com
 ```
+{% endraw %}
 
 ### Multi-Environment Configuration
 

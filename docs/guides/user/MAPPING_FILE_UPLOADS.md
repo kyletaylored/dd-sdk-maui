@@ -364,6 +364,7 @@ You can integrate the upload into your build process by adding a custom MSBuild 
 
 ### GitHub Actions
 
+{% raw %}
 ```yaml
 - name: Upload Mapping Files to Datadog
   env:
@@ -378,6 +379,7 @@ You can integrate the upload into your build process by adding a custom MSBuild 
       --android-mapping \
       --android-mapping-location MyApp/obj/Release/net9.0-android/lp/map.cache/mapping.txt
 ```
+{% endraw %}
 
 ### Azure Pipelines
 

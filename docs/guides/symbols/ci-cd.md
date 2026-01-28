@@ -45,6 +45,7 @@ Configure these secrets in your CI/CD platform:
 
 ### Basic Setup
 
+{% raw %}
 ```yaml
 name: Build and Deploy
 
@@ -86,9 +87,11 @@ jobs:
         run: |
           dotnet publish -f net8.0-ios -c Release
 ```
+{% endraw %}
 
 ### With MAUI Workload
 
+{% raw %}
 ```yaml
 - name: Install MAUI Workload
   run: dotnet workload install maui
@@ -101,11 +104,13 @@ jobs:
       -p:AndroidSigningKeyStore=${{ secrets.ANDROID_KEYSTORE }} \
       -p:AndroidSigningStorePass=${{ secrets.KEYSTORE_PASSWORD }}
 ```
+{% endraw %}
 
 ### Matrix Builds
 
 Build multiple platforms in parallel:
 
+{% raw %}
 ```yaml
 strategy:
   matrix:
@@ -126,6 +131,7 @@ steps:
     run: |
       dotnet publish -f ${{ matrix.framework }} -c Release
 ```
+{% endraw %}
 
 ## Azure DevOps
 
@@ -376,6 +382,7 @@ Never hardcode secrets:
 
 Only upload from main/release branches:
 
+{% raw %}
 ```yaml
 # GitHub Actions
 - name: Upload Symbols
@@ -384,6 +391,7 @@ Only upload from main/release branches:
     DD_API_KEY: ${{ secrets.DATADOG_API_KEY }}
   run: dotnet publish -c Release
 ```
+{% endraw %}
 
 ### 3. Dry Run for PRs
 
@@ -399,6 +407,7 @@ Test configuration in pull requests without uploading:
 
 Cache NuGet packages and Node modules:
 
+{% raw %}
 ```yaml
 # GitHub Actions
 - name: Cache NuGet packages
@@ -413,6 +422,7 @@ Cache NuGet packages and Node modules:
     path: ~/.npm
     key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
 ```
+{% endraw %}
 
 ### 5. Build Artifacts
 
