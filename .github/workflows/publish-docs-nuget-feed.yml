@@ -196,12 +196,13 @@ jobs:
 
       - name: Init feed (if missing)
         run: |
-          if [ ! -f "_site/nuget/index.json" ]; then
+          # Check if feed directory exists (don't check for files - let Sleet create them)
+          if [ ! -d "_site/nuget" ]; then
             echo "Initializing new NuGet feed..."
             sleet init --config sleet.json --source pages
             echo "✅ New feed initialized"
           else
-            echo "✅ Existing feed found, will update it"
+            echo "✅ Feed directory exists, will update it"
           fi
 
       - name: Push packages to feed
