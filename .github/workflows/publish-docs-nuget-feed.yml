@@ -1,9 +1,12 @@
 name: Deploy Docs + NuGet Feed to GitHub Pages
 
 # This workflow runs when:
-# 1. Documentation files are pushed to main (docs/** or _config.base.yml)
-# 2. A GitHub release is published (updates NuGet feed with release packages)
-# 3. Manually triggered via workflow_dispatch
+# 1. Documentation files are pushed to main (docs/** or _config.base.yml) - rebuilds docs + full feed
+# 2. A GitHub release is published - rebuilds docs + full feed with new release
+# 3. Manually triggered via workflow_dispatch - rebuilds everything
+#
+# Strategy: Always rebuild the complete NuGet feed from ALL releases
+# This ensures the feed is always up-to-date and consistent with GitHub Releases
 
 on:
   push:
@@ -28,6 +31,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Workflow trigger info
+        run: |
+          echo "## Workflow Trigger" >> $GITHUB_STEP_SUMMARY
+          echo "Event: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ github.event_name }}" = "release" ]; then
+            echo "Release tag: ${{ github.event.release.tag_name }}" >> $GITHUB_STEP_SUMMARY
+            echo "📦 Will update NuGet feed with release packages" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            echo "📝 Documentation update - NuGet feed will be preserved" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "🔧 Manual trigger - NuGet feed will be preserved" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+
       - name: Checkout
         uses: actions/checkout@v6
 
@@ -80,45 +97,80 @@ jobs:
           future: false
           verbose: true
 
+      # --- Fix permissions and restore existing NuGet feed ---
+      - name: Fix _site permissions
+        run: |
+          # Jekyll creates _site with restrictive permissions
+          # Make it writable so Sleet can create nuget/ subdirectory
+          chmod -R u+w ./_site
+          mkdir -p ./_site/nuget
+          chmod -R u+w ./_site/nuget
+
       # --- Build NuGet feed into _site/nuget ---
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: "8.0.x"
 
-      - name: Download release packages (if from release event)
-        if: github.event_name == 'release'
+      - name: Download ALL release packages
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p pkgs
-          echo "Downloading packages from release ${{ github.event.release.tag_name }}..."
-          gh release download ${{ github.event.release.tag_name }} \
-            --pattern "*.nupkg" \
-            --dir ./pkgs || echo "No packages found in release"
 
-      - name: Download latest Symbols package (always include in feed)
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          mkdir -p pkgs
-          echo "Checking for latest Symbols package release..."
-          LATEST_SYMBOLS_TAG=$(gh release list --limit 100 | grep "symbols-v" | head -1 | awk '{print $1}')
-          if [ -n "$LATEST_SYMBOLS_TAG" ]; then
-            echo "Found latest symbols release: $LATEST_SYMBOLS_TAG"
-            gh release download "$LATEST_SYMBOLS_TAG" \
-              --pattern "*.nupkg" \
-              --dir ./pkgs || echo "No Symbols package found in $LATEST_SYMBOLS_TAG"
+          # Get all SDK releases (excluding symbols-only releases)
+          echo "Fetching all SDK releases..."
+          RELEASES=$(gh release list --limit 100 | grep -v "symbols-v" | awk '{print $1}' || echo "")
+
+          if [ -z "$RELEASES" ]; then
+            echo "No SDK releases found yet"
           else
-            echo "No Symbols package releases found yet"
+            echo "Found SDK releases:"
+            echo "$RELEASES"
+            echo ""
+
+            # Download packages from each release
+            echo "$RELEASES" | while read -r tag; do
+              if [ -n "$tag" ]; then
+                echo "Downloading packages from release $tag..."
+                gh release download "$tag" \
+                  --pattern "*.nupkg" \
+                  --dir ./pkgs \
+                  --skip-existing || echo "No packages in $tag (or already downloaded)"
+              fi
+            done
           fi
 
-      - name: Build packages (if not from release)
-        if: github.event_name != 'release'
+          echo ""
+          echo "Total packages downloaded:"
+          find ./pkgs -name "*.nupkg" 2>/dev/null | wc -l || echo "0"
+
+      - name: Download ALL Symbols package releases
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Not a release event, skipping package build"
-          echo "NuGet feed will only be updated during releases"
           mkdir -p pkgs
+          echo "Fetching all Symbols package releases..."
+          SYMBOLS_RELEASES=$(gh release list --limit 100 | grep "symbols-v" | awk '{print $1}' || echo "")
+
+          if [ -z "$SYMBOLS_RELEASES" ]; then
+            echo "No Symbols package releases found yet"
+          else
+            echo "Found Symbols releases:"
+            echo "$SYMBOLS_RELEASES"
+            echo ""
+
+            # Download Symbols packages from each release
+            echo "$SYMBOLS_RELEASES" | while read -r tag; do
+              if [ -n "$tag" ]; then
+                echo "Downloading Symbols package from release $tag..."
+                gh release download "$tag" \
+                  --pattern "*.nupkg" \
+                  --dir ./pkgs \
+                  --skip-existing || echo "No packages in $tag (or already downloaded)"
+              fi
+            done
+          fi
 
       - name: Install Sleet
         run: dotnet tool install -g sleet
@@ -154,12 +206,34 @@ jobs:
       - name: Init feed (if missing)
         run: |
           if [ ! -f "_site/nuget/index.json" ]; then
+            echo "Initializing new NuGet feed..."
             sleet init --config sleet.json --source pages
+            echo "✅ New feed initialized"
+          else
+            echo "✅ Existing feed found, will update it"
           fi
 
       - name: Push packages to feed
         run: |
-          sleet push ./pkgs --config sleet.json --source pages --skip-existing
+          # Count packages
+          PKG_COUNT=$(find ./pkgs -name "*.nupkg" 2>/dev/null | wc -l || echo "0")
+          echo "Found $PKG_COUNT packages to push"
+
+          if [ "$PKG_COUNT" -gt 0 ]; then
+            echo "Pushing packages to feed..."
+            sleet push ./pkgs --config sleet.json --source pages --skip-existing
+            echo "✅ Packages pushed to feed"
+
+            echo "## NuGet Feed Update" >> $GITHUB_STEP_SUMMARY
+            echo "Pushed $PKG_COUNT package(s) to feed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Packages:" >> $GITHUB_STEP_SUMMARY
+            find ./pkgs -name "*.nupkg" -exec basename {} \; | sed 's/^/- /' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No packages to push (docs-only update)"
+            echo "## NuGet Feed Update" >> $GITHUB_STEP_SUMMARY
+            echo "No new packages (existing feed preserved)" >> $GITHUB_STEP_SUMMARY
+          fi
 
       - name: Build packages index for NuGet Explorer
         run: |
