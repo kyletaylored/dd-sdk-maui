@@ -24,12 +24,6 @@
     <NoWarn>$(NoWarn);NU5128</NoWarn>
   </PropertyGroup>
 
-  <!-- Version for the dependency set -->
-  <PropertyGroup>
-    <!-- Use the same property you already have in Directory.Build.props -->
-    <DatadogSdkVersion Condition="'$(DatadogSdkVersion)' == ''">3.5.0</DatadogSdkVersion>
-  </PropertyGroup>
-
   <!-- Meta-package dependencies: PackageReference to avoid duplicate class errors -->
   <ItemGroup>
     <!-- Core packages -->

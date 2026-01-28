@@ -24,11 +24,6 @@
     <NoWarn>$(NoWarn);NU5128</NoWarn>
   </PropertyGroup>
 
-  <!-- Version for the dependency set -->
-  <PropertyGroup>
-    <DatadogSdkVersion Condition="'$(DatadogSdkVersion)' == ''">3.5.0</DatadogSdkVersion>
-  </PropertyGroup>
-
   <!-- Meta-package dependencies: PackageReference to avoid duplicate class errors -->
   <ItemGroup>
     <PackageReference Include="Datadog.MAUI.iOS.Internal" Version="$(DatadogSdkVersion)" />

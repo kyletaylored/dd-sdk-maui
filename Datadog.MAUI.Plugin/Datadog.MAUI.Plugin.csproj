@@ -19,10 +19,6 @@
     <Title>Datadog SDK for .NET MAUI</Title>
     <Description>Unofficial Datadog SDK for .NET MAUI applications. Provides Real User Monitoring (RUM), Log Collection, APM Tracing, Session Replay, and more for iOS and Android platforms.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-
-    <!-- Ensure plugin package version matches your binding set version -->
-    <DatadogSdkVersion Condition="'$(DatadogSdkVersion)' == ''">3.5.0</DatadogSdkVersion>
-    <Version>$(DatadogSdkVersion)</Version>
   </PropertyGroup>
 
   <!-- Android Binding project references for testing (temporary) -->
