@@ -307,9 +307,9 @@ jobs:
           </configuration>
           EOF
 
-          echo "Restoring sample app dependencies..."
+          echo "Restoring sample app dependencies (Android only)..."
           cd samples/DatadogMauiSample
-          dotnet restore DatadogMauiSample.csproj --configfile nuget.config -p:Configuration=Release
+          dotnet restore DatadogMauiSample.csproj -f net10.0-android --configfile nuget.config -p:Configuration=Release
 
       - name: Build sample app (Android)
         env:
@@ -405,9 +405,9 @@ jobs:
           </configuration>
           EOF
 
-          echo "Restoring sample app dependencies..."
+          echo "Restoring sample app dependencies (iOS only)..."
           cd samples/DatadogMauiSample
-          dotnet restore DatadogMauiSample.csproj --configfile nuget.config -p:Configuration=Release
+          dotnet restore DatadogMauiSample.csproj -f net10.0-ios --configfile nuget.config -p:Configuration=Release
 
       - name: Build sample app (iOS)
         env:
