@@ -16,13 +16,20 @@ public class AppDelegate : MauiUIApplicationDelegate
 {
     public override bool FinishedLaunching(UIApplication application, NSDictionary? launchOptions)
     {
+        // DIAGNOSTIC: Test if logging is working
+        System.Diagnostics.Debug.WriteLine("========================================");
+        System.Diagnostics.Debug.WriteLine("[DIAGNOSTIC] AppDelegate.FinishedLaunching started");
+        System.Diagnostics.Debug.WriteLine("========================================");
+
         // Configure tab bar appearance before MAUI initializes
         ConfigureTabBarAppearance();
 
         // Load Datadog configuration from environment
         DatadogConfig.LoadFromEnvironment();
 
+        System.Diagnostics.Debug.WriteLine("[DIAGNOSTIC] About to call InitializeDatadog()");
         InitializeDatadog();
+        System.Diagnostics.Debug.WriteLine("[DIAGNOSTIC] InitializeDatadog() completed");
 
         var result = base.FinishedLaunching(application, launchOptions);
 
@@ -127,9 +134,9 @@ public class AppDelegate : MauiUIApplicationDelegate
     {
         try
         {
-            Console.WriteLine($"[Datadog] Initializing for iOS");
-            Console.WriteLine($"[Datadog] - Environment: {DatadogConfig.Environment}");
-            Console.WriteLine($"[Datadog] - Service: {DatadogConfig.ServiceName}");
+            System.Diagnostics.Debug.WriteLine($"[Datadog] Initializing for iOS");
+            System.Diagnostics.Debug.WriteLine($"[Datadog] - Environment: {DatadogConfig.Environment}");
+            System.Diagnostics.Debug.WriteLine($"[Datadog] - Service: {DatadogConfig.ServiceName}");
 
             // Safely mask the client token
             var maskedToken = string.IsNullOrEmpty(DatadogConfig.IosClientToken)
@@ -138,8 +145,8 @@ public class AppDelegate : MauiUIApplicationDelegate
                     ? $"{DatadogConfig.IosClientToken.Substring(0, 10)}...{DatadogConfig.IosClientToken.Substring(DatadogConfig.IosClientToken.Length - 4)}"
                     : "***CONFIGURED***";
 
-            Console.WriteLine($"[Datadog] - Client Token: {maskedToken}");
-            Console.WriteLine($"[Datadog] - RUM Application ID: {DatadogConfig.IosRumApplicationId}");
+            System.Diagnostics.Debug.WriteLine($"[Datadog] - Client Token: {maskedToken}");
+            System.Diagnostics.Debug.WriteLine($"[Datadog] - RUM Application ID: {DatadogConfig.IosRumApplicationId}");
 
             // Initialize Datadog Core
             var configuration = new DDConfiguration(
@@ -154,7 +161,7 @@ public class AppDelegate : MauiUIApplicationDelegate
             // Initialize SDK with tracking consent
             DDDatadog.InitializeWithConfiguration(configuration, DDTrackingConsent.Granted);
 
-            Console.WriteLine("[Datadog] Core SDK initialized");
+            System.Diagnostics.Debug.WriteLine("[Datadog] Core SDK initialized");
 
             // Set verbosity level for debugging
             if (DatadogConfig.VerboseLogging)
@@ -164,17 +171,17 @@ public class AppDelegate : MauiUIApplicationDelegate
 
             // Enable Logs
             DDLogs.EnableWith(new DDLogsConfiguration());
-            Console.WriteLine("[Datadog] Logs enabled");
+            System.Diagnostics.Debug.WriteLine("[Datadog] Logs enabled");
 
             // Enable Crash Reporting
             try
             {
                 DDCrashReporter.Enable();
-                Console.WriteLine("[Datadog] Crash Reporting enabled");
+                System.Diagnostics.Debug.WriteLine("[Datadog] Crash Reporting enabled");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[Datadog] Crash Reporting failed: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[Datadog] Crash Reporting failed: {ex.Message}");
             }
 
             // Enable RUM (Real User Monitoring)
@@ -185,7 +192,7 @@ public class AppDelegate : MauiUIApplicationDelegate
             rumConfiguration.SessionSampleRate = 100.0f;
 
             DDRUM.EnableWith(rumConfiguration);
-            Console.WriteLine("[Datadog] RUM enabled");
+            System.Diagnostics.Debug.WriteLine("[Datadog] RUM enabled");
 
             // Enable Session Replay
             try
@@ -198,23 +205,49 @@ public class AppDelegate : MauiUIApplicationDelegate
                 );
 
                 DDSessionReplay.EnableWith(sessionReplayConfig);
-                Console.WriteLine("[Datadog] Session Replay enabled");
+                System.Diagnostics.Debug.WriteLine("[Datadog] Session Replay enabled");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[Datadog] Session Replay failed: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[Datadog] Session Replay failed: {ex.Message}");
             }
 
             // Enable APM Tracing
             try
             {
                 var traceConfig = new DDTraceConfiguration();
+                traceConfig.SampleRate = 100.0f;  // Sample 100% of traces
+
+                // Configure URLSession tracking with first-party hosts for automatic HTTP tracing
+                var firstPartyHosts = new[] { "fakestoreapi.com" };
+
+                if (firstPartyHosts.Length > 0)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[Datadog] Configuring URLSession tracking for {firstPartyHosts.Length} first-party hosts");
+
+                    var hosts = new NSSet<NSString>(
+                        firstPartyHosts.Select(h => new NSString(h)).ToArray()
+                    );
+
+                    var firstPartyHostsTracing = new DDTraceFirstPartyHostsTracing(hosts);
+                    var urlSessionTracking = new DDTraceURLSessionTracking(firstPartyHostsTracing);
+                    traceConfig.SetURLSessionTracking(urlSessionTracking);
+
+                    System.Diagnostics.Debug.WriteLine("[Datadog] ✓ URLSession tracking configured");
+                    foreach (var host in firstPartyHosts)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[Datadog]   - {host}");
+                    }
+                }
+
                 DDTrace.EnableWith(traceConfig);
-                Console.WriteLine("[Datadog] APM Tracing enabled");
+                System.Diagnostics.Debug.WriteLine("[Datadog] ✓ APM Tracing enabled with URLSession tracking");
+                System.Diagnostics.Debug.WriteLine("[Datadog] ℹ HTTP requests to first-party hosts will be traced");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[Datadog] APM Tracing failed: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[Datadog] ⚠ APM Tracing failed: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[Datadog] Stack trace: {ex.StackTrace}");
             }
 
             // Enable WebView Tracking
@@ -223,19 +256,19 @@ public class AppDelegate : MauiUIApplicationDelegate
             try
             {
                 // DDWebViewTracking will be enabled per-WebView in the WebView handler
-                Console.WriteLine("[Datadog] WebView tracking configuration skipped (call Enable when WebView is available)");
+                System.Diagnostics.Debug.WriteLine("[Datadog] WebView tracking configuration skipped (call Enable when WebView is available)");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[Datadog] WebView tracking failed: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[Datadog] WebView tracking failed: {ex.Message}");
             }
 
-            Console.WriteLine("[Datadog] Successfully initialized for iOS");
+            System.Diagnostics.Debug.WriteLine("[Datadog] Successfully initialized for iOS");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[Datadog] Initialization failed: {ex.Message}");
-            Console.WriteLine($"[Datadog] Stack trace: {ex.StackTrace}");
+            System.Diagnostics.Debug.WriteLine($"[Datadog] Initialization failed: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[Datadog] Stack trace: {ex.StackTrace}");
         }
     }
 

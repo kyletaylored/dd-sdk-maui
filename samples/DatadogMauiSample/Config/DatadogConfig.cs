@@ -150,16 +150,16 @@ public static class DatadogConfig
                     }
                 }
 
-                Console.WriteLine($"[Datadog] Loaded {creds.Count} credentials from embedded config");
+                System.Diagnostics.Debug.WriteLine($"[Datadog] Loaded {creds.Count} credentials from embedded config");
             }
             else
             {
-                Console.WriteLine($"[Datadog] No embedded config file found ({resourceName})");
+                System.Diagnostics.Debug.WriteLine($"[Datadog] No embedded config file found ({resourceName})");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[Datadog] Failed to load embedded config: {ex.GetType().Name} - {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[Datadog] Failed to load embedded config: {ex.GetType().Name} - {ex.Message}");
         }
 
         return creds;

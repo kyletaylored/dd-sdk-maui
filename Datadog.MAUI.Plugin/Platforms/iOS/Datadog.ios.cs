@@ -82,7 +82,7 @@ public static partial class Datadog
         {
             try
             {
-                Console.WriteLine($"[Datadog] Configuring URLSession tracking for {tracingConfig.FirstPartyHosts.Length} first-party hosts");
+                System.Diagnostics.Debug.WriteLine($"[Datadog] Configuring URLSession tracking for {tracingConfig.FirstPartyHosts.Length} first-party hosts");
 
                 // Create NSSet of host strings
                 var hosts = new NSSet<NSString>(
@@ -98,22 +98,22 @@ public static partial class Datadog
                 // Apply to trace configuration
                 traceConfiguration.SetURLSessionTracking(urlSessionTracking);
 
-                Console.WriteLine("[Datadog] ✓ URLSession tracking configured");
+                System.Diagnostics.Debug.WriteLine("[Datadog] ✓ URLSession tracking configured");
 
                 // Log configured hosts
                 foreach (var host in tracingConfig.FirstPartyHosts)
                 {
-                    Console.WriteLine($"[Datadog]   - {host}");
+                    System.Diagnostics.Debug.WriteLine($"[Datadog]   - {host}");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[Datadog] ⚠ Failed to configure URLSession tracking: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[Datadog] ⚠ Failed to configure URLSession tracking: {ex.Message}");
             }
         }
         else
         {
-            Console.WriteLine("[Datadog] ℹ No first-party hosts configured for tracing");
+            System.Diagnostics.Debug.WriteLine("[Datadog] ℹ No first-party hosts configured for tracing");
         }
 
         DDTrace.EnableWith(traceConfiguration);
@@ -139,9 +139,9 @@ public static partial class Datadog
             return;
         }
 
-        Console.WriteLine("[Datadog] ℹ URLSession instrumentation requires a delegate instance");
-        Console.WriteLine("[Datadog]   Relying on URLSession tracking configuration instead");
-        Console.WriteLine("[Datadog]   If automatic HTTP tracing doesn't work, see docs for manual approach");
+        System.Diagnostics.Debug.WriteLine("[Datadog] ℹ URLSession instrumentation requires a delegate instance");
+        System.Diagnostics.Debug.WriteLine("[Datadog]   Relying on URLSession tracking configuration instead");
+        System.Diagnostics.Debug.WriteLine("[Datadog]   If automatic HTTP tracing doesn't work, see docs for manual approach");
 
         // TODO: Implement one of these approaches:
         // 1. Create a custom NSUrlSessionDataDelegate subclass
