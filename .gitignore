@@ -72,6 +72,8 @@ xcuserdata/
 *.jar
 .gradle/
 build/
+# Exception: MSBuild SDK packages need their build/ directory
+!Datadog.MAUI.Symbols/build/
 captures/
 .externalNativeBuild/
 .cxx/

@@ -1,0 +1,88 @@
+<Project>
+  <!--
+    Datadog.MAUI.Symbols MSBuild Targets
+
+    This file automatically triggers symbol uploads to Datadog after publishing a .NET MAUI app.
+    It handles both iOS (dSYMs) and Android (Proguard mapping.txt) symbol files.
+  -->
+
+  <UsingTask TaskName="Datadog.MAUI.Symbols.UploadSymbolsTask"
+             AssemblyFile="$(MSBuildThisFileDirectory)..\lib\netstandard2.0\Datadog.MAUI.Symbols.dll" />
+
+  <Target Name="DatadogUploadSymbols" AfterTargets="Publish">
+
+    <!-- Determine if upload should run -->
+    <PropertyGroup>
+      <!-- Allow users to explicitly disable with <DatadogUploadEnabled>false</DatadogUploadEnabled> -->
+      <_DatadogShouldRun Condition="'$(DatadogUploadEnabled)' == 'false'">false</_DatadogShouldRun>
+      <_DatadogShouldRun Condition="'$(_DatadogShouldRun)' == ''">true</_DatadogShouldRun>
+
+      <!-- Only run in Release configuration by default -->
+      <_DatadogShouldRun Condition="'$(Configuration)' != 'Release' AND '$(DatadogUploadInDebug)' != 'true'">false</_DatadogShouldRun>
+
+      <!-- Set default values -->
+      <_DatadogAppVersion Condition="'$(DatadogAppVersion)' == ''">$(ApplicationDisplayVersion)</_DatadogAppVersion>
+      <_DatadogAppVersion Condition="'$(_DatadogAppVersion)' == ''">1.0.0</_DatadogAppVersion>
+      <_DatadogSite Condition="'$(DatadogSite)' == ''">datadoghq.com</_DatadogSite>
+      <_DatadogDryRun Condition="'$(DatadogDryRun)' == 'true'">true</_DatadogDryRun>
+      <_DatadogDryRun Condition="'$(_DatadogDryRun)' == ''">false</_DatadogDryRun>
+    </PropertyGroup>
+
+    <!-- Android: Locate mapping.txt -->
+    <ItemGroup Condition="'$(TargetPlatformIdentifier)' == 'android' AND '$(_DatadogShouldRun)' == 'true'">
+      <!-- Try common locations for mapping.txt -->
+      <_DDMappingFile Include="$(OutputPath)\mapping.txt" Condition="Exists('$(OutputPath)\mapping.txt')" />
+      <_DDMappingFile Include="$(OutputPath)\..\mapping.txt" Condition="Exists('$(OutputPath)\..\mapping.txt') AND '@(_DDMappingFile)' == ''" />
+      <_DDMappingFile Include="$(IntermediateOutputPath)\mapping.txt" Condition="Exists('$(IntermediateOutputPath)\mapping.txt') AND '@(_DDMappingFile)' == ''" />
+      <_DDMappingFile Include="$(ProjectDir)\obj\$(Configuration)\$(TargetFramework)\android-arm64\mapping.txt"
+                      Condition="Exists('$(ProjectDir)\obj\$(Configuration)\$(TargetFramework)\android-arm64\mapping.txt') AND '@(_DDMappingFile)' == ''" />
+    </ItemGroup>
+
+    <!-- iOS: Locate .dSYM folder -->
+    <ItemGroup Condition="'$(TargetPlatformIdentifier)' == 'ios' AND '$(_DatadogShouldRun)' == 'true'">
+      <!-- Try common locations for .dSYM -->
+      <_DDDsymFolder Include="$(OutputPath)\$(AssemblyName).app.dSYM" Condition="Exists('$(OutputPath)\$(AssemblyName).app.dSYM')" />
+      <_DDDsymFolder Include="$(OutputPath)\..\$(AssemblyName).app.dSYM" Condition="Exists('$(OutputPath)\..\$(AssemblyName).app.dSYM') AND '@(_DDDsymFolder)' == ''" />
+      <_DDDsymFolder Include="$(AppBundleDir).dSYM" Condition="Exists('$(AppBundleDir).dSYM') AND '@(_DDDsymFolder)' == ''" />
+    </ItemGroup>
+
+    <!-- Upload Android Mapping File -->
+    <UploadSymbolsTask
+      Condition="'$(TargetPlatformIdentifier)' == 'android' AND '@(_DDMappingFile)' != ''"
+      TargetPlatform="android"
+      ServiceName="$(DatadogServiceName)"
+      ServiceNameAndroid="$(DatadogServiceNameAndroid)"
+      AppVersion="$(_DatadogAppVersion)"
+      FilePath="@(_DDMappingFile)"
+      ApiKey="$(DatadogApiKey)"
+      Site="$(_DatadogSite)"
+      DryRun="$(_DatadogDryRun)"
+    />
+
+    <!-- Upload iOS dSYM Files -->
+    <UploadSymbolsTask
+      Condition="'$(TargetPlatformIdentifier)' == 'ios' AND '@(_DDDsymFolder)' != ''"
+      TargetPlatform="ios"
+      ServiceName="$(DatadogServiceName)"
+      ServiceNameIOS="$(DatadogServiceNameiOS)"
+      AppVersion="$(_DatadogAppVersion)"
+      FilePath="@(_DDDsymFolder)"
+      ApiKey="$(DatadogApiKey)"
+      Site="$(_DatadogSite)"
+      DryRun="$(_DatadogDryRun)"
+    />
+
+    <!-- Log when files are not found -->
+    <Message
+      Condition="'$(TargetPlatformIdentifier)' == 'android' AND '$(_DatadogShouldRun)' == 'true' AND '@(_DDMappingFile)' == ''"
+      Importance="high"
+      Text="[Datadog] Android mapping.txt not found. Ensure ProGuard/R8 is enabled for Release builds." />
+
+    <Message
+      Condition="'$(TargetPlatformIdentifier)' == 'ios' AND '$(_DatadogShouldRun)' == 'true' AND '@(_DDDsymFolder)' == ''"
+      Importance="high"
+      Text="[Datadog] iOS dSYM folder not found at expected locations." />
+
+  </Target>
+
+</Project>
