@@ -97,15 +97,6 @@ jobs:
           future: false
           verbose: true
 
-      # --- Fix permissions and restore existing NuGet feed ---
-      - name: Fix _site permissions
-        run: |
-          # Jekyll creates _site with restrictive permissions
-          # Make it writable so Sleet can create nuget/ subdirectory
-          chmod -R u+w ./_site
-          mkdir -p ./_site/nuget
-          chmod -R u+w ./_site/nuget
-
       # --- Build NuGet feed into _site/nuget ---
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
