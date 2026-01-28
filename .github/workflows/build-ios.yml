@@ -180,7 +180,7 @@ jobs:
           echo "${{ needs.download-xcframeworks.outputs.projects }}" | while read -r project; do
             if [ -n "$project" ]; then
               echo "Building $project..."
-              dotnet build "$project" --configuration Release --no-restore -p:TargetFrameworks=net9.0-ios
+              dotnet build "$project" --configuration Release --no-restore -p:TargetFrameworks=net9.0-ios -v minimal
             fi
           done
 
@@ -294,7 +294,7 @@ jobs:
           echo "${{ needs.download-xcframeworks.outputs.projects }}" | while read -r project; do
             if [ -n "$project" ]; then
               echo "Building $project..."
-              dotnet build "$project" --configuration Release --no-restore -p:TargetFrameworks=net10.0-ios
+              dotnet build "$project" --configuration Release --no-restore -p:TargetFrameworks=net10.0-ios -v minimal
             fi
           done
 

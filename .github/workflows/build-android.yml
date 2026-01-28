@@ -158,7 +158,7 @@ jobs:
           echo "${{ needs.verify-android-dependencies.outputs.projects }}" | while read -r project; do
             if [ -n "$project" ]; then
               echo "Building $project..."
-              dotnet build "$project" --configuration Release --no-restore -p:TargetFrameworks=net9.0-android
+              dotnet build "$project" --configuration Release --no-restore -p:TargetFrameworks=net9.0-android -v minimal
             fi
           done
 
@@ -284,7 +284,7 @@ jobs:
           echo "${{ needs.verify-android-dependencies.outputs.projects }}" | while read -r project; do
             if [ -n "$project" ]; then
               echo "Building $project..."
-              dotnet build "$project" --configuration Release --no-restore -p:TargetFrameworks=net10.0-android
+              dotnet build "$project" --configuration Release --no-restore -p:TargetFrameworks=net10.0-android -v minimal
             fi
           done
 
