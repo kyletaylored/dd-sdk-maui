@@ -166,7 +166,10 @@ namespace Datadog.MAUI.Symbols
                 }
 
                 Log.LogMessage(MessageImportance.High, $"[Datadog] Uploading {TargetPlatform} symbols to Datadog...");
-                Log.LogMessage(MessageImportance.Normal, $"[Datadog] Command: npx @datadog/datadog-ci {arguments.Replace(ApiKey ?? "", "***")}");
+
+                // Sanitize command for logging (hide API key if present in arguments)
+                string sanitizedArgs = !string.IsNullOrEmpty(ApiKey) ? arguments.Replace(ApiKey, "***") : arguments;
+                Log.LogMessage(MessageImportance.Normal, $"[Datadog] Command: npx @datadog/datadog-ci {sanitizedArgs}");
 
                 var process = Process.Start(psi);
                 if (process == null)
