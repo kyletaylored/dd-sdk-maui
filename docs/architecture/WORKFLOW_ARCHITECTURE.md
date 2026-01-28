@@ -4,6 +4,7 @@ title: Workflow Architecture
 parent: Architecture
 nav_order: 1
 description: "GitHub Actions workflow architecture and build pipeline for the Datadog SDK for .NET MAUI"
+permalink: /architecture/workflows
 ---
 
 # GitHub Actions Workflow Architecture

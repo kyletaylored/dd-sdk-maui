@@ -3,6 +3,7 @@ layout: default
 title: Integration Packages
 parent: Android
 nav_order: 2
+permalink: /guides/android/integrations
 ---
 
 # Android Integration Packages
@@ -359,7 +360,7 @@ curl -s https://repo1.maven.org/maven2/com/datadoghq/dd-sdk-android-okhttp/3.5.0
 ## Related Documentation
 
 - [SCRIPTS_OVERVIEW.md]() - Build scripts guide
-- [maven-nuget-version-mapping.md](../../guides/android/ANDROID_DEPENDENCIES.html) - Version compatibility
+- [maven-nuget-version-mapping.md](../../guides/android/android_dependencies.html) - Version compatibility
 - [PACKAGING_ARCHITECTURE.md]() - Package structure
 - [_reference/ANDROID_PACKAGES_ANALYSIS.md](../_reference/ANDROID_PACKAGES_ANALYSIS.html) - All available packages
 

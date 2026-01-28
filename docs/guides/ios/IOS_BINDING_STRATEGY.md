@@ -3,6 +3,7 @@ layout: default
 title: Binding Strategy
 parent: iOS
 nav_order: 1
+permalink: /guides/ios/binding-strategy
 ---
 
 # iOS Binding Strategy
@@ -437,7 +438,7 @@ For each iOS framework:
 - [IDENTIFYING_USER_FACING_APIS.md]() - Detailed methodology
 - [RUM_BINDING_COMPARISON.md]() - Concrete before/after example
 - [UNIFIED_API_DESIGN.md]() - Cross-platform API design
-- [PROJECT_OVERVIEW.md](../../project/PROJECT_GUIDE.html) - Overall project architecture
+- [PROJECT_OVERVIEW.md](../../project/project_guide.html) - Overall project architecture
 
 ---
 

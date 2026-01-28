@@ -3,6 +3,7 @@ layout: default
 title: Packaging Architecture
 parent: Architecture
 nav_order: 2
+permalink: /architecture/packaging
 ---
 
 # Packaging and Release Guide: Datadog .NET MAUI Bindings (Android + iOS)

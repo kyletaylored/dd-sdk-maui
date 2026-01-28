@@ -3,6 +3,7 @@ layout: default
 title: API Identification
 parent: iOS
 nav_order: 2
+permalink: /guides/ios/api-identification
 ---
 
 # Methodology: Identifying User-Facing vs Internal APIs

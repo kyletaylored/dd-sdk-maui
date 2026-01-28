@@ -3,6 +3,7 @@ layout: default
 title: API Reference
 parent: Getting Started
 nav_order: 3
+permalink: /getting-started/api-reference
 ---
 
 # Datadog MAUI Unified API Design

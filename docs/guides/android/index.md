@@ -14,7 +14,7 @@ Complete guides for Android development with the Datadog MAUI SDK.
 
 ### Dependency Management
 
-**[Android Dependencies](../../guides/android/ANDROID_DEPENDENCIES.html)** - Complete guide to managing Android dependencies:
+**[Android Dependencies](../../guides/android/android_dependencies.html)** - Complete guide to managing Android dependencies:
 
 - **The Problem and Solution**: Understanding Maven to NuGet mapping
 - **Quick Reference**: Fast lookup tables for dependency handling
@@ -30,7 +30,7 @@ Complete guides for Android development with the Datadog MAUI SDK.
 
 ### Integration Packages
 
-**[Android Integration Packages](../../guides/android/ANDROID_INTEGRATION_PACKAGES.html)** - Optional integration modules:
+**[Android Integration Packages](../../guides/android/android_integration_packages.html)** - Optional integration modules:
 
 - **OkHttp Integration**: HTTP client instrumentation
 - **OpenTelemetry Integration**: OTel tracing support
@@ -40,22 +40,22 @@ Complete guides for Android development with the Datadog MAUI SDK.
 
 ### For New Android Developers
 
-1. Read [Android Dependencies](ANDROID_DEPENDENCIES.html#the-problem-and-solution) to understand the architecture
-2. Use [Quick Reference](ANDROID_DEPENDENCIES.html#quick-reference) tables for lookups
-3. Check [Troubleshooting](ANDROID_DEPENDENCIES.html#troubleshooting) if you hit issues
+1. Read [Android Dependencies](android_dependencies.html#the-problem-and-solution) to understand the architecture
+2. Use [Quick Reference](android_dependencies.html#quick-reference) tables for lookups
+3. Check [Troubleshooting](android_dependencies.html#troubleshooting) if you hit issues
 
 ### Common Tasks
 
 | Task | Guide Section |
 |------|---------------|
-| Add AndroidX dependency | [Android Dependencies - AndroidX](ANDROID_DEPENDENCIES.html#androidx-dependencies) |
-| Add Maven library | [Android Dependencies - Maven](ANDROID_DEPENDENCIES.html#maven-dependencies) |
-| Add integration package | [Integration Packages - Adding More](ANDROID_INTEGRATION_PACKAGES.html#adding-more-integration-packages) |
-| Fix version conflict | [Dependencies - Troubleshooting](ANDROID_DEPENDENCIES.html#troubleshooting) |
-| Update SDK version | [Dependencies - Version Updates](ANDROID_DEPENDENCIES.html#version-updates) |
+| Add AndroidX dependency | [Android Dependencies - AndroidX](android_dependencies.html#androidx-dependencies) |
+| Add Maven library | [Android Dependencies - Maven](android_dependencies.html#maven-dependencies) |
+| Add integration package | [Integration Packages - Adding More](android_integration_packages.html#adding-more-integration-packages) |
+| Fix version conflict | [Dependencies - Troubleshooting](android_dependencies.html#troubleshooting) |
+| Update SDK version | [Dependencies - Version Updates](android_dependencies.html#version-updates) |
 
 ## Related Documentation
 
-- [Project Guide](../../project/PROJECT_GUIDE.html) - Overall project structure
-- [Scripts Overview](../../architecture/SCRIPTS_OVERVIEW.html) - Build automation for Android
-- [Packaging Architecture](../../architecture/PACKAGING_ARCHITECTURE.html) - Android package structure
+- [Project Guide](../../project/project_guide.html) - Overall project structure
+- [Scripts Overview](../../architecture/scripts_overview.html) - Build automation for Android
+- [Packaging Architecture](../../architecture/packaging_architecture.html) - Android package structure

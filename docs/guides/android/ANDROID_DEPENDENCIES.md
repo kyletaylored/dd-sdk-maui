@@ -3,6 +3,7 @@ layout: default
 title: Dependencies
 parent: Android
 nav_order: 1
+permalink: /guides/android/dependencies
 ---
 
 # Android Dependencies Guide

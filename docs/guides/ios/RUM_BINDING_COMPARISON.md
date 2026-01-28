@@ -3,6 +3,7 @@ layout: default
 title: RUM Example
 parent: iOS
 nav_order: 3
+permalink: /guides/ios/rum-example
 ---
 
 # RUM Binding Comparison: Generated vs Manual

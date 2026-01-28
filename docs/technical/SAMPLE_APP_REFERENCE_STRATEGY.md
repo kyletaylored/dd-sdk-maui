@@ -3,6 +3,7 @@ layout: default
 title: Sample App Reference Strategy
 parent: Architecture
 nav_order: 4
+permalink: /architecture/sample-app-strategy
 ---
 
 # Sample App Reference Strategy

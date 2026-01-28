@@ -14,7 +14,7 @@ Guides for developers using the Datadog MAUI SDK in their applications.
 
 ### RUM Action Naming
 
-**[RUM Action Naming](RUM_ACTION_NAMING.html)** - Improve RUM action names for better observability:
+**[RUM Action Naming](rum_action_naming.html)** - Improve RUM action names for better observability:
 
 - **AutomationId Property**: Tag MAUI elements with readable identifiers
 - **Manual Action Tracking**: Add custom RUM actions with rich context
@@ -29,7 +29,7 @@ Guides for developers using the Datadog MAUI SDK in their applications.
 
 ### Mapping File Uploads
 
-**[Mapping File Uploads](../../guides/user/MAPPING_FILE_UPLOADS.html)** - Upload mapping files for crash symbolication:
+**[Mapping File Uploads](../../guides/user/mapping_file_uploads.html)** - Upload mapping files for crash symbolication:
 
 - **ProGuard/R8 Mapping Files**: Deobfuscate Android crash reports
 - **NDK Symbol Files**: Symbolicate native C/C++ crashes
@@ -47,25 +47,25 @@ Guides for developers using the Datadog MAUI SDK in their applications.
 
 ### For MAUI App Developers
 
-1. **Want readable RUM action names?** → Read [RUM Action Naming](RUM_ACTION_NAMING.html)
-2. **Using RUM Error Tracking?** → Read [Mapping File Uploads](../../guides/user/MAPPING_FILE_UPLOADS.html)
-3. **Using ProGuard/R8?** → See [R8 Configuration](MAPPING_FILE_UPLOADS.html#prerequisites-enable-r8-code-shrinking)
-4. **Using Native Code (NDK)?** → See [NDK Symbol Upload](MAPPING_FILE_UPLOADS.html#ndk-symbol-files)
+1. **Want readable RUM action names?** → Read [RUM Action Naming](rum_action_naming.html)
+2. **Using RUM Error Tracking?** → Read [Mapping File Uploads](../../guides/user/mapping_file_uploads.html)
+3. **Using ProGuard/R8?** → See [R8 Configuration](mapping_file_uploads.html#prerequisites-enable-r8-code-shrinking)
+4. **Using Native Code (NDK)?** → See [NDK Symbol Upload](mapping_file_uploads.html#ndk-symbol-files)
 
 ### Common Tasks
 
 | Task | Guide Section |
 |------|---------------|
-| Improve RUM action names | [RUM Action Naming](RUM_ACTION_NAMING.html) |
-| Add AutomationId to elements | [RUM Action Naming - AutomationId](RUM_ACTION_NAMING.html#solution-1-automationid-property) |
-| Track custom actions | [RUM Action Naming - Manual Tracking](RUM_ACTION_NAMING.html#solution-2-manual-rum-action-tracking) |
-| Enable R8 | [Mapping Files - Prerequisites](MAPPING_FILE_UPLOADS.html#prerequisites-enable-r8-code-shrinking) |
-| Find mapping file | [Mapping Files - File Locations](../../guides/user/MAPPING_FILE_UPLOADS.html) |
-| Upload with CLI | [Mapping Files - Datadog CLI](MAPPING_FILE_UPLOADS.html#method-1-datadog-cli) |
-| Automate upload | [Mapping Files - CI/CD](../../guides/user/MAPPING_FILE_UPLOADS.html) |
+| Improve RUM action names | [RUM Action Naming](rum_action_naming.html) |
+| Add AutomationId to elements | [RUM Action Naming - AutomationId](rum_action_naming.html#solution-1-automationid-property) |
+| Track custom actions | [RUM Action Naming - Manual Tracking](rum_action_naming.html#solution-2-manual-rum-action-tracking) |
+| Enable R8 | [Mapping Files - Prerequisites](mapping_file_uploads.html#prerequisites-enable-r8-code-shrinking) |
+| Find mapping file | [Mapping Files - File Locations](../../guides/user/mapping_file_uploads.html) |
+| Upload with CLI | [Mapping Files - Datadog CLI](mapping_file_uploads.html#method-1-datadog-cli) |
+| Automate upload | [Mapping Files - CI/CD](../../guides/user/mapping_file_uploads.html) |
 
 ## Related Documentation
 
-- [Getting Started](../../getting-started/GETTING_STARTED.html) - SDK installation and setup
-- [Android Dependencies](../android/ANDROID_DEPENDENCIES.html) - Android-specific configuration
-- [Unified API Design](../../getting-started/UNIFIED_API_DESIGN.html) - SDK API reference
+- [Getting Started](../../getting-started/getting_started.html) - SDK installation and setup
+- [Android Dependencies](../android/android_dependencies.html) - Android-specific configuration
+- [Unified API Design](../../getting-started/unified_api_design.html) - SDK API reference

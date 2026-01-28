@@ -3,6 +3,7 @@ layout: default
 title: RUM Action Naming
 parent: User Guides
 nav_order: 1
+permalink: /guides/user/rum-actions
 ---
 
 # Improving RUM Action Names in .NET MAUI
@@ -264,5 +265,5 @@ After implementation:
 ---
 
 **Related Guides:**
-- [Getting Started](../../getting-started/GETTING_STARTED.html)
-- [Mapping File Uploads](MAPPING_FILE_UPLOADS.html)
+- [Getting Started](../../getting-started/getting_started.html)
+- [Mapping File Uploads](mapping_file_uploads.html)

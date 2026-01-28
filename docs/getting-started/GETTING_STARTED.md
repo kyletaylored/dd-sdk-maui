@@ -4,6 +4,7 @@ title: Installation & Setup
 parent: Getting Started
 nav_order: 1
 description: "Guide to developing and building the Datadog SDK for .NET MAUI"
+permalink: /getting-started/installation
 ---
 
 # Getting Started with Datadog MAUI SDK Development
@@ -371,7 +372,7 @@ dotnet build -f net9.0-android
 
 ## Next Steps
 
-1. **Review Architecture**: Read [PROJECT_OVERVIEW.md](../project/PROJECT_GUIDE.html)
+1. **Review Architecture**: Read [PROJECT_OVERVIEW.md](../project/project_guide.html)
 2. **Implement Features**: Start with core initialization
 3. **Write Tests**: Add unit and integration tests
 4. **Contribute**: See [CONTRIBUTING.md]()
@@ -406,7 +407,7 @@ git log --oneline --graph --decorate --all -10
 
 ### Documentation
 - [Documentation Index](../index.html)
-- [Project Overview](../project/PROJECT_GUIDE.html)
+- [Project Overview](../project/project_guide.html)
 - [Contributing Guide]()
 - [Changelog]()
 

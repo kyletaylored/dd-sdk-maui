@@ -4,6 +4,7 @@ title: Contributing
 parent: Project
 nav_order: 2
 description: "How to contribute to the Datadog SDK for .NET MAUI"
+permalink: /project/contributing
 ---
 
 # Contributing to Datadog MAUI SDK

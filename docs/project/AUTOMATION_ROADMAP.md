@@ -4,6 +4,7 @@ title: Automation Roadmap
 parent: Project
 nav_order: 4
 description: "Path to full automation for Android dependency management in the Datadog MAUI SDK"
+permalink: /project/roadmap
 ---
 
 # Dependency Automation Roadmap

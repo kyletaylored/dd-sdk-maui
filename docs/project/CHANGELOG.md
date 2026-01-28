@@ -4,6 +4,7 @@ title: Changelog
 parent: Project
 nav_order: 3
 description: "Release history and notable changes for the Datadog SDK for .NET MAUI"
+permalink: /project/changelog
 ---
 
 # Changelog

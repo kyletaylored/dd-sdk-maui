@@ -3,6 +3,7 @@ layout: default
 title: Overview
 parent: Project
 nav_order: 1
+permalink: /project/overview
 ---
 
 # Project Guide
