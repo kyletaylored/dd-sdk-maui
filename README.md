@@ -228,6 +228,22 @@ dotnet pack -c Release -o artifacts/packages
 
 For more detailed build instructions, see [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md).
 
+### Running the Sample App
+
+The repository includes a comprehensive sample app demonstrating all SDK features:
+
+```bash
+# Quick start (auto-loads .env from sample directory)
+cd samples/DatadogMauiSample
+cp .env.example .env       # Copy and edit with your Datadog credentials
+
+cd ../..                   # Return to repository root
+make run-ios              # iOS - automatically loads samples/DatadogMauiSample/.env
+make run-android          # Android - automatically loads samples/DatadogMauiSample/.env
+```
+
+See [samples/DatadogMauiSample/README.md](samples/DatadogMauiSample/README.md) for detailed setup instructions.
+
 ## Documentation
 
 📚 **[Full Documentation Site](https://kyletaylored.github.io/dd-sdk-maui/)**

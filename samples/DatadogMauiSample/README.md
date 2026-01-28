@@ -106,33 +106,67 @@ The ShopistApiService demonstrates HTTP request tracing:
 
 ## Configuration
 
-### 1. Create `.env` file
+### 1. Set Environment Variables
 
-Create a `.env` file in the project root with your Datadog credentials:
+The sample app uses environment variables for credentials. There are two ways to set them:
+
+#### Option A: Using `.env` file (Recommended)
+
+Create a `.env` file in the sample app directory:
+
+```bash
+# From the sample directory
+cd samples/DatadogMauiSample
+cp .env.example .env
+nano .env  # Edit with your credentials
+
+# Or from repository root
+cp samples/DatadogMauiSample/.env.example samples/DatadogMauiSample/.env
+nano samples/DatadogMauiSample/.env
+```
+
+Add your credentials:
 
 ```env
-# Datadog Configuration
-DATADOG_ANDROID_CLIENT_TOKEN=your_android_client_token_here
-DATADOG_ANDROID_RUM_APPLICATION_ID=your_android_rum_app_id_here
+# iOS Configuration
+DD_RUM_IOS_CLIENT_TOKEN=pub1234567890abcdef1234567890abcd
+DD_RUM_IOS_APPLICATION_ID=12345678-1234-1234-1234-123456789012
 
-DATADOG_IOS_CLIENT_TOKEN=your_ios_client_token_here
-DATADOG_IOS_RUM_APPLICATION_ID=your_ios_rum_app_id_here
+# Android Configuration
+DD_RUM_ANDROID_CLIENT_TOKEN=pub9876543210fedcba9876543210fedc
+DD_RUM_ANDROID_APPLICATION_ID=87654321-4321-4321-4321-210987654321
 
-DATADOG_ENVIRONMENT=dev
-DATADOG_SERVICE_NAME=datadog-maui-sample
-DATADOG_SESSION_SAMPLE_RATE=100
-DATADOG_VERBOSE_LOGGING=true
+# Optional: General settings
+DD_ENV=dev
+DD_SERVICE_NAME=shopist-maui-demo
+DD_SITE=US1
+DD_VERBOSE_LOGGING=true
+```
 
-# First-party hosts for distributed tracing
-DATADOG_FIRST_PARTY_HOSTS=fakestoreapi.com,api.example.com
+Then run from the repository root:
+
+#### Option B: Export Directly
+
+Export environment variables in your terminal:
+
+```bash
+# iOS
+export DD_RUM_IOS_CLIENT_TOKEN="your-ios-client-token"
+export DD_RUM_IOS_APPLICATION_ID="your-ios-app-id"
+
+# Android
+export DD_RUM_ANDROID_CLIENT_TOKEN="your-android-client-token"
+export DD_RUM_ANDROID_APPLICATION_ID="your-android-app-id"
 ```
 
 ### 2. Get Datadog Credentials
 
 1. Log into [Datadog](https://app.datadoghq.com/)
-2. Navigate to **UX Monitoring > RUM Applications**
-3. Create a new application or select an existing one
-4. Copy your **Client Token** and **Application ID**
+2. Go to **Organization Settings > Client Tokens**
+   - Create a new token or copy an existing one
+3. Go to **UX Monitoring > RUM Applications**
+   - Create separate applications for iOS and Android
+   - Copy the **Application ID** for each platform
 
 ### 3. Configure in MauiProgram.cs
 
@@ -174,19 +208,59 @@ The app automatically loads configuration from the `.env` file:
 - Android SDK (for Android development)
 - Xcode (for iOS development on macOS)
 
-### Build and Run
+### Quick Start with Make
 
 ```bash
-# Restore workloads
-dotnet workload restore
+# Set up credentials (first time only)
+cd samples/DatadogMauiSample
+cp .env.example .env
+nano .env  # Edit with your Datadog credentials
 
-# Run on Android
-dotnet build -f net9.0-android
-dotnet run -f net9.0-android
+# Run from repository root with automatic .env loading (recommended)
+cd ../..
+make run-ios        # iOS (macOS only) - auto-loads samples/DatadogMauiSample/.env
+make run-android    # Android - auto-loads samples/DatadogMauiSample/.env
+
+# Or manually source .env first
+source samples/DatadogMauiSample/.env
+make sample-ios     # iOS (macOS only)
+make sample-android # Android
+```
+
+The `run-ios` and `run-android` targets automatically:
+- ✅ Check if `.env` file exists in samples/DatadogMauiSample/
+- ✅ Load environment variables from `.env`
+- ✅ Validate credentials are set
+- ✅ Build and run the app
+
+### Manual Build
+
+If you prefer not to use Make:
+
+```bash
+# Set environment variables
+export DD_RUM_IOS_CLIENT_TOKEN="your-token"
+export DD_RUM_IOS_APPLICATION_ID="your-app-id"
 
 # Run on iOS (macOS only)
-dotnet build -f net9.0-ios
-dotnet run -f net9.0-ios
+cd samples/DatadogMauiSample
+dotnet build -f net9.0-ios -c Debug \
+  -p:IosClientToken="$DD_RUM_IOS_CLIENT_TOKEN" \
+  -p:IosApplicationId="$DD_RUM_IOS_APPLICATION_ID"
+dotnet build -f net9.0-ios -c Debug -t:Run \
+  -p:IosClientToken="$DD_RUM_IOS_CLIENT_TOKEN" \
+  -p:IosApplicationId="$DD_RUM_IOS_APPLICATION_ID"
+
+# Run on Android
+export DD_RUM_ANDROID_CLIENT_TOKEN="your-token"
+export DD_RUM_ANDROID_APPLICATION_ID="your-app-id"
+
+dotnet build -f net10.0-android -c Debug \
+  -p:AndroidClientToken="$DD_RUM_ANDROID_CLIENT_TOKEN" \
+  -p:AndroidApplicationId="$DD_RUM_ANDROID_APPLICATION_ID"
+dotnet build -f net10.0-android -c Debug -t:Run \
+  -p:AndroidClientToken="$DD_RUM_ANDROID_CLIENT_TOKEN" \
+  -p:AndroidApplicationId="$DD_RUM_ANDROID_APPLICATION_ID"
 ```
 
 ## Viewing Data in Datadog

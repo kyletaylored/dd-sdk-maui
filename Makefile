@@ -1,6 +1,6 @@
 .PHONY: help build-android build-ios build-plugin build pack clean clean-all test status check-prereqs dev-setup \
-        sample-ios sample-android sample-build-ios sample-build-android download-ios-frameworks \
-        sample-logs-android sample-logs-clear upload-symbols restore
+        sample-ios sample-android sample-build-ios sample-build-android run-ios run-android \
+        download-ios-frameworks sample-logs-android sample-logs-clear upload-symbols restore
 
 # Default target
 .DEFAULT_GOAL := help
@@ -119,31 +119,119 @@ sample-ios: ## Build and run iOS sample app (Debug mode)
 		echo "$(RED)Error: iOS sample requires macOS$(NC)"; \
 		exit 1; \
 	fi
+	@if [ -z "$$DD_RUM_IOS_CLIENT_TOKEN" ] || [ -z "$$DD_RUM_IOS_APPLICATION_ID" ]; then \
+		echo "$(YELLOW)⚠️  Warning: iOS RUM credentials not set$(NC)"; \
+		echo "$(YELLOW)   Set DD_RUM_IOS_CLIENT_TOKEN and DD_RUM_IOS_APPLICATION_ID environment variables$(NC)"; \
+		echo "$(YELLOW)   App will use placeholder values$(NC)"; \
+	fi
 	@cd samples/DatadogMauiSample && \
-		dotnet build -f net9.0-ios -c Debug && \
-		dotnet build -f net9.0-ios -c Debug -t:Run
+		dotnet build -f net9.0-ios -c Debug \
+			-p:IosClientToken="$$DD_RUM_IOS_CLIENT_TOKEN" \
+			-p:IosApplicationId="$$DD_RUM_IOS_APPLICATION_ID" && \
+		dotnet build -f net9.0-ios -c Debug -t:Run \
+			-p:IosClientToken="$$DD_RUM_IOS_CLIENT_TOKEN" \
+			-p:IosApplicationId="$$DD_RUM_IOS_APPLICATION_ID"
 	@echo "$(GREEN)✓ iOS sample app launched$(NC)"
 
 sample-android: ## Build and run Android sample app (Debug mode)
 	@echo "$(BLUE)Building and running Android sample app...$(NC)"
+	@if [ -z "$$DD_RUM_ANDROID_CLIENT_TOKEN" ] || [ -z "$$DD_RUM_ANDROID_APPLICATION_ID" ]; then \
+		echo "$(YELLOW)⚠️  Warning: Android RUM credentials not set$(NC)"; \
+		echo "$(YELLOW)   Set DD_RUM_ANDROID_CLIENT_TOKEN and DD_RUM_ANDROID_APPLICATION_ID environment variables$(NC)"; \
+		echo "$(YELLOW)   App will use placeholder values$(NC)"; \
+	fi
 	@cd samples/DatadogMauiSample && \
-		dotnet build -f net10.0-android -c Debug && \
-		dotnet build -f net10.0-android -c Debug -t:Run
+		dotnet build -f net10.0-android -c Debug \
+			-p:AndroidClientToken="$$DD_RUM_ANDROID_CLIENT_TOKEN" \
+			-p:AndroidApplicationId="$$DD_RUM_ANDROID_APPLICATION_ID" && \
+		dotnet build -f net10.0-android -c Debug -t:Run \
+			-p:AndroidClientToken="$$DD_RUM_ANDROID_CLIENT_TOKEN" \
+			-p:AndroidApplicationId="$$DD_RUM_ANDROID_APPLICATION_ID"
 	@echo "$(GREEN)✓ Android sample app launched$(NC)"
 
 sample-build-ios: ## Build iOS sample in Debug mode (uses ProjectReference)
 	@echo "$(BLUE)Building iOS sample app (Debug)...$(NC)"
+	@if [ -z "$$DD_RUM_IOS_CLIENT_TOKEN" ] || [ -z "$$DD_RUM_IOS_APPLICATION_ID" ]; then \
+		echo "$(YELLOW)⚠️  Warning: iOS RUM credentials not set$(NC)"; \
+		echo "$(YELLOW)   Set DD_RUM_IOS_CLIENT_TOKEN and DD_RUM_IOS_APPLICATION_ID environment variables$(NC)"; \
+		echo "$(YELLOW)   App will use placeholder values$(NC)"; \
+	fi
 	@cd samples/DatadogMauiSample && \
 		dotnet restore && \
-		dotnet build -f net9.0-ios -c Debug
+		dotnet build -f net9.0-ios -c Debug \
+			-p:IosClientToken="$$DD_RUM_IOS_CLIENT_TOKEN" \
+			-p:IosApplicationId="$$DD_RUM_IOS_APPLICATION_ID"
 	@echo "$(GREEN)✓ iOS sample built$(NC)"
 
 sample-build-android: ## Build Android sample in Debug mode (uses ProjectReference)
 	@echo "$(BLUE)Building Android sample app (Debug)...$(NC)"
+	@if [ -z "$$DD_RUM_ANDROID_CLIENT_TOKEN" ] || [ -z "$$DD_RUM_ANDROID_APPLICATION_ID" ]; then \
+		echo "$(YELLOW)⚠️  Warning: Android RUM credentials not set$(NC)"; \
+		echo "$(YELLOW)   Set DD_RUM_ANDROID_CLIENT_TOKEN and DD_RUM_ANDROID_APPLICATION_ID environment variables$(NC)"; \
+		echo "$(YELLOW)   App will use placeholder values$(NC)"; \
+	fi
 	@cd samples/DatadogMauiSample && \
 		dotnet restore && \
-		dotnet build -f net10.0-android -c Debug
+		dotnet build -f net10.0-android -c Debug \
+			-p:AndroidClientToken="$$DD_RUM_ANDROID_CLIENT_TOKEN" \
+			-p:AndroidApplicationId="$$DD_RUM_ANDROID_APPLICATION_ID"
 	@echo "$(GREEN)✓ Android sample built$(NC)"
+
+run-ios: ## Auto-load .env and run iOS sample app
+	@echo "$(BLUE)Loading environment and running iOS sample...$(NC)"
+	@if [ "$$(uname)" != "Darwin" ]; then \
+		echo "$(RED)Error: iOS sample requires macOS$(NC)"; \
+		exit 1; \
+	fi
+	@if [ ! -f samples/DatadogMauiSample/.env ]; then \
+		echo "$(RED)❌ .env file not found in samples/DatadogMauiSample/$(NC)"; \
+		echo "$(YELLOW)Create .env file from .env.example:$(NC)"; \
+		echo "  cp samples/DatadogMauiSample/.env.example samples/DatadogMauiSample/.env"; \
+		echo "  # Edit samples/DatadogMauiSample/.env with your credentials"; \
+		exit 1; \
+	fi
+	@echo "$(GREEN)✓ Found .env file$(NC)"
+	@set -a; . ./samples/DatadogMauiSample/.env; set +a; \
+	if [ -z "$$DD_RUM_IOS_CLIENT_TOKEN" ] || [ -z "$$DD_RUM_IOS_APPLICATION_ID" ]; then \
+		echo "$(RED)❌ iOS credentials not set in .env file$(NC)"; \
+		echo "$(YELLOW)Set DD_RUM_IOS_CLIENT_TOKEN and DD_RUM_IOS_APPLICATION_ID in .env$(NC)"; \
+		exit 1; \
+	fi; \
+	echo "$(GREEN)✓ Loaded iOS credentials$(NC)"; \
+	cd samples/DatadogMauiSample && \
+		dotnet build -f net9.0-ios -c Debug \
+			-p:IosClientToken="$$DD_RUM_IOS_CLIENT_TOKEN" \
+			-p:IosApplicationId="$$DD_RUM_IOS_APPLICATION_ID" && \
+		dotnet build -f net9.0-ios -c Debug -t:Run \
+			-p:IosClientToken="$$DD_RUM_IOS_CLIENT_TOKEN" \
+			-p:IosApplicationId="$$DD_RUM_IOS_APPLICATION_ID"
+	@echo "$(GREEN)✓ iOS sample app launched$(NC)"
+
+run-android: ## Auto-load .env and run Android sample app
+	@echo "$(BLUE)Loading environment and running Android sample...$(NC)"
+	@if [ ! -f samples/DatadogMauiSample/.env ]; then \
+		echo "$(RED)❌ .env file not found in samples/DatadogMauiSample/$(NC)"; \
+		echo "$(YELLOW)Create .env file from .env.example:$(NC)"; \
+		echo "  cp samples/DatadogMauiSample/.env.example samples/DatadogMauiSample/.env"; \
+		echo "  # Edit samples/DatadogMauiSample/.env with your credentials"; \
+		exit 1; \
+	fi
+	@echo "$(GREEN)✓ Found .env file$(NC)"
+	@set -a; . ./samples/DatadogMauiSample/.env; set +a; \
+	if [ -z "$$DD_RUM_ANDROID_CLIENT_TOKEN" ] || [ -z "$$DD_RUM_ANDROID_APPLICATION_ID" ]; then \
+		echo "$(RED)❌ Android credentials not set in .env file$(NC)"; \
+		echo "$(YELLOW)Set DD_RUM_ANDROID_CLIENT_TOKEN and DD_RUM_ANDROID_APPLICATION_ID in .env$(NC)"; \
+		exit 1; \
+	fi; \
+	echo "$(GREEN)✓ Loaded Android credentials$(NC)"; \
+	cd samples/DatadogMauiSample && \
+		dotnet build -f net10.0-android -c Debug \
+			-p:AndroidClientToken="$$DD_RUM_ANDROID_CLIENT_TOKEN" \
+			-p:AndroidApplicationId="$$DD_RUM_ANDROID_APPLICATION_ID" && \
+		dotnet build -f net10.0-android -c Debug -t:Run \
+			-p:AndroidClientToken="$$DD_RUM_ANDROID_CLIENT_TOKEN" \
+			-p:AndroidApplicationId="$$DD_RUM_ANDROID_APPLICATION_ID"
+	@echo "$(GREEN)✓ Android sample app launched$(NC)"
 
 sample-logs-android: ## View Android logs (filtered for Datadog and app)
 	@echo "$(BLUE)Viewing Android logs (filtering for Datadog and app output)...$(NC)"
