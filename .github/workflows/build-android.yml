@@ -341,6 +341,27 @@ jobs:
           mkdir -p ./artifacts-combined
           mkdir -p ./temp-extract
 
+          # Verify both net9 and net10 packages exist
+          NET9_COUNT=$(ls -1 ./artifacts-net9/*.nupkg 2>/dev/null | wc -l)
+          NET10_COUNT=$(ls -1 ./artifacts-net10/*.nupkg 2>/dev/null | wc -l)
+
+          if [ "$NET9_COUNT" -eq 0 ]; then
+            echo "Error: No net9.0-android packages found"
+            exit 1
+          fi
+
+          if [ "$NET10_COUNT" -eq 0 ]; then
+            echo "Error: No net10.0-android packages found"
+            exit 1
+          fi
+
+          if [ "$NET9_COUNT" -ne "$NET10_COUNT" ]; then
+            echo "Error: Package count mismatch - net9: $NET9_COUNT, net10: $NET10_COUNT"
+            exit 1
+          fi
+
+          echo "Found $NET9_COUNT packages for both net9.0-android and net10.0-android"
+
           # Process each package
           for net9_pkg in ./artifacts-net9/*.nupkg; do
             pkg_name=$(basename "$net9_pkg" | sed 's/\.[0-9]\+\.[0-9]\+\.[0-9]\+\.nupkg$//')
@@ -349,30 +370,30 @@ jobs:
 
             echo "Processing $pkg_name version $version"
 
-            if [ -f "$net10_pkg" ]; then
-              # Extract both packages
-              unzip -q "$net9_pkg" -d "./temp-extract/net9"
-              unzip -q "$net10_pkg" -d "./temp-extract/net10"
-
-              # Copy net10.0-android* libs to net9 package structure (handles net10.0-android35.0)
-              for net10_dir in "./temp-extract/net10/lib"/net10.0-android*; do
-                if [ -d "$net10_dir" ]; then
-                  cp -r "$net10_dir" "./temp-extract/net9/lib/"
-                  echo "  Copied $(basename $net10_dir) framework"
-                fi
-              done
-
-              # Repackage the combined content
-              (cd "./temp-extract/net9" && zip -q -r "../../artifacts-combined/${pkg_name}.${version}.nupkg" *)
-
-              # Clean up temp directories
-              rm -rf "./temp-extract/net9" "./temp-extract/net10"
-
-              echo "  ✅ Created combined package: ${pkg_name}.${version}.nupkg"
-            else
-              echo "  ⚠️  Missing net10 package, using net9 only"
-              cp "$net9_pkg" "./artifacts-combined/"
+            if [ ! -f "$net10_pkg" ]; then
+              echo "Error: Missing net10.0-android package for $pkg_name"
+              exit 1
             fi
+
+            # Extract both packages
+            unzip -q "$net9_pkg" -d "./temp-extract/net9"
+            unzip -q "$net10_pkg" -d "./temp-extract/net10"
+
+            # Copy net10.0-android* libs to net9 package structure (handles net10.0-android35.0)
+            for net10_dir in "./temp-extract/net10/lib"/net10.0-android*; do
+              if [ -d "$net10_dir" ]; then
+                cp -r "$net10_dir" "./temp-extract/net9/lib/"
+                echo "  Copied $(basename $net10_dir) framework"
+              fi
+            done
+
+            # Repackage the combined content
+            (cd "./temp-extract/net9" && zip -q -r "../../artifacts-combined/${pkg_name}.${version}.nupkg" *)
+
+            # Clean up temp directories
+            rm -rf "./temp-extract/net9" "./temp-extract/net10"
+
+            echo "Created combined package: ${pkg_name}.${version}.nupkg"
           done
 
           echo ""

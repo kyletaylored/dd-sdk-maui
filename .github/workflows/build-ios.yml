@@ -310,48 +310,38 @@ jobs:
     name: Combine iOS Packages
     runs-on: macos-latest  # macOS required for packing iOS meta-package
     needs: [build-ios-net9, build-ios-net10]
-    if: success() || failure()  # Run even if builds failed (iOS incomplete)
 
     steps:
-      - name: Check if packages exist
-        id: check-packages
-        run: |
-          echo "Checking for iOS packages..."
-          echo "packages_exist=false" >> $GITHUB_OUTPUT
-
       - name: Download net9.0-ios packages
-        if: success()
         uses: actions/download-artifact@v7
         with:
           name: ios-nuget-packages-net9
           path: ./artifacts-net9
-        continue-on-error: true
 
       - name: Download net10.0-ios packages
-        if: success()
         uses: actions/download-artifact@v7
         with:
           name: ios-nuget-packages-net10
           path: ./artifacts-net10
-        continue-on-error: true
 
       - name: Combine packages for all target frameworks
-        if: success()
         run: |
           mkdir -p ./artifacts-combined
           mkdir -p ./temp-extract
 
-          # Check if we have any packages to combine (try net9 first, then net10)
-          if [ -d "./artifacts-net9" ] && [ -n "$(ls -A ./artifacts-net9/*.nupkg 2>/dev/null)" ]; then
-            BASE_DIR="./artifacts-net9"
-            echo "Using net9.0-ios as base"
-          elif [ -d "./artifacts-net10" ] && [ -n "$(ls -A ./artifacts-net10/*.nupkg 2>/dev/null)" ]; then
-            BASE_DIR="./artifacts-net10"
-            echo "Using net10.0-ios as base"
-          else
-            echo "No iOS packages found, skipping combine"
-            exit 0
+          # Verify both net9 and net10 packages exist
+          if [ ! -d "./artifacts-net9" ] || [ -z "$(ls -A ./artifacts-net9/*.nupkg 2>/dev/null)" ]; then
+            echo "Error: net9.0-ios packages not found"
+            exit 1
           fi
+
+          if [ ! -d "./artifacts-net10" ] || [ -z "$(ls -A ./artifacts-net10/*.nupkg 2>/dev/null)" ]; then
+            echo "Error: net10.0-ios packages not found"
+            exit 1
+          fi
+
+          echo "Found both net9.0-ios and net10.0-ios packages"
+          BASE_DIR="./artifacts-net9"
 
           # Process each package
           for base_pkg in $BASE_DIR/*.nupkg; do
@@ -397,51 +387,46 @@ jobs:
             # Clean up temp directories
             rm -rf "./temp-extract/base"
 
-            echo "  ✅ Created combined package: ${pkg_name}.${version}.nupkg"
+            echo "Created combined package: ${pkg_name}.${version}.nupkg"
           done
 
           echo ""
           echo "Combined packages:"
-          ls -lh ./artifacts-combined/ || echo "No packages created"
-        continue-on-error: true
+          ls -lh ./artifacts-combined/
 
       - name: Verify combined packages before meta-package build
-        if: success()
         run: |
           echo "Checking artifacts-combined directory..."
           ls -la ./artifacts-combined/ || echo "Directory does not exist"
           echo "Package count: $(ls -1 ./artifacts-combined/*.nupkg 2>/dev/null | wc -l)"
 
       - name: Checkout repository for meta-package build
-        if: success()
         uses: actions/checkout@v6
         with:
           path: repo
 
       - name: Setup .NET SDK 10 for meta-package
-        if: success()
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.x
 
+      - name: Install .NET iOS workload for meta-package
+        run: dotnet workload install maui-ios
+
       - name: Build and pack iOS meta-package
-        if: success()
         run: |
           # Restore and pack the meta-package using combined packages from parent directory
           LOCAL_SOURCE="$(pwd)/artifacts-combined"
           echo "Restoring iOS meta-package from: $LOCAL_SOURCE"
-          ls -la "$LOCAL_SOURCE/" || echo "Local source does not exist"
+          ls -la "$LOCAL_SOURCE/"
           dotnet restore repo/Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj --source "$LOCAL_SOURCE" --source https://api.nuget.org/v3/index.json
           dotnet pack repo/Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj --configuration Release --output ./artifacts-combined --no-build
-        continue-on-error: true  # iOS bindings not complete yet
 
       - name: Upload combined iOS packages
-        if: always()  # Upload even if packing failed, so dependent jobs can check
         uses: actions/upload-artifact@v6
         with:
           name: ios-nuget-packages
           path: ./artifacts-combined/*.nupkg
-          if-no-files-found: ignore  # Don't fail if bindings aren't ready
           retention-days: 30
 
       - name: Package summary
@@ -449,7 +434,6 @@ jobs:
           echo "## iOS NuGet Packages Status" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           if [ -d "./artifacts-combined" ] && [ -n "$(ls -A ./artifacts-combined/*.nupkg 2>/dev/null)" ]; then
-            echo "✅ iOS packages built successfully" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "Target frameworks included:" >> $GITHUB_STEP_SUMMARY
             echo "- net9.0-ios" >> $GITHUB_STEP_SUMMARY
