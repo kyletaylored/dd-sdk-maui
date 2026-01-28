@@ -13,14 +13,14 @@ Welcome to the Datadog SDK for .NET MAUI! This section will help you get up and 
 
 If you're integrating the Datadog SDK into your .NET MAUI application:
 
-- **[Getting Started Guide](../getting-started/getting_started.html)** - Installation, configuration, and basic usage
-- **[Unified API Design](../getting-started/unified_api_design.html)** - Cross-platform API reference and usage patterns
+- **[Getting Started Guide](../getting-started/installation)** - Installation, configuration, and basic usage
+- **[Unified API Design](../getting-started/api-reference)** - Cross-platform API reference and usage patterns
 
 ## For SDK Developers
 
 If you're contributing to or building the Datadog MAUI SDK itself:
 
-- **[Developer Guide](../getting-started/developer_guide.html)** - Complete setup guide for SDK development
+- **[Developer Guide](../getting-started/developer-guide)** - Complete setup guide for SDK development
   - Prerequisites and tools
   - First-time setup
   - Building the SDK
@@ -29,10 +29,10 @@ If you're contributing to or building the Datadog MAUI SDK itself:
 
 ## Quick Links
 
-- **Install the SDK**: See [Getting Started Guide](getting_started.html#installation)
-- **Initialize Datadog**: See [Getting Started Guide](getting_started.html#initialization)
-- **API Reference**: See [Unified API Design](../getting-started/unified_api_design.html)
-- **Developer Setup**: See [Developer Guide](developer_guide.html#first-time-setup)
+- **Install the SDK**: See [Getting Started Guide](installation#installation)
+- **Initialize Datadog**: See [Getting Started Guide](installation#initialization)
+- **API Reference**: See [Unified API Design](../getting-started/api-reference)
+- **Developer Setup**: See [Developer Guide](developer-guide#first-time-setup)
 
 ## What's Next?
 

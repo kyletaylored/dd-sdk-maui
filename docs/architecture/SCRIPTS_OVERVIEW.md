@@ -106,7 +106,7 @@ io.opentelemetry:opentelemetry-api → OpenTelemetry.Api
 - Resolving version compatibility issues
 - Understanding why versions differ from Maven POMs
 
-**See also**: [maven-nuget-version-mapping.md](../guides/android/android_dependencies.html)
+**See also**: [maven-nuget-version-mapping.md](../guides/android/dependencies)
 
 ---
 
@@ -451,10 +451,10 @@ curl -I https://repo1.maven.org/maven2/com/datadoghq/dd-sdk-android-rum/3.5.0/dd
 
 ## Related Documentation
 
-- [maven-nuget-version-mapping.md](../guides/android/android_dependencies.html) - Version compatibility guide
+- [maven-nuget-version-mapping.md](../guides/android/dependencies) - Version compatibility guide
 - [PACKAGING_ARCHITECTURE.md]() - NuGet package structure
 - [WORKFLOW_ARCHITECTURE.md]() - CI/CD pipeline details
-- [PROJECT_OVERVIEW.md](../project/project_guide.html) - Overall architecture
+- [PROJECT_OVERVIEW.md](../project/overview) - Overall architecture
 
 ---
 

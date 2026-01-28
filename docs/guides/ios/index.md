@@ -14,7 +14,7 @@ Complete guides for iOS development with the Datadog MAUI SDK.
 
 ### Binding Strategy
 
-**[iOS Binding Strategy](../../guides/ios/ios_binding_strategy.html)** - Complete approach to iOS bindings:
+**[iOS Binding Strategy](../../guides/ios/binding-strategy)** - Complete approach to iOS bindings:
 
 - **Generated vs Manual Bindings**: Comparison and decision framework
 - **API Identification Methodology**: How to determine what to bind
@@ -29,7 +29,7 @@ Complete guides for iOS development with the Datadog MAUI SDK.
 
 ### API Identification
 
-**[Identifying User-Facing APIs](../../guides/ios/identifying_user_facing_apis.html)** - Methodology for API identification:
+**[Identifying User-Facing APIs](../../guides/ios/api-identification)** - Methodology for API identification:
 
 - **Analysis Approach**: How to analyze native SDKs
 - **Classification System**: Public vs internal APIs
@@ -38,7 +38,7 @@ Complete guides for iOS development with the Datadog MAUI SDK.
 
 ### Concrete Example
 
-**[RUM Binding Comparison](../../guides/ios/rum_binding_comparison.html)** - Before/after binding example:
+**[RUM Binding Comparison](../../guides/ios/rum-example)** - Before/after binding example:
 
 - **Generated Binding**: What Sharpie produces
 - **Manual Binding**: Curated, minimal approach
@@ -49,18 +49,18 @@ Complete guides for iOS development with the Datadog MAUI SDK.
 
 ### For New iOS Developers
 
-1. Read [iOS Binding Strategy](../../guides/ios/ios_binding_strategy.html) for the overall approach
-2. Use [Identifying User-Facing APIs](../../guides/ios/identifying_user_facing_apis.html) to analyze what to bind
-3. Review [RUM Binding Comparison](../../guides/ios/rum_binding_comparison.html) for a concrete example
+1. Read [iOS Binding Strategy](../../guides/ios/binding-strategy) for the overall approach
+2. Use [Identifying User-Facing APIs](../../guides/ios/api-identification) to analyze what to bind
+3. Review [RUM Binding Comparison](../../guides/ios/rum-example) for a concrete example
 
 ### Common Tasks
 
 | Task | Guide Section |
 |------|---------------|
-| Start new iOS binding | [Binding Strategy - Implementation Checklist](ios_binding_strategy.html#implementation-checklist) |
-| Identify APIs to bind | [API Identification - Analysis Approach](identifying_user_facing_apis.html#analysis-approach) |
-| Decide on approach | [Binding Strategy - Decision Framework](ios_binding_strategy.html#generated-vs-manual-bindings) |
-| See real example | [RUM Comparison - Full Example](../../guides/ios/rum_binding_comparison.html) |
+| Start new iOS binding | [Binding Strategy - Implementation Checklist](binding-strategy#implementation-checklist) |
+| Identify APIs to bind | [API Identification - Analysis Approach](api-identification#analysis-approach) |
+| Decide on approach | [Binding Strategy - Decision Framework](binding-strategy#generated-vs-manual-bindings) |
+| See real example | [RUM Comparison - Full Example](../../guides/ios/rum-example) |
 
 ## iOS Binding Workflow
 
@@ -79,6 +79,6 @@ graph TD
 
 ## Related Documentation
 
-- [Project Guide](../../project/project_guide.html) - Overall project structure
-- [Scripts Overview](../../architecture/scripts_overview.html) - Build automation for iOS
-- [Packaging Architecture](../../architecture/packaging_architecture.html) - iOS package structure
+- [Project Guide](../../project/overview) - Overall project structure
+- [Scripts Overview](../../architecture/scripts) - Build automation for iOS
+- [Packaging Architecture](../../architecture/packaging) - iOS package structure

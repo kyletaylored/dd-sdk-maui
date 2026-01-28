@@ -44,13 +44,13 @@ Platform-specific and user guides for the Datadog MAUI SDK.
 
 | Platform | Guide | Description |
 |----------|-------|-------------|
-| Android | [Dependencies](android/android_dependencies.html) | Complete dependency management |
-| Android | [Integrations](android/android_integration_packages.html) | Optional integration packages |
-| iOS | [Binding Strategy](ios/ios_binding_strategy.html) | iOS binding approach |
-| iOS | [API Identification](ios/identifying_user_facing_apis.html) | How to identify APIs to bind |
-| iOS | [RUM Example](ios/rum_binding_comparison.html) | Concrete binding example |
+| Android | [Dependencies](android/dependencies) | Complete dependency management |
+| Android | [Integrations](android/integrations) | Optional integration packages |
+| iOS | [Binding Strategy](ios/binding-strategy) | iOS binding approach |
+| iOS | [API Identification](ios/api-identification) | How to identify APIs to bind |
+| iOS | [RUM Example](ios/rum-example) | Concrete binding example |
 | Symbols | [Getting Started](symbols/getting-started.html) | Install and configure symbol upload |
 | Symbols | [Configuration](symbols/configuration.html) | Complete configuration reference |
 | Symbols | [CI/CD Integration](symbols/ci-cd.html) | Integrate with build pipelines |
 | Symbols | [Troubleshooting](symbols/troubleshooting.html) | Common issues and solutions |
-| User | [Mapping Files](user/mapping_file_uploads.html) | Upload ProGuard/NDK files |
+| User | [Mapping Files](user/mapping-files) | Upload ProGuard/NDK files |

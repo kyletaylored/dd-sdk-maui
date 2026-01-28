@@ -372,7 +372,7 @@ dotnet build -f net9.0-android
 
 ## Next Steps
 
-1. **Review Architecture**: Read [PROJECT_OVERVIEW.md](../project/project_guide.html)
+1. **Review Architecture**: Read [PROJECT_OVERVIEW.md](../project/overview)
 2. **Implement Features**: Start with core initialization
 3. **Write Tests**: Add unit and integration tests
 4. **Contribute**: See [CONTRIBUTING.md]()
@@ -407,7 +407,7 @@ git log --oneline --graph --decorate --all -10
 
 ### Documentation
 - [Documentation Index](../index.html)
-- [Project Overview](../project/project_guide.html)
+- [Project Overview](../project/overview)
 - [Contributing Guide]()
 - [Changelog]()
 

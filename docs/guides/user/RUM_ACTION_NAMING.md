@@ -265,5 +265,5 @@ After implementation:
 ---
 
 **Related Guides:**
-- [Getting Started](../../getting-started/getting_started.html)
-- [Mapping File Uploads](mapping_file_uploads.html)
+- [Getting Started](../../getting-started/installation)
+- [Mapping File Uploads](mapping-files)

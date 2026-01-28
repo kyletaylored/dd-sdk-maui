@@ -14,7 +14,7 @@ Complete guides for Android development with the Datadog MAUI SDK.
 
 ### Dependency Management
 
-**[Android Dependencies](../../guides/android/android_dependencies.html)** - Complete guide to managing Android dependencies:
+**[Android Dependencies](../../guides/android/dependencies)** - Complete guide to managing Android dependencies:
 
 - **The Problem and Solution**: Understanding Maven to NuGet mapping
 - **Quick Reference**: Fast lookup tables for dependency handling
@@ -30,7 +30,7 @@ Complete guides for Android development with the Datadog MAUI SDK.
 
 ### Integration Packages
 
-**[Android Integration Packages](../../guides/android/android_integration_packages.html)** - Optional integration modules:
+**[Android Integration Packages](../../guides/android/integrations)** - Optional integration modules:
 
 - **OkHttp Integration**: HTTP client instrumentation
 - **OpenTelemetry Integration**: OTel tracing support
@@ -40,22 +40,22 @@ Complete guides for Android development with the Datadog MAUI SDK.
 
 ### For New Android Developers
 
-1. Read [Android Dependencies](android_dependencies.html#the-problem-and-solution) to understand the architecture
-2. Use [Quick Reference](android_dependencies.html#quick-reference) tables for lookups
-3. Check [Troubleshooting](android_dependencies.html#troubleshooting) if you hit issues
+1. Read [Android Dependencies](dependencies#the-problem-and-solution) to understand the architecture
+2. Use [Quick Reference](dependencies#quick-reference) tables for lookups
+3. Check [Troubleshooting](dependencies#troubleshooting) if you hit issues
 
 ### Common Tasks
 
 | Task | Guide Section |
 |------|---------------|
-| Add AndroidX dependency | [Android Dependencies - AndroidX](android_dependencies.html#androidx-dependencies) |
-| Add Maven library | [Android Dependencies - Maven](android_dependencies.html#maven-dependencies) |
-| Add integration package | [Integration Packages - Adding More](android_integration_packages.html#adding-more-integration-packages) |
-| Fix version conflict | [Dependencies - Troubleshooting](android_dependencies.html#troubleshooting) |
-| Update SDK version | [Dependencies - Version Updates](android_dependencies.html#version-updates) |
+| Add AndroidX dependency | [Android Dependencies - AndroidX](dependencies#androidx-dependencies) |
+| Add Maven library | [Android Dependencies - Maven](dependencies#maven-dependencies) |
+| Add integration package | [Integration Packages - Adding More](integrations#adding-more-integration-packages) |
+| Fix version conflict | [Dependencies - Troubleshooting](dependencies#troubleshooting) |
+| Update SDK version | [Dependencies - Version Updates](dependencies#version-updates) |
 
 ## Related Documentation
 
-- [Project Guide](../../project/project_guide.html) - Overall project structure
-- [Scripts Overview](../../architecture/scripts_overview.html) - Build automation for Android
-- [Packaging Architecture](../../architecture/packaging_architecture.html) - Android package structure
+- [Project Guide](../../project/overview) - Overall project structure
+- [Scripts Overview](../../architecture/scripts) - Build automation for Android
+- [Packaging Architecture](../../architecture/packaging) - Android package structure

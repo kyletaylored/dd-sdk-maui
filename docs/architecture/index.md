@@ -22,13 +22,13 @@ The Datadog MAUI SDK is built on a multi-layered architecture:
 
 ### Build System & Workflows
 
-- **[Workflow Architecture](../architecture/workflow_architecture.html)** - CI/CD pipelines and GitHub Actions
+- **[Workflow Architecture](../architecture/workflows)** - CI/CD pipelines and GitHub Actions
   - Build validation workflow
   - Package publishing workflow
   - Documentation deployment
   - Automation triggers
 
-- **[Scripts Overview](../architecture/scripts_overview.html)** - Build automation and utility scripts
+- **[Scripts Overview](../architecture/scripts)** - Build automation and utility scripts
   - Android binding scripts
   - iOS binding scripts
   - Packaging scripts
@@ -36,7 +36,7 @@ The Datadog MAUI SDK is built on a multi-layered architecture:
 
 ### Package Structure
 
-- **[Packaging Architecture](../architecture/packaging_architecture.html)** - NuGet package organization
+- **[Packaging Architecture](../architecture/packaging)** - NuGet package organization
   - Package hierarchy
   - Dependencies between packages
   - Platform-specific packages
@@ -46,12 +46,12 @@ The Datadog MAUI SDK is built on a multi-layered architecture:
 
 | Topic | Document | Description |
 |-------|----------|-------------|
-| CI/CD | [Workflow Architecture](../architecture/workflow_architecture.html) | GitHub Actions workflows |
-| Build Scripts | [Scripts Overview](../architecture/scripts_overview.html) | Automation scripts and tools |
-| Packages | [Packaging Architecture](../architecture/packaging_architecture.html) | NuGet package structure |
+| CI/CD | [Workflow Architecture](../architecture/workflows) | GitHub Actions workflows |
+| Build Scripts | [Scripts Overview](../architecture/scripts) | Automation scripts and tools |
+| Packages | [Packaging Architecture](../architecture/packaging) | NuGet package structure |
 
 ## Related Documentation
 
-- [Project Guide](../project/project_guide.html) - Complete project overview
-- [Android Dependencies](../guides/android/android_dependencies.html) - Android dependency management
-- [iOS Binding Strategy](../guides/ios/ios_binding_strategy.html) - iOS binding approach
+- [Project Guide](../project/overview) - Complete project overview
+- [Android Dependencies](../guides/android/dependencies) - Android dependency management
+- [iOS Binding Strategy](../guides/ios/binding-strategy) - iOS binding approach

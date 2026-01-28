@@ -228,7 +228,7 @@ jobs:
 
           ## Documentation
 
-          See the [README](https://github.com/DataDog/dd-sdk-maui/blob/main/Datadog.MAUI.Symbols/README.md) for detailed configuration options and troubleshooting.
+          See the [Symbol Upload Plugin documentation](https://datadog.github.io/dd-sdk-maui/guides/symbols/) for detailed configuration options and troubleshooting.
 
           ## Requirements
 

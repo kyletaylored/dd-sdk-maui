@@ -17,60 +17,60 @@ This SDK enables you to integrate Datadog's Real User Monitoring (RUM), APM Trac
 ### [Getting Started](getting-started/index.html)
 
 Everything you need to start using or developing the Datadog MAUI SDK:
-- **[Installation & Setup](getting-started/getting_started.html)** - For SDK users
-- **[Developer Setup](getting-started/developer_guide.html)** - For SDK contributors
-- **[API Reference](getting-started/unified_api_design.html)** - Cross-platform API documentation
+- **[Installation & Setup](getting-started/installation)** - For SDK users
+- **[Developer Setup](getting-started/developer-guide)** - For SDK contributors
+- **[API Reference](getting-started/api-reference)** - Cross-platform API documentation
 
 ### [Architecture](architecture/index.html)
 
 Understand the internal structure and build system:
-- **[Workflow Architecture](architecture/workflow_architecture.html)** - CI/CD pipelines
-- **[Packaging](architecture/packaging_architecture.html)** - NuGet package structure
-- **[Scripts](architecture/scripts_overview.html)** - Build automation
+- **[Workflow Architecture](architecture/workflows)** - CI/CD pipelines
+- **[Packaging](architecture/packaging)** - NuGet package structure
+- **[Scripts](architecture/scripts)** - Build automation
 
 ### [Guides](guides/index.html)
 
 Platform-specific and user guides:
 
 #### Android Development
-- **[Android Dependencies](guides/android/android_dependencies.html)** - Complete dependency management
-- **[Integration Packages](guides/android/android_integration_packages.html)** - Optional modules
+- **[Android Dependencies](guides/android/dependencies)** - Complete dependency management
+- **[Integration Packages](guides/android/integrations)** - Optional modules
 
 #### iOS Development
-- **[iOS Binding Strategy](guides/ios/ios_binding_strategy.html)** - Binding approach
-- **[API Identification](guides/ios/identifying_user_facing_apis.html)** - Methodology
-- **[RUM Example](guides/ios/rum_binding_comparison.html)** - Concrete example
+- **[iOS Binding Strategy](guides/ios/binding-strategy)** - Binding approach
+- **[API Identification](guides/ios/api-identification)** - Methodology
+- **[RUM Example](guides/ios/rum-example)** - Concrete example
 
 #### User Guides
-- **[Mapping File Uploads](guides/user/mapping_file_uploads.html)** - ProGuard/R8 and NDK symbols
+- **[Mapping File Uploads](guides/user/mapping-files)** - ProGuard/R8 and NDK symbols
 
 ### [Project](project/index.html)
 
 Project information and contribution guidelines:
-- **[Project Guide](project/project_guide.html)** - Complete project overview
-- **[Contributing](project/contributing.html)** - How to contribute
-- **[Changelog](project/changelog.html)** - Release history
-- **[Roadmap](project/automation_roadmap.html)** - Future plans
+- **[Project Guide](project/overview)** - Complete project overview
+- **[Contributing](project/contributing)** - How to contribute
+- **[Changelog](project/changelog)** - Release history
+- **[Roadmap](project/roadmap)** - Future plans
 
 ## Quick Links
 
 **For SDK Users:**
-- [Install the SDK](getting-started/getting_started.html#installation)
-- [Initialize Datadog](getting-started/getting_started.html#initialization)
-- [Upload Mapping Files](guides/user/mapping_file_uploads.html)
+- [Install the SDK](getting-started/installation#installation)
+- [Initialize Datadog](getting-started/installation#initialization)
+- [Upload Mapping Files](guides/user/mapping-files)
 
 **For SDK Developers:**
-- [Developer Setup](getting-started/developer_guide.html#first-time-setup)
-- [Build the SDK](architecture/scripts_overview.html)
-- [Contribute](project/contributing.html)
+- [Developer Setup](getting-started/developer-guide#first-time-setup)
+- [Build the SDK](architecture/scripts)
+- [Contribute](project/contributing)
 
 **Platform-Specific:**
-- [Android Dependencies](guides/android/android_dependencies.html)
-- [iOS Binding Strategy](guides/ios/ios_binding_strategy.html)
+- [Android Dependencies](guides/android/dependencies)
+- [iOS Binding Strategy](guides/ios/binding-strategy)
 
 ## Getting Help
 
-- Review the [Getting Started guide](getting-started/getting_started.html)
+- Review the [Getting Started guide](getting-started/installation)
 - Check platform-specific guides ([Android](guides/android/index.html) / [iOS](guides/ios/index.html))
-- Read the [Project Guide](project/project_guide.html) for architecture details
-- See [Contributing guidelines](project/contributing.html) to get involved
+- Read the [Project Guide](project/overview) for architecture details
+- See [Contributing guidelines](project/contributing) to get involved
