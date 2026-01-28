@@ -1,7 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Datadog.Maui;
 using Datadog.Maui.Configuration;
 using DatadogMauiSample.Config;
+using DatadogMauiSample.Services;
 
 namespace DatadogMauiSample;
 
@@ -28,15 +30,16 @@ public static class MauiProgram
 #endif
 			});
 
-		// Note: Datadog is initialized platform-specifically:
-		// - Android: See Platforms/Android/MainApplication.cs
-		// - iOS: Will be implemented in Platforms/iOS/AppDelegate.cs
-		// This approach allows for platform-specific configuration using native SDK APIs.
+		builder.Services.AddSingleton<IDatadogInitializer, DatadogInitializer>();
+
+		// Note: Datadog is initialized via DI at app construction with platform-specific SDK calls.
 
 #if DEBUG
 		builder.Logging.AddDebug();
 #endif
 
-		return builder.Build();
+		var app = builder.Build();
+		app.Services.GetRequiredService<IDatadogInitializer>().Initialize();
+		return app;
 	}
 }
