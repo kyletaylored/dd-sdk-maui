@@ -25,6 +25,14 @@ Platform-specific and user guides for the Datadog MAUI SDK.
 - API identification
 - Implementation examples
 
+### Symbol Upload Plugin
+
+**[Symbol Upload Plugin](symbols/index.html)** - Automatic symbol upload for crash symbolication:
+- iOS dSYM upload
+- Android Proguard/R8 mapping upload
+- CI/CD integration
+- Configuration and troubleshooting
+
 ## User Guides
 
 **[User Guides](user/index.html)** - Guides for SDK users:
@@ -41,4 +49,8 @@ Platform-specific and user guides for the Datadog MAUI SDK.
 | iOS | [Binding Strategy](ios/IOS_BINDING_STRATEGY.html) | iOS binding approach |
 | iOS | [API Identification](ios/IDENTIFYING_USER_FACING_APIS.html) | How to identify APIs to bind |
 | iOS | [RUM Example](ios/RUM_BINDING_COMPARISON.html) | Concrete binding example |
+| Symbols | [Getting Started](symbols/getting-started.html) | Install and configure symbol upload |
+| Symbols | [Configuration](symbols/configuration.html) | Complete configuration reference |
+| Symbols | [CI/CD Integration](symbols/ci-cd.html) | Integrate with build pipelines |
+| Symbols | [Troubleshooting](symbols/troubleshooting.html) | Common issues and solutions |
 | User | [Mapping Files](user/MAPPING_FILE_UPLOADS.html) | Upload ProGuard/NDK files |
