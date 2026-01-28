@@ -1,7 +1,8 @@
 ---
 layout: default
-title: RUM Binding Comparison
-nav_order: 33
+title: RUM Example
+parent: iOS
+nav_order: 3
 ---
 
 # RUM Binding Comparison: Generated vs Manual

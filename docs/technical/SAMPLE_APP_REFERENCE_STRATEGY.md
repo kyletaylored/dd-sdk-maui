@@ -1,3 +1,10 @@
+---
+layout: default
+title: Sample App Reference Strategy
+parent: Architecture
+nav_order: 4
+---
+
 # Sample App Reference Strategy
 
 ## Problem

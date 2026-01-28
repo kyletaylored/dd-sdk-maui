@@ -1,15 +1,9 @@
 ---
 layout: default
-title: Getting Started
-nav_order: 3
----
-
----
-layout: default
-title: Getting Started
-nav_order: 2
+title: Installation & Setup
+parent: Getting Started
+nav_order: 1
 description: "Guide to developing and building the Datadog SDK for .NET MAUI"
-permalink: /getting-started
 ---
 
 # Getting Started with Datadog MAUI SDK Development

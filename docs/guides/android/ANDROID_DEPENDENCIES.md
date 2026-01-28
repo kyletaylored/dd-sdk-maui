@@ -1,7 +1,8 @@
 ---
 layout: default
-title: Android Dependencies
-nav_order: 21
+title: Dependencies
+parent: Android
+nav_order: 1
 ---
 
 # Android Dependencies Guide

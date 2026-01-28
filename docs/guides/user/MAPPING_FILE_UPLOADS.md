@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Mapping File Uploads
-nav_order: 41
+parent: User Guides
+nav_order: 2
 ---
 
 # Mapping File Uploads for MAUI Android

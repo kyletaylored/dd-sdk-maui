@@ -1,7 +1,7 @@
 ---
 layout: default
-title: NuGet Explorer
-nav_order: 20
+title: NuGet Feed
+nav_order: 6
 ---
 
 # NuGet Explorer

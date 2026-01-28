@@ -1,7 +1,8 @@
 ---
 layout: default
-title: Project Guide
-nav_order: 2
+title: Overview
+parent: Project
+nav_order: 1
 ---
 
 # Project Guide

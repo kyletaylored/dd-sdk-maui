@@ -1,7 +1,8 @@
 ---
 layout: default
-title: iOS Binding Strategy
-nav_order: 31
+title: Binding Strategy
+parent: iOS
+nav_order: 1
 ---
 
 # iOS Binding Strategy

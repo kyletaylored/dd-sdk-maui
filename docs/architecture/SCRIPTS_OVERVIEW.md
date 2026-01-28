@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Scripts Overview
-nav_order: 12
+parent: Architecture
+nav_order: 3
 ---
 
 # Build Scripts Overview

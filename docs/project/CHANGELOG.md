@@ -1,9 +1,9 @@
 ---
 layout: default
 title: Changelog
-nav_order: 9
+parent: Project
+nav_order: 3
 description: "Release history and notable changes for the Datadog SDK for .NET MAUI"
-permalink: /changelog
 ---
 
 # Changelog

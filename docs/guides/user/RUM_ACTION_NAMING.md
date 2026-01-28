@@ -2,7 +2,7 @@
 layout: default
 title: RUM Action Naming
 parent: User Guides
-nav_order: 2
+nav_order: 1
 ---
 
 # Improving RUM Action Names in .NET MAUI

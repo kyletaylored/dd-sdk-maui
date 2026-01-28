@@ -1,7 +1,8 @@
 ---
 layout: default
-title: Identifying User-Facing APIs
-nav_order: 32
+title: API Identification
+parent: iOS
+nav_order: 2
 ---
 
 # Methodology: Identifying User-Facing vs Internal APIs

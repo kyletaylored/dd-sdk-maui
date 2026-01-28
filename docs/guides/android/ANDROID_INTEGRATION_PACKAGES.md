@@ -1,7 +1,8 @@
 ---
 layout: default
-title: Android Integration Packages
-nav_order: 22
+title: Integration Packages
+parent: Android
+nav_order: 2
 ---
 
 # Android Integration Packages

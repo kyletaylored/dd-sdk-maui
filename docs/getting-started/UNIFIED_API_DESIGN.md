@@ -1,7 +1,8 @@
 ---
 layout: default
-title: Unified API Design
-nav_order: 5
+title: API Reference
+parent: Getting Started
+nav_order: 3
 ---
 
 # Datadog MAUI Unified API Design

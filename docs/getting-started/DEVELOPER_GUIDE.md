@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Developer Guide
-nav_order: 4
+parent: Getting Started
+nav_order: 2
 ---
 
 # Datadog MAUI SDK - Developer Guide
