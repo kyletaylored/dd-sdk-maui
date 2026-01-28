@@ -88,15 +88,6 @@ jobs:
           echo "Generated docs/_config.yml:"
           tail -n +1 docs/_config.yml
 
-      # --- Build docs site ---
-      - name: Build with Jekyll
-        uses: actions/jekyll-build-pages@v1
-        with:
-          source: ./docs
-          destination: ./_site
-          future: false
-          verbose: true
-
       # --- Build NuGet feed into _site/nuget ---
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -195,12 +186,12 @@ jobs:
           print("baseURI:", "${BASEURI}")
           PY
 
-      - name: Init feed in temp location
+      - name: Init NuGet feed
         run: |
           echo "Initializing NuGet feed in temp location..."
           mkdir -p nuget-temp
           sleet init --config sleet.json --source pages
-          echo "✅ Feed initialized"
+          echo "Feed initialized"
 
       - name: Push packages to feed
         run: |
@@ -211,7 +202,7 @@ jobs:
           if [ "$PKG_COUNT" -gt 0 ]; then
             echo "Pushing packages to feed..."
             sleet push ./pkgs --config sleet.json --source pages --skip-existing
-            echo "✅ Packages pushed to feed"
+            echo "Packages pushed to feed"
 
             echo "## NuGet Feed Update" >> $GITHUB_STEP_SUMMARY
             echo "Pushed $PKG_COUNT package(s) to feed" >> $GITHUB_STEP_SUMMARY
@@ -224,13 +215,6 @@ jobs:
             echo "No new packages (existing feed preserved)" >> $GITHUB_STEP_SUMMARY
           fi
 
-      - name: Move feed to _site directory
-        run: |
-          echo "Moving NuGet feed from temp location to _site/nuget..."
-          rm -rf _site/nuget
-          mv nuget-temp _site/nuget
-          echo "✅ Feed moved to _site/nuget"
-
       - name: Build packages index for NuGet Explorer
         run: |
           python - <<'PY'
@@ -238,8 +222,8 @@ jobs:
           import os
           from pathlib import Path
 
-          root = Path("_site/nuget/flatcontainer")
-          out = Path("_site/nuget/packages.json")
+          root = Path("nuget-temp/flatcontainer")
+          out = Path("nuget-temp/packages.json")
           out.parent.mkdir(parents=True, exist_ok=True)
 
           packages = []
@@ -277,6 +261,21 @@ jobs:
           out.write_text(json.dumps(data, indent=2))
           print(f"Wrote {out} with {len(packages)} packages")
           PY
+
+      - name: Move nuget feed to docs directory
+        run: |
+          echo "Moving NuGet feed from temp location to docs/nuget..."
+          mv nuget-temp docs/nuget
+          echo "Feed moved to docs/nuget"
+
+      # --- Build docs site ---
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./docs
+          destination: ./_site
+          future: false
+          verbose: true
 
       # --- Upload Pages artifact ---
       - name: Upload artifact
