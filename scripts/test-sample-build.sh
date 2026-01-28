@@ -45,14 +45,14 @@ echo "=========================================="
 echo "Restoring sample app dependencies..."
 echo "=========================================="
 cd samples/DatadogMauiSample
-dotnet restore --configfile nuget.config
+dotnet restore DatadogMauiSample.csproj --configfile nuget.config -p:Configuration=Release
 echo ""
 
 # Build Android
 echo "=========================================="
 echo "Building Android (net10.0-android)..."
 echo "=========================================="
-dotnet build -f net10.0-android -c Release --no-restore -v minimal
+dotnet build DatadogMauiSample.csproj -f net10.0-android -c Release --no-restore -v q
 echo ""
 
 # Build iOS (only on macOS)
@@ -60,7 +60,7 @@ if [ "$(uname)" = "Darwin" ]; then
     echo "=========================================="
     echo "Building iOS (net10.0-ios)..."
     echo "=========================================="
-    dotnet build -f net10.0-ios -c Release --no-restore -v minimal
+    dotnet build DatadogMauiSample.csproj -f net10.0-ios -c Release --no-restore -v q
     echo ""
 else
     echo "⚠️  Skipping iOS build (not on macOS)"

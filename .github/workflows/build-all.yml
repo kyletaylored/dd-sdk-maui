@@ -310,10 +310,11 @@ jobs:
           cat samples/DatadogMauiSample/nuget.config
           echo ""
 
-          # Restore with explicit config
+          # Restore with explicit config (csproj directly, not solution)
+          # IMPORTANT: Must specify -p:Configuration=Release to evaluate conditional PackageReference
           echo "Restoring sample app dependencies..."
           cd samples/DatadogMauiSample
-          dotnet restore --configfile nuget.config
+          dotnet restore DatadogMauiSample.csproj --configfile nuget.config -p:Configuration=Release
 
       - name: Build sample app (Android)
         env:
@@ -322,7 +323,7 @@ jobs:
         run: |
           cd samples/DatadogMauiSample
           echo "Building Android (net10.0-android)..."
-          dotnet build -f net10.0-android -c Release --no-restore -v minimal
+          dotnet build DatadogMauiSample.csproj -f net10.0-android -c Release --no-restore -v minimal
 
       - name: Build sample app (iOS)
         env:
@@ -331,7 +332,7 @@ jobs:
         run: |
           cd samples/DatadogMauiSample
           echo "Building iOS (net10.0-ios)..."
-          dotnet build -f net10.0-ios -c Release --no-restore -v minimal
+          dotnet build DatadogMauiSample.csproj -f net10.0-ios -c Release --no-restore -v minimal
 
       - name: Upload Android sample APK
         uses: actions/upload-artifact@v6
