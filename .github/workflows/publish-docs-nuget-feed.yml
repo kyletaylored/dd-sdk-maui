@@ -1,9 +1,9 @@
 name: Deploy Docs + NuGet Feed to GitHub Pages
 
 # This workflow runs when:
-# 1. Documentation files are pushed to main (docs/** or _config.base.yml) - rebuilds docs + full feed
-# 2. A GitHub release is published - rebuilds docs + full feed with new release
-# 3. Manually triggered via workflow_dispatch - rebuilds everything
+# 1. Documentation files are pushed to main (docs/** or _config.base.yml)
+# 2. A GitHub release is published
+# 3. Manually triggered via workflow_dispatch
 #
 # Strategy: Always rebuild the complete NuGet feed from ALL releases
 # This ensures the feed is always up-to-date and consistent with GitHub Releases
@@ -30,7 +30,19 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
+      # ================================================================
+      # Setup and Configuration
+      # ================================================================
+
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup GitHub Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
       - name: Workflow trigger info
         run: |
           echo "## Workflow Trigger" >> $GITHUB_STEP_SUMMARY
@@ -45,15 +57,10 @@ jobs:
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
 
-      - name: Checkout
-        uses: actions/checkout@v6
+      # ================================================================
+      # Jekyll Configuration
+      # ================================================================
 
-      # --- Pages vars (origin/base_path) ---
-      - name: Setup Pages
-        id: pages
-        uses: actions/configure-pages@v5
-
-      # --- Generate Jekyll config dynamically (keep your current approach) ---
       - name: Generate Jekyll config from template
         run: |
           cp docs/_config.base.yml docs/_config.yml
@@ -74,7 +81,6 @@ jobs:
             "NuGet Feed":
               - "${{ steps.pages.outputs.origin }}${{ steps.pages.outputs.base_path }}/nuget/index.json"
 
-
           aux_links_new_tab: true
 
           gh_edit_link: true
@@ -88,13 +94,16 @@ jobs:
           echo "Generated docs/_config.yml:"
           tail -n +1 docs/_config.yml
 
-      # --- Build NuGet feed into _site/nuget ---
+      # ================================================================
+      # NuGet Feed - Download Packages
+      # ================================================================
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: "8.0.x"
 
-      - name: Download ALL release packages
+      - name: Download SDK release packages
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -124,14 +133,15 @@ jobs:
           fi
 
           echo ""
-          echo "Total packages downloaded:"
+          echo "Total SDK packages downloaded:"
           find ./pkgs -name "*.nupkg" 2>/dev/null | wc -l || echo "0"
 
-      - name: Download ALL Symbols package releases
+      - name: Download Symbols package releases
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p pkgs
+
           echo "Fetching all Symbols package releases..."
           SYMBOLS_RELEASES=$(gh release list --limit 100 | grep "symbols-v" | awk '{print $1}' || echo "")
 
@@ -154,12 +164,19 @@ jobs:
             done
           fi
 
+          echo ""
+          echo "Total packages (SDK + Symbols):"
+          find ./pkgs -name "*.nupkg" 2>/dev/null | wc -l || echo "0"
+
+      # ================================================================
+      # NuGet Feed - Build with Sleet
+      # ================================================================
+
       - name: Install Sleet
         run: dotnet tool install -g sleet
 
-      - name: Generate sleet.json dynamically (baseURI uses Pages origin + base_path)
+      - name: Generate sleet.json config
         run: |
-          # Build feed in temp location to avoid Jekyll permission issues
           cat > sleet.json <<'JSON'
           {
             "username": "github-actions[bot]",
@@ -176,7 +193,8 @@ jobs:
           JSON
 
           BASEURI="${{ steps.pages.outputs.origin }}${{ steps.pages.outputs.base_path }}/nuget/"
-          # safe string replace
+
+          # Replace baseURI placeholder with actual URL
           python - <<PY
           import pathlib
           p = pathlib.Path("sleet.json")
@@ -186,23 +204,22 @@ jobs:
           print("baseURI:", "${BASEURI}")
           PY
 
-      - name: Init NuGet feed
+      - name: Initialize NuGet feed
         run: |
           echo "Initializing NuGet feed in temp location..."
           mkdir -p nuget-temp
           sleet init --config sleet.json --source pages
-          echo "Feed initialized"
+          echo "✓ Feed initialized"
 
       - name: Push packages to feed
         run: |
-          # Count packages
           PKG_COUNT=$(find ./pkgs -name "*.nupkg" 2>/dev/null | wc -l || echo "0")
           echo "Found $PKG_COUNT packages to push"
 
           if [ "$PKG_COUNT" -gt 0 ]; then
             echo "Pushing packages to feed..."
             sleet push ./pkgs --config sleet.json --source pages --skip-existing
-            echo "Packages pushed to feed"
+            echo "✓ Packages pushed to feed"
 
             echo "## NuGet Feed Update" >> $GITHUB_STEP_SUMMARY
             echo "Pushed $PKG_COUNT package(s) to feed" >> $GITHUB_STEP_SUMMARY
@@ -215,11 +232,10 @@ jobs:
             echo "No new packages (existing feed preserved)" >> $GITHUB_STEP_SUMMARY
           fi
 
-      - name: Build packages index for NuGet Explorer
+      - name: Generate packages index for NuGet Explorer
         run: |
           python - <<'PY'
           import json
-          import os
           from pathlib import Path
 
           root = Path("nuget-temp/flatcontainer")
@@ -232,6 +248,7 @@ jobs:
               pkg_id = pkg_dir.name
               versions = []
               prerelease_versions = []
+
               for ver_dir in sorted([p for p in pkg_dir.iterdir() if p.is_dir()], key=lambda p: p.name):
                 v = ver_dir.name
                 versions.append(v)
@@ -259,16 +276,19 @@ jobs:
             "packages": packages
           }
           out.write_text(json.dumps(data, indent=2))
-          print(f"Wrote {out} with {len(packages)} packages")
+          print(f"✓ Wrote {out} with {len(packages)} packages")
           PY
 
-      - name: Move nuget feed to docs directory
+      - name: Move NuGet feed to docs directory
         run: |
           echo "Moving NuGet feed from temp location to docs/nuget..."
           mv nuget-temp docs/nuget
-          echo "Feed moved to docs/nuget"
+          echo "✓ Feed moved to docs/nuget (Jekyll will copy to _site/nuget)"
 
-      # --- Build docs site ---
+      # ================================================================
+      # Jekyll Build and Pages Deployment
+      # ================================================================
+
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:
@@ -277,18 +297,23 @@ jobs:
           future: false
           verbose: true
 
-      # --- Upload Pages artifact ---
-      - name: Upload artifact
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./_site
 
+  # ================================================================
+  # Deploy to GitHub Pages
+  # ================================================================
+
   deploy:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: build
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
+
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
