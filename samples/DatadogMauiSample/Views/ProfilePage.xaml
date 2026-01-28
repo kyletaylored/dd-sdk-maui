@@ -73,27 +73,37 @@
 
             <!-- Quick Login Buttons -->
             <VerticalStackLayout Spacing="10">
-                <Label Text="Quick Sign In"
+                <Label Text="Quick Sign In (Real API)"
                        FontSize="16"
                        FontAttributes="Bold"
                        Margin="0,10,0,5"/>
 
-                <Button Text="Sign in as Alice"
+                <Label Text="Uses real FakeStore API authentication"
+                       FontSize="11"
+                       TextColor="Gray"
+                       Margin="0,0,0,5"/>
+
+                <Button Text="Sign in as John Doe (johnd)"
                         Clicked="OnQuickSignInClicked"
                         CommandParameter="alice"
                         BackgroundColor="#4CAF50"
                         TextColor="White"/>
 
-                <Button Text="Sign in as Bob"
+                <Button Text="Sign in as Morrison (mor_2314)"
                         Clicked="OnQuickSignInClicked"
                         CommandParameter="bob"
                         BackgroundColor="#FF9800"
                         TextColor="White"/>
 
-                <Button Text="Sign in as Charlie"
+                <Button Text="Sign in as Kevin (kevinryan)"
                         Clicked="OnQuickSignInClicked"
                         CommandParameter="charlie"
                         BackgroundColor="#9C27B0"
+                        TextColor="White"/>
+
+                <Button Text="Test Bad Login (should fail)"
+                        Clicked="OnTestBadLoginClicked"
+                        BackgroundColor="#F44336"
                         TextColor="White"/>
             </VerticalStackLayout>
 

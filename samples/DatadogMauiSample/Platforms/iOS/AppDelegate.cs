@@ -16,10 +16,13 @@ public class AppDelegate : MauiUIApplicationDelegate
 {
     public override bool FinishedLaunching(UIApplication application, NSDictionary? launchOptions)
     {
-        // DIAGNOSTIC: Test if logging is working
-        System.Diagnostics.Debug.WriteLine("========================================");
-        System.Diagnostics.Debug.WriteLine("[DIAGNOSTIC] AppDelegate.FinishedLaunching started");
-        System.Diagnostics.Debug.WriteLine("========================================");
+        // Create marker file to show AppDelegate ran
+        try
+        {
+            var markerFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), ".datadog_initialized");
+            File.WriteAllText(markerFile, $"Initialized at {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+        }
+        catch { /* Ignore file errors */ }
 
         // Configure tab bar appearance before MAUI initializes
         ConfigureTabBarAppearance();
@@ -27,9 +30,7 @@ public class AppDelegate : MauiUIApplicationDelegate
         // Load Datadog configuration from environment
         DatadogConfig.LoadFromEnvironment();
 
-        System.Diagnostics.Debug.WriteLine("[DIAGNOSTIC] About to call InitializeDatadog()");
         InitializeDatadog();
-        System.Diagnostics.Debug.WriteLine("[DIAGNOSTIC] InitializeDatadog() completed");
 
         var result = base.FinishedLaunching(application, launchOptions);
 

@@ -8,6 +8,7 @@ public class Product
     public decimal Price { get; set; }
     public string ImageUrl { get; set; } = string.Empty;
     public bool InStock { get; set; } = true;
+    public string Category { get; set; } = string.Empty;
 }
 
 public class FakeStoreProduct
@@ -18,6 +19,57 @@ public class FakeStoreProduct
     public string Description { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
     public string? Image { get; set; }
+}
+
+public class FakeStoreUser
+{
+    public int Id { get; set; }
+    public string Username { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+    public FakeStoreUserName? Name { get; set; }
+    public FakeStoreAddress? Address { get; set; }
+    public string Phone { get; set; } = string.Empty;
+}
+
+public class FakeStoreUserName
+{
+    public string Firstname { get; set; } = string.Empty;
+    public string Lastname { get; set; } = string.Empty;
+}
+
+public class FakeStoreAddress
+{
+    public string City { get; set; } = string.Empty;
+    public string Street { get; set; } = string.Empty;
+    public int Number { get; set; }
+    public string Zipcode { get; set; } = string.Empty;
+    public FakeStoreGeolocation? Geolocation { get; set; }
+}
+
+public class FakeStoreGeolocation
+{
+    public string Lat { get; set; } = string.Empty;
+    public string Long { get; set; } = string.Empty;
+}
+
+public class FakeStoreLoginResponse
+{
+    public string Token { get; set; } = string.Empty;
+}
+
+public class FakeStoreCart
+{
+    public int Id { get; set; }
+    public int UserId { get; set; }
+    public string Date { get; set; } = string.Empty;
+    public List<FakeStoreCartProduct>? Products { get; set; }
+}
+
+public class FakeStoreCartProduct
+{
+    public int ProductId { get; set; }
+    public int Quantity { get; set; }
 }
 
 public class FakeStoreCartResponse

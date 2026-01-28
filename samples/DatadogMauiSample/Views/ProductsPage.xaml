@@ -17,11 +17,30 @@
                    Margin="0,0,0,10"/>
 
             <!-- Action Buttons Row -->
-            <HorizontalStackLayout Grid.Row="1" Spacing="10" Margin="0,0,0,10">
+            <HorizontalStackLayout Grid.Row="1" Spacing="10" Margin="0,0,0,10" FlowDirection="LeftToRight" HorizontalOptions="Start">
                 <Button x:Name="RefreshButton"
                         AutomationId="refresh_products_button"
                         Text="Refresh"
                         Clicked="OnRefreshClicked"/>
+
+                <Picker x:Name="CategoryPicker"
+                        Title="Category"
+                        WidthRequest="150"
+                        SelectedIndexChanged="OnCategoryChanged"/>
+
+                <Picker x:Name="LimitPicker"
+                        Title="Limit"
+                        WidthRequest="100"
+                        SelectedIndexChanged="OnLimitChanged">
+                    <Picker.ItemsSource>
+                        <x:Array Type="{x:Type x:String}">
+                            <x:String>5</x:String>
+                            <x:String>10</x:String>
+                            <x:String>20</x:String>
+                            <x:String>All</x:String>
+                        </x:Array>
+                    </Picker.ItemsSource>
+                </Picker>
 
                 <Button x:Name="ViewCartButton"
                         AutomationId="view_cart_button"

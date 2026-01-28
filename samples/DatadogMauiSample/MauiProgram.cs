@@ -30,7 +30,7 @@ public static class MauiProgram
 
 		// Note: Datadog is initialized platform-specifically:
 		// - Android: See Platforms/Android/MainApplication.cs
-		// - iOS: Will be implemented in Platforms/iOS/AppDelegate.cs
+		// - iOS: See Platforms/iOS/AppDelegate.cs
 		// This approach allows for platform-specific configuration using native SDK APIs.
 
 #if DEBUG

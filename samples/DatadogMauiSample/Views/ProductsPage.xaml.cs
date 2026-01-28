@@ -11,6 +11,9 @@ public partial class ProductsPage : ContentPage
     private readonly CartService _cartService;
     private readonly ILogger _logger;
     private List<Product> _products = new();
+    private List<string> _categories = new();
+    private string? _selectedCategory = null;
+    private int? _currentLimit = 20;
 
     public ProductsPage()
     {
@@ -31,7 +34,57 @@ public partial class ProductsPage : ContentPage
 
         _logger.Info("ProductsPage initialized");
 
+        // Set default limit
+        LimitPicker.SelectedIndex = 2; // 20
+
+        LoadCategoriesAsync();
         LoadProductsAsync();
+    }
+
+    private async void LoadCategoriesAsync()
+    {
+        try
+        {
+            System.Diagnostics.Debug.WriteLine("[ProductsPage] Loading categories");
+            _categories = await _apiService.GetCategoriesAsync();
+
+            // Add "All Categories" at the beginning
+            var categoryList = new List<string> { "All Categories" };
+            categoryList.AddRange(_categories);
+
+            CategoryPicker.ItemsSource = categoryList;
+            CategoryPicker.SelectedIndex = 0;
+
+            System.Diagnostics.Debug.WriteLine($"[ProductsPage] Loaded {_categories.Count} categories");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[ProductsPage] Error loading categories: {ex.Message}");
+        }
+    }
+
+    private async void OnCategoryChanged(object? sender, EventArgs e)
+    {
+        if (CategoryPicker.SelectedIndex == 0)
+        {
+            _selectedCategory = null; // All categories
+        }
+        else if (CategoryPicker.SelectedIndex > 0)
+        {
+            _selectedCategory = _categories[CategoryPicker.SelectedIndex - 1];
+        }
+
+        await LoadProductsAsync();
+    }
+
+    private async void OnLimitChanged(object? sender, EventArgs e)
+    {
+        if (LimitPicker.SelectedIndex < 0) return;
+
+        var selectedValue = LimitPicker.Items[LimitPicker.SelectedIndex];
+        _currentLimit = selectedValue == "All" ? null : int.Parse(selectedValue);
+
+        await LoadProductsAsync();
     }
 
     protected override void OnDisappearing()
@@ -67,7 +120,24 @@ public partial class ProductsPage : ContentPage
 
             _logger.Info("Starting to load products");
 
-            _products = await _apiService.GetProductsAsync();
+            // Load products based on selected category and limit
+            if (_selectedCategory != null)
+            {
+                System.Diagnostics.Debug.WriteLine($"[ProductsPage] Loading products for category: {_selectedCategory}");
+                _products = await _apiService.GetProductsByCategoryAsync(_selectedCategory);
+
+                // Apply limit if set
+                if (_currentLimit.HasValue && _products.Count > _currentLimit.Value)
+                {
+                    _products = _products.Take(_currentLimit.Value).ToList();
+                }
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"[ProductsPage] Loading all products with limit: {_currentLimit?.ToString() ?? "none"}");
+                _products = await _apiService.GetProductsAsync(limit: _currentLimit);
+            }
+
             ProductsCollectionView.ItemsSource = _products;
 
             // Track successful load timing

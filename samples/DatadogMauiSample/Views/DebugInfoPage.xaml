@@ -11,6 +11,14 @@
                    FontAttributes="Bold"
                    Margin="0,0,0,10"/>
 
+            <!-- SDK Status -->
+            <Frame BorderColor="LightGray" Padding="15" CornerRadius="8" BackgroundColor="LightYellow">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="SDK Initialization Status" FontAttributes="Bold" FontSize="16"/>
+                    <Label x:Name="SdkStatusLabel" TextColor="Gray"/>
+                </VerticalStackLayout>
+            </Frame>
+
             <!-- Platform -->
             <Frame BorderColor="LightGray" Padding="15" CornerRadius="8">
                 <VerticalStackLayout Spacing="5">

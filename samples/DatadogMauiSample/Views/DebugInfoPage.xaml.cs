@@ -12,6 +12,28 @@ public partial class DebugInfoPage : ContentPage
 
     private void LoadDebugInfo()
     {
+        // Check if Datadog SDK is initialized by checking marker file
+        var appDelegateFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), ".datadog_initialized");
+        if (File.Exists(appDelegateFile))
+        {
+            try
+            {
+                var content = File.ReadAllText(appDelegateFile);
+                SdkStatusLabel.Text = $"✅ Initialized\n{content}";
+                SdkStatusLabel.TextColor = Colors.Green;
+            }
+            catch
+            {
+                SdkStatusLabel.Text = "✅ Initialized";
+                SdkStatusLabel.TextColor = Colors.Green;
+            }
+        }
+        else
+        {
+            SdkStatusLabel.Text = "❌ NOT INITIALIZED\nAppDelegate.FinishedLaunching() was not called";
+            SdkStatusLabel.TextColor = Colors.Red;
+        }
+
         // Platform
 #if ANDROID
         PlatformLabel.Text = "Android";
