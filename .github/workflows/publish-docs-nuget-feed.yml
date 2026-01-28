@@ -110,8 +110,9 @@ jobs:
           mkdir -p pkgs
 
           # Get all SDK releases (excluding symbols-only releases)
+          # Using --json to get structured output, then extract tag_name
           echo "Fetching all SDK releases..."
-          RELEASES=$(gh release list --limit 100 | grep -v "symbols-v" | awk '{print $1}' || echo "")
+          RELEASES=$(gh release list --limit 100 --json tagName --jq '.[] | select(.tagName | test("^symbols-v") | not) | .tagName' || echo "")
 
           if [ -z "$RELEASES" ]; then
             echo "No SDK releases found yet"
@@ -142,8 +143,9 @@ jobs:
         run: |
           mkdir -p pkgs
 
+          # Get Symbols package releases using --json for structured output
           echo "Fetching all Symbols package releases..."
-          SYMBOLS_RELEASES=$(gh release list --limit 100 | grep "symbols-v" | awk '{print $1}' || echo "")
+          SYMBOLS_RELEASES=$(gh release list --limit 100 --json tagName --jq '.[] | select(.tagName | test("^symbols-v")) | .tagName' || echo "")
 
           if [ -z "$SYMBOLS_RELEASES" ]; then
             echo "No Symbols package releases found yet"
