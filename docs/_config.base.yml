@@ -4,8 +4,13 @@
 # by the GitHub Actions workflow at build time.
 # ------------------------------------------------------------
 
-title: dd-sdk-maui
-description: Developer documentation for the dd-sdk-maui project.
+title: Datadog MAUI SDK
+description: Developer documentation for the Datadog SDK for .NET MAUI
+
+# Branding
+logo: "/assets/images/datadog-maui-logo.svg"
+# Note: Add favicon.ico to /assets/images/ for browser tab icon
+# favicon_ico: "/assets/images/favicon.ico"
 
 # These are injected dynamically in CI
 url: ""
@@ -103,10 +108,8 @@ exclude:
   - .github/
   - fixtures/
   - README.md
-  - nuget # Safety: ensure feed output is never processed by Jekyll
   - _archive/ # Archived documentation
   - "*.sh" # Build and utility scripts
-  - _DOCS_CLEANUP_SUMMARY.md
 
 # Sass
 sass:

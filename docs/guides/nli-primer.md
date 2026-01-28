@@ -8,7 +8,7 @@ permalink: /guides/nli-primer
 
 # Native Library Interop: The Friendly Neighborhood Translator
 
-![Native Library Interop]({{ site.baseurl }}/images/maui-nli-binding.png)
+![Native Library Interop]({{ site.baseurl }}/assets/images/maui-nli-binding.png)
 
 ## What is NLI?
 

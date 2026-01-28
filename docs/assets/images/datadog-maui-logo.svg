@@ -1,0 +1,17 @@
+<svg width="300" height="60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ddGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#632CA6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#774AA4;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background rounded rectangle -->
+  <rect x="5" y="5" width="290" height="50" rx="8" fill="url(#ddGradient)"/>
+
+  <!-- "DD" in bold -->
+  <text x="20" y="40" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="white">DD</text>
+
+  <!-- "MAUI SDK" in normal weight -->
+  <text x="75" y="40" font-family="Arial, sans-serif" font-size="28" font-weight="normal" fill="white">MAUI SDK</text>
+</svg>
