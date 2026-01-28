@@ -492,7 +492,17 @@ jobs:
 
       - name: Create release notes
         run: |
-          cat > release-notes.md << 'EOF'
+          # Extract package names from artifacts and categorize them
+          cd ./release-artifacts
+
+          # Get all unique package IDs (strip version and .nupkg)
+          PLUGIN_PACKAGES=$(ls Datadog.MAUI.*.nupkg 2>/dev/null | grep -v "Android\|iOS" | sed 's/\.[0-9]\+\.[0-9]\+\.[0-9]\+\.nupkg$//' | sort -u)
+          ANDROID_PACKAGES=$(ls Datadog.MAUI.Android.*.nupkg 2>/dev/null | grep -v "\.Binding\." | sed 's/\.[0-9]\+\.[0-9]\+\.[0-9]\+\.nupkg$//' | sort -u)
+          IOS_PACKAGES=$(ls Datadog.MAUI.iOS.*.nupkg 2>/dev/null | grep -v "\.Binding\." | sed 's/\.[0-9]\+\.[0-9]\+\.[0-9]\+\.nupkg$//' | sort -u)
+          META_PACKAGES=$(ls Datadog.MAUI.*.Binding.*.nupkg 2>/dev/null | sed 's/\.[0-9]\+\.[0-9]\+\.[0-9]\+\.nupkg$//' | sort -u)
+
+          # Start building release notes
+          cat > ../release-notes.md << EOF
           # Datadog MAUI SDK ${{ steps.get-version.outputs.version }}
 
           .NET MAUI bindings for Datadog's native iOS and Android Mobile SDKs.
@@ -501,26 +511,50 @@ jobs:
 
           This release includes the following NuGet packages:
 
-          ### Android Bindings - Core & Features
-          - Datadog.MAUI.Android.Core
-          - Datadog.MAUI.Android.Internal
-          - Datadog.MAUI.Android.RUM
-          - Datadog.MAUI.Android.Logs
-          - Datadog.MAUI.Android.Trace
-          - Datadog.MAUI.Android.SessionReplay
-          - Datadog.MAUI.Android.NDK
-          - Datadog.MAUI.Android.WebView
-          - Datadog.MAUI.Android.Flags
+          EOF
 
-          ### Android Bindings - Integrations
-          - Datadog.MAUI.Android.OkHttp
-          - Datadog.MAUI.Android.Trace.OpenTelemetry
-          - Datadog.MAUI.Android.OkHttp.OpenTelemetry
-          - Datadog.MAUI.Android.GradlePlugin
+          # Add Unified Plugin section
+          if [ -n "$PLUGIN_PACKAGES" ]; then
+            echo "### Unified Plugin" >> ../release-notes.md
+            echo "" >> ../release-notes.md
+            for pkg in $PLUGIN_PACKAGES; do
+              echo "- **$pkg** - Cross-platform unified API for both iOS and Android" >> ../release-notes.md
+            done
+            echo "" >> ../release-notes.md
+          fi
 
-          ### iOS Bindings
-          - Datadog.MAUI.iOS.Binding (if available)
+          # Add Android packages
+          if [ -n "$ANDROID_PACKAGES" ]; then
+            echo "### Android Bindings" >> ../release-notes.md
+            echo "" >> ../release-notes.md
+            echo "$ANDROID_PACKAGES" | while read pkg; do
+              echo "- $pkg" >> ../release-notes.md
+            done
+            echo "" >> ../release-notes.md
+          fi
 
+          # Add iOS packages
+          if [ -n "$IOS_PACKAGES" ]; then
+            echo "### iOS Bindings" >> ../release-notes.md
+            echo "" >> ../release-notes.md
+            echo "$IOS_PACKAGES" | while read pkg; do
+              echo "- $pkg" >> ../release-notes.md
+            done
+            echo "" >> ../release-notes.md
+          fi
+
+          # Add Meta-Packages
+          if [ -n "$META_PACKAGES" ]; then
+            echo "### Meta-Packages" >> ../release-notes.md
+            echo "" >> ../release-notes.md
+            echo "$META_PACKAGES" | while read pkg; do
+              echo "- $pkg" >> ../release-notes.md
+            done
+            echo "" >> ../release-notes.md
+          fi
+
+          # Add remaining sections
+          cat >> ../release-notes.md << 'ENDEOF'
           ## Target Frameworks
 
           All packages support:
@@ -529,8 +563,15 @@ jobs:
 
           ## Installation
 
+          For most users, install the unified plugin:
+          ```bash
+          dotnet add package Datadog.MAUI --version ${{ steps.get-version.outputs.version }}
+          ```
+
+          Or install platform-specific bindings:
           ```bash
           dotnet add package Datadog.MAUI.Android.Core --version ${{ steps.get-version.outputs.version }}
+          dotnet add package Datadog.MAUI.iOS.Core --version ${{ steps.get-version.outputs.version }}
           ```
 
           ## Documentation
@@ -540,7 +581,11 @@ jobs:
           ## What's Changed
 
           See [CHANGELOG.md](https://github.com/DataDog/dd-sdk-maui/blob/main/docs/CHANGELOG.md) for detailed changes.
-          EOF
+          ENDEOF
+
+          cd ..
+          echo "=== Generated Release Notes ==="
+          cat release-notes.md
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
