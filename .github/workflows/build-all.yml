@@ -282,6 +282,18 @@ jobs:
           echo "Packages available for sample app build:"
           ls -lh ./artifacts/*.nupkg
 
+      - name: Setup local NuGet source
+        run: |
+          # Add local artifacts directory as NuGet source
+          LOCAL_SOURCE="$(pwd)/artifacts"
+          echo "Adding local NuGet source: $LOCAL_SOURCE"
+          dotnet nuget add source "$LOCAL_SOURCE" --name LocalArtifacts || echo "Source already exists"
+
+          # List available packages
+          echo ""
+          echo "Available packages in local source:"
+          ls -1 "$LOCAL_SOURCE"/*.nupkg
+
       - name: Build sample app (Android + iOS)
         env:
           DD_RUM_ANDROID_CLIENT_TOKEN: ${{ secrets.DD_RUM_ANDROID_CLIENT_TOKEN }}
@@ -291,9 +303,10 @@ jobs:
         run: |
           cd samples/DatadogMauiSample
 
-          # Restore all dependencies (Android + iOS)
+          # Restore all dependencies (Android + iOS) from local source first
           echo "Restoring dependencies for all target frameworks..."
-          dotnet restore
+          LOCAL_SOURCE="$(cd ../.. && pwd)/artifacts"
+          dotnet restore --source "$LOCAL_SOURCE" --source https://api.nuget.org/v3/index.json
 
           # Build Android (net10.0-android)
           echo "Building Android (net10.0-android)..."
