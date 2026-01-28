@@ -168,6 +168,7 @@ jobs:
 
       - name: Generate sleet.json dynamically (baseURI uses Pages origin + base_path)
         run: |
+          # Build feed in temp location to avoid Jekyll permission issues
           cat > sleet.json <<'JSON'
           {
             "username": "github-actions[bot]",
@@ -176,7 +177,7 @@ jobs:
               {
                 "name": "pages",
                 "type": "local",
-                "path": "./_site/nuget",
+                "path": "./nuget-temp",
                 "baseURI": "__BASEURI__"
               }
             ]
@@ -194,16 +195,12 @@ jobs:
           print("baseURI:", "${BASEURI}")
           PY
 
-      - name: Init feed (if missing)
+      - name: Init feed in temp location
         run: |
-          # Check if feed directory exists (don't check for files - let Sleet create them)
-          if [ ! -d "_site/nuget" ]; then
-            echo "Initializing new NuGet feed..."
-            sleet init --config sleet.json --source pages
-            echo "✅ New feed initialized"
-          else
-            echo "✅ Feed directory exists, will update it"
-          fi
+          echo "Initializing NuGet feed in temp location..."
+          mkdir -p nuget-temp
+          sleet init --config sleet.json --source pages
+          echo "✅ Feed initialized"
 
       - name: Push packages to feed
         run: |
@@ -226,6 +223,13 @@ jobs:
             echo "## NuGet Feed Update" >> $GITHUB_STEP_SUMMARY
             echo "No new packages (existing feed preserved)" >> $GITHUB_STEP_SUMMARY
           fi
+
+      - name: Move feed to _site directory
+        run: |
+          echo "Moving NuGet feed from temp location to _site/nuget..."
+          rm -rf _site/nuget
+          mv nuget-temp _site/nuget
+          echo "✅ Feed moved to _site/nuget"
 
       - name: Build packages index for NuGet Explorer
         run: |
