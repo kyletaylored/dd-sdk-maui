@@ -97,6 +97,22 @@ jobs:
             --pattern "*.nupkg" \
             --dir ./pkgs || echo "No packages found in release"
 
+      - name: Download latest Symbols package (always include in feed)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p pkgs
+          echo "Checking for latest Symbols package release..."
+          LATEST_SYMBOLS_TAG=$(gh release list --limit 100 | grep "symbols-v" | head -1 | awk '{print $1}')
+          if [ -n "$LATEST_SYMBOLS_TAG" ]; then
+            echo "Found latest symbols release: $LATEST_SYMBOLS_TAG"
+            gh release download "$LATEST_SYMBOLS_TAG" \
+              --pattern "*.nupkg" \
+              --dir ./pkgs || echo "No Symbols package found in $LATEST_SYMBOLS_TAG"
+          else
+            echo "No Symbols package releases found yet"
+          fi
+
       - name: Build packages (if not from release)
         if: github.event_name != 'release'
         run: |
