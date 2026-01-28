@@ -29,6 +29,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dd-sdk-android-trace-otel",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dd-sdk-android-okhttp-otel", "dd-sdk-android-okhttp-otel\dd-sdk-android-okhttp-otel.csproj", "{D7EA1FC9-3456-6789-01CD-EF0123456789}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "opentracing-api", "opentracing-api\opentracing-api.csproj", "{9A8C09C5-2737-41F2-B18A-81E4CD981DB8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -195,6 +197,18 @@ Global
 		{D7EA1FC9-3456-6789-01CD-EF0123456789}.Release|x64.Build.0 = Release|Any CPU
 		{D7EA1FC9-3456-6789-01CD-EF0123456789}.Release|x86.ActiveCfg = Release|Any CPU
 		{D7EA1FC9-3456-6789-01CD-EF0123456789}.Release|x86.Build.0 = Release|Any CPU
+		{9A8C09C5-2737-41F2-B18A-81E4CD981DB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A8C09C5-2737-41F2-B18A-81E4CD981DB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A8C09C5-2737-41F2-B18A-81E4CD981DB8}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9A8C09C5-2737-41F2-B18A-81E4CD981DB8}.Debug|x64.Build.0 = Debug|Any CPU
+		{9A8C09C5-2737-41F2-B18A-81E4CD981DB8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9A8C09C5-2737-41F2-B18A-81E4CD981DB8}.Debug|x86.Build.0 = Debug|Any CPU
+		{9A8C09C5-2737-41F2-B18A-81E4CD981DB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A8C09C5-2737-41F2-B18A-81E4CD981DB8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A8C09C5-2737-41F2-B18A-81E4CD981DB8}.Release|x64.ActiveCfg = Release|Any CPU
+		{9A8C09C5-2737-41F2-B18A-81E4CD981DB8}.Release|x64.Build.0 = Release|Any CPU
+		{9A8C09C5-2737-41F2-B18A-81E4CD981DB8}.Release|x86.ActiveCfg = Release|Any CPU
+		{9A8C09C5-2737-41F2-B18A-81E4CD981DB8}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

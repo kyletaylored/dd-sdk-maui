@@ -282,17 +282,26 @@ jobs:
           echo "Packages available for sample app build:"
           ls -lh ./artifacts/*.nupkg
 
-      - name: Build Android sample app
+      - name: Build sample app (Android + iOS)
         env:
           DD_RUM_ANDROID_CLIENT_TOKEN: ${{ secrets.DD_RUM_ANDROID_CLIENT_TOKEN }}
           DD_RUM_ANDROID_APPLICATION_ID: ${{ secrets.DD_RUM_ANDROID_APPLICATION_ID }}
-        run: make sample-build-android-release-only
-
-      - name: Build iOS sample app
-        env:
           DD_RUM_IOS_CLIENT_TOKEN: ${{ secrets.DD_RUM_IOS_CLIENT_TOKEN }}
           DD_RUM_IOS_APPLICATION_ID: ${{ secrets.DD_RUM_IOS_APPLICATION_ID }}
-        run: make sample-build-ios-release-only
+        run: |
+          cd samples/DatadogMauiSample
+
+          # Restore all dependencies (Android + iOS)
+          echo "Restoring dependencies for all target frameworks..."
+          dotnet restore
+
+          # Build Android (net10.0-android)
+          echo "Building Android (net10.0-android)..."
+          dotnet build -f net10.0-android -c Release --no-restore
+
+          # Build iOS (net10.0-ios)
+          echo "Building iOS (net10.0-ios)..."
+          dotnet build -f net10.0-ios -c Release --no-restore
 
       - name: Upload Android sample APK
         uses: actions/upload-artifact@v6

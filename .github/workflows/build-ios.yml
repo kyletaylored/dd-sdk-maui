@@ -22,10 +22,28 @@ jobs:
   download-xcframeworks:
     name: Download XCFrameworks
     runs-on: macos-latest
+    outputs:
+      projects: ${{ steps.get-projects.outputs.projects }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+
+      - name: Get binding projects from solution file
+        id: get-projects
+        run: |
+          cd Datadog.MAUI.iOS.Binding
+
+          # Get all projects from solution, exclude meta-package and header line
+          PROJECTS=$(dotnet sln list | tail -n +3 | grep -v '^Datadog.MAUI.iOS.Binding.csproj$')
+
+          echo "Found binding projects:"
+          echo "$PROJECTS"
+
+          # Save to output for later jobs (with full path)
+          echo "projects<<EOF" >> $GITHUB_OUTPUT
+          echo "$PROJECTS" | awk '{print "Datadog.MAUI.iOS.Binding/" $0}' >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Get SDK version
         id: sdk-version
@@ -140,31 +158,31 @@ jobs:
           # Fix NU1301: Create artifacts dir to satisfy NuGet.Config
           mkdir -p ./artifacts
 
-          # Restore individual packages, skip meta-package
-          for dir in Datadog.MAUI.iOS.Binding/Datadog*; do
-            if [ -d "$dir" ] && [ -f "$dir"/*.csproj ] && [[ "$(basename $dir)" != "Datadog.MAUI.iOS.Binding" ]]; then
-              echo "Restoring $(basename $dir)..."
-              dotnet restore "$dir" -p:TargetFrameworks=net9.0-ios
+          # Restore individual packages from solution file
+          echo "${{ needs.download-xcframeworks.outputs.projects }}" | while read -r project; do
+            if [ -n "$project" ]; then
+              echo "Restoring $project..."
+              dotnet restore "$project" -p:TargetFrameworks=net9.0-ios
             fi
           done
 
       - name: Build iOS bindings (net9.0-ios)
         run: |
-          # Build individual packages, skip meta-package
-          for dir in Datadog.MAUI.iOS.Binding/Datadog*; do
-            if [ -d "$dir" ] && [ -f "$dir"/*.csproj ] && [[ "$(basename $dir)" != "Datadog.MAUI.iOS.Binding" ]]; then
-              echo "Building $(basename $dir)..."
-              dotnet build "$dir" --configuration Release --no-restore -p:TargetFrameworks=net9.0-ios
+          # Build individual packages from solution file
+          echo "${{ needs.download-xcframeworks.outputs.projects }}" | while read -r project; do
+            if [ -n "$project" ]; then
+              echo "Building $project..."
+              dotnet build "$project" --configuration Release --no-restore -p:TargetFrameworks=net9.0-ios
             fi
           done
 
       - name: Pack NuGet packages (net9.0-ios)
         run: |
-          # Pack individual packages (excluding meta-package)
-          for dir in Datadog.MAUI.iOS.Binding/Datadog*; do
-            if [ -d "$dir" ] && [ -f "$dir"/*.csproj ] && [[ "$(basename $dir)" != "Datadog.MAUI.iOS.Binding" ]]; then
-              echo "Packing $(basename $dir)..."
-              dotnet pack "$dir" --configuration Release --no-build --output ./artifacts-net9 -p:TargetFrameworks=net9.0-ios
+          # Pack individual packages from solution file
+          echo "${{ needs.download-xcframeworks.outputs.projects }}" | while read -r project; do
+            if [ -n "$project" ]; then
+              echo "Packing $project..."
+              dotnet pack "$project" --configuration Release --no-build --output ./artifacts-net9 -p:TargetFrameworks=net9.0-ios
             fi
           done
 
@@ -245,31 +263,31 @@ jobs:
           # Fix NU1301: Create artifacts dir to satisfy NuGet.Config
           mkdir -p ./artifacts
 
-          # Restore individual packages, skip meta-package
-          for dir in Datadog.MAUI.iOS.Binding/Datadog*; do
-            if [ -d "$dir" ] && [ -f "$dir"/*.csproj ] && [[ "$(basename $dir)" != "Datadog.MAUI.iOS.Binding" ]]; then
-              echo "Restoring $(basename $dir)..."
-              dotnet restore "$dir" -p:TargetFrameworks=net10.0-ios
+          # Restore individual packages from solution file
+          echo "${{ needs.download-xcframeworks.outputs.projects }}" | while read -r project; do
+            if [ -n "$project" ]; then
+              echo "Restoring $project..."
+              dotnet restore "$project" -p:TargetFrameworks=net10.0-ios
             fi
           done
 
       - name: Build iOS bindings (net10.0-ios)
         run: |
-          # Build individual packages, skip meta-package
-          for dir in Datadog.MAUI.iOS.Binding/Datadog*; do
-            if [ -d "$dir" ] && [ -f "$dir"/*.csproj ] && [[ "$(basename $dir)" != "Datadog.MAUI.iOS.Binding" ]]; then
-              echo "Building $(basename $dir)..."
-              dotnet build "$dir" --configuration Release --no-restore -p:TargetFrameworks=net10.0-ios
+          # Build individual packages from solution file
+          echo "${{ needs.download-xcframeworks.outputs.projects }}" | while read -r project; do
+            if [ -n "$project" ]; then
+              echo "Building $project..."
+              dotnet build "$project" --configuration Release --no-restore -p:TargetFrameworks=net10.0-ios
             fi
           done
 
       - name: Pack NuGet packages (net10.0-ios)
         run: |
-          # Pack individual packages (excluding meta-package)
-          for dir in Datadog.MAUI.iOS.Binding/Datadog*; do
-            if [ -d "$dir" ] && [ -f "$dir"/*.csproj ] && [[ "$(basename $dir)" != "Datadog.MAUI.iOS.Binding" ]]; then
-              echo "Packing $(basename $dir)..."
-              dotnet pack "$dir" --configuration Release --no-build --output ./artifacts-net10 -p:TargetFrameworks=net10.0-ios
+          # Pack individual packages from solution file
+          echo "${{ needs.download-xcframeworks.outputs.projects }}" | while read -r project; do
+            if [ -n "$project" ]; then
+              echo "Packing $project..."
+              dotnet pack "$project" --configuration Release --no-build --output ./artifacts-net10 -p:TargetFrameworks=net10.0-ios
             fi
           done
 

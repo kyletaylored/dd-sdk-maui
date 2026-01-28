@@ -22,10 +22,28 @@ jobs:
   verify-android-dependencies:
     name: Verify Android Dependencies
     runs-on: ubuntu-latest
+    outputs:
+      projects: ${{ steps.get-projects.outputs.projects }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+
+      - name: Get binding projects from solution file
+        id: get-projects
+        run: |
+          cd Datadog.MAUI.Android.Binding
+
+          # Get all projects from solution, exclude meta-package and header line
+          PROJECTS=$(dotnet sln list | tail -n +3 | grep -v '^Datadog.MAUI.Android.Binding.csproj$')
+
+          echo "Found binding projects:"
+          echo "$PROJECTS"
+
+          # Save to output for later jobs (with full path)
+          echo "projects<<EOF" >> $GITHUB_OUTPUT
+          echo "$PROJECTS" | awk '{print "Datadog.MAUI.Android.Binding/" $0}' >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Get SDK version
         id: sdk-version
@@ -125,33 +143,33 @@ jobs:
           </configuration>
           EOF
 
-          # Restore individual packages using temp config (skips ./artifacts, uses nuget.org for external deps)
-          for dir in Datadog.MAUI.Android.Binding/dd-sdk-android-* Datadog.MAUI.Android.Binding/opentracing-api; do
-            if [ -d "$dir" ]; then
-              echo "Restoring $(basename $dir)..."
-              dotnet restore "$dir" -p:TargetFrameworks=net9.0-android --configfile /tmp/nuget.temp.config
+          # Restore individual packages from solution file
+          echo "${{ needs.verify-android-dependencies.outputs.projects }}" | while read -r project; do
+            if [ -n "$project" ]; then
+              echo "Restoring $project..."
+              dotnet restore "$project" -p:TargetFrameworks=net9.0-android --configfile /tmp/nuget.temp.config
             fi
           done
 
       - name: Build Android bindings (net9.0-android)
         if: steps.cache-nuget-net9.outputs.cache-hit != 'true'
         run: |
-          # Build individual packages, skip meta-package
-          for dir in Datadog.MAUI.Android.Binding/dd-sdk-android-* Datadog.MAUI.Android.Binding/opentracing-api; do
-            if [ -d "$dir" ]; then
-              echo "Building $(basename $dir)..."
-              dotnet build "$dir" --configuration Release --no-restore -p:TargetFrameworks=net9.0-android
+          # Build individual packages from solution file
+          echo "${{ needs.verify-android-dependencies.outputs.projects }}" | while read -r project; do
+            if [ -n "$project" ]; then
+              echo "Building $project..."
+              dotnet build "$project" --configuration Release --no-restore -p:TargetFrameworks=net9.0-android
             fi
           done
 
       - name: Pack NuGet packages (net9.0-android)
         if: steps.cache-nuget-net9.outputs.cache-hit != 'true'
         run: |
-          # Pack individual packages (excluding meta-package)
-          for dir in Datadog.MAUI.Android.Binding/dd-sdk-android-* Datadog.MAUI.Android.Binding/opentracing-api; do
-            if [ -d "$dir" ]; then
-              echo "Packing $(basename $dir)..."
-              dotnet pack "$dir" --configuration Release --no-build --output ./artifacts-net9 -p:TargetFrameworks=net9.0-android
+          # Pack individual packages from solution file
+          echo "${{ needs.verify-android-dependencies.outputs.projects }}" | while read -r project; do
+            if [ -n "$project" ]; then
+              echo "Packing $project..."
+              dotnet pack "$project" --configuration Release --no-build --output ./artifacts-net9 -p:TargetFrameworks=net9.0-android
             fi
           done
 
@@ -251,33 +269,33 @@ jobs:
           </configuration>
           EOF
 
-          # Restore individual packages using temp config (skips ./artifacts, uses nuget.org for external deps)
-          for dir in Datadog.MAUI.Android.Binding/dd-sdk-android-* Datadog.MAUI.Android.Binding/opentracing-api; do
-            if [ -d "$dir" ]; then
-              echo "Restoring $(basename $dir)..."
-              dotnet restore "$dir" -p:TargetFrameworks=net10.0-android --configfile /tmp/nuget.temp.config
+          # Restore individual packages from solution file
+          echo "${{ needs.verify-android-dependencies.outputs.projects }}" | while read -r project; do
+            if [ -n "$project" ]; then
+              echo "Restoring $project..."
+              dotnet restore "$project" -p:TargetFrameworks=net10.0-android --configfile /tmp/nuget.temp.config
             fi
           done
 
       - name: Build Android bindings (net10.0-android)
         if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
         run: |
-          # Build individual packages, skip meta-package
-          for dir in Datadog.MAUI.Android.Binding/dd-sdk-android-* Datadog.MAUI.Android.Binding/opentracing-api; do
-            if [ -d "$dir" ]; then
-              echo "Building $(basename $dir)..."
-              dotnet build "$dir" --configuration Release --no-restore -p:TargetFrameworks=net10.0-android
+          # Build individual packages from solution file
+          echo "${{ needs.verify-android-dependencies.outputs.projects }}" | while read -r project; do
+            if [ -n "$project" ]; then
+              echo "Building $project..."
+              dotnet build "$project" --configuration Release --no-restore -p:TargetFrameworks=net10.0-android
             fi
           done
 
       - name: Pack NuGet packages (net10.0-android)
         if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
         run: |
-          # Pack individual packages (excluding meta-package)
-          for dir in Datadog.MAUI.Android.Binding/dd-sdk-android-* Datadog.MAUI.Android.Binding/opentracing-api; do
-            if [ -d "$dir" ]; then
-              echo "Packing $(basename $dir)..."
-              dotnet pack "$dir" --configuration Release --no-build --output ./artifacts-net10 -p:TargetFrameworks=net10.0-android
+          # Pack individual packages from solution file
+          echo "${{ needs.verify-android-dependencies.outputs.projects }}" | while read -r project; do
+            if [ -n "$project" ]; then
+              echo "Packing $project..."
+              dotnet pack "$project" --configuration Release --no-build --output ./artifacts-net10 -p:TargetFrameworks=net10.0-android
             fi
           done
 
