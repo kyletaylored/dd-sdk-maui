@@ -40,6 +40,19 @@ Platform-specific and user guides for the Datadog MAUI SDK.
 - ProGuard/R8 configuration
 - NDK symbol uploads
 
+## Feature Guides
+
+**[What is NLI?](nli-primer)** - Understanding Native Library Interop:
+- What is NLI and how does it work?
+- Why we use native bindings
+- Architecture overview
+
+**[HTTP Request Tracing](http-tracing)** - Distributed tracing for HTTP requests:
+- How HTTP tracing works
+- Android automatic tracing
+- iOS manual tracing workarounds
+- Current limitations and future improvements
+
 ## Quick Navigation
 
 | Platform | Guide | Description |
@@ -54,3 +67,5 @@ Platform-specific and user guides for the Datadog MAUI SDK.
 | Symbols | [CI/CD Integration](symbols/ci-cd.html) | Integrate with build pipelines |
 | Symbols | [Troubleshooting](symbols/troubleshooting.html) | Common issues and solutions |
 | User | [Mapping Files](user/mapping-files) | Upload ProGuard/NDK files |
+| Feature | [What is NLI?](nli-primer) | Understanding Native Library Interop |
+| Feature | [HTTP Tracing](http-tracing) | Distributed tracing for HTTP requests |

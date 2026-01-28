@@ -76,7 +76,77 @@ public static partial class Datadog
     {
         var traceConfiguration = new DDTraceConfiguration();
         traceConfiguration.SampleRate = tracingConfig.SampleRate;
+
+        // Configure URLSession tracking with first-party hosts
+        if (tracingConfig.FirstPartyHosts.Length > 0)
+        {
+            try
+            {
+                Console.WriteLine($"[Datadog] Configuring URLSession tracking for {tracingConfig.FirstPartyHosts.Length} first-party hosts");
+
+                // Create NSSet of host strings
+                var hosts = new NSSet<NSString>(
+                    tracingConfig.FirstPartyHosts.Select(h => new NSString(h)).ToArray()
+                );
+
+                // Create first-party hosts tracing configuration
+                var firstPartyHostsTracing = new DDTraceFirstPartyHostsTracing(hosts);
+
+                // Create URLSession tracking configuration
+                var urlSessionTracking = new DDTraceURLSessionTracking(firstPartyHostsTracing);
+
+                // Apply to trace configuration
+                traceConfiguration.SetURLSessionTracking(urlSessionTracking);
+
+                Console.WriteLine("[Datadog] ✓ URLSession tracking configured");
+
+                // Log configured hosts
+                foreach (var host in tracingConfig.FirstPartyHosts)
+                {
+                    Console.WriteLine($"[Datadog]   - {host}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Datadog] ⚠ Failed to configure URLSession tracking: {ex.Message}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("[Datadog] ℹ No first-party hosts configured for tracing");
+        }
+
         DDTrace.EnableWith(traceConfiguration);
+
+        // EXPERIMENTAL: Try to enable URLSession instrumentation
+        EnableURLSessionInstrumentation(tracingConfig);
+    }
+
+    private static void EnableURLSessionInstrumentation(TracingConfiguration tracingConfig)
+    {
+        // EXPERIMENTAL: Try to enable URLSession instrumentation
+        // This may or may not work without a specific delegate class
+        //
+        // NOTE: URLSessionInstrumentation requires an INSUrlSessionDataDelegate instance
+        // However, .NET MAUI's HttpClient uses an internal delegate that we can't access.
+        // This method is disabled for now until we find a working approach.
+        //
+        // For now, the URLSession tracking configuration in InitializeTracing() may be
+        // sufficient to enable automatic HTTP tracing. Testing needed.
+
+        if (tracingConfig.FirstPartyHosts.Length == 0)
+        {
+            return;
+        }
+
+        Console.WriteLine("[Datadog] ℹ URLSession instrumentation requires a delegate instance");
+        Console.WriteLine("[Datadog]   Relying on URLSession tracking configuration instead");
+        Console.WriteLine("[Datadog]   If automatic HTTP tracing doesn't work, see docs for manual approach");
+
+        // TODO: Implement one of these approaches:
+        // 1. Create a custom NSUrlSessionDataDelegate subclass
+        // 2. Use a DelegatingHandler wrapper for HttpClient
+        // 3. Explore runtime method swizzling from C#
     }
 
     static partial void PlatformSetUser(UserInfo userInfo)

@@ -273,6 +273,9 @@ public class MainApplication : MauiApplication
 
 Place this in `Platforms/iOS/AppDelegate.cs`:
 
+{: .note }
+> **iOS HTTP Tracing**: This example includes Phase 1 implementation of automatic HTTP tracing, which configures URLSession tracking with first-party hosts. This may enable automatic tracing without additional code. See STEP 7 for the configuration.
+
 ```csharp
 using Foundation;
 using UIKit;
@@ -421,12 +424,33 @@ public class AppDelegate : MauiUIApplicationDelegate
             {
                 var traceConfig = new DDTraceConfiguration();
                 traceConfig.SampleRate = 100.0f;         // Sample 100% of traces
-                traceConfig.URLSessionTracking = DDTraceURLSessionTracking.FirstPartyHostsWithTraces;
+
+                // Configure URLSession tracking with first-party hosts
+                // This enables automatic HTTP tracing for specified domains
+                var firstPartyHosts = new[] { "api.myapp.com", "backend.myapp.com" };
+
+                if (firstPartyHosts.Length > 0)
+                {
+                    var hosts = new NSSet<NSString>(
+                        firstPartyHosts.Select(h => new NSString(h)).ToArray()
+                    );
+
+                    var firstPartyHostsTracing = new DDTraceFirstPartyHostsTracing(hosts);
+                    var urlSessionTracking = new DDTraceURLSessionTracking(firstPartyHostsTracing);
+                    traceConfig.SetURLSessionTracking(urlSessionTracking);
+
+                    Console.WriteLine($"[Datadog] ✓ URLSession tracking configured for {firstPartyHosts.Length} first-party hosts");
+                    foreach (var host in firstPartyHosts)
+                    {
+                        Console.WriteLine($"[Datadog]   - {host}");
+                    }
+                }
 
                 DDTrace.EnableWith(traceConfig);
                 Console.WriteLine("[Datadog] ✓ APM Tracing enabled");
 
-                // Note: HTTP requests to first-party hosts will be automatically traced
+                // Note: HTTP requests to first-party hosts will be automatically traced (Phase 1)
+                Console.WriteLine("[Datadog] ℹ URLSession instrumentation relies on URLSession tracking configuration");
             }
             catch (Exception ex)
             {
@@ -604,9 +628,12 @@ Once you've completed the setup above, the following will be tracked **automatic
 
 | Feature | Android | iOS | Description |
 |---------|---------|-----|-------------|
-| **HTTP Tracing** | ✅ | ✅ | Automatic trace headers for first-party hosts |
-| **Span Generation** | ✅ | ✅ | Automatic spans for HTTP requests |
-| **Distributed Tracing** | ✅ | ✅ | End-to-end trace propagation |
+| **HTTP Tracing** | ✅ | 🧪 | Automatic trace headers for first-party hosts (iOS: Phase 1 testing) |
+| **Span Generation** | ✅ | 🧪 | Automatic spans for HTTP requests (iOS: Phase 1 testing) |
+| **Distributed Tracing** | ✅ | 🧪 | End-to-end trace propagation (iOS: Phase 1 testing) |
+
+{: .note }
+> **iOS HTTP Tracing Status**: Phase 1 implementation has been deployed (URLSession tracking configuration). This may enable automatic HTTP tracing on iOS. Testing is required to verify functionality. If automatic tracing doesn't work, see the [HTTP Tracing Guide](../guides/http-tracing) for manual instrumentation approaches.
 
 ### ✅ Logs
 
