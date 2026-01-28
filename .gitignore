@@ -36,6 +36,8 @@ ScaffoldingReadMe.txt
 *.nupkg
 # NuGet Symbol Packages
 *.snupkg
+# Temporary nuget.config files (created by CI/test scripts)
+samples/**/nuget.config
 
 # Others
 ~$*

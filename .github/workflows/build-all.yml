@@ -282,39 +282,56 @@ jobs:
           echo "Packages available for sample app build:"
           ls -lh ./artifacts/*.nupkg
 
-      - name: Setup local NuGet source
-        run: |
-          # Add local artifacts directory as NuGet source
-          LOCAL_SOURCE="$(pwd)/artifacts"
-          echo "Adding local NuGet source: $LOCAL_SOURCE"
-          dotnet nuget add source "$LOCAL_SOURCE" --name LocalArtifacts || echo "Source already exists"
-
-          # List available packages
-          echo ""
-          echo "Available packages in local source:"
-          ls -1 "$LOCAL_SOURCE"/*.nupkg
-
-      - name: Build sample app (Android + iOS)
+      - name: Setup local NuGet source and restore
         env:
           DD_RUM_ANDROID_CLIENT_TOKEN: ${{ secrets.DD_RUM_ANDROID_CLIENT_TOKEN }}
           DD_RUM_ANDROID_APPLICATION_ID: ${{ secrets.DD_RUM_ANDROID_APPLICATION_ID }}
           DD_RUM_IOS_CLIENT_TOKEN: ${{ secrets.DD_RUM_IOS_CLIENT_TOKEN }}
           DD_RUM_IOS_APPLICATION_ID: ${{ secrets.DD_RUM_IOS_APPLICATION_ID }}
         run: |
+          # List available packages
+          echo "Available packages in artifacts:"
+          ls -1 ./artifacts/*.nupkg
+          echo ""
+
+          # Create nuget.config in sample directory with local source
+          cat > samples/DatadogMauiSample/nuget.config << 'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <configuration>
+            <packageSources>
+              <clear />
+              <add key="LocalArtifacts" value="../../artifacts" />
+              <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+            </packageSources>
+          </configuration>
+          EOF
+
+          echo "Created nuget.config:"
+          cat samples/DatadogMauiSample/nuget.config
+          echo ""
+
+          # Restore with explicit config
+          echo "Restoring sample app dependencies..."
           cd samples/DatadogMauiSample
+          dotnet restore --configfile nuget.config
 
-          # Restore all dependencies (Android + iOS) from local source first
-          echo "Restoring dependencies for all target frameworks..."
-          LOCAL_SOURCE="$(cd ../.. && pwd)/artifacts"
-          dotnet restore --source "$LOCAL_SOURCE" --source https://api.nuget.org/v3/index.json
-
-          # Build Android (net10.0-android)
+      - name: Build sample app (Android)
+        env:
+          DD_RUM_ANDROID_CLIENT_TOKEN: ${{ secrets.DD_RUM_ANDROID_CLIENT_TOKEN }}
+          DD_RUM_ANDROID_APPLICATION_ID: ${{ secrets.DD_RUM_ANDROID_APPLICATION_ID }}
+        run: |
+          cd samples/DatadogMauiSample
           echo "Building Android (net10.0-android)..."
-          dotnet build -f net10.0-android -c Release --no-restore
+          dotnet build -f net10.0-android -c Release --no-restore -v minimal
 
-          # Build iOS (net10.0-ios)
+      - name: Build sample app (iOS)
+        env:
+          DD_RUM_IOS_CLIENT_TOKEN: ${{ secrets.DD_RUM_IOS_CLIENT_TOKEN }}
+          DD_RUM_IOS_APPLICATION_ID: ${{ secrets.DD_RUM_IOS_APPLICATION_ID }}
+        run: |
+          cd samples/DatadogMauiSample
           echo "Building iOS (net10.0-ios)..."
-          dotnet build -f net10.0-ios -c Release --no-restore
+          dotnet build -f net10.0-ios -c Release --no-restore -v minimal
 
       - name: Upload Android sample APK
         uses: actions/upload-artifact@v6
