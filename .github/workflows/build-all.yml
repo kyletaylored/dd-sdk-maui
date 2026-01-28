@@ -6,19 +6,25 @@ on:
     paths:
       - 'Datadog.MAUI.Android.Binding/**'
       - 'Datadog.MAUI.iOS.Binding/**'
+      - 'Datadog.MAUI.Plugin/**'
       - 'samples/**'
       - 'scripts/**'
       - 'Directory.Build.props'
-      - '.github/workflows/**'
+      - '.github/workflows/build-all.yml'
+      - '.github/workflows/build-android.yml'
+      - '.github/workflows/build-ios.yml'
   pull_request:
     branches: [ main, develop ]
     paths:
       - 'Datadog.MAUI.Android.Binding/**'
       - 'Datadog.MAUI.iOS.Binding/**'
+      - 'Datadog.MAUI.Plugin/**'
       - 'samples/**'
       - 'scripts/**'
       - 'Directory.Build.props'
-      - '.github/workflows/**'
+      - '.github/workflows/build-all.yml'
+      - '.github/workflows/build-android.yml'
+      - '.github/workflows/build-ios.yml'
   workflow_dispatch:  # Allow manual triggering
   schedule:
     # Run weekly on Monday at 9 AM UTC
