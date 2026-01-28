@@ -135,8 +135,6 @@ jobs:
           VERSION=$(grep -E '<DatadogSdkVersion>.*</DatadogSdkVersion>' Directory.Build.props | sed 's/.*<DatadogSdkVersion>\(.*\)<\/DatadogSdkVersion>.*/\1/')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      # --- REMOVED OUTPUT CACHING HERE (The Fix) ---
-
       - name: Restore dependencies (individual packages only)
         run: |
           # Fix NU1301: Create artifacts dir to satisfy NuGet.Config
@@ -242,8 +240,6 @@ jobs:
           VERSION=$(grep -E '<DatadogSdkVersion>.*</DatadogSdkVersion>' Directory.Build.props | sed 's/.*<DatadogSdkVersion>\(.*\)<\/DatadogSdkVersion>.*/\1/')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      # --- REMOVED OUTPUT CACHING HERE (The Fix) ---
-
       - name: Restore dependencies (individual packages only)
         run: |
           # Fix NU1301: Create artifacts dir to satisfy NuGet.Config
@@ -347,8 +343,9 @@ jobs:
 
           # Process each package
           for base_pkg in $BASE_DIR/*.nupkg; do
-            pkg_name=$(basename "$base_pkg" | sed 's/\.[0-9]\+\.[0-9]\+\.[0-9]\+\.nupkg$//')
-            version=$(basename "$base_pkg" | sed -n 's/.*\.\([0-9]\+\.[0-9]\+\.[0-9]\+\)\.nupkg$/\1/p')
+            # Use sed -E to handle + characters in regex on macOS
+            pkg_name=$(basename "$base_pkg" | sed -E 's/\.[0-9]+\.[0-9]+\.[0-9]+\.nupkg$//')
+            version=$(basename "$base_pkg" | sed -E -n 's/.*\.([0-9]+\.[0-9]+\.[0-9]+)\.nupkg$/\1/p')
 
             net9_pkg="./artifacts-net9/${pkg_name}.${version}.nupkg"
             net10_pkg="./artifacts-net10/${pkg_name}.${version}.nupkg"
@@ -422,16 +419,8 @@ jobs:
           LOCAL_SOURCE="$(pwd)/artifacts-combined"
           echo "Restoring iOS meta-package from: $LOCAL_SOURCE"
           ls -la "$LOCAL_SOURCE/" || echo "Local source does not exist"
-          
-          # Fix: Explicitly use local source (-s) AND api.nuget.org to avoid global config errors
-          dotnet restore repo/Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj \
-            -s "$LOCAL_SOURCE" \
-            -s "https://api.nuget.org/v3/index.json"
-            
-          dotnet pack repo/Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj \
-            --configuration Release \
-            --output ./artifacts-combined \
-            --no-build
+          dotnet restore repo/Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj --source "$LOCAL_SOURCE" --source https://api.nuget.org/v3/index.json
+          dotnet pack repo/Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj --configuration Release --output ./artifacts-combined --no-build
         continue-on-error: true  # iOS bindings not complete yet
 
       - name: Upload combined iOS packages
