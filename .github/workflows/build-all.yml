@@ -495,11 +495,25 @@ jobs:
           path: ./artifacts
         continue-on-error: true
 
-      - name: List plugin package
+      - name: Download Android packages
+        uses: actions/download-artifact@v7
+        with:
+          name: android-nuget-packages
+          path: ./artifacts
+        continue-on-error: true
+
+      - name: Download iOS packages
+        uses: actions/download-artifact@v7
+        with:
+          name: ios-nuget-packages
+          path: ./artifacts
+        continue-on-error: true
+
+      - name: List all packages
         run: |
-          echo "=== Plugin Package ==="
+          echo "=== All Packages ==="
           if [ -d "./artifacts" ]; then
-            ls -lh ./artifacts/*.nupkg 2>/dev/null || echo "No plugin package found"
+            ls -lh ./artifacts/*.nupkg 2>/dev/null || echo "No packages found"
           else
             echo "Artifacts directory not found"
           fi
@@ -570,17 +584,19 @@ jobs:
 
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          # Plugin Package
-          echo "## Plugin Package" >> $GITHUB_STEP_SUMMARY
+          # All Packages
+          echo "## NuGet Packages" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          if [ -d "./artifacts" ] && ls ./artifacts/Datadog.MAUI.*.nupkg >/dev/null 2>&1; then
-            echo "**Datadog.MAUI Plugin**: ✅ Created" >> $GITHUB_STEP_SUMMARY
+          if [ -d "./artifacts" ] && ls ./artifacts/*.nupkg >/dev/null 2>&1; then
+            PKG_COUNT=$(ls -1 ./artifacts/*.nupkg 2>/dev/null | wc -l)
+            echo "**Packages Created**: ✅ $PKG_COUNT package(s)" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
-            ls -1 ./artifacts/Datadog.MAUI.*.nupkg 2>/dev/null | xargs -n1 basename >> $GITHUB_STEP_SUMMARY
+            ls -1 ./artifacts/*.nupkg 2>/dev/null | xargs -n1 basename | sort >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
           else
-            echo "**Datadog.MAUI Plugin**: ❌ Not found" >> $GITHUB_STEP_SUMMARY
+            echo "**Packages**: ❌ Not found" >> $GITHUB_STEP_SUMMARY
           fi
 
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -640,11 +656,26 @@ jobs:
           # Extract package names from artifacts and categorize them
           cd ./release-artifacts
 
+          echo "=== Debug: All files in release-artifacts ==="
+          ls -la
+          echo ""
+          echo "=== Debug: All .nupkg files ==="
+          ls -1 *.nupkg 2>/dev/null || echo "No .nupkg files found"
+          echo ""
+
           # Get all unique package IDs (strip version and .nupkg)
-          PLUGIN_PACKAGES=$(ls Datadog.MAUI.*.nupkg 2>/dev/null | grep -v "Android\|iOS" | sed 's/\.[0-9]\+\.[0-9]\+\.[0-9]\+\.nupkg$//' | sort -u)
-          ANDROID_PACKAGES=$(ls Datadog.MAUI.Android.*.nupkg 2>/dev/null | grep -v "\.Binding\." | sed 's/\.[0-9]\+\.[0-9]\+\.[0-9]\+\.nupkg$//' | sort -u)
-          IOS_PACKAGES=$(ls Datadog.MAUI.iOS.*.nupkg 2>/dev/null | grep -v "\.Binding\." | sed 's/\.[0-9]\+\.[0-9]\+\.[0-9]\+\.nupkg$//' | sort -u)
-          META_PACKAGES=$(ls Datadog.MAUI.*.Binding.*.nupkg 2>/dev/null | sed 's/\.[0-9]\+\.[0-9]\+\.[0-9]\+\.nupkg$//' | sort -u)
+          # Using sed with extended regex for better version matching
+          PLUGIN_PACKAGES=$(ls Datadog.MAUI.*.nupkg 2>/dev/null | grep -v "Android\|iOS" | sed -E 's/\.[0-9]+\.[0-9]+\.[0-9]+\.nupkg$//' | sort -u)
+          ANDROID_PACKAGES=$(ls Datadog.MAUI.Android.*.nupkg 2>/dev/null | grep -v "\.Binding\." | sed -E 's/\.[0-9]+\.[0-9]+\.[0-9]+\.nupkg$//' | sort -u)
+          IOS_PACKAGES=$(ls Datadog.MAUI.iOS.*.nupkg 2>/dev/null | grep -v "\.Binding\." | sed -E 's/\.[0-9]+\.[0-9]+\.[0-9]+\.nupkg$//' | sort -u)
+          META_PACKAGES=$(ls Datadog.MAUI.*.Binding.*.nupkg 2>/dev/null | sed -E 's/\.[0-9]+\.[0-9]+\.[0-9]+\.nupkg$//' | sort -u)
+
+          echo "=== Debug: Package categories ==="
+          echo "PLUGIN_PACKAGES: $PLUGIN_PACKAGES"
+          echo "ANDROID_PACKAGES: $ANDROID_PACKAGES"
+          echo "IOS_PACKAGES: $IOS_PACKAGES"
+          echo "META_PACKAGES: $META_PACKAGES"
+          echo ""
 
           # Start building release notes
           cat > ../release-notes.md << EOF
