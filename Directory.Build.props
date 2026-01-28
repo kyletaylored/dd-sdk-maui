@@ -31,5 +31,10 @@
     <!-- The Datadog Android SDK AARs include test dependencies in their Maven metadata -->
     <!-- which aren't needed at runtime and cause build failures -->
     <AndroidSkipJavaDependencyVerification>true</AndroidSkipJavaDependencyVerification>
+
+    <!-- Suppress AndroidX transitive dependency version constraint warnings -->
+    <!-- NU1608: These occur because .Ktx packages have strict version ranges but higher versions are resolved -->
+    <!-- This is safe in practice and common in MAUI apps due to Microsoft.Maui's own AndroidX dependencies -->
+    <NoWarn>$(NoWarn);NU1608</NoWarn>
   </PropertyGroup>
 </Project>
