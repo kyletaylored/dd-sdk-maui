@@ -120,7 +120,7 @@ jobs:
         id: cache-nuget-net9
         uses: actions/cache@v5
         with:
-          path: ./artifacts-net9/*.nupkg
+          path: ./artifacts-net9
           key: ${{ runner.os }}-android-net9-packages-${{ steps.sdk-version.outputs.version }}-${{ hashFiles('Datadog.MAUI.Android.Binding/**/*.csproj') }}
           restore-keys: |
             ${{ runner.os }}-android-net9-packages-${{ steps.sdk-version.outputs.version }}-
@@ -246,7 +246,7 @@ jobs:
         id: cache-nuget-net10
         uses: actions/cache@v5
         with:
-          path: ./artifacts-net10/*.nupkg
+          path: ./artifacts-net10
           key: ${{ runner.os }}-android-net10-packages-${{ steps.sdk-version.outputs.version }}-${{ hashFiles('Datadog.MAUI.Android.Binding/**/*.csproj') }}
           restore-keys: |
             ${{ runner.os }}-android-net10-packages-${{ steps.sdk-version.outputs.version }}-
