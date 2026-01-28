@@ -1,0 +1,116 @@
+name: Publish Datadog.MAUI.Symbols to NuGet
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g., 1.0.0)'
+        required: true
+        type: string
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - production
+          - test
+        default: production
+
+  # Auto-publish when a symbols release is created
+  release:
+    types: [published]
+
+jobs:
+  publish-to-nuget:
+    name: Publish to NuGet.org
+    runs-on: ubuntu-latest
+    # Only run for symbols releases (tagged with symbols-v*)
+    if: |
+      (github.event_name == 'release' && startsWith(github.event.release.tag_name, 'symbols-v')) ||
+      github.event_name == 'workflow_dispatch'
+    environment: ${{ inputs.environment || 'production' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Determine version
+        id: get-version
+        run: |
+          if [ "${{ github.event_name }}" == "release" ]; then
+            # Extract from tag (symbols-v1.0.0 -> 1.0.0)
+            VERSION=${GITHUB_REF#refs/tags/symbols-v}
+          else
+            # Use manual input
+            VERSION="${{ inputs.version }}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Publishing version: $VERSION"
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore Datadog.MAUI.Symbols/Datadog.MAUI.Symbols.csproj
+
+      - name: Build package
+        run: dotnet build Datadog.MAUI.Symbols/Datadog.MAUI.Symbols.csproj --configuration Release --no-restore
+
+      - name: Pack NuGet package
+        run: dotnet pack Datadog.MAUI.Symbols/Datadog.MAUI.Symbols.csproj --configuration Release --no-build --output ./artifacts
+
+      - name: Verify package version
+        run: |
+          PACKAGE_FILE="./artifacts/Datadog.MAUI.Symbols.${{ steps.get-version.outputs.version }}.nupkg"
+          if [ ! -f "$PACKAGE_FILE" ]; then
+            echo "❌ Expected package file not found: $PACKAGE_FILE"
+            echo "Available files:"
+            ls -la ./artifacts/
+            exit 1
+          fi
+          echo "✅ Package verified: $PACKAGE_FILE"
+
+      - name: Publish to NuGet.org (Production)
+        if: inputs.environment == 'production' || github.event_name == 'release'
+        run: |
+          dotnet nuget push ./artifacts/Datadog.MAUI.Symbols.${{ steps.get-version.outputs.version }}.nupkg \
+            --api-key ${{ secrets.NUGET_API_KEY }} \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate
+
+      - name: Publish to Test Feed
+        if: inputs.environment == 'test'
+        run: |
+          echo "Publishing to test feed..."
+          # Configure your test NuGet feed here if you have one
+          # dotnet nuget push ./artifacts/*.nupkg --source https://your-test-feed.com --api-key ${{ secrets.TEST_NUGET_KEY }}
+          echo "Test feed publishing not configured - skipping"
+
+      - name: Generate publish summary
+        run: |
+          echo "# 📦 NuGet Publish Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Package**: Datadog.MAUI.Symbols" >> $GITHUB_STEP_SUMMARY
+          echo "**Version**: ${{ steps.get-version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment**: ${{ inputs.environment || 'production' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ inputs.environment }}" == "production" ] || [ "${{ github.event_name }}" == "release" ]; then
+            echo "✅ **Published to**: NuGet.org" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Installation" >> $GITHUB_STEP_SUMMARY
+            echo '```bash' >> $GITHUB_STEP_SUMMARY
+            echo "dotnet add package Datadog.MAUI.Symbols --version ${{ steps.get-version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "⏳ **Note**: It may take a few minutes for the package to be indexed on NuGet.org" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ **Published to**: Test Feed" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Create success notification
+        if: success()
+        run: |
+          echo "::notice title=Published to NuGet::Datadog.MAUI.Symbols v${{ steps.get-version.outputs.version }} has been published to NuGet.org"

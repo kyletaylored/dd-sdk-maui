@@ -1,0 +1,274 @@
+name: Build Datadog.MAUI.Symbols
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'Datadog.MAUI.Symbols/**'
+      - '.github/workflows/build-symbols.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'Datadog.MAUI.Symbols/**'
+      - '.github/workflows/build-symbols.yml'
+  workflow_dispatch:  # Allow manual triggering
+    inputs:
+      create-release:
+        description: 'Create a GitHub release'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  build-symbols-package:
+    name: Build Symbols Package
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Get package version
+        id: get-version
+        run: |
+          # Extract version from .csproj
+          VERSION=$(grep -oPm1 "(?<=<Version>)[^<]+" Datadog.MAUI.Symbols/Datadog.MAUI.Symbols.csproj)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Package version: $VERSION"
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore Datadog.MAUI.Symbols/Datadog.MAUI.Symbols.csproj
+
+      - name: Build package
+        run: dotnet build Datadog.MAUI.Symbols/Datadog.MAUI.Symbols.csproj --configuration Release --no-restore
+
+      - name: Pack NuGet package
+        run: dotnet pack Datadog.MAUI.Symbols/Datadog.MAUI.Symbols.csproj --configuration Release --no-build --output ./artifacts
+
+      - name: Verify package contents
+        run: |
+          echo "=== Package Contents ==="
+          unzip -l ./artifacts/Datadog.MAUI.Symbols.${{ steps.get-version.outputs.version }}.nupkg
+
+          echo ""
+          echo "=== Verifying Critical Files ==="
+
+          # Check for required files in the package
+          if unzip -l ./artifacts/Datadog.MAUI.Symbols.${{ steps.get-version.outputs.version }}.nupkg | grep -q "build/Datadog.MAUI.Symbols.targets"; then
+            echo "✅ build/Datadog.MAUI.Symbols.targets found"
+          else
+            echo "❌ build/Datadog.MAUI.Symbols.targets MISSING"
+            exit 1
+          fi
+
+          if unzip -l ./artifacts/Datadog.MAUI.Symbols.${{ steps.get-version.outputs.version }}.nupkg | grep -q "buildTransitive/Datadog.MAUI.Symbols.targets"; then
+            echo "✅ buildTransitive/Datadog.MAUI.Symbols.targets found"
+          else
+            echo "❌ buildTransitive/Datadog.MAUI.Symbols.targets MISSING"
+            exit 1
+          fi
+
+          if unzip -l ./artifacts/Datadog.MAUI.Symbols.${{ steps.get-version.outputs.version }}.nupkg | grep -q "lib/netstandard2.0/Datadog.MAUI.Symbols.dll"; then
+            echo "✅ lib/netstandard2.0/Datadog.MAUI.Symbols.dll found"
+          else
+            echo "❌ lib/netstandard2.0/Datadog.MAUI.Symbols.dll MISSING"
+            exit 1
+          fi
+
+          if unzip -l ./artifacts/Datadog.MAUI.Symbols.${{ steps.get-version.outputs.version }}.nupkg | grep -q "README.md"; then
+            echo "✅ README.md found"
+          else
+            echo "⚠️  README.md not found (non-critical)"
+          fi
+
+      - name: Upload NuGet package artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: symbols-nuget-package
+          path: ./artifacts/*.nupkg
+          retention-days: 30
+
+      - name: Generate build summary
+        run: |
+          echo "# Datadog.MAUI.Symbols Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version**: ${{ steps.get-version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Package Details" >> $GITHUB_STEP_SUMMARY
+          echo "- **Package ID**: Datadog.MAUI.Symbols" >> $GITHUB_STEP_SUMMARY
+          echo "- **Target Framework**: netstandard2.0 (MSBuild Task)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Compatible with**: All .NET MAUI versions (net6+)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Features" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Automatic symbol upload for iOS (dSYM)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Automatic symbol upload for Android (Proguard mapping.txt)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Platform-specific service name support" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ CI/CD friendly (environment variable support)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Package File" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ls -lh ./artifacts/*.nupkg
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  # Create release when tagged with 'symbols-v*'
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: build-symbols-package
+    if: |
+      (github.ref_type == 'tag' && startsWith(github.ref_name, 'symbols-v')) ||
+      (github.event_name == 'workflow_dispatch' && inputs.create-release)
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Download package artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: symbols-nuget-package
+          path: ./release-artifacts
+
+      - name: Get version from package
+        id: get-version
+        run: |
+          if [ "${{ github.ref_type }}" == "tag" ]; then
+            # Extract version from tag (symbols-v1.0.0 -> 1.0.0)
+            TAG_NAME=${GITHUB_REF#refs/tags/symbols-v}
+            echo "version=$TAG_NAME" >> $GITHUB_OUTPUT
+          else
+            # Extract from package filename
+            VERSION=$(ls ./release-artifacts/Datadog.MAUI.Symbols.*.nupkg | grep -oP '\d+\.\d+\.\d+' | head -1)
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+          fi
+          echo "Release version: $(cat $GITHUB_OUTPUT | grep version | cut -d= -f2)"
+
+      - name: Generate SHA256 checksums
+        run: |
+          cd ./release-artifacts
+          sha256sum *.nupkg > checksums.txt
+          echo "=== SHA256 Checksums ==="
+          cat checksums.txt
+
+      - name: Create release notes
+        run: |
+          cat > release-notes.md << 'EOF'
+          # Datadog.MAUI.Symbols v${{ steps.get-version.outputs.version }}
+
+          MSBuild SDK for automatically uploading .NET MAUI debug symbols to Datadog.
+
+          ## What is this package?
+
+          This package automatically uploads iOS dSYMs and Android Proguard mapping files to Datadog during the `dotnet publish` process, enabling proper symbolication of crash reports and error stack traces.
+
+          ## Features
+
+          - 🚀 **Automatic Upload**: Integrates seamlessly into your build pipeline
+          - 📱 **Platform Support**: iOS (dSYM) and Android (Proguard/R8 mapping)
+          - 🎯 **Flexible Configuration**: Platform-specific or global service names
+          - 🔐 **Secure**: Uses environment variables for API keys
+          - ⚙️ **CI/CD Ready**: Works in GitHub Actions, Azure DevOps, etc.
+
+          ## Installation
+
+          ```bash
+          dotnet add package Datadog.MAUI.Symbols --version ${{ steps.get-version.outputs.version }}
+          ```
+
+          Or add to your `.csproj`:
+
+          ```xml
+          <PackageReference Include="Datadog.MAUI.Symbols" Version="${{ steps.get-version.outputs.version }}" />
+          ```
+
+          ## Quick Start
+
+          Add to your MAUI app's `.csproj`:
+
+          ```xml
+          <PropertyGroup>
+            <!-- Required: Set your service name -->
+            <DatadogServiceNameAndroid>com.example.app.android</DatadogServiceNameAndroid>
+            <DatadogServiceNameiOS>com.example.app.ios</DatadogServiceNameiOS>
+
+            <!-- API Key via environment variable (recommended) -->
+            <!-- Set DD_API_KEY environment variable -->
+
+            <!-- Optional: Test with dry-run first -->
+            <DatadogDryRun>false</DatadogDryRun>
+          </PropertyGroup>
+          ```
+
+          Then publish as usual:
+
+          ```bash
+          # Set API key
+          export DD_API_KEY="your-api-key"
+
+          # Publish (symbols upload automatically)
+          dotnet publish -f net9.0-android -c Release
+          dotnet publish -f net9.0-ios -c Release
+          ```
+
+          ## Compatibility
+
+          - ✅ .NET 6, 7, 8, 9, 10+ MAUI apps
+          - ✅ Works with all MSBuild versions
+          - ✅ Compatible with CI/CD pipelines
+
+          ## Documentation
+
+          See the [README](https://github.com/DataDog/dd-sdk-maui/blob/main/Datadog.MAUI.Symbols/README.md) for detailed configuration options and troubleshooting.
+
+          ## Requirements
+
+          - Node.js and npm (for `npx @datadog/datadog-ci`)
+          - Datadog API Key
+          - For Android: ProGuard/R8 must be enabled in Release builds
+
+          ## What's Changed
+
+          See the [commit history](https://github.com/DataDog/dd-sdk-maui/commits/main/Datadog.MAUI.Symbols) for changes in this release.
+          EOF
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Datadog.MAUI.Symbols v${{ steps.get-version.outputs.version }}
+          body_path: release-notes.md
+          tag_name: symbols-v${{ steps.get-version.outputs.version }}
+          files: |
+            ./release-artifacts/*.nupkg
+            ./release-artifacts/checksums.txt
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release summary
+        run: |
+          echo "## 🎉 Release Created" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Package**: Datadog.MAUI.Symbols" >> $GITHUB_STEP_SUMMARY
+          echo "**Version**: ${{ steps.get-version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag**: symbols-v${{ steps.get-version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Published Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ls -lh ./release-artifacts/*.nupkg
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "1. Publish to NuGet.org (manual or via separate workflow)" >> $GITHUB_STEP_SUMMARY
+          echo "2. Update documentation if needed" >> $GITHUB_STEP_SUMMARY
+          echo "3. Announce the release" >> $GITHUB_STEP_SUMMARY
