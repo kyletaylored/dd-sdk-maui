@@ -8,13 +8,14 @@ permalink: /guides/nli-primer
 
 # Native Library Interop: The Friendly Neighborhood Translator
 
-![Native Library Interop](./_images/maui-nli-binding.png)
+![Native Library Interop]({{ site.baseurl }}/images/maui-nli-binding.png)
 
 ## What is NLI?
 
 **Native Library Interop (NLI)** is like having Spider-Man swing between two buildings - except the buildings are programming languages, and Spider-Man is your C# code trying to talk to native mobile libraries.
 
 When you write a .NET MAUI app, you're writing C#. But the really cool mobile SDKs (like Datadog's) are written in the native languages:
+
 - **Android**: Kotlin/Java
 - **iOS**: Swift/Objective-C
 
@@ -47,11 +48,13 @@ Datadog.Initialize(config);
 Mobile platforms have **decades** of mature, battle-tested native libraries. Instead of rewriting everything in C#, we create **bindings** - thin wrappers that expose native functionality through C# APIs.
 
 ### For Android (Java/Kotlin → C#)
+
 - We use **.NET for Android bindings** (formerly Xamarin.Android)
 - Takes Java/Kotlin `.jar` or `.aar` files
 - Generates C# classes that call the native code
 
 ### For iOS (Swift/Objective-C → C#)
+
 - We use **.NET for iOS bindings** (formerly Xamarin.iOS)
 - Takes Objective-C `.framework` or Swift modules
 - Generates C# classes that call the native code
@@ -61,6 +64,7 @@ Mobile platforms have **decades** of mature, battle-tested native libraries. Ins
 Here's where it gets fun: when you call a C# method in a binding, under the hood it's doing something like this:
 
 **Android:**
+
 ```csharp
 // Your C# call
 datadog.TrackEvent("user_login");
@@ -70,6 +74,7 @@ JNIEnv.CallVoidMethod(javaObject, methodId, javaArgs);
 ```
 
 **iOS:**
+
 ```csharp
 // Your C# call
 datadog.TrackEvent("user_login");
@@ -130,6 +135,7 @@ Fair question! Why not just rewrite everything in C#?
 **Short answer:** We'd rather spend our time building features than rewriting perfectly good code.
 
 **Long answer:**
+
 - Native SDKs are **massive** (thousands of lines of battle-tested code)
 - They're updated **frequently** with bug fixes and new features
 - They're optimized for their specific platforms
@@ -146,4 +152,4 @@ Want to dive deeper into how we build these bindings?
 
 ---
 
-*Now you know the secret: when you call a C# method, it's actually a superhero swinging between language worlds to make it work!* 🕷️
+_Now you know the secret: when you call a C# method, it's actually a superhero swinging between language worlds to make it work!_ 🕷️
