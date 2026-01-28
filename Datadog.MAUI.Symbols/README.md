@@ -94,6 +94,7 @@ dotnet publish -f net8.0-ios -c Release
 ```
 
 The plugin will:
+
 1. Detect the platform (Android/iOS)
 2. Locate the debug symbols (`mapping.txt` or `.dSYM`)
 3. Upload them to Datadog using `datadog-ci`
@@ -109,19 +110,19 @@ export DD_SITE="us5.datadoghq.com"
 
 ## Troubleshooting
 
-### "npx not found" Error
+### "npx not found" Error.
 
 Ensure Node.js and npm are installed and available in your PATH.
 
-### "mapping.txt not found" (Android)
+### "mapping.txt not found" (Android).
 
 Verify that ProGuard/R8 is enabled for Release builds. The mapping file is only generated when obfuscation is enabled.
 
-### "dSYM folder not found" (iOS)
+### "dSYM folder not found" (iOS).
 
 The dSYM folder is typically generated during Archive builds. Ensure you're building in Release configuration.
 
-## CI/CD Integration
+## CI/CD Integration.
 
 For CI/CD pipelines, set the API key as an environment variable:
 
