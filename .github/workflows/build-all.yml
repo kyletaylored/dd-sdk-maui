@@ -139,7 +139,7 @@ jobs:
     name: Build Datadog.MAUI Plugin
     runs-on: macos-latest
     needs: [build-android, build-ios, verify-sdk-versions]
-    if: needs.build-android.result == 'success'  # Require Android to succeed, iOS is optional
+    if: needs.build-android.result == 'success' && needs.build-ios.result == 'success'
 
     steps:
       - name: Checkout repository
@@ -177,7 +177,6 @@ jobs:
         with:
           name: ios-nuget-packages
           path: ./artifacts/ios
-        continue-on-error: true  # iOS might not be ready yet
 
       - name: Download iOS XCFrameworks
         id: download-ios-xcframeworks
@@ -186,7 +185,6 @@ jobs:
         with:
           name: ios-xcframeworks
           path: Datadog.MAUI.iOS.Binding/artifacts/
-        continue-on-error: true  # iOS might not be ready yet
 
       - name: Fix iOS package filenames if malformed
         if: steps.cache-plugin.outputs.cache-hit != 'true'
@@ -202,19 +200,6 @@ jobs:
             done 2>/dev/null || true
           fi
 
-      - name: Check iOS availability for plugin build
-        id: check-ios-for-plugin
-        if: steps.cache-plugin.outputs.cache-hit != 'true'
-        run: |
-          # Check if iOS packages are available (both download succeeded and packages exist)
-          if ls ./artifacts/ios/Datadog.MAUI.iOS.*.nupkg 1> /dev/null 2>&1; then
-            echo "ios_ready=true" >> $GITHUB_OUTPUT
-            echo "✅ iOS packages available - building plugin with full iOS+Android support"
-          else
-            echo "ios_ready=false" >> $GITHUB_OUTPUT
-            echo "⚠️  iOS packages not available - building Android-only plugin"
-          fi
-
       - name: Setup local NuGet source
         if: steps.cache-plugin.outputs.cache-hit != 'true'
         run: |
@@ -227,32 +212,16 @@ jobs:
           dotnet nuget add source ./artifacts/all --name LocalArtifacts || true
 
       - name: Restore plugin dependencies (iOS + Android)
-        if: steps.cache-plugin.outputs.cache-hit != 'true' && steps.check-ios-for-plugin.outputs.ios_ready == 'true'
+        if: steps.cache-plugin.outputs.cache-hit != 'true'
         run: dotnet restore Datadog.MAUI.Plugin/Datadog.MAUI.Plugin.csproj
 
-      - name: Restore plugin dependencies (Android only)
-        if: steps.cache-plugin.outputs.cache-hit != 'true' && steps.check-ios-for-plugin.outputs.ios_ready != 'true'
-        run: |
-          dotnet restore Datadog.MAUI.Plugin/Datadog.MAUI.Plugin.csproj /p:TargetFrameworks="net9.0-android;net10.0-android"
-
       - name: Build plugin (iOS + Android)
-        if: steps.cache-plugin.outputs.cache-hit != 'true' && steps.check-ios-for-plugin.outputs.ios_ready == 'true'
+        if: steps.cache-plugin.outputs.cache-hit != 'true'
         run: dotnet build Datadog.MAUI.Plugin/Datadog.MAUI.Plugin.csproj --configuration Release --no-restore
 
-      - name: Build plugin (Android only)
-        if: steps.cache-plugin.outputs.cache-hit != 'true' && steps.check-ios-for-plugin.outputs.ios_ready != 'true'
-        run: |
-          dotnet build Datadog.MAUI.Plugin/Datadog.MAUI.Plugin.csproj --configuration Release --no-restore /p:TargetFrameworks="net9.0-android;net10.0-android"
-
       - name: Pack plugin (iOS + Android)
-        if: steps.cache-plugin.outputs.cache-hit != 'true' && steps.check-ios-for-plugin.outputs.ios_ready == 'true'
+        if: steps.cache-plugin.outputs.cache-hit != 'true'
         run: dotnet pack Datadog.MAUI.Plugin/Datadog.MAUI.Plugin.csproj --configuration Release --no-build --output ./artifacts/plugin
-
-      - name: Pack plugin (Android only)
-        if: steps.cache-plugin.outputs.cache-hit != 'true' && steps.check-ios-for-plugin.outputs.ios_ready != 'true'
-        run: |
-          dotnet pack Datadog.MAUI.Plugin/Datadog.MAUI.Plugin.csproj --configuration Release --no-build --output ./artifacts/plugin /p:TargetFrameworks="net9.0-android;net10.0-android"
-          
 
       - name: Upload plugin package
         uses: actions/upload-artifact@v6
@@ -261,8 +230,7 @@ jobs:
           path: ./artifacts/plugin/*.nupkg
           retention-days: 30
 
-      - name: Plugin build summary (iOS + Android)
-        if: steps.check-ios-for-plugin.outputs.ios_ready == 'true'
+      - name: Plugin build summary
         run: |
           echo "## Datadog.MAUI Plugin Package" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -273,19 +241,6 @@ jobs:
           echo "**Platform Support**: iOS + Android (full support)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "This package provides a unified C# API over Android and iOS bindings." >> $GITHUB_STEP_SUMMARY
-
-      - name: Plugin build summary (Android only)
-        if: steps.check-ios-for-plugin.outputs.ios_ready != 'true'
-        run: |
-          echo "## Datadog.MAUI Plugin Package" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Plugin package built successfully (Android only)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Package**: Datadog.MAUI.${{ needs.verify-sdk-versions.outputs.sdk-version }}.nupkg" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Platform Support**: Android only (iOS bindings not available)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "⚠️  iOS support will be added once iOS bindings are complete." >> $GITHUB_STEP_SUMMARY
 
   # Build sample apps using the unified plugin package
   build-sample-apps:
@@ -313,12 +268,11 @@ jobs:
           path: ./artifacts
 
       - name: Download iOS packages
-        id: download-ios
         uses: actions/download-artifact@v7
         with:
           name: ios-nuget-packages
           path: ./artifacts
-        continue-on-error: true  # iOS might not be ready yet
+        # removed continue-on-error
 
       - name: Download plugin package
         uses: actions/download-artifact@v7
@@ -337,47 +291,22 @@ jobs:
             fi
           done 2>/dev/null || true
 
-      - name: Check iOS packages availability
-        id: check-ios
-        run: |
-          # Check if iOS artifacts were actually downloaded
-          if [ "${{ steps.download-ios.outcome }}" == "success" ] && ls ./artifacts/Datadog.MAUI.iOS.*.nupkg 1> /dev/null 2>&1; then
-            echo "ios_available=true" >> $GITHUB_OUTPUT
-            echo "✅ iOS packages found and downloaded"
-          else
-            echo "ios_available=false" >> $GITHUB_OUTPUT
-            echo "⚠️  iOS packages not available - sample app builds will be skipped"
-            if [ "${{ steps.download-ios.outcome }}" != "success" ]; then
-              echo "  Reason: iOS artifact download failed (iOS build may have failed or been skipped)"
-            fi
-          fi
-
       - name: Verify artifacts
         run: |
           echo "Packages available for sample app build:"
           ls -lh ./artifacts/*.nupkg
 
       - name: Build Android sample app
-        if: steps.check-ios.outputs.ios_available == 'true'
         env:
           DD_RUM_ANDROID_CLIENT_TOKEN: ${{ secrets.DD_RUM_ANDROID_CLIENT_TOKEN }}
           DD_RUM_ANDROID_APPLICATION_ID: ${{ secrets.DD_RUM_ANDROID_APPLICATION_ID }}
         run: make sample-build-android-release-only
 
       - name: Build iOS sample app
-        if: steps.check-ios.outputs.ios_available == 'true'
         env:
           DD_RUM_IOS_CLIENT_TOKEN: ${{ secrets.DD_RUM_IOS_CLIENT_TOKEN }}
           DD_RUM_IOS_APPLICATION_ID: ${{ secrets.DD_RUM_IOS_APPLICATION_ID }}
         run: make sample-build-ios-release-only
-
-      - name: Sample apps skipped
-        if: steps.check-ios.outputs.ios_available != 'true'
-        run: |
-          echo "⚠️  Sample app builds skipped - iOS packages not available yet"
-          echo ""
-          echo "iOS bindings require Objective-C API definitions to be generated."
-          echo "Once iOS bindings are complete, sample apps will build automatically."
 
       - name: Upload Android sample APK
         uses: actions/upload-artifact@v6
