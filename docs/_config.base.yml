@@ -10,7 +10,7 @@ description: Developer documentation for the Datadog SDK for .NET MAUI
 # Branding
 logo: "/assets/images/datadog-maui-logo.svg"
 # Note: Add favicon.ico to /assets/images/ for browser tab icon
-# favicon_ico: "/assets/images/favicon.ico"
+favicon_ico: "/assets/images/dd-favicon.png"
 
 # These are injected dynamically in CI
 url: ""
@@ -21,6 +21,7 @@ permalink: pretty
 
 # Theme
 remote_theme: just-the-docs/just-the-docs
+color_scheme: datadog
 
 # Default frontmatter
 defaults:

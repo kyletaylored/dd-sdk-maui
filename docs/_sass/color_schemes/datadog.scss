@@ -1,0 +1,59 @@
+// Datadog Color Scheme
+// Based on official Datadog brand palette
+
+$purple-000: #f8f5fb !default;
+$purple-100: #e9e0f5 !default;
+$purple-200: #d4c5ea !default;
+$purple-300: #a998d4 !default;
+$purple-400: #774aa4 !default;
+$purple-500: #632CA6 !default;
+$purple-600: #5a27a0 !default;
+$purple-700: #4a1f85 !default;
+$purple-800: #3a1869 !default;
+$purple-900: #2a104d !default;
+
+// Datadog accent purple
+$datadog-accent: #8000FF !default;
+
+// Body
+$body-background-color: $white !default;
+$body-heading-color: $purple-700 !default;
+$body-text-color: $grey-dk-300 !default;
+
+// Links
+$link-color: $purple-500 !default;
+$link-hover-color: $datadog-accent !default;
+
+// Code blocks
+$code-background-color: $purple-000 !default;
+$code-linenumber-color: $grey-dk-000 !default;
+
+// Buttons
+$btn-primary-color: $purple-500 !default;
+
+// Navigation
+$sidebar-color: $purple-000 !default;
+$nav-child-link-color: $purple-600 !default;
+$nav-list-link-color: $purple-700 !default;
+$nav-list-expander-color: $purple-600 !default;
+
+// Search
+$search-background-color: $white !default;
+$search-result-preview-color: $grey-dk-000 !default;
+
+// Borders
+$border-color: $purple-200 !default;
+
+// Feedback
+$feedback-color: $purple-400 !default;
+
+// Tables
+$table-background-color: $white !default;
+$table-header-background-color: $purple-000 !default;
+
+// Focus
+$focus-color: $datadog-accent !default;
+
+// Top navigation (if enabled)
+$nav-background-color: $purple-700 !default;
+$nav-text-color: $white !default;
