@@ -16,6 +16,7 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/DataDog/dd-sdk-maui</RepositoryUrl>
     <PackageTags>.NET MAUI iOS Datadog Mobile Binding Internal</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 
     <XCFrameworkPath>../artifacts/DatadogInternal.xcframework</XCFrameworkPath>
@@ -33,5 +34,10 @@
       <SmartLink>True</SmartLink>
       <ForceLoad>True</ForceLoad>
     </NativeReference>
+  </ItemGroup>
+
+  <!-- Package README -->
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>

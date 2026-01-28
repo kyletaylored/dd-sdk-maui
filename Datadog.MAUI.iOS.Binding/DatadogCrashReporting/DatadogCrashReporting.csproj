@@ -15,6 +15,7 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/DataDog/dd-sdk-maui</RepositoryUrl>
     <PackageTags>.NET MAUI iOS Datadog Mobile Binding CrashReporting</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
 
     <XCFrameworkPath>../artifacts/DatadogCrashReporting.xcframework</XCFrameworkPath>
     <IsTrimmable>true</IsTrimmable>
@@ -37,5 +38,10 @@
       <IsCxx>True</IsCxx>
       <LinkerFlags>-lc++</LinkerFlags>
     </NativeReference>
+  </ItemGroup>
+
+  <!-- Package README -->
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>

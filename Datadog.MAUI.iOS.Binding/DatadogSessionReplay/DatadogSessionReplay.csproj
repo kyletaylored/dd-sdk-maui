@@ -15,6 +15,7 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/DataDog/dd-sdk-maui</RepositoryUrl>
     <PackageTags>.NET MAUI iOS Datadog Mobile Binding SessionReplay</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
 
     <XCFrameworkPath>../artifacts/DatadogSessionReplay.xcframework</XCFrameworkPath>
     <IsTrimmable>true</IsTrimmable>
@@ -36,5 +37,10 @@
       <SmartLink>True</SmartLink>
       <ForceLoad>True</ForceLoad>
     </NativeReference>
+  </ItemGroup>
+
+  <!-- Package README -->
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>
