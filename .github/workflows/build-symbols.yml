@@ -69,7 +69,7 @@ jobs:
             exit 1
           fi
 
-          if unzip -l ./artifacts/Datadog.MAUI.Symbols.${{ steps.get-version.outputs.version }}.nupkg | grep -q "buildTransitive/Datadog.MAUI.Symbols.targets"; then
+          if unzip -l ./artifacts/Datadog.MAUI.Symbols.${{ steps.get-version.outputs.version }}.nupkg | grep -q "buildTransitive.*Datadog.MAUI.Symbols.targets"; then
             echo "✅ buildTransitive/Datadog.MAUI.Symbols.targets found"
           else
             echo "❌ buildTransitive/Datadog.MAUI.Symbols.targets MISSING"
