@@ -120,8 +120,6 @@ make clean-all
 
 ```bash
 make build
-# or
-make build-all
 ```
 
 Builds all projects in the correct order:
@@ -136,14 +134,7 @@ Builds all projects in the correct order:
 #### Android Only
 
 ```bash
-# Build Release configuration
 make build-android
-
-# Build Debug configuration
-make build-android-debug
-
-# Show only errors (hide warnings)
-make build-android-errors
 ```
 
 **Android modules built:**
@@ -161,14 +152,7 @@ make build-android-errors
 #### iOS Only (macOS required)
 
 ```bash
-# Build Release configuration
 make build-ios
-
-# Build Debug configuration
-make build-ios-debug
-
-# Show only errors (hide warnings)
-make build-ios-errors
 ```
 
 **iOS modules built:**
@@ -191,16 +175,6 @@ make build-plugin
 
 Builds the cross-platform MAUI plugin that wraps Android and iOS bindings.
 
-### Show Only Errors
-
-To see only errors without warnings during build:
-
-```bash
-make build-errors
-```
-
-Runs both `build-android-errors` and `build-ios-errors`.
-
 ## Packaging
 
 ### Create All NuGet Packages
@@ -220,21 +194,7 @@ This follows the proper dependency order documented in [docs/PACKAGING_ARCHITECT
 
 **Output**: All packages are created in `./artifacts/`
 
-### Pack in Debug Configuration
-
-```bash
-make pack-debug
-```
-
-Creates packages in Debug configuration, output to `./artifacts-debug/`
-
-### List Generated Packages
-
-```bash
-make list-packages
-```
-
-Shows all `.nupkg` files in `./local-packages/`.
+**Debug builds**: For debug configuration packages, run `./scripts/pack.sh Debug ./artifacts-debug` directly.
 
 ## Testing
 
@@ -246,13 +206,7 @@ make test
 
 Runs all tests in `Datadog.MAUI.Plugin.Tests/`.
 
-### Run Tests with Verbose Output
-
-```bash
-make test-verbose
-```
-
-Shows detailed test output for debugging.
+For verbose output, run `dotnet test --verbosity detailed` directly.
 
 ## Sample Apps
 
@@ -278,18 +232,9 @@ make sample-ios
 
 # Build only (don't run)
 make sample-build-ios
-
-# Launch on specific simulator (iPhone 15 Pro)
-make sample-ios-simulator
 ```
 
-### List Available iOS Simulators
-
-```bash
-make list-simulators
-```
-
-Shows all available iPhone and iPad simulators.
+To list available iOS simulators, use `xcrun simctl list devices available` directly.
 
 ## Android Binding Development
 
@@ -484,7 +429,7 @@ See [docs/MAPPING_FILE_UPLOADS.md]() for complete guide.
 |------|---------|
 | First-time setup | `make dev-setup` |
 | Download iOS XCFrameworks | `make download-ios-frameworks` |
-| Build everything | `make build` or `make build-all` |
+| Build everything | `make build` |
 | Build Android only | `make build-android` |
 | Build iOS only | `make build-ios` |
 | Build plugin only | `make build-plugin` |
@@ -492,7 +437,6 @@ See [docs/MAPPING_FILE_UPLOADS.md]() for complete guide.
 | Run tests | `make test` |
 | Clean artifacts | `make clean` |
 | Restore packages | `make restore` |
-| Format code | `make format` |
 | Run Android sample | `make sample-android` |
 | Run iOS sample | `make sample-ios` |
 | Check prerequisites | `make check-prereqs` |
@@ -600,7 +544,7 @@ Before pushing changes, ensure everything builds:
 
 ```bash
 make clean
-make build-all
+make build
 make test
 make pack
 ```
@@ -608,7 +552,6 @@ make pack
 ## Getting Help
 
 - **View all commands**: `make help`
-- **Quick reference**: `make readme`
 - **Check status**: `make status`
 - **Documentation**: Browse `docs/` directory
 
