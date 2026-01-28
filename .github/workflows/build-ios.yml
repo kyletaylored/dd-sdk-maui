@@ -135,17 +135,10 @@ jobs:
           VERSION=$(grep -E '<DatadogSdkVersion>.*</DatadogSdkVersion>' Directory.Build.props | sed 's/.*<DatadogSdkVersion>\(.*\)<\/DatadogSdkVersion>.*/\1/')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Cache NuGet packages (net9.0-ios)
-        id: cache-nuget-net9
-        uses: actions/cache@v5
-        with:
-          path: ./artifacts-net9/*.nupkg
-          key: ${{ runner.os }}-ios-net9-packages-${{ steps.sdk-version.outputs.version }}-${{ hashFiles('Datadog.MAUI.iOS.Binding/**/*.csproj') }}
-          restore-keys: |
-            ${{ runner.os }}-ios-net9-packages-${{ steps.sdk-version.outputs.version }}-
+      # --- REMOVED OUTPUT CACHING HERE (The Fix) ---
+      # Steps below now run unconditionally
 
       - name: Restore dependencies (individual packages only)
-        if: steps.cache-nuget-net9.outputs.cache-hit != 'true'
         run: |
           # Restore individual packages, skip meta-package
           for dir in Datadog.MAUI.iOS.Binding/Datadog*; do
@@ -157,7 +150,6 @@ jobs:
         continue-on-error: true  # iOS bindings not complete yet
 
       - name: Build iOS bindings (net9.0-ios)
-        if: steps.cache-nuget-net9.outputs.cache-hit != 'true'
         run: |
           # Build individual packages, skip meta-package
           for dir in Datadog.MAUI.iOS.Binding/Datadog*; do
@@ -169,7 +161,6 @@ jobs:
         continue-on-error: true  # iOS bindings not complete yet
 
       - name: Pack NuGet packages (net9.0-ios)
-        if: steps.cache-nuget-net9.outputs.cache-hit != 'true'
         run: |
           # Pack individual packages (excluding meta-package)
           for dir in Datadog.MAUI.iOS.Binding/Datadog*; do
@@ -252,17 +243,10 @@ jobs:
           VERSION=$(grep -E '<DatadogSdkVersion>.*</DatadogSdkVersion>' Directory.Build.props | sed 's/.*<DatadogSdkVersion>\(.*\)<\/DatadogSdkVersion>.*/\1/')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Cache NuGet packages (net10.0-ios)
-        id: cache-nuget-net10
-        uses: actions/cache@v5
-        with:
-          path: ./artifacts-net10/*.nupkg
-          key: ${{ runner.os }}-ios-net10-packages-${{ steps.sdk-version.outputs.version }}-${{ hashFiles('Datadog.MAUI.iOS.Binding/**/*.csproj') }}
-          restore-keys: |
-            ${{ runner.os }}-ios-net10-packages-${{ steps.sdk-version.outputs.version }}-
+      # --- REMOVED OUTPUT CACHING HERE (The Fix) ---
+      # Steps below now run unconditionally
 
       - name: Restore dependencies (individual packages only)
-        if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
         run: |
           # Restore individual packages, skip meta-package
           for dir in Datadog.MAUI.iOS.Binding/Datadog*; do
@@ -274,7 +258,6 @@ jobs:
         continue-on-error: true  # iOS bindings not complete yet
 
       - name: Build iOS bindings (net10.0-ios)
-        if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
         run: |
           # Build individual packages, skip meta-package
           for dir in Datadog.MAUI.iOS.Binding/Datadog*; do
@@ -286,7 +269,6 @@ jobs:
         continue-on-error: true  # iOS bindings not complete yet
 
       - name: Pack NuGet packages (net10.0-ios)
-        if: steps.cache-nuget-net10.outputs.cache-hit != 'true'
         run: |
           # Pack individual packages (excluding meta-package)
           for dir in Datadog.MAUI.iOS.Binding/Datadog*; do

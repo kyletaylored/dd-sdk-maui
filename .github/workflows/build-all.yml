@@ -186,20 +186,6 @@ jobs:
           name: ios-xcframeworks
           path: Datadog.MAUI.iOS.Binding/artifacts/
 
-      - name: Fix iOS package filenames if malformed
-        if: steps.cache-plugin.outputs.cache-hit != 'true'
-        run: |
-          # Fix any double-extension filenames (.nupkg..nupkg -> .nupkg)
-          if [ -d "./artifacts/ios" ]; then
-            for file in ./artifacts/ios/*.nupkg..nupkg; do
-              if [ -f "$file" ]; then
-                newname="${file%.nupkg}"
-                mv "$file" "$newname"
-                echo "Renamed: $(basename $file) -> $(basename $newname)"
-              fi
-            done 2>/dev/null || true
-          fi
-
       - name: Setup local NuGet source
         if: steps.cache-plugin.outputs.cache-hit != 'true'
         run: |
