@@ -153,7 +153,17 @@ jobs:
           VERSION=$(grep -E '<DatadogSdkVersion>.*</DatadogSdkVersion>' Directory.Build.props | sed 's/.*<DatadogSdkVersion>\(.*\)<\/DatadogSdkVersion>.*/\1/')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
+      - name: Cache net9.0-ios packages
+        id: cache-net9-packages
+        uses: actions/cache@v5
+        with:
+          path: ./artifacts-net9/*.nupkg
+          key: ${{ runner.os }}-ios-net9-packages-${{ steps.sdk-version.outputs.version }}-${{ hashFiles('Datadog.MAUI.iOS.Binding/**/*.csproj', 'Datadog.MAUI.iOS.Binding/**/*.cs', 'Directory.Build.props') }}
+          restore-keys: |
+            ${{ runner.os }}-ios-net9-packages-${{ steps.sdk-version.outputs.version }}-
+
       - name: Restore dependencies (individual packages only)
+        if: steps.cache-net9-packages.outputs.cache-hit != 'true'
         run: |
           # Restore individual packages from solution file
           echo "${{ needs.download-xcframeworks.outputs.projects }}" | while read -r project; do
@@ -164,6 +174,7 @@ jobs:
           done
 
       - name: Build iOS bindings (net9.0-ios)
+        if: steps.cache-net9-packages.outputs.cache-hit != 'true'
         run: |
           # Build individual packages from solution file
           echo "${{ needs.download-xcframeworks.outputs.projects }}" | while read -r project; do
@@ -174,6 +185,7 @@ jobs:
           done
 
       - name: Pack NuGet packages (net9.0-ios)
+        if: steps.cache-net9-packages.outputs.cache-hit != 'true'
         run: |
           # Pack individual packages from solution file
           echo "${{ needs.download-xcframeworks.outputs.projects }}" | while read -r project; do
@@ -255,7 +267,17 @@ jobs:
           VERSION=$(grep -E '<DatadogSdkVersion>.*</DatadogSdkVersion>' Directory.Build.props | sed 's/.*<DatadogSdkVersion>\(.*\)<\/DatadogSdkVersion>.*/\1/')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
+      - name: Cache net10.0-ios packages
+        id: cache-net10-packages
+        uses: actions/cache@v5
+        with:
+          path: ./artifacts-net10/*.nupkg
+          key: ${{ runner.os }}-ios-net10-packages-${{ steps.sdk-version.outputs.version }}-${{ hashFiles('Datadog.MAUI.iOS.Binding/**/*.csproj', 'Datadog.MAUI.iOS.Binding/**/*.cs', 'Directory.Build.props') }}
+          restore-keys: |
+            ${{ runner.os }}-ios-net10-packages-${{ steps.sdk-version.outputs.version }}-
+
       - name: Restore dependencies (individual packages only)
+        if: steps.cache-net10-packages.outputs.cache-hit != 'true'
         run: |
           # Restore individual packages from solution file
           echo "${{ needs.download-xcframeworks.outputs.projects }}" | while read -r project; do
@@ -266,6 +288,7 @@ jobs:
           done
 
       - name: Build iOS bindings (net10.0-ios)
+        if: steps.cache-net10-packages.outputs.cache-hit != 'true'
         run: |
           # Build individual packages from solution file
           echo "${{ needs.download-xcframeworks.outputs.projects }}" | while read -r project; do
@@ -276,6 +299,7 @@ jobs:
           done
 
       - name: Pack NuGet packages (net10.0-ios)
+        if: steps.cache-net10-packages.outputs.cache-hit != 'true'
         run: |
           # Pack individual packages from solution file
           echo "${{ needs.download-xcframeworks.outputs.projects }}" | while read -r project; do
