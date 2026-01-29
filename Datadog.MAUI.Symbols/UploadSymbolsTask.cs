@@ -64,33 +64,71 @@ namespace Datadog.MAUI.Symbols
         /// <returns>True if the upload succeeded, false otherwise.</returns>
         public override bool Execute()
         {
-            // 1. Resolve Service Name using hierarchy: Platform Specific > Global > Error
+            // 1. Check if npx is available before doing anything else
+            if (!CheckNpxAvailable())
+            {
+                Log.LogError("[Datadog] Node.js and npm are required for symbol upload. Please install Node.js from https://nodejs.org/");
+                Log.LogError("[Datadog] After installing, verify with: npx --version");
+                Log.LogError("[Datadog] To disable symbol upload, set <DatadogUploadEnabled>false</DatadogUploadEnabled> in your .csproj");
+                return false;
+            }
+
+            // 2. Resolve Service Name using hierarchy: Platform Specific > Global > Error
             string? finalServiceName = ResolveServiceName();
 
             if (string.IsNullOrEmpty(finalServiceName))
             {
-                Log.LogError("Datadog Service Name is required. Set <DatadogServiceName> or <DatadogServiceNameAndroid>/<DatadogServiceNameiOS>.");
+                Log.LogError("[Datadog] Service Name is required. Set <DatadogServiceName> or <DatadogServiceNameAndroid>/<DatadogServiceNameiOS>.");
                 return false;
             }
 
-            // 2. Validate FilePath
+            // 3. Validate FilePath
             if (string.IsNullOrEmpty(FilePath))
             {
-                Log.LogError("FilePath is required but was not provided.");
+                Log.LogError("[Datadog] FilePath is required but was not provided.");
                 return false;
             }
 
             if (!File.Exists(FilePath) && !Directory.Exists(FilePath))
             {
-                Log.LogWarning($"Datadog Symbols: File or directory not found at '{FilePath}'. Skipping upload.");
+                Log.LogWarning($"[Datadog] Symbols: File or directory not found at '{FilePath}'. Skipping upload.");
                 return true; // Don't fail the build, just skip
             }
 
-            // 3. Build Arguments (finalServiceName is guaranteed non-null here due to check above)
+            // 4. Build Arguments (finalServiceName is guaranteed non-null here due to check above)
             string args = BuildCommandArguments(finalServiceName!);
 
-            // 4. Execute via NPX
-            return ExecuteNpx(args);
+            // 5. Execute via NPX
+            return ExecuteNpx(args, finalServiceName!);
+        }
+
+        private bool CheckNpxAvailable()
+        {
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "npx",
+                    Arguments = "--version",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                };
+
+                var process = Process.Start(psi);
+                if (process == null)
+                {
+                    return false;
+                }
+
+                process.WaitForExit(5000); // 5 second timeout
+                return process.ExitCode == 0;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private string? ResolveServiceName()
@@ -135,7 +173,7 @@ namespace Datadog.MAUI.Symbols
             return args;
         }
 
-        private bool ExecuteNpx(string arguments)
+        private bool ExecuteNpx(string arguments, string serviceName)
         {
             try
             {
@@ -156,7 +194,16 @@ namespace Datadog.MAUI.Symbols
                 }
                 else if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DD_API_KEY")))
                 {
-                    Log.LogWarning("DD_API_KEY is not set. Upload may fail if not configured elsewhere.");
+                    // In dry-run mode, set a dummy key to avoid metrics initialization errors
+                    if (DryRun)
+                    {
+                        psi.EnvironmentVariables["DD_API_KEY"] = "dummy-key-for-dry-run";
+                        Log.LogMessage(MessageImportance.Normal, "[Datadog] Dry-run mode: Using dummy API key.");
+                    }
+                    else
+                    {
+                        Log.LogWarning("[Datadog] DD_API_KEY is not set. Upload may fail if not configured elsewhere.");
+                    }
                 }
 
                 // Set Datadog Site if provided
@@ -166,6 +213,9 @@ namespace Datadog.MAUI.Symbols
                 }
 
                 Log.LogMessage(MessageImportance.High, $"[Datadog] Uploading {TargetPlatform} symbols to Datadog...");
+                Log.LogMessage(MessageImportance.High, $"[Datadog]   Service: {serviceName}");
+                Log.LogMessage(MessageImportance.High, $"[Datadog]   Version: {AppVersion}");
+                Log.LogMessage(MessageImportance.High, $"[Datadog]   Variant: release");
 
                 // Sanitize command for logging (hide API key if present in arguments)
                 string sanitizedArgs = !string.IsNullOrEmpty(ApiKey) ? arguments.Replace(ApiKey, "***") : arguments;
@@ -184,10 +234,14 @@ namespace Datadog.MAUI.Symbols
 
                 process.WaitForExit();
 
-                // Log output
+                // Log output from datadog-ci command
                 if (!string.IsNullOrWhiteSpace(output))
                 {
-                    Log.LogMessage(MessageImportance.Normal, output);
+                    Log.LogMessage(MessageImportance.High, "[Datadog] datadog-ci output:");
+                    foreach (var line in output.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        Log.LogMessage(MessageImportance.High, $"  {line}");
+                    }
                 }
 
                 if (process.ExitCode != 0)
@@ -208,12 +262,14 @@ namespace Datadog.MAUI.Symbols
             }
             catch (System.ComponentModel.Win32Exception ex) when (ex.Message.Contains("npx"))
             {
-                Log.LogError($"[Datadog] Failed to execute npx. Ensure Node.js and npm are installed and available in PATH. Error: {ex.Message}");
+                Log.LogError($"[Datadog] Failed to execute npx. This shouldn't happen as we checked earlier. Error: {ex.Message}");
+                Log.LogError("[Datadog] Please ensure Node.js is in your PATH and try again.");
                 return false;
             }
             catch (Exception ex)
             {
                 Log.LogError($"[Datadog] Unexpected error during symbol upload: {ex.Message}");
+                Log.LogError($"[Datadog] Stack trace: {ex.StackTrace}");
                 return false;
             }
         }

@@ -23,7 +23,7 @@
     <!-- MSBuild SDK Package Settings -->
     <DevelopmentDependency>true</DevelopmentDependency>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
-    <NoWarn>$(NoWarn);NU5128</NoWarn>
+    <NoWarn>$(NoWarn);NU5128;NU5129</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

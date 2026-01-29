@@ -3,6 +3,9 @@
     <!-- Datadog SDK Version - Keep in sync across iOS and Android -->
     <DatadogSdkVersion>3.5.0</DatadogSdkVersion>
 
+    <!-- Datadog Symbols Package Version - Independent versioning -->
+    <DatadogSymbolsVersion>0.0.2</DatadogSymbolsVersion>
+
     <!-- .NET MAUI Binding Package Version -->
     <Version>$(DatadogSdkVersion)</Version>
     <PackageVersion>$(DatadogSdkVersion)</PackageVersion>

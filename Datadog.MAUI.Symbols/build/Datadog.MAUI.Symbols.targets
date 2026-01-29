@@ -9,7 +9,11 @@
   <UsingTask TaskName="Datadog.MAUI.Symbols.UploadSymbolsTask"
              AssemblyFile="$(MSBuildThisFileDirectory)..\lib\netstandard2.0\Datadog.MAUI.Symbols.dll" />
 
+  <!-- Run after publish completes successfully -->
   <Target Name="DatadogUploadSymbols" AfterTargets="Publish">
+
+    <!-- Debug logging -->
+    <Message Importance="high" Text="[Datadog] Symbol upload target triggered for $(TargetPlatformIdentifier)" />
 
     <!-- Determine if upload should run -->
     <PropertyGroup>
@@ -38,6 +42,11 @@
                       Condition="Exists('$(ProjectDir)\obj\$(Configuration)\$(TargetFramework)\android-arm64\mapping.txt') AND '@(_DDMappingFile)' == ''" />
     </ItemGroup>
 
+    <!-- Debug: Show what we found -->
+    <Message Condition="'$(TargetPlatformIdentifier)' == 'android' AND '@(_DDMappingFile)' != ''"
+             Importance="high"
+             Text="[Datadog] Found Android mapping file: @(_DDMappingFile)" />
+
     <!-- iOS: Locate .dSYM folder -->
     <ItemGroup Condition="'$(TargetPlatformIdentifier)' == 'ios' AND '$(_DatadogShouldRun)' == 'true'">
       <!-- Try common locations for .dSYM -->
@@ -45,6 +54,11 @@
       <_DDDsymFolder Include="$(OutputPath)\..\$(AssemblyName).app.dSYM" Condition="Exists('$(OutputPath)\..\$(AssemblyName).app.dSYM') AND '@(_DDDsymFolder)' == ''" />
       <_DDDsymFolder Include="$(AppBundleDir).dSYM" Condition="Exists('$(AppBundleDir).dSYM') AND '@(_DDDsymFolder)' == ''" />
     </ItemGroup>
+
+    <!-- Debug: Show what we found -->
+    <Message Condition="'$(TargetPlatformIdentifier)' == 'ios' AND '@(_DDDsymFolder)' != ''"
+             Importance="high"
+             Text="[Datadog] Found iOS dSYM folder: @(_DDDsymFolder)" />
 
     <!-- Upload Android Mapping File -->
     <UploadSymbolsTask
@@ -57,6 +71,7 @@
       ApiKey="$(DatadogApiKey)"
       Site="$(_DatadogSite)"
       DryRun="$(_DatadogDryRun)"
+      ContinueOnError="true"
     />
 
     <!-- Upload iOS dSYM Files -->
@@ -70,6 +85,7 @@
       ApiKey="$(DatadogApiKey)"
       Site="$(_DatadogSite)"
       DryRun="$(_DatadogDryRun)"
+      ContinueOnError="true"
     />
 
     <!-- Log when files are not found -->

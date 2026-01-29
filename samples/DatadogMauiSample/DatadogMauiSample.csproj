@@ -51,11 +51,22 @@
 		<RunAOTCompilation>false</RunAOTCompilation>
 	</PropertyGroup>
 
+	<!-- Datadog Symbol Upload Configuration (applies to all configurations) -->
+	<!-- NOTE: Symbol upload only runs in Release builds by default (when mapping files are generated) -->
+	<!-- To test in Debug, add: <DatadogUploadInDebug>true</DatadogUploadInDebug> -->
+	<PropertyGroup Condition="$(TargetFramework.Contains('android'))">
+		<DatadogServiceNameAndroid>com.datadog.datadog-maui-shopist.demo.android</DatadogServiceNameAndroid>
+		<DatadogDryRun>true</DatadogDryRun>		<!-- Set to false for actual uploads -->
+	</PropertyGroup>
+
+	<PropertyGroup Condition="$(TargetFramework.Contains('ios'))">
+		<DatadogServiceNameiOS>com.datadog.datadog-maui-shopist.demo.ios</DatadogServiceNameiOS>
+		<DatadogDryRun>true</DatadogDryRun>		<!-- Set to false for actual uploads -->
+	</PropertyGroup>
+
 	<!-- Custom target to remove duplicate tracing AAR before dex compilation -->
 	<Target Name="RemoveDuplicateTracingAAR" BeforeTargets="_CompileToDalvik" Condition="'$(TargetFramework)' == 'net10.0-android'">
-		<Exec Command="find $(IntermediateOutputPath)lp -type d -name '12*' -o -name '16*' | while read dir; do if [ -f &quot;$$dir/jl/classes.jar&quot; ] &amp;&amp; unzip -l &quot;$$dir/jl/classes.jar&quot; 2&gt;/dev/null | grep -q 'androidx/tracing/TraceKt.class' &amp;&amp; echo &quot;$$dir&quot; | grep -q '/12'; then echo &quot;Removing duplicate tracing-android from $$dir&quot;; rm -rf &quot;$$dir/jl/classes.jar&quot;; fi; done"
-			  IgnoreExitCode="true"
-			  Condition="Exists('$(IntermediateOutputPath)lp')" />
+		<Exec Command="find $(IntermediateOutputPath)lp -type d -name '12*' -o -name '16*' | while read dir; do if [ -f &quot;$$dir/jl/classes.jar&quot; ] &amp;&amp; unzip -l &quot;$$dir/jl/classes.jar&quot; 2&gt;/dev/null | grep -q 'androidx/tracing/TraceKt.class' &amp;&amp; echo &quot;$$dir&quot; | grep -q '/12'; then echo &quot;Removing duplicate tracing-android from $$dir&quot;; rm -rf &quot;$$dir/jl/classes.jar&quot;; fi; done" IgnoreExitCode="true" Condition="Exists('$(IntermediateOutputPath)lp')" />
 	</Target>
 
 	<ItemGroup>
@@ -100,15 +111,26 @@
 	<!-- Release builds: Use PackageReference to test actual NuGet packages -->
 	<!-- CI builds: Use PackageReference from pipeline artifacts          -->
 
-	<!-- Debug: Use ProjectReference for fast local development -->
-	<ItemGroup Condition="'$(Configuration)' == 'Debug'">
+	<!-- Use ProjectReference for both Debug and Release for local development -->
+	<ItemGroup>
 		<ProjectReference Include="..\..\Datadog.MAUI.Plugin\Datadog.MAUI.Plugin.csproj" />
+		<ProjectReference Include="..\..\Datadog.MAUI.Symbols\Datadog.MAUI.Symbols.csproj" ReferenceOutputAssembly="false" />
 	</ItemGroup>
 
-	<!-- Release: Use PackageReference from local artifacts or CI artifacts -->
+	<!-- Load the Symbols MSBuild task from local build output -->
+	<UsingTask TaskName="Datadog.MAUI.Symbols.UploadSymbolsTask"
+	           AssemblyFile="$(MSBuildProjectDirectory)\..\..\Datadog.MAUI.Symbols\bin\$(Configuration)\netstandard2.0\Datadog.MAUI.Symbols.dll" />
+
+	<!-- Import the Symbols upload target (skips the UsingTask since we already loaded it) -->
+	<Import Project="..\..\Datadog.MAUI.Symbols\build\Datadog.MAUI.Symbols.targets" />
+
+	<!-- For CI builds, use PackageReference instead (commented out for local dev) -->
+	<!--
 	<ItemGroup Condition="'$(Configuration)' == 'Release'">
 		<PackageReference Include="Datadog.MAUI" Version="$(DatadogSdkVersion)" />
+		<PackageReference Include="Datadog.MAUI.Symbols" Version="$(DatadogSymbolsVersion)" />
 	</ItemGroup>
+	-->
 
 	<!-- Local NuGet source for Release builds (points to ./artifacts) -->
 	<!-- CI builds will override this via nuget.config or command-line restore -->
