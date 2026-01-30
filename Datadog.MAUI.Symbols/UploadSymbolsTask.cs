@@ -64,7 +64,17 @@ namespace Datadog.MAUI.Symbols
         /// <returns>True if the upload succeeded, false otherwise.</returns>
         public override bool Execute()
         {
+            Log.LogMessage(MessageImportance.High, "[Datadog] Symbol upload task started");
+            Log.LogMessage(MessageImportance.High, $"[Datadog]   TargetPlatform: {TargetPlatform}");
+            Log.LogMessage(MessageImportance.High, $"[Datadog]   AppVersion: {AppVersion}");
+            Log.LogMessage(MessageImportance.High, $"[Datadog]   FilePath: {FilePath ?? "(not set)"}");
+            Log.LogMessage(MessageImportance.High, $"[Datadog]   ServiceName: {ServiceName ?? "(not set)"}");
+            Log.LogMessage(MessageImportance.High, $"[Datadog]   ServiceNameAndroid: {ServiceNameAndroid ?? "(not set)"}");
+            Log.LogMessage(MessageImportance.High, $"[Datadog]   ServiceNameIOS: {ServiceNameIOS ?? "(not set)"}");
+            Log.LogMessage(MessageImportance.High, $"[Datadog]   DryRun: {DryRun}");
+
             // 1. Check if npx is available before doing anything else
+            Log.LogMessage(MessageImportance.High, "[Datadog] Checking if npx is available...");
             if (!CheckNpxAvailable())
             {
                 Log.LogError("[Datadog] Node.js and npm are required for symbol upload. Please install Node.js from https://nodejs.org/");
@@ -72,9 +82,11 @@ namespace Datadog.MAUI.Symbols
                 Log.LogError("[Datadog] To disable symbol upload, set <DatadogUploadEnabled>false</DatadogUploadEnabled> in your .csproj");
                 return false;
             }
+            Log.LogMessage(MessageImportance.High, "[Datadog] npx is available");
 
             // 2. Resolve Service Name using hierarchy: Platform Specific > Global > Error
             string? finalServiceName = ResolveServiceName();
+            Log.LogMessage(MessageImportance.High, $"[Datadog] Resolved service name: {finalServiceName ?? "(none)"}");
 
             if (string.IsNullOrEmpty(finalServiceName))
             {
@@ -86,10 +98,17 @@ namespace Datadog.MAUI.Symbols
             if (string.IsNullOrEmpty(FilePath))
             {
                 Log.LogError("[Datadog] FilePath is required but was not provided.");
+                Log.LogError("[Datadog] This usually means the MSBuild targets couldn't find the symbol files.");
+                Log.LogError("[Datadog] For Android: Ensure ProGuard/R8 is enabled in Release mode.");
+                Log.LogError("[Datadog] For iOS: Ensure debug symbols are enabled in project settings.");
                 return false;
             }
 
-            if (!File.Exists(FilePath) && !Directory.Exists(FilePath))
+            Log.LogMessage(MessageImportance.High, $"[Datadog] Checking if file/directory exists: {FilePath}");
+            bool pathExists = File.Exists(FilePath) || Directory.Exists(FilePath);
+            Log.LogMessage(MessageImportance.High, $"[Datadog] Path exists: {pathExists}");
+
+            if (!pathExists)
             {
                 Log.LogWarning($"[Datadog] Symbols: File or directory not found at '{FilePath}'. Skipping upload.");
                 return true; // Don't fail the build, just skip
@@ -97,6 +116,7 @@ namespace Datadog.MAUI.Symbols
 
             // 4. Build Arguments (finalServiceName is guaranteed non-null here due to check above)
             string args = BuildCommandArguments(finalServiceName!);
+            Log.LogMessage(MessageImportance.High, $"[Datadog] Built command arguments successfully");
 
             // 5. Execute via NPX
             return ExecuteNpx(args, finalServiceName!);
@@ -198,7 +218,7 @@ namespace Datadog.MAUI.Symbols
                     if (DryRun)
                     {
                         psi.EnvironmentVariables["DD_API_KEY"] = "dummy-key-for-dry-run";
-                        Log.LogMessage(MessageImportance.Normal, "[Datadog] Dry-run mode: Using dummy API key.");
+                        Log.LogMessage(MessageImportance.High, "[Datadog] Dry-run mode: Using dummy API key.");
                     }
                     else
                     {
@@ -212,33 +232,50 @@ namespace Datadog.MAUI.Symbols
                     psi.EnvironmentVariables["DD_SITE"] = Site;
                 }
 
-                Log.LogMessage(MessageImportance.High, $"[Datadog] Uploading {TargetPlatform} symbols to Datadog...");
+                Log.LogMessage(MessageImportance.High, $"[Datadog] ========================================");
+                Log.LogMessage(MessageImportance.High, $"[Datadog] Uploading {TargetPlatform} symbols to Datadog");
+                Log.LogMessage(MessageImportance.High, $"[Datadog] ========================================");
                 Log.LogMessage(MessageImportance.High, $"[Datadog]   Service: {serviceName}");
                 Log.LogMessage(MessageImportance.High, $"[Datadog]   Version: {AppVersion}");
-                Log.LogMessage(MessageImportance.High, $"[Datadog]   Variant: release");
+                Log.LogMessage(MessageImportance.High, $"[Datadog]   Platform: {TargetPlatform}");
+                Log.LogMessage(MessageImportance.High, $"[Datadog]   File: {FilePath}");
 
                 // Sanitize command for logging (hide API key if present in arguments)
                 string sanitizedArgs = !string.IsNullOrEmpty(ApiKey) ? arguments.Replace(ApiKey, "***") : arguments;
-                Log.LogMessage(MessageImportance.Normal, $"[Datadog] Command: npx @datadog/datadog-ci {sanitizedArgs}");
+                Log.LogMessage(MessageImportance.High, $"[Datadog]   Command: npx @datadog/datadog-ci {sanitizedArgs}");
+                Log.LogMessage(MessageImportance.High, $"[Datadog] ========================================");
 
                 var process = Process.Start(psi);
                 if (process == null)
                 {
-                    Log.LogError("Failed to start npx process.");
+                    Log.LogError("[Datadog] Failed to start npx process.");
                     return false;
                 }
 
-                // Read output asynchronously to prevent deadlocks
-                string output = process.StandardOutput.ReadToEnd();
-                string error = process.StandardError.ReadToEnd();
+                // Create tasks to read stdout and stderr asynchronously to prevent deadlocks
+                var outputTask = System.Threading.Tasks.Task.Run(() => process.StandardOutput.ReadToEnd());
+                var errorTask = System.Threading.Tasks.Task.Run(() => process.StandardError.ReadToEnd());
 
                 process.WaitForExit();
 
-                // Log output from datadog-ci command
+                // Wait for async reads to complete
+                var output = outputTask.Result;
+                var error = errorTask.Result;
+
+                // Always log ALL output at HIGH importance so it's visible
                 if (!string.IsNullOrWhiteSpace(output))
                 {
-                    Log.LogMessage(MessageImportance.High, "[Datadog] datadog-ci output:");
+                    Log.LogMessage(MessageImportance.High, "[Datadog] datadog-ci stdout:");
                     foreach (var line in output.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        Log.LogMessage(MessageImportance.High, $"  {line}");
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(error))
+                {
+                    Log.LogMessage(MessageImportance.High, "[Datadog] datadog-ci stderr:");
+                    foreach (var line in error.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
                     {
                         Log.LogMessage(MessageImportance.High, $"  {line}");
                     }
@@ -246,18 +283,14 @@ namespace Datadog.MAUI.Symbols
 
                 if (process.ExitCode != 0)
                 {
-                    if (!string.IsNullOrWhiteSpace(error))
-                    {
-                        Log.LogError($"[Datadog] Upload failed: {error}");
-                    }
-                    else
-                    {
-                        Log.LogError($"[Datadog] Upload failed with exit code {process.ExitCode}");
-                    }
+                    Log.LogError($"[Datadog] Upload failed with exit code {process.ExitCode}");
+                    Log.LogError($"[Datadog] See output above for details from datadog-ci");
                     return false;
                 }
 
-                Log.LogMessage(MessageImportance.High, $"[Datadog] Successfully uploaded {TargetPlatform} symbols.");
+                Log.LogMessage(MessageImportance.High, $"[Datadog] ========================================");
+                Log.LogMessage(MessageImportance.High, $"[Datadog] Successfully uploaded {TargetPlatform} symbols!");
+                Log.LogMessage(MessageImportance.High, $"[Datadog] ========================================");
                 return true;
             }
             catch (System.ComponentModel.Win32Exception ex) when (ex.Message.Contains("npx"))
