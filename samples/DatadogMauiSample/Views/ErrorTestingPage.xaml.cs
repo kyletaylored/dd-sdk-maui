@@ -31,7 +31,20 @@ public partial class ErrorTestingPage : ContentPage
         catch (Exception ex)
         {
             _logger.Error("NullReferenceException occurred", ex);
-            DisplayAlert("Error", $"NullReferenceException: {ex.Message}", "OK");
+
+            // Report error to RUM Error Tracking
+            Datadog.Maui.Rum.Rum.AddError(
+                "NullReferenceException test",
+                Datadog.Maui.Rum.RumErrorSource.Source,
+                ex,
+                new Dictionary<string, object>
+                {
+                    ["error_type"] = "test_exception",
+                    ["trigger_method"] = "OnNullReferenceException"
+                }
+            );
+
+            DisplayAlert("Success", $"NullReferenceException reported to Datadog Error Tracking", "OK");
         }
     }
 
@@ -46,7 +59,20 @@ public partial class ErrorTestingPage : ContentPage
         catch (Exception ex)
         {
             _logger.Error("DivideByZeroException occurred", ex);
-            DisplayAlert("Error", $"DivideByZeroException: {ex.Message}", "OK");
+
+            // Report error to RUM Error Tracking
+            Datadog.Maui.Rum.Rum.AddError(
+                "DivideByZeroException test",
+                Datadog.Maui.Rum.RumErrorSource.Source,
+                ex,
+                new Dictionary<string, object>
+                {
+                    ["error_type"] = "test_exception",
+                    ["trigger_method"] = "OnDivisionByZero"
+                }
+            );
+
+            DisplayAlert("Success", $"DivideByZeroException reported to Datadog Error Tracking", "OK");
         }
     }
 
@@ -61,7 +87,20 @@ public partial class ErrorTestingPage : ContentPage
         catch (Exception ex)
         {
             _logger.Error("IndexOutOfRangeException occurred", ex);
-            DisplayAlert("Error", $"IndexOutOfRangeException: {ex.Message}", "OK");
+
+            // Report error to RUM Error Tracking
+            Datadog.Maui.Rum.Rum.AddError(
+                "IndexOutOfRangeException test",
+                Datadog.Maui.Rum.RumErrorSource.Source,
+                ex,
+                new Dictionary<string, object>
+                {
+                    ["error_type"] = "test_exception",
+                    ["trigger_method"] = "OnIndexOutOfRange"
+                }
+            );
+
+            DisplayAlert("Success", $"IndexOutOfRangeException reported to Datadog Error Tracking", "OK");
         }
     }
 
@@ -76,7 +115,20 @@ public partial class ErrorTestingPage : ContentPage
         catch (Exception ex)
         {
             _logger.Error("InvalidOperationException occurred", ex);
-            DisplayAlert("Error", $"InvalidOperationException: {ex.Message}", "OK");
+
+            // Report error to RUM Error Tracking
+            Datadog.Maui.Rum.Rum.AddError(
+                "InvalidOperationException test",
+                Datadog.Maui.Rum.RumErrorSource.Source,
+                ex,
+                new Dictionary<string, object>
+                {
+                    ["error_type"] = "test_exception",
+                    ["trigger_method"] = "OnInvalidOperation"
+                }
+            );
+
+            DisplayAlert("Success", $"InvalidOperationException reported to Datadog Error Tracking", "OK");
         }
     }
 
@@ -90,7 +142,20 @@ public partial class ErrorTestingPage : ContentPage
         catch (Exception ex)
         {
             _logger.Error("ArgumentException occurred", ex);
-            DisplayAlert("Error", $"ArgumentException: {ex.Message}", "OK");
+
+            // Report error to RUM Error Tracking
+            Datadog.Maui.Rum.Rum.AddError(
+                "ArgumentException test",
+                Datadog.Maui.Rum.RumErrorSource.Source,
+                ex,
+                new Dictionary<string, object>
+                {
+                    ["error_type"] = "test_exception",
+                    ["trigger_method"] = "OnArgumentException"
+                }
+            );
+
+            DisplayAlert("Success", $"ArgumentException reported to Datadog Error Tracking", "OK");
         }
     }
 
@@ -118,12 +183,37 @@ public partial class ErrorTestingPage : ContentPage
         catch (TaskCanceledException ex)
         {
             _logger.Error("TaskCanceledException occurred", ex);
-            await DisplayAlert("Error", $"TaskCanceledException: {ex.Message}", "OK");
+
+            // Report error to RUM Error Tracking
+            Datadog.Maui.Rum.Rum.AddError(
+                "TaskCanceledException test",
+                Datadog.Maui.Rum.RumErrorSource.Source,
+                ex,
+                new Dictionary<string, object>
+                {
+                    ["error_type"] = "test_exception",
+                    ["trigger_method"] = "OnTaskCancellation"
+                }
+            );
+
+            await DisplayAlert("Success", $"TaskCanceledException reported to Datadog Error Tracking", "OK");
         }
         catch (Exception ex)
         {
             _logger.Error("Unexpected exception in TaskCancellation", ex);
-            await DisplayAlert("Error", $"Unexpected error: {ex.Message}", "OK");
+
+            Datadog.Maui.Rum.Rum.AddError(
+                "Unexpected exception in TaskCancellation",
+                Datadog.Maui.Rum.RumErrorSource.Source,
+                ex,
+                new Dictionary<string, object>
+                {
+                    ["error_type"] = "unexpected_exception",
+                    ["trigger_method"] = "OnTaskCancellation"
+                }
+            );
+
+            await DisplayAlert("Error", $"Unexpected error reported: {ex.Message}", "OK");
         }
     }
 
@@ -163,12 +253,39 @@ public partial class ErrorTestingPage : ContentPage
                 ["InnerExceptionCount"] = ex.InnerExceptions.Count,
                 ["ExceptionTypes"] = string.Join(", ", ex.InnerExceptions.Select(e => e.GetType().Name))
             });
-            await DisplayAlert("Error", $"AggregateException with {ex.InnerExceptions.Count} inner exceptions", "OK");
+
+            // Report error to RUM Error Tracking
+            Datadog.Maui.Rum.Rum.AddError(
+                "AggregateException test",
+                Datadog.Maui.Rum.RumErrorSource.Source,
+                ex,
+                new Dictionary<string, object>
+                {
+                    ["error_type"] = "test_exception",
+                    ["trigger_method"] = "OnAggregateException",
+                    ["InnerExceptionCount"] = ex.InnerExceptions.Count,
+                    ["ExceptionTypes"] = string.Join(", ", ex.InnerExceptions.Select(e => e.GetType().Name))
+                }
+            );
+
+            await DisplayAlert("Success", $"AggregateException with {ex.InnerExceptions.Count} inner exceptions reported to Datadog", "OK");
         }
         catch (Exception ex)
         {
             _logger.Error("Unexpected exception in AggregateException test", ex);
-            await DisplayAlert("Error", $"Unexpected error: {ex.Message}", "OK");
+
+            Datadog.Maui.Rum.Rum.AddError(
+                "Unexpected exception in AggregateException test",
+                Datadog.Maui.Rum.RumErrorSource.Source,
+                ex,
+                new Dictionary<string, object>
+                {
+                    ["error_type"] = "unexpected_exception",
+                    ["trigger_method"] = "OnAggregateException"
+                }
+            );
+
+            await DisplayAlert("Error", $"Unexpected error reported: {ex.Message}", "OK");
         }
     }
 
@@ -196,12 +313,37 @@ public partial class ErrorTestingPage : ContentPage
                 ["Url"] = "https://httpbin.org/delay/5",
                 ["TimeoutMs"] = 1
             });
-            await DisplayAlert("Error", "HTTP request timed out", "OK");
+
+            // Report error to RUM Error Tracking
+            Datadog.Maui.Rum.Rum.AddError(
+                "HTTP request timeout",
+                Datadog.Maui.Rum.RumErrorSource.Network,
+                ex,
+                new Dictionary<string, object>
+                {
+                    ["error_type"] = "http_timeout",
+                    ["url"] = "https://httpbin.org/delay/5",
+                    ["timeout_ms"] = 1
+                }
+            );
+
+            await DisplayAlert("Success", "HTTP timeout reported to Datadog Error Tracking", "OK");
         }
         catch (Exception ex)
         {
             _logger.Error("HTTP timeout test failed", ex);
-            await DisplayAlert("Error", $"Unexpected error: {ex.Message}", "OK");
+
+            Datadog.Maui.Rum.Rum.AddError(
+                "HTTP timeout test failed",
+                Datadog.Maui.Rum.RumErrorSource.Network,
+                ex,
+                new Dictionary<string, object>
+                {
+                    ["error_type"] = "unexpected_error"
+                }
+            );
+
+            await DisplayAlert("Error", $"Unexpected error reported: {ex.Message}", "OK");
         }
     }
 
@@ -222,13 +364,38 @@ public partial class ErrorTestingPage : ContentPage
                     ["StatusCode"] = (int)response.StatusCode,
                     ["Url"] = "https://httpbin.org/status/404"
                 });
-                await DisplayAlert("Error", $"HTTP 404: Resource not found", "OK");
+
+                // Report error to RUM Error Tracking
+                Datadog.Maui.Rum.Rum.AddError(
+                    "HTTP 404 Not Found",
+                    Datadog.Maui.Rum.RumErrorSource.Network,
+                    error,
+                    new Dictionary<string, object>
+                    {
+                        ["error_type"] = "http_error",
+                        ["status_code"] = (int)response.StatusCode,
+                        ["url"] = "https://httpbin.org/status/404"
+                    }
+                );
+
+                await DisplayAlert("Success", $"HTTP 404 error reported to Datadog Error Tracking", "OK");
             }
         }
         catch (Exception ex)
         {
             _logger.Error("HTTP 404 test failed", ex);
-            await DisplayAlert("Error", $"Unexpected error: {ex.Message}", "OK");
+
+            Datadog.Maui.Rum.Rum.AddError(
+                "HTTP 404 test failed",
+                Datadog.Maui.Rum.RumErrorSource.Network,
+                ex,
+                new Dictionary<string, object>
+                {
+                    ["error_type"] = "unexpected_error"
+                }
+            );
+
+            await DisplayAlert("Error", $"Unexpected error reported: {ex.Message}", "OK");
         }
     }
 
@@ -249,13 +416,38 @@ public partial class ErrorTestingPage : ContentPage
                     ["StatusCode"] = (int)response.StatusCode,
                     ["Url"] = "https://httpbin.org/status/500"
                 });
-                await DisplayAlert("Error", $"HTTP 500: Internal server error", "OK");
+
+                // Report error to RUM Error Tracking
+                Datadog.Maui.Rum.Rum.AddError(
+                    "HTTP 500 Server Error",
+                    Datadog.Maui.Rum.RumErrorSource.Network,
+                    error,
+                    new Dictionary<string, object>
+                    {
+                        ["error_type"] = "http_error",
+                        ["status_code"] = (int)response.StatusCode,
+                        ["url"] = "https://httpbin.org/status/500"
+                    }
+                );
+
+                await DisplayAlert("Success", $"HTTP 500 error reported to Datadog Error Tracking", "OK");
             }
         }
         catch (Exception ex)
         {
             _logger.Error("HTTP 500 test failed", ex);
-            await DisplayAlert("Error", $"Unexpected error: {ex.Message}", "OK");
+
+            Datadog.Maui.Rum.Rum.AddError(
+                "HTTP 500 test failed",
+                Datadog.Maui.Rum.RumErrorSource.Network,
+                ex,
+                new Dictionary<string, object>
+                {
+                    ["error_type"] = "unexpected_error"
+                }
+            );
+
+            await DisplayAlert("Error", $"Unexpected error reported: {ex.Message}", "OK");
         }
     }
 
@@ -272,7 +464,20 @@ public partial class ErrorTestingPage : ContentPage
             ["user_action"] = "clicked_log_error_button"
         });
 
-        DisplayAlert("Success", "Error log sent to Datadog", "OK");
+        // Also report to RUM Error Tracking
+        Datadog.Maui.Rum.Rum.AddError(
+            "Manual error log test",
+            Datadog.Maui.Rum.RumErrorSource.Source,
+            "Test error message from manual logging",
+            new Dictionary<string, object>
+            {
+                ["test_type"] = "manual_error_log",
+                ["timestamp"] = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+                ["user_action"] = "clicked_log_error_button"
+            }
+        );
+
+        DisplayAlert("Success", "Error log sent to Datadog Logs AND Error Tracking", "OK");
     }
 
     private void OnLogWarning(object sender, EventArgs e)
@@ -307,71 +512,66 @@ public partial class ErrorTestingPage : ContentPage
 
     #region Critical Crashes
 
-    private void OnNativeCrash(object sender, EventArgs e)
+    private async void OnNativeCrash(object sender, EventArgs e)
     {
-        DisplayAlert("Warning", "This will crash the app immediately!", "Cancel", "Crash")
-            .ContinueWith(async (task) =>
+        var result = await DisplayAlert("Warning", "This will crash the app immediately!", "Cancel", "Crash");
+
+        if (!result) // User clicked "Crash"
+        {
+            await Task.Delay(500); // Brief delay to allow alert to close
+
+            _logger.Error("Triggering native crash", null, new Dictionary<string, object>
             {
-                if (!task.Result) // User clicked "Crash"
-                {
-                    await Task.Delay(500); // Brief delay to allow alert to close
+                ["crash_type"] = "native",
+                ["platform"] = DeviceInfo.Platform.ToString()
+            });
 
-                    _logger.Error("Triggering native crash", null, new Dictionary<string, object>
-                    {
-                        ["crash_type"] = "native",
-                        ["platform"] = DeviceInfo.Platform.ToString()
-                    });
-
+            // Force the app to crash with a proper native exception
 #if ANDROID
-                    // Trigger Android native crash
-                    MainThread.BeginInvokeOnMainThread(() =>
-                    {
-                        throw new Java.Lang.RuntimeException("Test native crash from .NET MAUI");
-                    });
+            // For Android, use fatalError equivalent by throwing from main thread
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                // Force a segmentation fault-like crash
+                throw new Java.Lang.RuntimeException("Test native crash from .NET MAUI");
+            });
 #elif IOS
-                    // Trigger iOS native crash
-                    MainThread.BeginInvokeOnMainThread(() =>
-                    {
-                        throw new Foundation.NSErrorException(
-                            new Foundation.NSError(
-                                new Foundation.NSString("TestCrashDomain"),
-                                -1,
-                                Foundation.NSDictionary.FromObjectAndKey(
-                                    new Foundation.NSString("Test native crash from .NET MAUI"),
-                                    Foundation.NSError.LocalizedDescriptionKey
-                                )
-                            )
-                        );
-                    });
+            // For iOS, use Foundation.NSException which is closer to a native crash
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                // Use fatalError equivalent - throw ObjCRuntime exception
+                throw new ObjCRuntime.ObjCException("Test native crash from .NET MAUI");
+            });
 #else
-                    throw new PlatformNotSupportedException("Native crash not implemented for this platform");
+            throw new PlatformNotSupportedException("Native crash not implemented for this platform");
 #endif
-                }
-            }, TaskScheduler.FromCurrentSynchronizationContext());
+        }
     }
 
-    private void OnFatalException(object sender, EventArgs e)
+    private async void OnFatalException(object sender, EventArgs e)
     {
-        DisplayAlert("Warning", "This will crash the app with an unhandled exception!", "Cancel", "Crash")
-            .ContinueWith(async (task) =>
+        var result = await DisplayAlert("Warning", "This will crash the app with an unhandled exception!", "Cancel", "Crash");
+
+        if (!result) // User clicked "Crash"
+        {
+            await Task.Delay(500); // Brief delay to allow alert to close
+
+            _logger.Error("Triggering fatal unhandled exception", null, new Dictionary<string, object>
             {
-                if (!task.Result) // User clicked "Crash"
-                {
-                    await Task.Delay(500); // Brief delay to allow alert to close
+                ["crash_type"] = "unhandled_exception",
+                ["intentional"] = true
+            });
 
-                    _logger.Error("Triggering fatal unhandled exception", null, new Dictionary<string, object>
-                    {
-                        ["crash_type"] = "unhandled_exception",
-                        ["intentional"] = true
-                    });
+            // Throw unhandled exception on main thread
+            // Using Task.Run with no await to ensure it's truly unhandled
+            Task.Run(() =>
+            {
+                throw new InvalidOperationException("Fatal unhandled exception - testing crash reporting");
+            });
 
-                    // Throw unhandled exception on main thread
-                    MainThread.BeginInvokeOnMainThread(() =>
-                    {
-                        throw new InvalidOperationException("Fatal unhandled exception - testing crash reporting");
-                    });
-                }
-            }, TaskScheduler.FromCurrentSynchronizationContext());
+            // Also throw from main thread to ensure crash
+            await Task.Delay(100);
+            throw new InvalidOperationException("Fatal unhandled exception on main thread - testing crash reporting");
+        }
     }
 
     #endregion
