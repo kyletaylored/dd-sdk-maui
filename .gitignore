@@ -93,6 +93,7 @@ _reference/
 *.sln.docstates
 *.userprefs
 *.sln.iml
+
 # Environment files with secrets
 .env
 *.env
@@ -100,3 +101,7 @@ _reference/
 
 # Generated Datadog RUM config files (contain credentials)
 **/Config/datadog-rum-*.config
+
+# Claude docs
+/*.md
+!/README.md
