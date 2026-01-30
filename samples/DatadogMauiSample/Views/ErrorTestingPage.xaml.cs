@@ -539,7 +539,8 @@ public partial class ErrorTestingPage : ContentPage
             MainThread.BeginInvokeOnMainThread(() =>
             {
                 // Use fatalError equivalent - throw ObjCRuntime exception
-                throw new ObjCRuntime.ObjCException("Test native crash from .NET MAUI");
+                var nsException = new Foundation.NSException("TestCrashDomain", "Test native crash from .NET MAUI", null);
+                throw new ObjCRuntime.ObjCException(nsException);
             });
 #else
             throw new PlatformNotSupportedException("Native crash not implemented for this platform");
