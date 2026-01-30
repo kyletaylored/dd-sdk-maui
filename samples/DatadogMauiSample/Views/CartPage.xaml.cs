@@ -4,11 +4,17 @@ using Datadog.Maui.Logs;
 
 namespace DatadogMauiSample.Views;
 
+/// <summary>
+/// Page for displaying and managing the shopping cart.
+/// </summary>
 public partial class CartPage : ContentPage
 {
     private readonly CartService _cartService;
     private readonly ILogger _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CartPage"/> class.
+    /// </summary>
     public CartPage()
     {
         InitializeComponent();
@@ -38,6 +44,9 @@ public partial class CartPage : ContentPage
         UpdateCartSummary();
     }
 
+    /// <summary>
+    /// Called when the page is disappearing.
+    /// </summary>
     protected override void OnDisappearing()
     {
         base.OnDisappearing();

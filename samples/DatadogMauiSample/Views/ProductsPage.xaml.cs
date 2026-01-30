@@ -5,6 +5,9 @@ using Datadog.Maui.Logs;
 
 namespace DatadogMauiSample.Views;
 
+/// <summary>
+/// Page for browsing and purchasing products.
+/// </summary>
 public partial class ProductsPage : ContentPage
 {
     private readonly ShopistApiService _apiService;
@@ -15,6 +18,9 @@ public partial class ProductsPage : ContentPage
     private string? _selectedCategory = null;
     private int? _currentLimit = 20;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ProductsPage"/> class.
+    /// </summary>
     public ProductsPage()
     {
         InitializeComponent();
@@ -74,7 +80,7 @@ public partial class ProductsPage : ContentPage
             _selectedCategory = _categories[CategoryPicker.SelectedIndex - 1];
         }
 
-        await LoadProductsAsync();
+        await LoadProductsAsync(showSuccessAlert: false);
     }
 
     private async void OnLimitChanged(object? sender, EventArgs e)
@@ -84,9 +90,12 @@ public partial class ProductsPage : ContentPage
         var selectedValue = LimitPicker.Items[LimitPicker.SelectedIndex];
         _currentLimit = selectedValue == "All" ? null : int.Parse(selectedValue);
 
-        await LoadProductsAsync();
+        await LoadProductsAsync(showSuccessAlert: false);
     }
 
+    /// <summary>
+    /// Called when the page is disappearing.
+    /// </summary>
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
@@ -99,10 +108,10 @@ public partial class ProductsPage : ContentPage
 
     private async void OnRefreshClicked(object? sender, EventArgs e)
     {
-        await LoadProductsAsync();
+        await LoadProductsAsync(showSuccessAlert: true);
     }
 
-    private async Task LoadProductsAsync()
+    private async Task LoadProductsAsync(bool showSuccessAlert = false)
     {
         // Track the action in RUM
         Rum.AddAction(RumActionType.Custom, "load_products", new Dictionary<string, object>
@@ -153,7 +162,10 @@ public partial class ProductsPage : ContentPage
             // Add custom attribute to RUM session
             Rum.AddAttribute("last_product_count", _products.Count);
 
-            await DisplayAlert("Success", $"Loaded {_products.Count} products", "OK");
+            if (showSuccessAlert)
+            {
+                await DisplayAlert("Success", $"Loaded {_products.Count} products", "OK");
+            }
         }
         catch (Exception ex)
         {
@@ -228,7 +240,10 @@ public partial class ProductsPage : ContentPage
             }
 
             // Deselect the item
-            ((CollectionView)sender).SelectedItem = null;
+            if (sender is CollectionView collectionView)
+            {
+                collectionView.SelectedItem = null;
+            }
         }
     }
 
@@ -326,9 +341,19 @@ public partial class ProductsPage : ContentPage
     }
 }
 
-// Converters for data binding
+/// <summary>
+/// Converts stock status boolean to display text.
+/// </summary>
 public class StockStatusConverter : IValueConverter
 {
+    /// <summary>
+    /// Converts a boolean stock status to display text.
+    /// </summary>
+    /// <param name="value">The stock status boolean value.</param>
+    /// <param name="targetType">The target type.</param>
+    /// <param name="parameter">Optional parameter.</param>
+    /// <param name="culture">The culture info.</param>
+    /// <returns>"In Stock" or "Out of Stock" text.</returns>
     public object? Convert(object? value, Type targetType, object? parameter, System.Globalization.CultureInfo culture)
     {
         if (value is bool inStock)
@@ -338,14 +363,33 @@ public class StockStatusConverter : IValueConverter
         return "Unknown";
     }
 
+    /// <summary>
+    /// Converts back from text to boolean (not implemented).
+    /// </summary>
+    /// <param name="value">The value to convert back.</param>
+    /// <param name="targetType">The target type.</param>
+    /// <param name="parameter">Optional parameter.</param>
+    /// <param name="culture">The culture info.</param>
+    /// <returns>Not implemented.</returns>
     public object? ConvertBack(object? value, Type targetType, object? parameter, System.Globalization.CultureInfo culture)
     {
         throw new NotImplementedException();
     }
 }
 
+/// <summary>
+/// Converts stock status boolean to display color.
+/// </summary>
 public class StockColorConverter : IValueConverter
 {
+    /// <summary>
+    /// Converts a boolean stock status to a display color.
+    /// </summary>
+    /// <param name="value">The stock status boolean value.</param>
+    /// <param name="targetType">The target type.</param>
+    /// <param name="parameter">Optional parameter.</param>
+    /// <param name="culture">The culture info.</param>
+    /// <returns>Green if in stock, Red if out of stock, Gray otherwise.</returns>
     public object? Convert(object? value, Type targetType, object? parameter, System.Globalization.CultureInfo culture)
     {
         if (value is bool inStock)
@@ -355,6 +399,14 @@ public class StockColorConverter : IValueConverter
         return Colors.Gray;
     }
 
+    /// <summary>
+    /// Converts back from color to boolean (not implemented).
+    /// </summary>
+    /// <param name="value">The value to convert back.</param>
+    /// <param name="targetType">The target type.</param>
+    /// <param name="parameter">Optional parameter.</param>
+    /// <param name="culture">The culture info.</param>
+    /// <returns>Not implemented.</returns>
     public object? ConvertBack(object? value, Type targetType, object? parameter, System.Globalization.CultureInfo culture)
     {
         throw new NotImplementedException();

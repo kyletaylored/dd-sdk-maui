@@ -3,9 +3,15 @@ using UIKit;
 
 namespace DatadogMauiSample;
 
+/// <summary>
+/// iOS application entry point.
+/// </summary>
 public class Program
 {
-	// This is the main entry point of the application.
+	/// <summary>
+	/// Main entry point of the iOS application.
+	/// </summary>
+	/// <param name="args">Command line arguments.</param>
 	static void Main(string[] args)
 	{
 		// if you want to use a different Application Delegate class from "AppDelegate"

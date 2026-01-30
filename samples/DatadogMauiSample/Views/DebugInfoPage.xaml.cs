@@ -2,8 +2,14 @@ using DatadogMauiSample.Config;
 
 namespace DatadogMauiSample.Views;
 
+/// <summary>
+/// Page for displaying debug information about the Datadog SDK.
+/// </summary>
 public partial class DebugInfoPage : ContentPage
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DebugInfoPage"/> class.
+    /// </summary>
     public DebugInfoPage()
     {
         InitializeComponent();

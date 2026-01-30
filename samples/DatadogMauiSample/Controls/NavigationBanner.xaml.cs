@@ -2,17 +2,29 @@ using CommunityToolkit.Mvvm.Messaging;
 
 namespace DatadogMauiSample.Controls;
 
+/// <summary>
+/// A navigation banner control that displays user information.
+/// </summary>
 public partial class NavigationBanner : ContentView
 {
+    /// <summary>
+    /// Bindable property for the user name.
+    /// </summary>
     public static readonly BindableProperty UserNameProperty =
         BindableProperty.Create(nameof(UserName), typeof(string), typeof(NavigationBanner), string.Empty, propertyChanged: OnUserNameChanged);
 
+    /// <summary>
+    /// Gets or sets the user name to display.
+    /// </summary>
     public string UserName
     {
         get => (string)GetValue(UserNameProperty);
         set => SetValue(UserNameProperty, value);
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="NavigationBanner"/> class.
+    /// </summary>
     public NavigationBanner()
     {
         InitializeComponent();

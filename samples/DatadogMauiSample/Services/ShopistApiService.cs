@@ -6,12 +6,18 @@ using DatadogMauiSample.Models;
 
 namespace DatadogMauiSample.Services;
 
+/// <summary>
+/// Service for interacting with the Shopist and FakeStore APIs.
+/// </summary>
 public class ShopistApiService
 {
     private readonly HttpClient _httpClient;
     private const string BaseUrl = "https://fakestoreapi.com";
     private string? _authToken; // Store auth token after login
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ShopistApiService"/> class.
+    /// </summary>
     public ShopistApiService()
     {
 #if IOS
@@ -21,7 +27,9 @@ public class ShopistApiService
         {
             BaseAddress = new Uri(BaseUrl)
         };
-        System.Diagnostics.Debug.WriteLine("[ShopistAPI] Using DatadogHttpMessageHandler for iOS HTTP tracing");
+        var msg = "[ShopistAPI] Using DatadogHttpMessageHandler for iOS HTTP tracing";
+        System.Diagnostics.Debug.WriteLine(msg);
+        Console.WriteLine(msg);
 #else
         _httpClient = new HttpClient
         {
@@ -395,6 +403,14 @@ public class ShopistApiService
     // Legacy/Helper Methods
     // ============================================================================
 
+    /// <summary>
+    /// Adds an item to a cart.
+    /// </summary>
+    /// <param name="cartId">The cart ID.</param>
+    /// <param name="productId">The product ID.</param>
+    /// <param name="quantity">The quantity to add.</param>
+    /// <param name="amountPaid">The amount paid.</param>
+    /// <returns>The cart URL if successful, null otherwise.</returns>
     public async Task<string?> AddItemToCartAsync(string cartId, string productId, int quantity = 1, int amountPaid = 500)
     {
         // Update cart with new item
@@ -402,6 +418,12 @@ public class ShopistApiService
         return success ? $"/carts/{cartId}" : null;
     }
 
+    /// <summary>
+    /// Applies a coupon to a cart.
+    /// </summary>
+    /// <param name="cartId">The cart ID.</param>
+    /// <param name="couponCode">The coupon code to apply.</param>
+    /// <returns>True if successful.</returns>
     public async Task<bool> ApplyCouponAsync(string cartId, string couponCode = "100OFF")
     {
         // FakeStore API doesn't have coupon endpoint, so we'll simulate success
@@ -410,6 +432,13 @@ public class ShopistApiService
         return true;
     }
 
+    /// <summary>
+    /// Performs checkout with payment details.
+    /// </summary>
+    /// <param name="checkoutUrl">The checkout URL.</param>
+    /// <param name="cardNumber">The card number.</param>
+    /// <param name="cvc">The card CVC.</param>
+    /// <returns>True if successful.</returns>
     public async Task<bool> CheckoutAsync(string checkoutUrl, string cardNumber = "4242424242424242", string cvc = "123")
     {
         // FakeStore API doesn't have checkout endpoint, so we'll simulate success

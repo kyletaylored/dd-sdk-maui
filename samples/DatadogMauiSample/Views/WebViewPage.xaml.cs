@@ -1,7 +1,13 @@
 namespace DatadogMauiSample.Views;
 
+/// <summary>
+/// Page for displaying web content in a WebView.
+/// </summary>
 public partial class WebViewPage : ContentPage
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="WebViewPage"/> class.
+    /// </summary>
     public WebViewPage()
     {
         InitializeComponent();

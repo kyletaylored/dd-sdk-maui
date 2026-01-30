@@ -3,11 +3,17 @@ using Datadog.Maui.Rum;
 
 namespace DatadogMauiSample.Views;
 
+/// <summary>
+/// The main page of the application.
+/// </summary>
 public partial class MainPage : ContentPage
 {
 	int count = 0;
 	private readonly ILogger _logger;
 
+	/// <summary>
+	/// Initializes a new instance of the <see cref="MainPage"/> class.
+	/// </summary>
 	public MainPage()
 	{
 		InitializeComponent();

@@ -2,10 +2,19 @@ using System.Reflection;
 
 namespace DatadogMauiSample.Config;
 
+/// <summary>
+/// Configuration settings for Datadog RUM and logging.
+/// </summary>
 public static class DatadogConfig
 {
-    // General settings
+    /// <summary>
+    /// Gets or sets the deployment environment (e.g., dev, staging, prod).
+    /// </summary>
     public static string Environment { get; set; } = "dev";
+
+    /// <summary>
+    /// Gets or sets the service name for Datadog.
+    /// </summary>
     public static string ServiceName { get; set; } = "shopist-maui-demo";
 
     /// <summary>
@@ -13,6 +22,9 @@ public static class DatadogConfig
     /// </summary>
     public static string Site { get; set; } = "US1";
 
+    /// <summary>
+    /// Gets or sets a value indicating whether verbose logging is enabled.
+    /// </summary>
     public static bool VerboseLogging { get; set; } = true;
 
     // Placeholder defaults (used if config file not found)
@@ -24,7 +36,9 @@ public static class DatadogConfig
     // Lazy-loaded credentials from embedded config file
     private static readonly Lazy<Dictionary<string, string>> _credentials = new(LoadCredentials);
 
-    // Android settings - 3-tier priority: Embedded Config > Environment Variable > Placeholder
+    /// <summary>
+    /// Gets the Android client token (3-tier priority: Embedded Config > Environment Variable > Placeholder).
+    /// </summary>
     public static string AndroidClientToken
     {
         get
@@ -43,6 +57,9 @@ public static class DatadogConfig
         }
     }
 
+    /// <summary>
+    /// Gets the Android RUM application ID.
+    /// </summary>
     public static string AndroidRumApplicationId
     {
         get
@@ -58,9 +75,9 @@ public static class DatadogConfig
         }
     }
 
-    ///<Summary>
-    /// iOS settings - 3-tier priority: Embedded Config > Environment Variable > Placeholder
-    ///</Summary>
+    /// <summary>
+    /// Gets the iOS client token (3-tier priority: Embedded Config > Environment Variable > Placeholder).
+    /// </summary>
     public static string IosClientToken
     {
         get
@@ -76,9 +93,9 @@ public static class DatadogConfig
         }
     }
 
-    ///<Summary>
-    /// Sets RUM Application ID in iOS.
-    ///</Summary>
+    /// <summary>
+    /// Gets the iOS RUM application ID.
+    /// </summary>
     public static string IosRumApplicationId
     {
         get
@@ -94,11 +111,19 @@ public static class DatadogConfig
         }
     }
 
-    // Sample rates
+    /// <summary>
+    /// Gets or sets the RUM session sample rate (0-100).
+    /// </summary>
     public static float SessionSampleRate { get; set; } = 100f;
+
+    /// <summary>
+    /// Gets or sets the session replay sample rate (0-100).
+    /// </summary>
     public static float SessionReplaySampleRate { get; set; } = 100f;
 
-    // First-party hosts for tracing
+    /// <summary>
+    /// Gets or sets the list of first-party hosts for distributed tracing.
+    /// </summary>
     public static List<string> FirstPartyHosts { get; set; } = new()
     {
         "api.shopist.io",

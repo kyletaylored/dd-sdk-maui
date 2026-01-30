@@ -3,32 +3,64 @@ using DatadogMauiSample.Services;
 
 namespace DatadogMauiSample.Views;
 
+/// <summary>
+/// Page for displaying and managing user profile.
+/// </summary>
 public partial class ProfilePage : ContentPage
 {
     private User _currentUser;
     private readonly ShopistApiService _apiService;
     private List<FakeStoreUser> _availableUsers = new();
 
+    private static void Log(string message)
+    {
+        System.Diagnostics.Debug.WriteLine(message);
+        Console.WriteLine(message);
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ProfilePage"/> class.
+    /// </summary>
     public ProfilePage()
     {
         InitializeComponent();
         _apiService = new ShopistApiService();
         _currentUser = User.Guest;
         UpdateUI();
-        LoadAvailableUsersAsync();
+        // Don't load users immediately - wait for page to appear and SDK to be ready
+    }
+
+    /// <summary>
+    /// Called when the page is appearing.
+    /// </summary>
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+
+        // Load users when page appears (SDK should be ready by now)
+        if (_availableUsers.Count == 0)
+        {
+            LoadAvailableUsersAsync();
+        }
     }
 
     private async void LoadAvailableUsersAsync()
     {
         try
         {
-            System.Diagnostics.Debug.WriteLine("[ProfilePage] Loading available users from API");
+            var msg = "[ProfilePage] Loading available users from API";
+            System.Diagnostics.Debug.WriteLine(msg);
+            Console.WriteLine(msg);
             _availableUsers = await _apiService.GetUsersAsync();
-            System.Diagnostics.Debug.WriteLine($"[ProfilePage] Loaded {_availableUsers.Count} users");
+            var msg2 = $"[ProfilePage] Loaded {_availableUsers.Count} users";
+            System.Diagnostics.Debug.WriteLine(msg2);
+            Console.WriteLine(msg2);
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[ProfilePage] Error loading users: {ex.Message}");
+            var msg = $"[ProfilePage] Error loading users: {ex.Message}";
+            System.Diagnostics.Debug.WriteLine(msg);
+            Console.WriteLine(msg);
         }
     }
 
@@ -91,7 +123,7 @@ public partial class ProfilePage : ContentPage
     {
         try
         {
-            System.Diagnostics.Debug.WriteLine($"[ProfilePage] Attempting login with username: {username}");
+            Log($"[ProfilePage] Attempting login with username: {username}");
 
             var (success, token, error) = await _apiService.LoginAsync(username, password);
 
@@ -120,7 +152,7 @@ public partial class ProfilePage : ContentPage
                         app.SetCurrentUser(_currentUser.Name);
                     }
 
-                    System.Diagnostics.Debug.WriteLine($"[Datadog] User signed in via API: {_currentUser.Name} ({_currentUser.Email})");
+                    Log($"[Datadog] User signed in via API: {_currentUser.Name} ({_currentUser.Email})");
 
                     UpdateUI();
                     await DisplayAlert("Success", $"Welcome, {_currentUser.Name}!\n\nAuthentication token received.", "OK");
@@ -129,14 +161,14 @@ public partial class ProfilePage : ContentPage
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine($"[ProfilePage] Login failed: {error}");
+                Log($"[ProfilePage] Login failed: {error}");
                 await DisplayAlert("Login Failed", error ?? "Unknown error", "OK");
                 return false;
             }
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[ProfilePage] Login exception: {ex.Message}");
+            Log($"[ProfilePage] Login exception: {ex.Message}");
             await DisplayAlert("Error", $"Login error: {ex.Message}", "OK");
         }
 
@@ -207,7 +239,7 @@ public partial class ProfilePage : ContentPage
 
     private async void OnTestBadLoginClicked(object? sender, EventArgs e)
     {
-        System.Diagnostics.Debug.WriteLine("[ProfilePage] Testing bad login credentials");
+        Log("[ProfilePage] Testing bad login credentials");
         await SignInWithApiAsync("invaliduser", "wrongpassword");
     }
 

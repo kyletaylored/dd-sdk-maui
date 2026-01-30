@@ -5,8 +5,15 @@ using DatadogMauiSample.Config;
 
 namespace DatadogMauiSample;
 
+/// <summary>
+/// Entry point for the MAUI application configuration.
+/// </summary>
 public static class MauiProgram
 {
+	/// <summary>
+	/// Creates and configures the MAUI application.
+	/// </summary>
+	/// <returns>The configured <see cref="MauiApp"/>.</returns>
 	public static MauiApp CreateMauiApp()
 	{
 		// Load Datadog configuration from .env file

@@ -2,10 +2,16 @@ using System.Net;
 
 namespace DatadogMauiSample.Views;
 
+/// <summary>
+/// Page for testing error logging and crash reporting.
+/// </summary>
 public partial class ErrorTestingPage : ContentPage
 {
     private readonly Datadog.Maui.Logs.ILogger _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ErrorTestingPage"/> class.
+    /// </summary>
     public ErrorTestingPage()
     {
         InitializeComponent();
@@ -152,7 +158,7 @@ public partial class ErrorTestingPage : ContentPage
         }
         catch (AggregateException ex)
         {
-            _logger.Error("AggregateException occurred", ex, new Dictionary<string, object?>
+            _logger.Error("AggregateException occurred", ex, new Dictionary<string, object>
             {
                 ["InnerExceptionCount"] = ex.InnerExceptions.Count,
                 ["ExceptionTypes"] = string.Join(", ", ex.InnerExceptions.Select(e => e.GetType().Name))
@@ -185,7 +191,7 @@ public partial class ErrorTestingPage : ContentPage
         }
         catch (TaskCanceledException ex)
         {
-            _logger.Error("HTTP request timeout", ex, new Dictionary<string, object?>
+            _logger.Error("HTTP request timeout", ex, new Dictionary<string, object>
             {
                 ["Url"] = "https://httpbin.org/delay/5",
                 ["TimeoutMs"] = 1
@@ -211,7 +217,7 @@ public partial class ErrorTestingPage : ContentPage
             if (!response.IsSuccessStatusCode)
             {
                 var error = new HttpRequestException($"HTTP {(int)response.StatusCode}: {response.ReasonPhrase}");
-                _logger.Error("HTTP 404 Not Found", error, new Dictionary<string, object?>
+                _logger.Error("HTTP 404 Not Found", error, new Dictionary<string, object>
                 {
                     ["StatusCode"] = (int)response.StatusCode,
                     ["Url"] = "https://httpbin.org/status/404"
@@ -238,7 +244,7 @@ public partial class ErrorTestingPage : ContentPage
             if (!response.IsSuccessStatusCode)
             {
                 var error = new HttpRequestException($"HTTP {(int)response.StatusCode}: {response.ReasonPhrase}");
-                _logger.Error("HTTP 500 Server Error", error, new Dictionary<string, object?>
+                _logger.Error("HTTP 500 Server Error", error, new Dictionary<string, object>
                 {
                     ["StatusCode"] = (int)response.StatusCode,
                     ["Url"] = "https://httpbin.org/status/500"
@@ -259,7 +265,7 @@ public partial class ErrorTestingPage : ContentPage
 
     private void OnLogError(object sender, EventArgs e)
     {
-        _logger.Error("Test error message", null, new Dictionary<string, object?>
+        _logger.Error("Test error message", null, new Dictionary<string, object>
         {
             ["test_type"] = "manual_error_log",
             ["timestamp"] = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
@@ -271,7 +277,7 @@ public partial class ErrorTestingPage : ContentPage
 
     private void OnLogWarning(object sender, EventArgs e)
     {
-        _logger.Warn("Test warning message", null, new Dictionary<string, object?>
+        _logger.Warn("Test warning message", null, new Dictionary<string, object>
         {
             ["test_type"] = "manual_warning_log",
             ["timestamp"] = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
@@ -283,7 +289,7 @@ public partial class ErrorTestingPage : ContentPage
 
     private void OnLogInfoWithAttributes(object sender, EventArgs e)
     {
-        _logger.Info("Test info message with custom attributes", null, new Dictionary<string, object?>
+        _logger.Info("Test info message with custom attributes", null, new Dictionary<string, object>
         {
             ["test_type"] = "manual_info_log",
             ["timestamp"] = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
@@ -310,7 +316,7 @@ public partial class ErrorTestingPage : ContentPage
                 {
                     await Task.Delay(500); // Brief delay to allow alert to close
 
-                    _logger.Error("Triggering native crash", null, new Dictionary<string, object?>
+                    _logger.Error("Triggering native crash", null, new Dictionary<string, object>
                     {
                         ["crash_type"] = "native",
                         ["platform"] = DeviceInfo.Platform.ToString()
@@ -353,7 +359,7 @@ public partial class ErrorTestingPage : ContentPage
                 {
                     await Task.Delay(500); // Brief delay to allow alert to close
 
-                    _logger.Error("Triggering fatal unhandled exception", null, new Dictionary<string, object?>
+                    _logger.Error("Triggering fatal unhandled exception", null, new Dictionary<string, object>
                     {
                         ["crash_type"] = "unhandled_exception",
                         ["intentional"] = true

@@ -11,9 +11,18 @@ using Datadog.iOS.WebViewTracking;
 
 namespace DatadogMauiSample;
 
+/// <summary>
+/// iOS application delegate for DatadogMauiSample.
+/// </summary>
 [Register("AppDelegate")]
 public class AppDelegate : MauiUIApplicationDelegate
 {
+    /// <summary>
+    /// Called when the application finishes launching.
+    /// </summary>
+    /// <param name="application">The application instance.</param>
+    /// <param name="launchOptions">The launch options.</param>
+    /// <returns>True if launch was successful.</returns>
     public override bool FinishedLaunching(UIApplication application, NSDictionary? launchOptions)
     {
         // Create marker file to show AppDelegate ran
@@ -32,7 +41,7 @@ public class AppDelegate : MauiUIApplicationDelegate
 
         InitializeDatadog();
 
-        var result = base.FinishedLaunching(application, launchOptions);
+        var result = base.FinishedLaunching(application, launchOptions ?? new NSDictionary());
 
         // Remove liquid glass effect after MAUI creates the tab bar
         RemoveLiquidGlassEffect();
@@ -43,7 +52,26 @@ public class AppDelegate : MauiUIApplicationDelegate
     private void RemoveLiquidGlassEffect()
     {
         // Find and remove the _UIBarBackground view that creates the liquid glass effect
-        if (UIApplication.SharedApplication.KeyWindow?.RootViewController is UIViewController rootVC)
+        UIViewController? rootVC = null;
+
+        if (UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
+        {
+            // iOS 13+ - use window scenes
+            var windowScene = UIApplication.SharedApplication.ConnectedScenes
+                .OfType<UIWindowScene>()
+                .FirstOrDefault(scene => scene.ActivationState == UISceneActivationState.ForegroundActive);
+
+            rootVC = windowScene?.Windows.FirstOrDefault()?.RootViewController;
+        }
+        else
+        {
+            // iOS 12 and earlier - use deprecated KeyWindow
+            #pragma warning disable CA1422
+            rootVC = UIApplication.SharedApplication.KeyWindow?.RootViewController;
+            #pragma warning restore CA1422
+        }
+
+        if (rootVC != null)
         {
             RemoveBackgroundFromTabBar(rootVC);
         }
@@ -242,13 +270,24 @@ public class AppDelegate : MauiUIApplicationDelegate
                 }
 
                 DDTrace.EnableWith(traceConfig);
-                System.Diagnostics.Debug.WriteLine("[Datadog] ✓ APM Tracing enabled with URLSession tracking");
-                System.Diagnostics.Debug.WriteLine("[Datadog] ℹ HTTP requests to first-party hosts will be traced");
+                Console.WriteLine("[Datadog] ✓ APM Tracing enabled with URLSession tracking");
+                Console.WriteLine("[Datadog] ℹ HTTP requests to first-party hosts will be traced");
+
+                // Try to verify tracer is accessible
+                try
+                {
+                    var tracer = DDTracer.Shared;
+                    Console.WriteLine($"[Datadog] ✓ DDTracer.Shared accessible: {tracer?.GetType().Name ?? "null"}");
+                }
+                catch (Exception tracerEx)
+                {
+                    Console.WriteLine($"[Datadog] ✗ DDTracer.Shared NOT accessible: {tracerEx.Message}");
+                }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[Datadog] ⚠ APM Tracing failed: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"[Datadog] Stack trace: {ex.StackTrace}");
+                Console.WriteLine($"[Datadog] ⚠ APM Tracing failed: {ex.Message}");
+                Console.WriteLine($"[Datadog] Stack trace: {ex.StackTrace}");
             }
 
             // Enable WebView Tracking
@@ -287,5 +326,9 @@ public class AppDelegate : MauiUIApplicationDelegate
         };
     }
 
+    /// <summary>
+    /// Creates the MAUI application.
+    /// </summary>
+    /// <returns>The MAUI application instance.</returns>
     protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
 }
