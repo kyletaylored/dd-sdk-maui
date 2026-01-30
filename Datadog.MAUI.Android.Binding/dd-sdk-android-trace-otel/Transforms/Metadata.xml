@@ -1,4 +1,13 @@
 <metadata>
   <!-- Metadata transforms for OpenTelemetry Trace integration -->
   <!-- Add any necessary binding fixes here -->
+  <!-- Namespace remapping to align with iOS bindings -->
+  <!-- Android: Datadog.Android.Trace.OpenTelemetry (was Com.Datadog.Android.Trace.Opentelemetry) -->
+  <attr path="/api/package[@name='com.datadog.android.trace.opentelemetry']" name="managedName">Datadog.Android.Trace.OpenTelemetry</attr>
+  <attr path="/api/package[@name='com.datadog.android.trace.opentelemetry.internal']" name="managedName">Datadog.Android.Trace.OpenTelemetry.Internal</attr>
+
+  <!-- OpenTelemetry compatibility packages -->
+  <attr path="/api/package[@name='com.datadog.opentelemetry.compat.function']" name="managedName">Datadog.OpenTelemetry.Compat.Function</attr>
+  <attr path="/api/package[@name='com.datadog.opentelemetry.context.propagation']" name="managedName">Datadog.OpenTelemetry.Context.Propagation</attr>
+  <attr path="/api/package[@name='com.datadog.opentelemetry.trace']" name="managedName">Datadog.OpenTelemetry.Trace</attr>
 </metadata>

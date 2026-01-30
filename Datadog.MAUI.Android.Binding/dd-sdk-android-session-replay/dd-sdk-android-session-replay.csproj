@@ -7,7 +7,7 @@
     <IsBindingProject>true</IsBindingProject>
 
     <PackageId>Datadog.MAUI.Android.SessionReplay</PackageId>
-    <RootNamespace>Datadog.MAUI.Android.SessionReplay</RootNamespace>
+    <RootNamespace>Datadog.Android.SessionReplay</RootNamespace>
     <Authors>Datadog</Authors>
     <Description>.NET bindings for Datadog Android SDK Session Replay module</Description>
     <RepositoryType>git</RepositoryType>

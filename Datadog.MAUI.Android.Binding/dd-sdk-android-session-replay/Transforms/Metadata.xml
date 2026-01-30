@@ -3,10 +3,32 @@
     Binding fixes for Datadog Android SDK Session Replay
   -->
 
+  <!-- Namespace remapping to align with iOS bindings -->
+  <!-- iOS: Datadog.iOS.SessionReplay -->
+  <!-- Android: Datadog.Android.SessionReplay (was Com.Datadog.Android.Sessionreplay) -->
+  <attr path="/api/package[@name='com.datadog.android.sessionreplay']" name="managedName">Datadog.Android.SessionReplay</attr>
+  <attr path="/api/package[@name='com.datadog.android.sessionreplay.internal']" name="managedName">Datadog.Android.SessionReplay.Internal</attr>
+  <attr path="/api/package[@name='com.datadog.android.sessionreplay.internal.gson']" name="managedName">Datadog.Android.SessionReplay.Internal.Gson</attr>
+  <attr path="/api/package[@name='com.datadog.android.sessionreplay.internal.processor']" name="managedName">Datadog.Android.SessionReplay.Internal.Processor</attr>
+  <attr path="/api/package[@name='com.datadog.android.sessionreplay.internal.recorder']" name="managedName">Datadog.Android.SessionReplay.Internal.Recorder</attr>
+  <attr path="/api/package[@name='com.datadog.android.sessionreplay.internal.recorder.mapper']" name="managedName">Datadog.Android.SessionReplay.Internal.Recorder.Mapper</attr>
+  <attr path="/api/package[@name='com.datadog.android.sessionreplay.internal.recorder.obfuscator']" name="managedName">Datadog.Android.SessionReplay.Internal.Recorder.Obfuscator</attr>
+  <attr path="/api/package[@name='com.datadog.android.sessionreplay.internal.utils']" name="managedName">Datadog.Android.SessionReplay.Internal.Utils</attr>
+  <attr path="/api/package[@name='com.datadog.android.sessionreplay.model']" name="managedName">Datadog.Android.SessionReplay.Model</attr>
+  <attr path="/api/package[@name='com.datadog.android.sessionreplay.recorder']" name="managedName">Datadog.Android.SessionReplay.Recorder</attr>
+  <attr path="/api/package[@name='com.datadog.android.sessionreplay.recorder.mapper']" name="managedName">Datadog.Android.SessionReplay.Recorder.Mapper</attr>
+  <attr path="/api/package[@name='com.datadog.android.sessionreplay.recorder.resources']" name="managedName">Datadog.Android.SessionReplay.Recorder.Resources</attr>
+  <attr path="/api/package[@name='com.datadog.android.sessionreplay.recorder.wrappers']" name="managedName">Datadog.Android.SessionReplay.Recorder.Wrappers</attr>
+  <attr path="/api/package[@name='com.datadog.android.sessionreplay.utils']" name="managedName">Datadog.Android.SessionReplay.Utils</attr>
+
+  <!-- Hide internal implementation packages -->
+  <!-- These are SDK internals not meant for public consumption -->
+  <attr path="/api/package[starts-with(@name, 'com.datadog.android.sessionreplay.internal')]" name="visibility">internal</attr>
+
   <!-- Remove BaseWireframeMapper and BaseAsyncBackgroundWireframeMapper -->
-  <!-- These are abstract base classes that don't properly implement WireframeMapper.map() -->
-  <!-- They leave the implementation to subclasses, which causes C# binding generation errors -->
-  <!-- Concrete implementations like ImageViewMapper, TextViewMapper, etc. are available in the public API -->
+  <!-- These are abstract base classes with incompatible interface signatures that cause binding errors -->
+  <!-- They don't properly implement WireframeMapper.map() - implementation is left to subclasses -->
+  <!-- Concrete implementations like ImageViewMapper, TextViewMapper, etc. are available and work correctly -->
   <remove-node path="/api/package[@name='com.datadog.android.sessionreplay.recorder.mapper']/class[@name='BaseWireframeMapper']" />
   <remove-node path="/api/package[@name='com.datadog.android.sessionreplay.recorder.mapper']/class[@name='BaseAsyncBackgroundWireframeMapper']" />
 </metadata>

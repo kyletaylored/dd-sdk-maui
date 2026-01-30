@@ -7,7 +7,7 @@
     <IsBindingProject>true</IsBindingProject>
 
     <PackageId>Datadog.MAUI.Android.OkHttp.OpenTelemetry</PackageId>
-    <RootNamespace>Datadog.MAUI.Android.OkHttp.OpenTelemetry</RootNamespace>
+    <RootNamespace>Datadog.Android.OkHttp.OpenTelemetry</RootNamespace>
     <Authors>Datadog</Authors>
     <Description>.NET bindings for Datadog Android SDK OkHttp + OpenTelemetry integration module</Description>
     <RepositoryType>git</RepositoryType>

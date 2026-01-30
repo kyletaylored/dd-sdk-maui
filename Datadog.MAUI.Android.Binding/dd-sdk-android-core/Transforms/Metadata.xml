@@ -3,6 +3,50 @@
     Binding fixes for Datadog Android SDK Core
   -->
 
+  <!-- Namespace remapping to align with iOS bindings -->
+  <!-- iOS: Datadog.iOS.Core -->
+  <!-- Android: Datadog.Android.Core (was Com.Datadog.Android.Core) -->
+  <!-- We need to remap each package individually to preserve nested structure -->
+
+  <!-- Top-level packages -->
+  <attr path="/api/package[@name='com.datadog.android']" name="managedName">Datadog.Android</attr>
+  <attr path="/api/package[@name='com.datadog.android.core']" name="managedName">Datadog.Android.Core</attr>
+  <attr path="/api/package[@name='com.datadog.android.api']" name="managedName">Datadog.Android.Api</attr>
+  <attr path="/api/package[@name='com.datadog.android.event']" name="managedName">Datadog.Android.Event</attr>
+  <attr path="/api/package[@name='com.datadog.android.lint']" name="managedName">Datadog.Android.Lint</attr>
+  <attr path="/api/package[@name='com.datadog.android.log']" name="managedName">Datadog.Android.Log</attr>
+  <attr path="/api/package[@name='com.datadog.android.privacy']" name="managedName">Datadog.Android.Privacy</attr>
+  <attr path="/api/package[@name='com.datadog.android.security']" name="managedName">Datadog.Android.Security</attr>
+  <attr path="/api/package[@name='com.datadog.android.trace']" name="managedName">Datadog.Android.Trace</attr>
+
+  <!-- Api subpackages -->
+  <attr path="/api/package[@name='com.datadog.android.api.context']" name="managedName">Datadog.Android.Api.Context</attr>
+  <attr path="/api/package[@name='com.datadog.android.api.feature']" name="managedName">Datadog.Android.Api.Feature</attr>
+  <attr path="/api/package[@name='com.datadog.android.api.instrumentation.network']" name="managedName">Datadog.Android.Api.Instrumentation.Network</attr>
+  <attr path="/api/package[@name='com.datadog.android.api.net']" name="managedName">Datadog.Android.Api.Net</attr>
+  <attr path="/api/package[@name='com.datadog.android.api.storage']" name="managedName">Datadog.Android.Api.Storage</attr>
+  <attr path="/api/package[@name='com.datadog.android.api.storage.datastore']" name="managedName">Datadog.Android.Api.Storage.Datastore</attr>
+
+  <!-- Core subpackages -->
+  <attr path="/api/package[@name='com.datadog.android.core.configuration']" name="managedName">Datadog.Android.Core.Configuration</attr>
+  <attr path="/api/package[@name='com.datadog.android.core.constraints']" name="managedName">Datadog.Android.Core.Constraints</attr>
+  <attr path="/api/package[@name='com.datadog.android.core.feature.event']" name="managedName">Datadog.Android.Core.Feature.Event</attr>
+  <attr path="/api/package[@name='com.datadog.android.core.internal.constraints']" name="managedName">Datadog.Android.Core.Internal.Constraints</attr>
+  <attr path="/api/package[@name='com.datadog.android.core.internal.net']" name="managedName">Datadog.Android.Core.Internal.Net</attr>
+  <attr path="/api/package[@name='com.datadog.android.core.internal.persistence']" name="managedName">Datadog.Android.Core.Internal.Persistence</attr>
+  <attr path="/api/package[@name='com.datadog.android.core.internal.persistence.file']" name="managedName">Datadog.Android.Core.Internal.Persistence.File</attr>
+  <attr path="/api/package[@name='com.datadog.android.core.internal.thread']" name="managedName">Datadog.Android.Core.Internal.Thread</attr>
+  <attr path="/api/package[@name='com.datadog.android.core.internal.time']" name="managedName">Datadog.Android.Core.Internal.Time</attr>
+  <attr path="/api/package[@name='com.datadog.android.core.internal.utils']" name="managedName">Datadog.Android.Core.Internal.Utils</attr>
+  <attr path="/api/package[@name='com.datadog.android.core.metrics']" name="managedName">Datadog.Android.Core.Metrics</attr>
+  <attr path="/api/package[@name='com.datadog.android.core.persistence']" name="managedName">Datadog.Android.Core.Persistence</attr>
+  <attr path="/api/package[@name='com.datadog.android.core.persistence.datastore']" name="managedName">Datadog.Android.Core.Persistence.Datastore</attr>
+  <attr path="/api/package[@name='com.datadog.android.core.sampling']" name="managedName">Datadog.Android.Core.Sampling</attr>
+
+  <!-- Hide internal implementation packages -->
+  <!-- These are SDK internals not meant for public consumption -->
+  <attr path="/api/package[starts-with(@name, 'com.datadog.android.core.internal')]" name="visibility">internal</attr>
+
   <!-- Fix IFlushableExecutorService binding issues -->
   <!-- FlushableExecutorService extends java.util.concurrent.ExecutorService which has generic type issues -->
   <!-- Since this is an internal threading class, we remove it from the public API -->

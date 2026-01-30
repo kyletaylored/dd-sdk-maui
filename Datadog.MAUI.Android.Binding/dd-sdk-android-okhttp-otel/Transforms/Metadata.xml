@@ -1,4 +1,6 @@
 <metadata>
-  <!-- Metadata transforms for OkHttp + OpenTelemetry integration -->
-  <!-- Add any necessary binding fixes here -->
+  <!-- Namespace remapping to align with iOS bindings -->
+  <!-- Android: Datadog.Android.OkHttp.Otel (was Com.Datadog.Android.Okhttp.Otel) -->
+  <!-- Note: The 'opentelemetry' package no longer exists, only 'otel' package is present -->
+  <attr path="/api/package[@name='com.datadog.android.okhttp.otel']" name="managedName">Datadog.Android.OkHttp.Otel</attr>
 </metadata>

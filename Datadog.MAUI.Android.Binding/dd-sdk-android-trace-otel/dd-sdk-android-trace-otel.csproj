@@ -7,7 +7,7 @@
     <IsBindingProject>true</IsBindingProject>
 
     <PackageId>Datadog.MAUI.Android.Trace.OpenTelemetry</PackageId>
-    <RootNamespace>Datadog.MAUI.Android.Trace.OpenTelemetry</RootNamespace>
+    <RootNamespace>Datadog.Android.Trace.OpenTelemetry</RootNamespace>
     <Authors>Datadog</Authors>
     <Description>.NET bindings for Datadog Android SDK OpenTelemetry Trace integration module</Description>
     <RepositoryType>git</RepositoryType>

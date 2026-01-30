@@ -7,7 +7,7 @@
     <IsBindingProject>true</IsBindingProject>
 
     <PackageId>Datadog.MAUI.Android.NDK</PackageId>
-    <RootNamespace>Datadog.MAUI.Android.NDK</RootNamespace>
+    <RootNamespace>Datadog.Android.NDK</RootNamespace>
     <Authors>Datadog</Authors>
     <Description>.NET bindings for Datadog Android SDK NDK (Native Crash Reporting) module</Description>
     <RepositoryType>git</RepositoryType>

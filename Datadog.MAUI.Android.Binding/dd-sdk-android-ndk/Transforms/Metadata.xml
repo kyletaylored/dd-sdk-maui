@@ -6,6 +6,11 @@
     NDK-specific types (com.datadog.android.ndk.*).
   -->
 
+  <!-- Namespace remapping to align with iOS bindings -->
+  <!-- iOS: Datadog.iOS.CrashReporting -->
+  <!-- Android: Datadog.Android.NDK (was Com.Datadog.Android.Ndk) -->
+  <attr path="/api/package[@name='com.datadog.android.ndk']" name="managedName">Datadog.Android.NDK</attr>
+
   <!-- Remove core packages embedded in NDK AAR to prevent duplicates -->
   <remove-node path="/api/package[@name='com.datadog.android']" />
   <remove-node path="/api/package[@name='com.datadog.android.api']" />

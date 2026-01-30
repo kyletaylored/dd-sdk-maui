@@ -7,7 +7,7 @@
     <IsBindingProject>true</IsBindingProject>
 
     <PackageId>Datadog.MAUI.Android.Trace</PackageId>
-    <RootNamespace>Datadog.MAUI.Android.Trace</RootNamespace>
+    <RootNamespace>Datadog.Android.Trace</RootNamespace>
     <Authors>Datadog</Authors>
     <Description>.NET bindings for Datadog Android SDK Trace (APM) module</Description>
     <RepositoryType>git</RepositoryType>

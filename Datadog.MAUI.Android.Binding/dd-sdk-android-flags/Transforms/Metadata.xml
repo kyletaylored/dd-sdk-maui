@@ -4,4 +4,14 @@
     Example:
     <remove-node path="/api/package[@name='com.example']/class[@name='Foo']" />
   -->
+  <!-- Namespace remapping to align with iOS bindings -->
+  <!-- iOS: Datadog.iOS.Flags -->
+  <!-- Android: Datadog.Android.Flags (was Com.Datadog.Android.Flags) -->
+  <attr path="/api/package[@name='com.datadog.android.flags']" name="managedName">Datadog.Android.Flags</attr>
+  <attr path="/api/package[@name='com.datadog.android.flags.internal']" name="managedName">Datadog.Android.Flags.Internal</attr>
+  <attr path="/api/package[@name='com.datadog.android.flags.model']" name="managedName">Datadog.Android.Flags.Model</attr>
+
+  <!-- Hide internal implementation packages -->
+  <!-- These are SDK internals not meant for public consumption -->
+  <attr path="/api/package[starts-with(@name, 'com.datadog.android.flags.internal')]" name="visibility">internal</attr>
 </metadata>

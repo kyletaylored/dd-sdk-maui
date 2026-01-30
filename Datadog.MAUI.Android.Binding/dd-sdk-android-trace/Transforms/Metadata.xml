@@ -7,6 +7,16 @@
     trace, trace-api, and trace-internal packages.
   -->
 
+  <!-- Namespace remapping to align with iOS bindings -->
+  <!-- iOS: Datadog.iOS.Trace -->
+  <!-- Android: Datadog.Android.Trace (was Com.Datadog.Android.Trace) -->
+  <attr path="/api/package[@name='com.datadog.android.trace']" name="managedName">Datadog.Android.Trace</attr>
+  <attr path="/api/package[@name='com.datadog.android.trace.event']" name="managedName">Datadog.Android.Trace.Event</attr>
+  <attr path="/api/package[@name='com.datadog.android.trace.internal']" name="managedName">Datadog.Android.Trace.Internal</attr>
+  <attr path="/api/package[@name='com.datadog.android.trace.internal.domain.event']" name="managedName">Datadog.Android.Trace.Internal.Domain.Event</attr>
+  <attr path="/api/package[@name='com.datadog.android.trace.model']" name="managedName">Datadog.Android.Trace.Model</attr>
+  <attr path="/api/package[@name='com.datadog.android.trace.sqlite']" name="managedName">Datadog.Android.Trace.Sqlite</attr>
+
   <!-- Step 1: Hide all trace.api and trace.bootstrap packages by default -->
   <!-- These packages have complex interdependencies that cause binding conflicts -->
   <attr path="/api/package[@name='com.datadog.trace.api']" name="visibility">internal</attr>

@@ -4,4 +4,37 @@
     These have been re-enabled now that androidx.metrics is properly included from Google Maven.
     These classes provide frame metrics tracking for slow frames monitoring in RUM.
   -->
+
+  <!-- Namespace remapping to align with iOS bindings -->
+  <!-- iOS: Datadog.iOS.RUM -->
+  <!-- Android: Datadog.Android.RUM (was Com.Datadog.Android.Rum) -->
+  <attr path="/api/package[@name='com.datadog.android.rum']" name="managedName">Datadog.Android.RUM</attr>
+  <attr path="/api/package[@name='com.datadog.android.rum.configuration']" name="managedName">Datadog.Android.RUM.Configuration</attr>
+  <attr path="/api/package[@name='com.datadog.android.rum.event']" name="managedName">Datadog.Android.RUM.Event</attr>
+  <attr path="/api/package[@name='com.datadog.android.rum.featureoperations']" name="managedName">Datadog.Android.RUM.Featureoperations</attr>
+  <attr path="/api/package[@name='com.datadog.android.rum.internal']" name="managedName">Datadog.Android.RUM.Internal</attr>
+  <attr path="/api/package[@name='com.datadog.android.rum.internal.domain']" name="managedName">Datadog.Android.RUM.Internal.Domain</attr>
+  <attr path="/api/package[@name='com.datadog.android.rum.internal.domain.event']" name="managedName">Datadog.Android.RUM.Internal.Domain.Event</attr>
+  <attr path="/api/package[@name='com.datadog.android.rum.internal.domain.scope']" name="managedName">Datadog.Android.RUM.Internal.Domain.Scope</attr>
+  <attr path="/api/package[@name='com.datadog.android.rum.internal.instrumentation.gestures']" name="managedName">Datadog.Android.RUM.Internal.Instrumentation.Gestures</attr>
+  <attr path="/api/package[@name='com.datadog.android.rum.internal.instrumentation.insights']" name="managedName">Datadog.Android.RUM.Internal.Instrumentation.Insights</attr>
+  <attr path="/api/package[@name='com.datadog.android.rum.internal.monitor']" name="managedName">Datadog.Android.RUM.Internal.Monitor</attr>
+  <attr path="/api/package[@name='com.datadog.android.rum.internal.net']" name="managedName">Datadog.Android.RUM.Internal.Net</attr>
+  <attr path="/api/package[@name='com.datadog.android.rum.internal.startup']" name="managedName">Datadog.Android.RUM.Internal.Startup</attr>
+  <attr path="/api/package[@name='com.datadog.android.rum.internal.utils']" name="managedName">Datadog.Android.RUM.Internal.Utils</attr>
+  <attr path="/api/package[@name='com.datadog.android.rum.metric.interactiontonextview']" name="managedName">Datadog.Android.RUM.Metric.Interactiontonextview</attr>
+  <attr path="/api/package[@name='com.datadog.android.rum.metric.networksettled']" name="managedName">Datadog.Android.RUM.Metric.Networksettled</attr>
+  <attr path="/api/package[@name='com.datadog.android.rum.model']" name="managedName">Datadog.Android.RUM.Model</attr>
+  <attr path="/api/package[@name='com.datadog.android.rum.resource']" name="managedName">Datadog.Android.RUM.Resource</attr>
+  <attr path="/api/package[@name='com.datadog.android.rum.tracking']" name="managedName">Datadog.Android.RUM.Tracking</attr>
+
+  <!-- Additional packages in RUM module -->
+  <attr path="/api/package[@name='com.datadog.android.sqlite']" name="managedName">Datadog.Android.Sqlite</attr>
+  <attr path="/api/package[@name='com.datadog.android.telemetry.internal']" name="managedName">Datadog.Android.Telemetry.Internal</attr>
+  <attr path="/api/package[@name='com.datadog.android.telemetry.model']" name="managedName">Datadog.Android.Telemetry.Model</attr>
+
+  <!-- Hide internal implementation packages -->
+  <!-- These are SDK internals not meant for public consumption -->
+  <attr path="/api/package[starts-with(@name, 'com.datadog.android.rum.internal')]" name="visibility">internal</attr>
+  <attr path="/api/package[starts-with(@name, 'com.datadog.android.telemetry.internal')]" name="visibility">internal</attr>
 </metadata>

@@ -7,7 +7,7 @@
     <IsBindingProject>true</IsBindingProject>
 
     <PackageId>Datadog.MAUI.Android.Core</PackageId>
-    <RootNamespace>Datadog.MAUI.Android.Core</RootNamespace>
+    <RootNamespace>Datadog.Android.Core</RootNamespace>
     <Authors>Datadog</Authors>
     <Description>.NET bindings for Datadog Android SDK Core module</Description>
     <RepositoryType>git</RepositoryType>

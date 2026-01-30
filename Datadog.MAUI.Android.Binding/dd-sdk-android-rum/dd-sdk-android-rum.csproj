@@ -7,7 +7,8 @@
     <IsBindingProject>true</IsBindingProject>
 
     <PackageId>Datadog.MAUI.Android.RUM</PackageId>
-    <RootNamespace>Datadog.MAUI.Android.RUM</RootNamespace>
+    <RootNamespace>Datadog.Android.RUM</RootNamespace>
+    <AndroidGenerateResourceDesigner>false</AndroidGenerateResourceDesigner>
     <Authors>Datadog</Authors>
     <Description>.NET bindings for Datadog Android SDK RUM (Real User Monitoring) module</Description>
     <RepositoryType>git</RepositoryType>

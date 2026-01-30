@@ -1,0 +1,24 @@
+<Project>
+  <!-- Import parent Directory.Build.props to inherit DatadogSdkVersion and other common properties -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <PropertyGroup>
+    <!-- Suppress benign Android binding warnings that are expected when binding Kotlin/Java libraries -->
+    <!-- These warnings are informational and do not indicate actual problems with the bindings -->
+
+    <!-- BG8401: Duplicate nested type names (Kotlin companion objects) -->
+    <!-- BG8400: Unexpected field types (Kotlin companion objects as field types) -->
+    <!-- BG8605: Missing Java type references (internal types not bound) -->
+    <!-- BG8606: Summary warning for unresolved Java references -->
+    <!-- BG8102: Duplicate field name (Kotlin property backing fields) -->
+    <!-- BG8103: Conflicting constant field values -->
+    <!-- BG8403: Duplicate constant field name (Kotlin const properties) -->
+    <!-- BG8604: Java type not bound (internal/package-private types) -->
+    <!-- BG8A00: Metadata.xml transformation matched no nodes (can occur with version differences) -->
+    <!-- BG8A04: Metadata.xml attr transformation matched no nodes -->
+    <!-- CS0108: Member hiding without 'new' keyword in generated code -->
+    <!-- CS0114: Member hides inherited member (use new or override) -->
+
+    <NoWarn>$(NoWarn);BG8401;BG8400;BG8605;BG8606;BG8102;BG8103;BG8403;BG8604;BG8A00;BG8A04;CS0108;CS0114</NoWarn>
+  </PropertyGroup>
+</Project>

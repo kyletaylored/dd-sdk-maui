@@ -7,7 +7,7 @@
     <IsBindingProject>true</IsBindingProject>
 
     <PackageId>Datadog.MAUI.Android.WebView</PackageId>
-    <RootNamespace>Datadog.MAUI.Android.WebView</RootNamespace>
+    <RootNamespace>Datadog.Android.WebView</RootNamespace>
     <Authors>Datadog</Authors>
     <Description>.NET bindings for Datadog Android SDK WebView tracking module</Description>
     <RepositoryType>git</RepositoryType>
