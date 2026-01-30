@@ -1,12 +1,26 @@
 <metadata>
-  <!-- Opt-in approach: Remove Builder classes since they have complex generic signatures -->
-  <!-- Users can construct interceptors using factory methods or direct constructors instead -->
-  <remove-node path="/api/package[@name='com.datadog.android.okhttp']/class[@name='DatadogInterceptor.Builder']" />
+  <!-- Namespace remapping to align with iOS bindings -->
+  <!-- Android: Datadog.Android.OkHttp (was Com.Datadog.Android.Okhttp) -->
+  <attr path="/api/package[@name='com.datadog.android.okhttp']" name="managedName">Datadog.Android.OkHttp</attr>
+  <attr path="/api/package[@name='com.datadog.android.okhttp.internal']" name="managedName">Datadog.Android.OkHttp.Internal</attr>
+  <attr path="/api/package[@name='com.datadog.android.okhttp.internal.trace']" name="managedName">Datadog.Android.OkHttp.Internal.Trace</attr>
+  <attr path="/api/package[@name='com.datadog.android.okhttp.internal.utils']" name="managedName">Datadog.Android.OkHttp.Internal.Utils</attr>
+  <attr path="/api/package[@name='com.datadog.android.okhttp.trace']" name="managedName">Datadog.Android.OkHttp.Trace</attr>
 
-  <!-- Also remove other builder-related classes with binding issues -->
+  <!-- Hide internal implementation packages -->
+  <!-- These are SDK internals not meant for public consumption -->
+  <attr path="/api/package[starts-with(@name, 'com.datadog.android.okhttp.internal')]" name="visibility">internal</attr>
+
+  <!-- Remove Builder classes that don't properly implement abstract Build() method -->
+  <!-- These are internal builders that cause CS0534 errors due to incomplete interface implementations -->
+  <!-- Users can construct DatadogInterceptor and TracingInterceptor directly or use factory methods -->
+  <!-- Note: These are separate top-level classes in the trace package, not nested classes in okhttp package -->
+  <remove-node path="/api/package[@name='com.datadog.android.okhttp']/class[@name='DatadogInterceptor.Builder']" />
   <remove-node path="/api/package[@name='com.datadog.android.okhttp.trace']/class[@name='TracingInterceptor.BaseBuilder']" />
   <remove-node path="/api/package[@name='com.datadog.android.okhttp.trace']/class[@name='TracingInterceptor.Builder']" />
 
-  <!-- Remove TracedRequestListener interface - has default/abstract method binding issues -->
+  <!-- Remove TracedRequestListener interface that doesn't have complete method signatures -->
+  <!-- This interface has evolved and causes JAVAC errors about missing onRequestIntercepted() method -->
+  <!-- Users should use the concrete interceptor classes instead -->
   <remove-node path="/api/package[@name='com.datadog.android.okhttp.trace']/interface[@name='TracedRequestListener']" />
 </metadata>

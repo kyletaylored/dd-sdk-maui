@@ -466,9 +466,9 @@ public partial class ErrorTestingPage : ContentPage
 
         // Also report to RUM Error Tracking
         Datadog.Maui.Rum.Rum.AddError(
-            "Manual error log test",
+            "Manual error log test - Test error message from manual logging",
             Datadog.Maui.Rum.RumErrorSource.Source,
-            "Test error message from manual logging",
+            null, // No exception for manual logging
             new Dictionary<string, object>
             {
                 ["test_type"] = "manual_error_log",
@@ -563,10 +563,12 @@ public partial class ErrorTestingPage : ContentPage
 
             // Throw unhandled exception on main thread
             // Using Task.Run with no await to ensure it's truly unhandled
+#pragma warning disable CS4014 // Intentionally not awaiting to create unhandled exception
             Task.Run(() =>
             {
                 throw new InvalidOperationException("Fatal unhandled exception - testing crash reporting");
             });
+#pragma warning restore CS4014
 
             // Also throw from main thread to ensure crash
             await Task.Delay(100);
