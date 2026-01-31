@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<!-- Only targeting Android and iOS for Datadog SDK -->
-		<TargetFrameworks>net9.0-android;net10.0-android;net9.0-ios;net10.0-ios</TargetFrameworks>
+		<TargetFrameworks>net9.0-android;net9.0-ios;net10.0-android;net10.0-ios</TargetFrameworks>
 
 		<OutputType>Exe</OutputType>
 		<RootNamespace>DatadogMauiSample</RootNamespace>
@@ -10,6 +10,9 @@
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+
+		<!-- Suppress missing XML documentation warnings for sample app -->
+		<NoWarn>$(NoWarn);CS1591</NoWarn>
 
 		<!-- Display name -->
 		<ApplicationTitle>MAUI Shopist Demo</ApplicationTitle>
@@ -51,16 +54,32 @@
 		<RunAOTCompilation>false</RunAOTCompilation>
 	</PropertyGroup>
 
-	<!-- Datadog Symbol Upload Configuration (applies to all configurations) -->
+	<!-- Datadog Symbol Upload Configuration -->
 	<!-- NOTE: Symbol upload only runs in Release builds by default (when mapping files are generated) -->
 	<!-- To test in Debug, add: <DatadogUploadInDebug>true</DatadogUploadInDebug> -->
+
+	<!--
+		Flavor Strategy for Symbol Upload Uniqueness:
+		- Use environment variable DD_BUILD_FLAVOR to override (e.g., export DD_BUILD_FLAVOR=staging)
+		- Default: "debug" for Debug config, "release" for Release config
+		- Production: Set DD_BUILD_FLAVOR=production when building production releases
+		- Staging: Set DD_BUILD_FLAVOR=staging for staging builds
+		- Development: Use "debug" or set DD_BUILD_FLAVOR=dev-{username} for unique developer builds
+	-->
+	<PropertyGroup>
+		<!-- Read flavor from environment variable if set, otherwise default to configuration name -->
+		<DatadogFlavor Condition="'$(DD_BUILD_FLAVOR)' != ''">$(DD_BUILD_FLAVOR)</DatadogFlavor>
+	</PropertyGroup>
+
 	<PropertyGroup Condition="$(TargetFramework.Contains('android'))">
-		<DatadogServiceNameAndroid>com.datadog.datadog-maui-shopist.demo.android</DatadogServiceNameAndroid>
-		<DatadogDryRun>true</DatadogDryRun>		<!-- Set to false for actual uploads -->
+		<DatadogServiceNameAndroid>datadog-maui-android</DatadogServiceNameAndroid>
+		<DatadogSite>datadoghq.com</DatadogSite>
+		<DatadogDryRun>false</DatadogDryRun>		<!-- Set to false for actual uploads -->
 	</PropertyGroup>
 
 	<PropertyGroup Condition="$(TargetFramework.Contains('ios'))">
-		<DatadogServiceNameiOS>com.datadog.datadog-maui-shopist.demo.ios</DatadogServiceNameiOS>
+		<DatadogServiceNameiOS>datadog-maui-ios</DatadogServiceNameiOS>
+		<DatadogSite>datadoghq.com</DatadogSite>
 		<DatadogDryRun>true</DatadogDryRun>		<!-- Set to false for actual uploads -->
 	</PropertyGroup>
 
@@ -79,7 +98,7 @@
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
 		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
-		
+
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />
 
@@ -114,12 +133,12 @@
 	<!-- Use ProjectReference for both Debug and Release for local development -->
 	<ItemGroup>
 		<ProjectReference Include="..\..\Datadog.MAUI.Plugin\Datadog.MAUI.Plugin.csproj" />
-		<ProjectReference Include="..\..\Datadog.MAUI.Symbols\Datadog.MAUI.Symbols.csproj" ReferenceOutputAssembly="false" />
+		<!-- Symbols project is NOT referenced - must be built manually via scripts/test-symbols-local.sh -->
 	</ItemGroup>
 
-	<!-- Load the Symbols MSBuild task from local build output -->
-	<UsingTask TaskName="Datadog.MAUI.Symbols.UploadSymbolsTask"
-	           AssemblyFile="$(MSBuildProjectDirectory)\..\..\Datadog.MAUI.Symbols\bin\$(Configuration)\netstandard2.0\Datadog.MAUI.Symbols.dll" />
+	<!-- Load the Symbols MSBuild task from local build output (always from Release) -->
+	<!-- IMPORTANT: Run scripts/test-symbols-local.sh before building to ensure this DLL exists -->
+	<UsingTask TaskName="Datadog.MAUI.Symbols.UploadSymbolsTask" AssemblyFile="$(MSBuildProjectDirectory)\..\..\Datadog.MAUI.Symbols\bin\Release\netstandard2.0\Datadog.MAUI.Symbols.dll" />
 
 	<!-- Import the Symbols upload target (skips the UsingTask since we already loaded it) -->
 	<Import Project="..\..\Datadog.MAUI.Symbols\build\Datadog.MAUI.Symbols.targets" />
@@ -157,11 +176,7 @@
 		<Message Text="  Application ID: $(AndroidApplicationId)" Importance="high" Condition="'$(AndroidApplicationId)' != ''" />
 		<Message Text="⚠️  No Android RUM credentials found! App will use placeholder values." Importance="high" Condition="'$(AndroidClientToken)' == ''" />
 
-		<WriteLinesToFile
-			File="$(MSBuildProjectDirectory)/Config/datadog-rum-android.config"
-			Lines="DD_RUM_ANDROID_CLIENT_TOKEN=$(AndroidClientToken);DD_RUM_ANDROID_APPLICATION_ID=$(AndroidApplicationId)"
-			Overwrite="true"
-			Condition="'$(AndroidClientToken)' != ''" />
+		<WriteLinesToFile File="$(MSBuildProjectDirectory)/Config/datadog-rum-android.config" Lines="DD_RUM_ANDROID_CLIENT_TOKEN=$(AndroidClientToken);DD_RUM_ANDROID_APPLICATION_ID=$(AndroidApplicationId)" Overwrite="true" Condition="'$(AndroidClientToken)' != ''" />
 	</Target>
 
 	<!-- Generate iOS config file before build -->
@@ -171,11 +186,7 @@
 		<Message Text="  Application ID: $(IosApplicationId)" Importance="high" Condition="'$(IosApplicationId)' != ''" />
 		<Message Text="⚠️  No iOS RUM credentials found! App will use placeholder values." Importance="high" Condition="'$(IosClientToken)' == ''" />
 
-		<WriteLinesToFile
-			File="$(MSBuildProjectDirectory)/Config/datadog-rum-ios.config"
-			Lines="DD_RUM_IOS_CLIENT_TOKEN=$(IosClientToken);DD_RUM_IOS_APPLICATION_ID=$(IosApplicationId)"
-			Overwrite="true"
-			Condition="'$(IosClientToken)' != ''" />
+		<WriteLinesToFile File="$(MSBuildProjectDirectory)/Config/datadog-rum-ios.config" Lines="DD_RUM_IOS_CLIENT_TOKEN=$(IosClientToken);DD_RUM_IOS_APPLICATION_ID=$(IosApplicationId)" Overwrite="true" Condition="'$(IosClientToken)' != ''" />
 	</Target>
 
 	<!-- Embed config files as resources -->

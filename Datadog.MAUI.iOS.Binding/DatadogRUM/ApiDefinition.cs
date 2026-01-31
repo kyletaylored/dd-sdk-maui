@@ -1,5 +1,6 @@
 using Foundation;
 using ObjCRuntime;
+using UIKit;
 
 namespace Datadog.iOS.RUM
 {
@@ -220,5 +221,61 @@ namespace Datadog.iOS.RUM
 		/// </summary>
 		[Export("trackMemoryWarnings")]
 		bool TrackMemoryWarnings { get; set; }
+
+		/// <summary>
+		/// Predicate for tracking UIKit view controllers automatically.
+		/// Set to DDDefaultUIKitRUMViewsPredicate to enable automatic view tracking.
+		/// </summary>
+		[NullAllowed, Export("uiKitViewsPredicate", ArgumentSemantic.Strong)]
+		NSObject UiKitViewsPredicate { get; set; }
+
+		/// <summary>
+		/// Predicate for tracking UIKit actions (taps, swipes, etc.) automatically.
+		/// Set to DDDefaultUIKitRUMActionsPredicate to enable automatic action tracking.
+		/// </summary>
+		[NullAllowed, Export("uiKitActionsPredicate", ArgumentSemantic.Strong)]
+		NSObject UiKitActionsPredicate { get; set; }
+	}
+
+	/// <summary>
+	/// Default predicate that tracks all UIKit view controllers.
+	/// </summary>
+	[BaseType(typeof(NSObject))]
+	interface DDDefaultUIKitRUMViewsPredicate
+	{
+	}
+
+	/// <summary>
+	/// Default predicate that tracks all UIKit actions (taps, etc.).
+	/// </summary>
+	[BaseType(typeof(NSObject))]
+	interface DDDefaultUIKitRUMActionsPredicate
+	{
+	}
+
+	/// <summary>
+	/// Represents a RUM view to be tracked.
+	/// </summary>
+	[BaseType(typeof(NSObject))]
+	interface DDRUMView
+	{
+		[Export("name")]
+		string Name { get; }
+
+		[Export("attributes")]
+		NSDictionary Attributes { get; }
+	}
+
+	/// <summary>
+	/// Represents a RUM action to be tracked.
+	/// </summary>
+	[BaseType(typeof(NSObject))]
+	interface DDRUMAction
+	{
+		[Export("name")]
+		string Name { get; }
+
+		[Export("attributes")]
+		NSDictionary Attributes { get; }
 	}
 }

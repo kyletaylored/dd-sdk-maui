@@ -5,9 +5,9 @@ namespace Datadog.Maui.Tracing;
 
 public static partial class Tracer
 {
-    private static OTTracer? _nativeTracer;
+    private static DDTracer? _nativeTracer;
 
-    private static OTTracer NativeTracer
+    private static DDTracer NativeTracer
     {
         get
         {

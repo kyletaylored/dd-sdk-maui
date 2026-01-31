@@ -1,5 +1,5 @@
 using Android.Webkit;
-using Com.Datadog.Android.Webview;
+using Datadog.Android.WebView;
 using Microsoft.Maui.Handlers;
 using Microsoft.Maui.Platform;
 using AWebView = Android.Webkit.WebView;

@@ -304,42 +304,42 @@ namespace Datadog.iOS.Trace
 	interface DDTracer : OTTracer
 	{
 		// +(id<OTTracer> _Nonnull)shared __attribute__((warn_unused_result("")));
+		// Note: Returns DDTracer (concrete type) not OTTracer (protocol)
 		[Static]
 		[Export ("shared")]
-		
-		OTTracer Shared { get; }
+		DDTracer Shared { get; }
 
 		// -(id<OTSpan> _Nonnull)startSpan:(NSString * _Nonnull)operationName __attribute__((warn_unused_result("")));
 		[Export ("startSpan:")]
-		OTSpan StartSpan (string operationName);
+		new OTSpan StartSpan (string operationName);
 
 		// -(id<OTSpan> _Nonnull)startSpan:(NSString * _Nonnull)operationName tags:(NSDictionary * _Nullable)tags __attribute__((warn_unused_result("")));
 		[Export ("startSpan:tags:")]
-		OTSpan StartSpan (string operationName, [NullAllowed] NSDictionary tags);
+		new OTSpan StartSpan (string operationName, [NullAllowed] NSDictionary tags);
 
 		// -(id<OTSpan> _Nonnull)startSpan:(NSString * _Nonnull)operationName childOf:(id<OTSpanContext> _Nullable)parent __attribute__((warn_unused_result("")));
 		[Export ("startSpan:childOf:")]
-		OTSpan StartSpan (string operationName, [NullAllowed] OTSpanContext parent);
+		new OTSpan StartSpan (string operationName, [NullAllowed] OTSpanContext parent);
 
 		// -(id<OTSpan> _Nonnull)startSpan:(NSString * _Nonnull)operationName childOf:(id<OTSpanContext> _Nullable)parent tags:(NSDictionary * _Nullable)tags __attribute__((warn_unused_result("")));
 		[Export ("startSpan:childOf:tags:")]
-		OTSpan StartSpan (string operationName, [NullAllowed] OTSpanContext parent, [NullAllowed] NSDictionary tags);
+		new OTSpan StartSpan (string operationName, [NullAllowed] OTSpanContext parent, [NullAllowed] NSDictionary tags);
 
 		// -(id<OTSpan> _Nonnull)startSpan:(NSString * _Nonnull)operationName childOf:(id<OTSpanContext> _Nullable)parent tags:(NSDictionary * _Nullable)tags startTime:(NSDate * _Nullable)startTime __attribute__((warn_unused_result("")));
 		[Export ("startSpan:childOf:tags:startTime:")]
-		OTSpan StartSpan (string operationName, [NullAllowed] OTSpanContext parent, [NullAllowed] NSDictionary tags, [NullAllowed] NSDate startTime);
+		new OTSpan StartSpan (string operationName, [NullAllowed] OTSpanContext parent, [NullAllowed] NSDictionary tags, [NullAllowed] NSDate startTime);
 
 		// -(id<OTSpan> _Nonnull)startRootSpan:(NSString * _Nonnull)operationName tags:(NSDictionary * _Nullable)tags startTime:(NSDate * _Nullable)startTime customSampleRate:(NSNumber * _Nullable)customSampleRate __attribute__((warn_unused_result("")));
 		[Export ("startRootSpan:tags:startTime:customSampleRate:")]
-		OTSpan StartRootSpan (string operationName, [NullAllowed] NSDictionary tags, [NullAllowed] NSDate startTime, [NullAllowed] NSNumber customSampleRate);
+		new OTSpan StartRootSpan (string operationName, [NullAllowed] NSDictionary tags, [NullAllowed] NSDate startTime, [NullAllowed] NSNumber customSampleRate);
 
 		// -(BOOL)inject:(id<OTSpanContext> _Nonnull)spanContext format:(NSString * _Nonnull)format carrier:(id _Nonnull)carrier error:(NSError * _Nullable * _Nullable)error;
 		[Export ("inject:format:carrier:error:")]
-		bool Inject (OTSpanContext spanContext, string format, NSObject carrier, [NullAllowed] out NSError error);
+		new bool Inject (OTSpanContext spanContext, string format, NSObject carrier, [NullAllowed] out NSError error);
 
 		// -(BOOL)extractWithFormat:(NSString * _Nonnull)format carrier:(id _Nonnull)carrier error:(NSError * _Nullable * _Nullable)error;
 		[Export ("extractWithFormat:carrier:error:")]
-		bool ExtractWithFormat (string format, NSObject carrier, [NullAllowed] out NSError error);
+		new bool ExtractWithFormat (string format, NSObject carrier, [NullAllowed] out NSError error);
 	}
 
 	// @interface DDW3CHTTPHeadersWriter : NSObject

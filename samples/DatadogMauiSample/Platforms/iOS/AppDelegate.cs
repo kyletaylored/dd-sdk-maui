@@ -220,6 +220,11 @@ public class AppDelegate : MauiUIApplicationDelegate
             rumConfiguration.VitalsUpdateFrequency = DDRUMVitalsFrequency.Frequent;
             rumConfiguration.SessionSampleRate = 100.0f;
 
+            // Enable automatic UIKit tracking for native view controllers and actions
+            rumConfiguration.UiKitViewsPredicate = new DDDefaultUIKitRUMViewsPredicate();
+            rumConfiguration.UiKitActionsPredicate = new DDDefaultUIKitRUMActionsPredicate();
+            System.Diagnostics.Debug.WriteLine("[Datadog] Enabled automatic UIKit view and action tracking");
+
             DDRUM.EnableWith(rumConfiguration);
             System.Diagnostics.Debug.WriteLine("[Datadog] RUM enabled");
 

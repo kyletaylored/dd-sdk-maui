@@ -1,15 +1,15 @@
 using Android.App;
 using Android.Runtime;
 using Android.Util;
-using Com.Datadog.Android;
-using Com.Datadog.Android.Core.Configuration;
-using Com.Datadog.Android.Log;
-using Com.Datadog.Android.Ndk;
-using Com.Datadog.Android.Privacy;
-using Com.Datadog.Android.Rum;
-using Com.Datadog.Android.Sessionreplay;
-using Com.Datadog.Android.Trace;
-using Com.Datadog.Android.Webview;
+using Datadog.Android.Core;
+using Datadog.Android.Core.Configuration;
+using Datadog.Android.Logs;
+using Datadog.Android.NDK;
+using Datadog.Android.Privacy;
+using Datadog.Android.RUM;
+using Datadog.Android.SessionReplay;
+using Datadog.Android.Trace;
+using Datadog.Android.WebView;
 using DatadogMauiSample.Config;
 
 namespace DatadogMauiSample;
@@ -66,22 +66,22 @@ public class MainApplication : MauiApplication
                 DatadogConfig.ServiceName
             )
             .SetFirstPartyHosts(DatadogConfig.FirstPartyHosts)
-            .SetBatchSize(BatchSize.Small)
-            .SetUploadFrequency(UploadFrequency.Frequent)
+            .SetBatchSize(BatchSize.Small!)
+            .SetUploadFrequency(UploadFrequency.Frequent!)
             .Build();
 
             // Note: In Android SDK v3, site configuration is not exposed via Configuration.Builder
             // The site is typically set via environment variables or other configuration methods
 
             // Initialize Datadog SDK
-            Com.Datadog.Android.Datadog.Initialize(this, config, TrackingConsent.Granted);
+            Datadog.Android.Datadog.Initialize(this, config, TrackingConsent.Granted!);
 
             Console.WriteLine("[Datadog] Core SDK initialized");
 
             // Set verbosity level for debugging
             if (DatadogConfig.VerboseLogging)
             {
-                Com.Datadog.Android.Datadog.Verbosity = (int)LogPriority.Verbose;
+                Datadog.Android.Datadog.Verbosity = (int)LogPriority.Verbose;
             }
 
             // Enable Logs
@@ -125,12 +125,12 @@ public class MainApplication : MauiApplication
                 var sessionReplayConfig = new SessionReplayConfiguration.Builder(
                     DatadogConfig.SessionReplaySampleRate
                 )
-                .SetTextAndInputPrivacy(TextAndInputPrivacy.MaskSensitiveInputs)
-                .SetImagePrivacy(ImagePrivacy.MaskNone)
-                .SetTouchPrivacy(TouchPrivacy.Show)
+                .SetTextAndInputPrivacy(TextAndInputPrivacy.MaskSensitiveInputs!)
+                .SetImagePrivacy(ImagePrivacy.MaskNone!)
+                .SetTouchPrivacy(TouchPrivacy.Show!)
                 .Build();
 
-                SessionReplay.Enable(sessionReplayConfig, Com.Datadog.Android.Datadog.Instance);
+                SessionReplay.Enable(sessionReplayConfig, Datadog.Android.Datadog.Instance);
                 Console.WriteLine("[Datadog] Session Replay enabled");
             }
             catch (Exception ex)
@@ -142,7 +142,7 @@ public class MainApplication : MauiApplication
             try
             {
                 var traceConfig = new TraceConfiguration.Builder().Build();
-                Trace.Enable(traceConfig, Com.Datadog.Android.Datadog.Instance);
+                Trace.Enable(traceConfig, Datadog.Android.Datadog.Instance);
                 Console.WriteLine("[Datadog] APM Tracing enabled");
 
                 // Note: In SDK v3.x, the global tracer is automatically registered when Trace.Enable() is called.

@@ -12,12 +12,12 @@ public static partial class Logs
     private static partial void PlatformAddAttribute(string key, object value)
     {
         var javaValue = value as Java.Lang.Object ?? new Java.Lang.String(value?.ToString() ?? "");
-        Com.Datadog.Android.Log.Logs.AddAttribute(key, javaValue);
+        global::Datadog.Android.Logs.Logs.AddAttribute(key, javaValue);
     }
 
     private static partial void PlatformRemoveAttribute(string key)
     {
-        Com.Datadog.Android.Log.Logs.RemoveAttribute(key);
+        global::Datadog.Android.Logs.Logs.RemoveAttribute(key);
     }
 
     private static partial void PlatformAddTag(string key, string value)

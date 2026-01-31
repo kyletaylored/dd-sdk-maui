@@ -18,14 +18,14 @@ internal class DatadogSdkImplementation : IDatadogSdk
         //
         // Example pseudo-code:
         //
-        // var credentials = new Com.Datadog.Android.Core.Configuration.Credentials(
+        // var credentials = new Datadog.Android.Core.Configuration.Credentials(
         //     configuration.ClientToken,
         //     configuration.Environment,
         //     configuration.ApplicationId,
         //     null
         // );
         //
-        // var config = new Com.Datadog.Android.Core.Configuration.Builder(
+        // var config = new Datadog.Android.Core.Configuration.Builder(
         //     configuration.ClientToken,
         //     configuration.Environment,
         //     configuration.ApplicationId
@@ -34,7 +34,7 @@ internal class DatadogSdkImplementation : IDatadogSdk
         //     .SetServiceName(configuration.ServiceName)
         //     .Build();
         //
-        // Com.Datadog.Android.Datadog.Initialize(
+        // Datadog.Android.Datadog.Initialize(
         //     Android.App.Application.Context,
         //     credentials,
         //     config
@@ -42,7 +42,7 @@ internal class DatadogSdkImplementation : IDatadogSdk
         //
         // if (configuration.EnableCrashReporting)
         // {
-        //     Com.Datadog.Android.Rum.GlobalRum.RegisterIfAbsent(...);
+        //     Datadog.Android.Rum.GlobalRum.RegisterIfAbsent(...);
         // }
 
         _isInitialized = true;
@@ -53,7 +53,7 @@ internal class DatadogSdkImplementation : IDatadogSdk
         EnsureInitialized();
 
         // TODO: Implement using native binding
-        // Com.Datadog.Android.Datadog.SetUserInfo(id, name, email, null);
+        // Datadog.Android.Datadog.SetUserInfo(id, name, email, null);
     }
 
     public void ClearUser()
@@ -61,7 +61,7 @@ internal class DatadogSdkImplementation : IDatadogSdk
         EnsureInitialized();
 
         // TODO: Implement using native binding
-        // Com.Datadog.Android.Datadog.SetUserInfo(null, null, null, null);
+        // Datadog.Android.Datadog.SetUserInfo(null, null, null, null);
     }
 
     public void AddAttribute(string key, object value)
@@ -69,7 +69,7 @@ internal class DatadogSdkImplementation : IDatadogSdk
         EnsureInitialized();
 
         // TODO: Implement using native binding
-        // Com.Datadog.Android.Datadog.AddRumGlobalAttribute(key, value);
+        // Datadog.Android.Datadog.AddRumGlobalAttribute(key, value);
     }
 
     public void RemoveAttribute(string key)
@@ -77,7 +77,7 @@ internal class DatadogSdkImplementation : IDatadogSdk
         EnsureInitialized();
 
         // TODO: Implement using native binding
-        // Com.Datadog.Android.Datadog.RemoveRumGlobalAttribute(key);
+        // Datadog.Android.Datadog.RemoveRumGlobalAttribute(key);
     }
 
     private void EnsureInitialized()

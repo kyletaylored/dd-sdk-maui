@@ -18,6 +18,32 @@ public partial class ErrorTestingPage : ContentPage
         _logger = Datadog.Maui.Logs.Logs.CreateLogger("ErrorTestingPage");
     }
 
+    /// <summary>
+    /// Called when the page appears.
+    /// </summary>
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+
+        // Start RUM view tracking for error testing page
+        Datadog.Maui.Rum.Rum.StartView("error_testing", "Error Testing Page", new Dictionary<string, object>
+        {
+            ["page_type"] = "testing",
+            ["features"] = new[] { "error_tracking", "crash_reporting" }
+        });
+    }
+
+    /// <summary>
+    /// Called when the page disappears.
+    /// </summary>
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+
+        // Stop RUM view tracking
+        Datadog.Maui.Rum.Rum.StopView("error_testing");
+    }
+
     #region Exception Errors
 
     private void OnNullReferenceException(object sender, EventArgs e)

@@ -1,5 +1,5 @@
 using Datadog.Maui.Logs;
-using Com.Datadog.Android.Log;
+using Datadog.Android.Logs;
 
 namespace Datadog.Maui.Platforms.Android;
 

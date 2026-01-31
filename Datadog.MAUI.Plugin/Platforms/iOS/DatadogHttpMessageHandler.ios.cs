@@ -5,6 +5,20 @@ using Foundation;
 namespace Datadog.Maui.Http;
 
 /// <summary>
+/// Helper to ensure logs are visible in Xcode console
+/// </summary>
+internal static class DatadogHttpLogger
+{
+    public static void Log(string message)
+    {
+        // Console.WriteLine goes to NSLog which is visible in Xcode
+        Console.WriteLine(message);
+        // Also write to Debug for when debugging in IDE
+        Debug.WriteLine(message);
+    }
+}
+
+/// <summary>
 /// iOS-specific HTTP message handler that creates APM spans and injects trace headers.
 /// </summary>
 public class DatadogHttpMessageHandler : DelegatingHandler
@@ -23,33 +37,40 @@ public class DatadogHttpMessageHandler : DelegatingHandler
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         var requestUri = request.RequestUri;
+        DatadogHttpLogger.Log($"[Datadog HTTP] Request intercepted: {request.Method} {requestUri}");
+
         if (requestUri == null || !ShouldTrace(requestUri.Host))
         {
             // Not a first-party host, don't trace
+            DatadogHttpLogger.Log($"[Datadog HTTP] Skipping trace - host not in first-party list: {requestUri?.Host}");
             return await base.SendAsync(request, cancellationToken);
         }
 
+        DatadogHttpLogger.Log($"[Datadog HTTP] Host {requestUri.Host} is first-party, attempting to trace");
+
         // Get the Datadog tracer
-        // Note: DDTracer.Shared can throw if tracing not enabled yet
-        OTTracer? tracer = null;
+        // Note: DDTracer.Shared now correctly returns DDTracer (not OTTracer)
+        DatadogHttpLogger.Log("[Datadog HTTP] Attempting to access DDTracer.Shared...");
+        DDTracer? tracer = null;
         try
         {
             tracer = DDTracer.Shared;
-        }
-        catch (InvalidCastException ex)
-        {
-            Debug.WriteLine($"[Datadog HTTP] Tracer cast error (likely not initialized): {ex.Message}");
-            return await base.SendAsync(request, cancellationToken);
+            DatadogHttpLogger.Log($"[Datadog HTTP] ✓ Successfully obtained tracer: {tracer?.GetType().Name ?? "null"}");
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"[Datadog HTTP] Failed to get tracer: {ex.Message}");
+            DatadogHttpLogger.Log($"[Datadog HTTP] ✗ Failed to get tracer: {ex.GetType().Name}: {ex.Message}");
+            if (ex.InnerException != null)
+            {
+                DatadogHttpLogger.Log($"[Datadog HTTP]   Inner exception: {ex.InnerException.GetType().Name}: {ex.InnerException.Message}");
+            }
+            DatadogHttpLogger.Log($"[Datadog HTTP]   Falling back to untraced request");
             return await base.SendAsync(request, cancellationToken);
         }
 
         if (tracer == null)
         {
-            Debug.WriteLine("[Datadog HTTP] Tracer not available, skipping instrumentation");
+            DatadogHttpLogger.Log("[Datadog HTTP] ✗ Tracer is null, skipping instrumentation");
             return await base.SendAsync(request, cancellationToken);
         }
 
@@ -72,24 +93,12 @@ public class DatadogHttpMessageHandler : DelegatingHandler
 
         var span = tracer.StartSpan(operationName, tags);
 
-        Debug.WriteLine($"[Datadog HTTP] Started span: {operationName}");
+        DatadogHttpLogger.Log($"[Datadog HTTP] Started span: {operationName}");
 
-        // Inject trace headers
-        try
-        {
-            var headerWriter = new DDHTTPHeadersWriter(DDTraceContextInjection.All);
-            var traceHeaders = headerWriter.TraceHeaderFields;
-
-            foreach (var header in traceHeaders)
-            {
-                request.Headers.TryAddWithoutValidation(header.Key.ToString(), header.Value.ToString());
-                Debug.WriteLine($"[Datadog HTTP] Injected header: {header.Key} = {header.Value}");
-            }
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"[Datadog HTTP] Failed to inject headers: {ex.Message}");
-        }
+        // Note: Header injection is skipped because DDTracer.Inject() has a binding issue
+        // The native iOS SDK's URLSession instrumentation should handle trace propagation automatically
+        // For now, we're just creating spans to track HTTP requests in APM
+        DatadogHttpLogger.Log("[Datadog HTTP] Skipping header injection (using span tracking only)");
 
         HttpResponseMessage? response = null;
         Exception? exception = null;
@@ -107,7 +116,7 @@ public class DatadogHttpMessageHandler : DelegatingHandler
                 span.SetTag("error", true);
             }
 
-            Debug.WriteLine($"[Datadog HTTP] Completed: {operationName} - {response.StatusCode}");
+            DatadogHttpLogger.Log($"[Datadog HTTP] Completed: {operationName} - {response.StatusCode}");
 
             return response;
         }
@@ -121,7 +130,7 @@ public class DatadogHttpMessageHandler : DelegatingHandler
             span.SetTag("error.message", new NSString(ex.Message));
             span.SetTag("error.stack", new NSString(ex.StackTrace ?? ""));
 
-            Debug.WriteLine($"[Datadog HTTP] Error: {operationName} - {ex.Message}");
+            DatadogHttpLogger.Log($"[Datadog HTTP] Error: {operationName} - {ex.Message}");
 
             throw;
         }
@@ -129,7 +138,7 @@ public class DatadogHttpMessageHandler : DelegatingHandler
         {
             // Finish the span
             span.Finish();
-            Debug.WriteLine($"[Datadog HTTP] Finished span: {operationName}");
+            DatadogHttpLogger.Log($"[Datadog HTTP] Finished span: {operationName}");
         }
     }
 

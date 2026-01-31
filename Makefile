@@ -1,6 +1,7 @@
 .PHONY: help build-android build-ios build-plugin build pack clean clean-all test status check-prereqs dev-setup \
         sample-ios sample-android sample-build-ios sample-build-android run-ios run-android \
-        download-ios-frameworks sample-logs-android sample-logs-clear upload-symbols restore
+        download-ios-frameworks sample-logs-android sample-logs-clear upload-symbols restore \
+        publish-android publish-ios publish-all install-android run-android-release install-ios run-ios-release
 
 # Default target
 .DEFAULT_GOAL := help
@@ -252,7 +253,224 @@ sample-logs-clear: ## Clear Android logs
 		echo "$(RED)❌ adb not found in PATH$(NC)"; \
 	fi
 
-##@ Symbol Upload
+##@ Symbol Upload & Release Publishing
+
+publish-android: ## Publish Android sample in Release mode with symbols (APK for testing)
+	@echo "$(BLUE)Publishing Android sample with symbols...$(NC)"
+	@if [ ! -f samples/DatadogMauiSample/.env ]; then \
+		echo "$(RED)❌ .env file not found in samples/DatadogMauiSample/$(NC)"; \
+		echo "$(YELLOW)Create .env file from .env.example:$(NC)"; \
+		echo "  cp samples/DatadogMauiSample/.env.example samples/DatadogMauiSample/.env"; \
+		exit 1; \
+	fi
+	@echo "$(YELLOW)Building Symbols package in Release...$(NC)"
+	@dotnet build Datadog.MAUI.Symbols/Datadog.MAUI.Symbols.csproj -c Release --nologo -v q
+	@set -a; . ./samples/DatadogMauiSample/.env; set +a; \
+	if [ -z "$$DD_RUM_ANDROID_CLIENT_TOKEN" ] || [ -z "$$DD_RUM_ANDROID_APPLICATION_ID" ]; then \
+		echo "$(RED)❌ Android credentials not set in .env file$(NC)"; \
+		exit 1; \
+	fi; \
+	cd samples/DatadogMauiSample && \
+		dotnet publish -f net9.0-android -c Release -v normal \
+			-p:AndroidClientToken="$$DD_RUM_ANDROID_CLIENT_TOKEN" \
+			-p:AndroidApplicationId="$$DD_RUM_ANDROID_APPLICATION_ID" \
+			-p:AndroidPackageFormat=apk \
+			-p:DatadogApiKey="$$DD_API_KEY"
+	@echo "$(GREEN)✓ Android app published with symbols$(NC)"
+	@echo "$(YELLOW)Output: samples/DatadogMauiSample/bin/Release/net9.0-android/publish/$(NC)"
+	@MAPPING_FILE=$$(find samples/DatadogMauiSample -name "mapping.txt" -type f 2>/dev/null | head -1); \
+	APK_FILE=$$(find samples/DatadogMauiSample/bin/Release/net9.0-android -name "*.apk" -type f 2>/dev/null | head -1); \
+	if [ -n "$$MAPPING_FILE" ]; then \
+		echo "$(GREEN)✓ Mapping file: $$MAPPING_FILE$(NC)"; \
+	else \
+		echo "$(YELLOW)⚠️  No mapping.txt found$(NC)"; \
+	fi; \
+	if [ -n "$$APK_FILE" ]; then \
+		echo "$(GREEN)✓ APK file: $$APK_FILE$(NC)"; \
+		echo "$(YELLOW)Install with: make install-android$(NC)"; \
+	fi
+
+publish-android-staging: ## Publish Android app with 'staging' flavor for symbol upload
+	@echo "$(BLUE)Publishing Android app with staging flavor...$(NC)"
+	@DD_BUILD_FLAVOR=staging $(MAKE) publish-android
+
+publish-android-production: ## Publish Android app with 'production' flavor for symbol upload
+	@echo "$(BLUE)Publishing Android app with production flavor...$(NC)"
+	@DD_BUILD_FLAVOR=production $(MAKE) publish-android
+
+publish-android-dev: ## Publish Android app with developer-specific flavor (e.g., dev-kyle)
+	@if [ -z "$$USER" ]; then \
+		echo "$(RED)❌ USER environment variable not set$(NC)"; \
+		exit 1; \
+	fi
+	@echo "$(BLUE)Publishing Android app with dev-$$USER flavor...$(NC)"
+	@DD_BUILD_FLAVOR=dev-$$USER $(MAKE) publish-android
+
+install-android: ## Install published Android APK to connected device/emulator
+	@echo "$(BLUE)Installing Android APK...$(NC)"
+	@APK_FILE=$$(find samples/DatadogMauiSample/bin/Release/net9.0-android -name "*-Signed.apk" -type f 2>/dev/null | head -1); \
+	if [ -z "$$APK_FILE" ]; then \
+		echo "$(RED)❌ No APK file found. Run 'make publish-android' first$(NC)"; \
+		exit 1; \
+	fi; \
+	if ! command -v adb >/dev/null 2>&1; then \
+		echo "$(RED)❌ adb not found in PATH$(NC)"; \
+		exit 1; \
+	fi; \
+	echo "$(YELLOW)Installing $$APK_FILE$(NC)"; \
+	adb install -r "$$APK_FILE" && \
+	echo "$(GREEN)✓ APK installed$(NC)" && \
+	echo "$(YELLOW)Launch with: adb shell am start -n com.datadog.datadog_maui_shopist.demo/crc64f2aa0ed48bd5d29c.MainActivity$(NC)"
+
+run-android-release: ## Install and run published Android APK
+	@echo "$(BLUE)Installing and running Android APK...$(NC)"
+	@APK_FILE=$$(find samples/DatadogMauiSample/bin/Release/net9.0-android -name "*-Signed.apk" -type f 2>/dev/null | head -1); \
+	if [ -z "$$APK_FILE" ]; then \
+		echo "$(RED)❌ No APK file found. Run 'make publish-android' first$(NC)"; \
+		exit 1; \
+	fi; \
+	if ! command -v adb >/dev/null 2>&1; then \
+		echo "$(RED)❌ adb not found in PATH$(NC)"; \
+		exit 1; \
+	fi; \
+	echo "$(YELLOW)Installing $$APK_FILE$(NC)"; \
+	adb install -r "$$APK_FILE" && \
+	echo "$(GREEN)✓ APK installed$(NC)" && \
+	echo "$(YELLOW)Launching app...$(NC)" && \
+	adb shell am start -n com.datadog.datadog_maui_shopist.demo/crc64f2aa0ed48bd5d29c.MainActivity && \
+	echo "$(GREEN)✓ App launched$(NC)"
+
+test-ios-symbols: ## Test iOS symbol upload without full publish (macOS only)
+	@echo "$(BLUE)Testing iOS symbol upload...$(NC)"
+	@if [ "$$(uname)" != "Darwin" ]; then \
+		echo "$(RED)Error: iOS operations require macOS$(NC)"; \
+		exit 1; \
+	fi
+	@if [ ! -f samples/DatadogMauiSample/.env ]; then \
+		echo "$(RED)❌ .env file not found in samples/DatadogMauiSample/$(NC)"; \
+		echo "$(YELLOW)Create .env file from .env.example:$(NC)"; \
+		echo "  cp samples/DatadogMauiSample/.env.example samples/DatadogMauiSample/.env"; \
+		exit 1; \
+	fi
+	@echo "$(YELLOW)Building Symbols package in Release...$(NC)"
+	@dotnet build Datadog.MAUI.Symbols/Datadog.MAUI.Symbols.csproj -c Release --nologo -v q
+	@set -a; . ./samples/DatadogMauiSample/.env; set +a; \
+	if [ -z "$$DD_RUM_IOS_CLIENT_TOKEN" ] || [ -z "$$DD_RUM_IOS_APPLICATION_ID" ]; then \
+		echo "$(RED)❌ iOS credentials not set in .env file$(NC)"; \
+		exit 1; \
+	fi; \
+	echo "$(YELLOW)Building iOS app (without provisioning)...$(NC)"; \
+	cd samples/DatadogMauiSample && \
+		dotnet build -f net9.0-ios -c Release -v normal \
+			-p:IosClientToken="$$DD_RUM_IOS_CLIENT_TOKEN" \
+			-p:IosApplicationId="$$DD_RUM_IOS_APPLICATION_ID" \
+			-p:CreatePackage=false \
+			-p:BuildIpa=false
+	@echo "$(GREEN)✓ iOS app built$(NC)"
+	@DSYM_DIR=$$(find samples/DatadogMauiSample/bin/Release/net9.0-ios -type d -name "*.app.dSYM" 2>/dev/null | head -1); \
+	if [ -z "$$DSYM_DIR" ]; then \
+		echo "$(RED)❌ No .dSYM folder found$(NC)"; \
+		exit 1; \
+	fi; \
+	echo "$(GREEN)✓ dSYM folder found: $$DSYM_DIR$(NC)"; \
+	set -a; . ./samples/DatadogMauiSample/.env; set +a; \
+	echo "$(YELLOW)Manually uploading dSYM files...$(NC)"; \
+	npx @datadog/datadog-ci flutter-symbols upload \
+		--service "datadog-maui-ios" \
+		--dart-symbols-location "$$DSYM_DIR" \
+		--version "1.0" \
+		--flavor "release" \
+		--site "datadoghq.com" \
+		--dry-run
+	@echo "$(GREEN)✓ Symbol upload test complete$(NC)"
+
+publish-ios: ## Publish iOS sample in Release mode with symbols (requires provisioning) (macOS only)
+	@echo "$(BLUE)Publishing iOS sample with symbols...$(NC)"
+	@if [ "$$(uname)" != "Darwin" ]; then \
+		echo "$(RED)Error: iOS publish requires macOS$(NC)"; \
+		exit 1; \
+	fi
+	@if [ ! -f samples/DatadogMauiSample/.env ]; then \
+		echo "$(RED)❌ .env file not found in samples/DatadogMauiSample/$(NC)"; \
+		echo "$(YELLOW)Create .env file from .env.example:$(NC)"; \
+		echo "  cp samples/DatadogMauiSample/.env.example samples/DatadogMauiSample/.env"; \
+		exit 1; \
+	fi
+	@echo "$(YELLOW)Building Symbols package in Release...$(NC)"
+	@dotnet build Datadog.MAUI.Symbols/Datadog.MAUI.Symbols.csproj -c Release --nologo -v q
+	@set -a; . ./samples/DatadogMauiSample/.env; set +a; \
+	if [ -z "$$DD_RUM_IOS_CLIENT_TOKEN" ] || [ -z "$$DD_RUM_IOS_APPLICATION_ID" ]; then \
+		echo "$(RED)❌ iOS credentials not set in .env file$(NC)"; \
+		exit 1; \
+	fi; \
+	cd samples/DatadogMauiSample && \
+		dotnet publish -f net9.0-ios -c Release -v normal \
+			-p:RuntimeIdentifier=ios-arm64 \
+			-p:IosClientToken="$$DD_RUM_IOS_CLIENT_TOKEN" \
+			-p:IosApplicationId="$$DD_RUM_IOS_APPLICATION_ID" \
+			-p:CodesignKey="Apple Development" \
+			-p:CodesignProvision="Automatic" \
+			-p:DatadogApiKey="$$DD_API_KEY"
+	@echo "$(GREEN)✓ iOS app published with symbols$(NC)"
+	@echo "$(YELLOW)Output: samples/DatadogMauiSample/bin/Release/net9.0-ios/ios-arm64/$(NC)"
+	@DSYM_DIR=$$(find samples/DatadogMauiSample/bin/Release/net9.0-ios -type d -name "*.app.dSYM" 2>/dev/null | head -1); \
+	APP_DIR=$$(find samples/DatadogMauiSample/bin/Release/net9.0-ios/ios-arm64 -type d -name "*.app" 2>/dev/null | head -1); \
+	if [ -n "$$DSYM_DIR" ]; then \
+		echo "$(GREEN)✓ dSYM folder: $$DSYM_DIR$(NC)"; \
+	else \
+		echo "$(YELLOW)⚠️  No .dSYM folder found$(NC)"; \
+	fi; \
+	if [ -n "$$APP_DIR" ]; then \
+		echo "$(GREEN)✓ App bundle: $$APP_DIR$(NC)"; \
+		echo "$(YELLOW)Install with: make install-ios$(NC)"; \
+	fi
+
+install-ios: ## Install published iOS app to running simulator (macOS only)
+	@echo "$(BLUE)Installing iOS app to simulator...$(NC)"
+	@if [ "$$(uname)" != "Darwin" ]; then \
+		echo "$(RED)Error: iOS operations require macOS$(NC)"; \
+		exit 1; \
+	fi
+	@APP_DIR=$$(find samples/DatadogMauiSample/bin/Release/net9.0-ios/iossimulator-arm64 -type d -name "*.app" 2>/dev/null | head -1); \
+	if [ -z "$$APP_DIR" ]; then \
+		echo "$(RED)❌ No .app bundle found. Run 'make publish-ios' first$(NC)"; \
+		exit 1; \
+	fi; \
+	SIMULATOR_ID=$$(xcrun simctl list devices booted | grep -E "iPhone|iPad" | head -1 | sed 's/.*(\([^)]*\)).*/\1/'); \
+	if [ -z "$$SIMULATOR_ID" ]; then \
+		echo "$(RED)❌ No booted simulator found. Start a simulator first$(NC)"; \
+		exit 1; \
+	fi; \
+	echo "$(YELLOW)Installing to simulator $$SIMULATOR_ID$(NC)"; \
+	xcrun simctl install $$SIMULATOR_ID "$$APP_DIR" && \
+	echo "$(GREEN)✓ App installed to simulator$(NC)" && \
+	echo "$(YELLOW)Launch with: make run-ios-release$(NC)"
+
+run-ios-release: ## Install and launch published iOS app in simulator (macOS only)
+	@echo "$(BLUE)Installing and launching iOS app...$(NC)"
+	@if [ "$$(uname)" != "Darwin" ]; then \
+		echo "$(RED)Error: iOS operations require macOS$(NC)"; \
+		exit 1; \
+	fi
+	@APP_DIR=$$(find samples/DatadogMauiSample/bin/Release/net9.0-ios/iossimulator-arm64 -type d -name "*.app" 2>/dev/null | head -1); \
+	if [ -z "$$APP_DIR" ]; then \
+		echo "$(RED)❌ No .app bundle found. Run 'make publish-ios' first$(NC)"; \
+		exit 1; \
+	fi; \
+	SIMULATOR_ID=$$(xcrun simctl list devices booted | grep -E "iPhone|iPad" | head -1 | sed 's/.*(\([^)]*\)).*/\1/'); \
+	if [ -z "$$SIMULATOR_ID" ]; then \
+		echo "$(RED)❌ No booted simulator found. Start a simulator first$(NC)"; \
+		exit 1; \
+	fi; \
+	BUNDLE_ID="com.datadog.datadog-maui-shopist.demo"; \
+	echo "$(YELLOW)Installing to simulator $$SIMULATOR_ID$(NC)"; \
+	xcrun simctl install $$SIMULATOR_ID "$$APP_DIR" && \
+	echo "$(GREEN)✓ App installed$(NC)" && \
+	echo "$(YELLOW)Launching app...$(NC)" && \
+	xcrun simctl launch $$SIMULATOR_ID $$BUNDLE_ID && \
+	echo "$(GREEN)✓ App launched$(NC)"
+
+publish-all: publish-android publish-ios ## Publish both Android and iOS samples with symbols
 
 upload-symbols: ## Upload both Android and iOS symbols to Datadog
 	@echo "$(BLUE)Uploading symbols to Datadog...$(NC)"

@@ -43,11 +43,11 @@ public partial class ProductsPage : ContentPage
         // Set default limit
         LimitPicker.SelectedIndex = 2; // 20
 
-        LoadCategoriesAsync();
-        LoadProductsAsync();
+        _ = LoadCategoriesAsync();
+        _ = LoadProductsAsync();
     }
 
-    private async void LoadCategoriesAsync()
+    private async Task LoadCategoriesAsync()
     {
         try
         {

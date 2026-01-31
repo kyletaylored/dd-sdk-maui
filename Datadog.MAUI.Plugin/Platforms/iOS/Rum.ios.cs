@@ -98,14 +98,37 @@ public static partial class Rum
 
         if (exception != null)
         {
+            // Create NSError with detailed exception information including stack trace
+            var userInfo = new NSMutableDictionary<NSString, NSObject>();
+
+            // Use provided message or exception message
+            var errorMessage = message ?? exception.Message;
+            userInfo[NSError.LocalizedDescriptionKey] = new NSString(errorMessage);
+
+            // Include exception type and full details
+            userInfo[new NSString("ExceptionType")] = new NSString(exception.GetType().FullName ?? exception.GetType().Name);
+            userInfo[new NSString("Message")] = new NSString(exception.Message);
+
+            // Include full stack trace if available
+            if (!string.IsNullOrEmpty(exception.StackTrace))
+            {
+                userInfo[new NSString("StackTrace")] = new NSString(exception.StackTrace);
+            }
+
+            // Include inner exception if present
+            if (exception.InnerException != null)
+            {
+                userInfo[new NSString("InnerException")] = new NSString(exception.InnerException.ToString());
+            }
+
+            // Create NSError with exception type as domain
             var nsError = NSError.FromDomain(
-                new NSString("Exception"),
-                0,
-                NSDictionary<NSString, NSObject>.FromObjectAndKey(
-                    new NSString(exception.ToString()),
-                    NSError.LocalizedDescriptionKey
-                )
+                new NSString(exception.GetType().Name),
+                -1,
+                userInfo
             );
+
+            // Add error using NSError overload
             monitor.AddError(
                 error: nsError,
                 source: errorSource,

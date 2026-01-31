@@ -20,7 +20,7 @@ public class ShopistApiService
     /// </summary>
     public ShopistApiService()
     {
-#if IOS
+#if IOS && FALSE  // Temporarily disabled for testing
         // On iOS, use Datadog's HTTP message handler for automatic span creation and trace header injection
         var datadogHandler = new Datadog.Maui.Http.DatadogHttpMessageHandler(new[] { "fakestoreapi.com" });
         _httpClient = new HttpClient(datadogHandler)
@@ -35,6 +35,9 @@ public class ShopistApiService
         {
             BaseAddress = new Uri(BaseUrl)
         };
+        var msg = "[ShopistAPI] Using plain HttpClient (DatadogHttpMessageHandler disabled for testing)";
+        System.Diagnostics.Debug.WriteLine(msg);
+        Console.WriteLine(msg);
 #endif
         _httpClient.DefaultRequestHeaders.Add("User-Agent", "DatadogMauiSample/1.0");
     }
