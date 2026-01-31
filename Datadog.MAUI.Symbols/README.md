@@ -29,9 +29,66 @@ Or add directly to your `.csproj`:
 <PackageReference Include="Datadog.MAUI.Symbols" Version="1.0.0" />
 ```
 
-## Configuration
+## Quick Start
 
-Configure the plugin using MSBuild properties in your `.csproj` file:
+### Minimal Configuration
+
+The simplest setup requires only API key and service name:
+
+```xml
+<PropertyGroup>
+  <!-- Required: Service Name for both platforms -->
+  <DatadogServiceName>com.company.myapp</DatadogServiceName>
+</PropertyGroup>
+```
+
+Set your API key as an environment variable:
+
+```bash
+export DD_API_KEY=your-datadog-api-key
+dotnet publish -f net9.0-android -c Release
+```
+
+Symbol files will automatically upload using:
+- **Version**: Your app's `ApplicationDisplayVersion` (e.g., `1.0`)
+- **Flavor**: `release` (or `debug` for Debug builds)
+- **Service**: The service name you configured
+
+### Recommended Configuration for Production
+
+For production apps with multiple build variants (production, staging, development):
+
+```xml
+<PropertyGroup>
+  <!-- Platform-specific service names -->
+  <DatadogServiceNameAndroid>com.company.myapp.android</DatadogServiceNameAndroid>
+  <DatadogServiceNameiOS>com.company.myapp.ios</DatadogServiceNameiOS>
+
+  <!-- Datadog site (if not using US1) -->
+  <DatadogSite>datadoghq.com</DatadogSite>
+
+  <!-- Read flavor from environment variable -->
+  <DatadogFlavor Condition="'$(DD_BUILD_FLAVOR)' != ''">$(DD_BUILD_FLAVOR)</DatadogFlavor>
+</PropertyGroup>
+```
+
+Then differentiate builds using the `DD_BUILD_FLAVOR` environment variable:
+
+```bash
+# Production release
+export DD_BUILD_FLAVOR=production
+dotnet publish -f net9.0-android -c Release
+
+# Staging release
+export DD_BUILD_FLAVOR=staging
+dotnet publish -f net9.0-android -c Release
+
+# Developer builds (each dev gets unique symbols)
+export DD_BUILD_FLAVOR=dev-kyle
+dotnet publish -f net9.0-android -c Release
+```
+
+### Complete Configuration Options
 
 ```xml
 <PropertyGroup>
@@ -45,15 +102,20 @@ Configure the plugin using MSBuild properties in your `.csproj` file:
   <DatadogServiceNameAndroid>com.company.app.android</DatadogServiceNameAndroid>
   <DatadogServiceNameiOS>com.company.app.ios</DatadogServiceNameiOS>
 
-  <!-- Optional: App Version (defaults to ApplicationDisplayVersion or 1.0.0) -->
+  <!-- Optional: App Version (defaults to ApplicationDisplayVersion) -->
+  <!-- Note: Should match version reported by RUM SDK for symbolication to work -->
   <DatadogAppVersion>1.2.3</DatadogAppVersion>
 
+  <!-- Optional: Build Flavor/Variant -->
+  <!-- Defaults to "debug" or "release" based on Configuration -->
+  <!-- Read from DD_BUILD_FLAVOR environment variable if set -->
+  <DatadogFlavor Condition="'$(DD_BUILD_FLAVOR)' != ''">$(DD_BUILD_FLAVOR)</DatadogFlavor>
+
   <!-- Optional: Datadog Site (defaults to datadoghq.com) -->
-  <!-- Common values: datadoghq.com, us3.datadoghq.com, us5.datadoghq.com, datadoghq.eu, ap1.datadoghq.com -->
   <DatadogSite>datadoghq.com</DatadogSite>
 
   <!-- Optional: Dry run mode - simulates upload without sending data -->
-  <DatadogDryRun>true</DatadogDryRun>
+  <DatadogDryRun>false</DatadogDryRun>
 
   <!-- Optional: Disable automatic upload entirely -->
   <DatadogUploadEnabled>true</DatadogUploadEnabled>
@@ -71,7 +133,8 @@ Configure the plugin using MSBuild properties in your `.csproj` file:
 | `DatadogServiceName` | Yes* | - | Global service name used for both platforms unless overridden. |
 | `DatadogServiceNameAndroid` | No | - | Android-specific service name. Overrides `DatadogServiceName` for Android builds. |
 | `DatadogServiceNameiOS` | No | - | iOS-specific service name. Overrides `DatadogServiceName` for iOS builds. |
-| `DatadogAppVersion` | No | `ApplicationDisplayVersion` or `1.0.0` | Version string for the uploaded symbols. Must match the version in your RUM configuration. |
+| `DatadogAppVersion` | No | `ApplicationDisplayVersion` or `1.0.0` | Version string for the uploaded symbols. **Important**: Must match the version reported by your RUM SDK for crash symbolication to work. We recommend omitting this property to automatically use `ApplicationDisplayVersion`. |
+| `DatadogFlavor` | No | `debug` or `release` (based on Configuration) | Build flavor/variant. Combined with service and version to create unique symbol upload. Use `DD_BUILD_FLAVOR` environment variable to differentiate builds (e.g., `production`, `staging`, `dev-username`). |
 | `DatadogSite` | No | `datadoghq.com` | Datadog site for your organization. Can also be set via `DD_SITE` environment variable. |
 | `DatadogDryRun` | No | `false` | When `true`, simulates the upload without sending data. Useful for testing. |
 | `DatadogUploadEnabled` | No | `true` | Set to `false` to completely disable symbol uploads. |
@@ -235,12 +298,14 @@ This will simulate the upload and show what would be sent.
 
 ## CI/CD Integration
 
-For CI/CD pipelines, set the API key as an environment variable:
+For CI/CD pipelines, use environment variables to configure the API key and build flavor:
 
 ```yaml
-# GitHub Actions example
-name: Build and Upload Symbols
-on: [push]
+# GitHub Actions example - Production build
+name: Build and Upload Symbols (Production)
+on:
+  push:
+    branches: [main]
 
 jobs:
   build:
@@ -248,6 +313,7 @@ jobs:
     env:
       DD_API_KEY: ${{ secrets.DATADOG_API_KEY }}
       DD_SITE: datadoghq.com
+      DD_BUILD_FLAVOR: production
 
     steps:
       - uses: actions/checkout@v3
@@ -269,6 +335,27 @@ jobs:
         run: dotnet publish -f net9.0-ios -c Release
 ```
 
+For staging builds, use a different flavor:
+
+```yaml
+# GitHub Actions example - Staging build
+name: Build and Upload Symbols (Staging)
+on:
+  push:
+    branches: [develop]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    env:
+      DD_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+      DD_SITE: datadoghq.com
+      DD_BUILD_FLAVOR: staging  # Different flavor for staging
+
+    steps:
+      # ... same as above
+```
+
 ### Disabling Symbol Upload in CI
 
 To disable symbol upload for specific builds:
@@ -281,6 +368,72 @@ dotnet publish -f net9.0-android -c Release
 # Or via command line property
 dotnet publish -f net9.0-android -c Release /p:DatadogUploadEnabled=false
 ```
+
+## Managing Symbol Upload Uniqueness
+
+Datadog identifies symbol files using the combination of `(service, version, flavor)`. Uploads with the same combination are ignored.
+
+**Important**: The version in your symbol upload must match the version reported by your RUM SDK for crash symbolication to work correctly. Therefore, we recommend using the app's actual version (`ApplicationDisplayVersion`) and differentiating builds using the **flavor** parameter.
+
+### Recommended Approach: Use Flavors for Build Variants
+
+The cleanest approach is to use different flavors for different build types while keeping the version consistent with your RUM SDK:
+
+```xml
+<PropertyGroup>
+  <!-- Read flavor from environment variable or use configuration name -->
+  <DatadogFlavor Condition="'$(DD_BUILD_FLAVOR)' != ''">$(DD_BUILD_FLAVOR)</DatadogFlavor>
+  <!-- If not set, DatadogFlavor will default to "debug" or "release" based on Configuration -->
+</PropertyGroup>
+```
+
+Then set the flavor when building:
+
+```bash
+# Production release
+export DD_BUILD_FLAVOR=production
+dotnet publish -f net9.0-android -c Release
+
+# Staging release
+export DD_BUILD_FLAVOR=staging
+dotnet publish -f net9.0-android -c Release
+
+# Development builds (unique per developer)
+export DD_BUILD_FLAVOR=dev-kyle
+dotnet publish -f net9.0-android -c Release
+```
+
+This generates symbol uploads like:
+- Production: `(datadog-maui-android, 1.0, production)`
+- Staging: `(datadog-maui-android, 1.0, staging)`
+- Developer: `(datadog-maui-android, 1.0, dev-kyle)`
+
+**Benefits of the flavor-based approach**:
+- Version automatically matches between RUM SDK and symbol upload (no configuration needed)
+- Clear separation between production, staging, and development builds
+- Multiple developers can work simultaneously without conflicts
+- No runtime version passing required
+- Simple to use with environment variables or CI/CD pipelines
+
+### Alternative: Version with Build Metadata (Not Recommended)
+
+If you absolutely need unique versions for each build, you can append build metadata to the version. However, this approach is **not recommended** because:
+
+- You **must** pass the build-time generated version to your RUM SDK initialization at runtime
+- Requires code changes in your MainActivity/AppDelegate to read and set the version
+- Creates maintenance burden and complexity
+- Easy to misconfigure, breaking crash symbolication
+
+If you still want to use this approach:
+
+```xml
+<PropertyGroup>
+  <BuildTimestamp>$([System.DateTime]::UtcNow.ToString('yyyyMMddHHmmss'))</BuildTimestamp>
+  <DatadogAppVersion>$(ApplicationDisplayVersion).$(BuildTimestamp)</DatadogAppVersion>
+</PropertyGroup>
+```
+
+This generates versions like `1.0.20260130143022`, but **requires passing the same version to the RUM SDK at runtime for symbolication to work**. You'll need to embed this version in your app and configure the RUM SDK accordingly.
 
 ## License
 

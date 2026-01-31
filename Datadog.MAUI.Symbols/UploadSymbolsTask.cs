@@ -59,6 +59,12 @@ namespace Datadog.MAUI.Symbols
         public bool DryRun { get; set; }
 
         /// <summary>
+        /// Optional build flavor/variant (e.g., "release", "debug", "staging").
+        /// Defaults to "release" if not specified.
+        /// </summary>
+        public string? Flavor { get; set; }
+
+        /// <summary>
         /// Executes the symbol upload task.
         /// </summary>
         /// <returns>True if the upload succeeded, false otherwise.</returns>
@@ -72,6 +78,7 @@ namespace Datadog.MAUI.Symbols
             Log.LogMessage(MessageImportance.High, $"[Datadog]   ServiceNameAndroid: {ServiceNameAndroid ?? "(not set)"}");
             Log.LogMessage(MessageImportance.High, $"[Datadog]   ServiceNameIOS: {ServiceNameIOS ?? "(not set)"}");
             Log.LogMessage(MessageImportance.High, $"[Datadog]   DryRun: {DryRun}");
+            Log.LogMessage(MessageImportance.High, $"[Datadog]   ApiKey: {(string.IsNullOrEmpty(ApiKey) ? "(not set)" : "***SET***")}");
 
             // 1. Check if npx is available before doing anything else
             Log.LogMessage(MessageImportance.High, "[Datadog] Checking if npx is available...");
@@ -190,6 +197,11 @@ namespace Datadog.MAUI.Symbols
                 args += " --dry-run";
             }
 
+            if (!string.IsNullOrEmpty(Flavor))
+            {
+                args += $" --flavor \"{Flavor}\"";
+            }
+
             return args;
         }
 
@@ -200,7 +212,7 @@ namespace Datadog.MAUI.Symbols
                 var psi = new ProcessStartInfo
                 {
                     FileName = "npx",
-                    Arguments = $"@datadog/datadog-ci {arguments}",
+                    Arguments = $"--yes @datadog/datadog-ci {arguments}",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
@@ -210,19 +222,20 @@ namespace Datadog.MAUI.Symbols
                 // Set API Key from Property or fall back to environment variable
                 if (!string.IsNullOrEmpty(ApiKey))
                 {
-                    psi.EnvironmentVariables["DD_API_KEY"] = ApiKey;
+                    psi.EnvironmentVariables["DATADOG_API_KEY"] = ApiKey;
                 }
-                else if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DD_API_KEY")))
+                else if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DATADOG_API_KEY")) &&
+                         string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DD_API_KEY")))
                 {
                     // In dry-run mode, set a dummy key to avoid metrics initialization errors
                     if (DryRun)
                     {
-                        psi.EnvironmentVariables["DD_API_KEY"] = "dummy-key-for-dry-run";
+                        psi.EnvironmentVariables["DATADOG_API_KEY"] = "dummy-key-for-dry-run";
                         Log.LogMessage(MessageImportance.High, "[Datadog] Dry-run mode: Using dummy API key.");
                     }
                     else
                     {
-                        Log.LogWarning("[Datadog] DD_API_KEY is not set. Upload may fail if not configured elsewhere.");
+                        Log.LogWarning("[Datadog] DATADOG_API_KEY is not set. Upload may fail if not configured elsewhere.");
                     }
                 }
 
@@ -237,13 +250,22 @@ namespace Datadog.MAUI.Symbols
                 Log.LogMessage(MessageImportance.High, $"[Datadog] ========================================");
                 Log.LogMessage(MessageImportance.High, $"[Datadog]   Service: {serviceName}");
                 Log.LogMessage(MessageImportance.High, $"[Datadog]   Version: {AppVersion}");
+                Log.LogMessage(MessageImportance.High, $"[Datadog]   Flavor: {Flavor ?? "(not set)"}");
                 Log.LogMessage(MessageImportance.High, $"[Datadog]   Platform: {TargetPlatform}");
                 Log.LogMessage(MessageImportance.High, $"[Datadog]   File: {FilePath}");
+                Log.LogMessage(MessageImportance.High, $"[Datadog]   Unique Key: ({serviceName}, {AppVersion}, {Flavor ?? "none"})");
 
                 // Sanitize command for logging (hide API key if present in arguments)
                 string sanitizedArgs = !string.IsNullOrEmpty(ApiKey) ? arguments.Replace(ApiKey, "***") : arguments;
                 Log.LogMessage(MessageImportance.High, $"[Datadog]   Command: npx @datadog/datadog-ci {sanitizedArgs}");
                 Log.LogMessage(MessageImportance.High, $"[Datadog] ========================================");
+                Log.LogMessage(MessageImportance.High, "[Datadog] Starting npx process...");
+                Log.LogMessage(MessageImportance.High, "[Datadog] NOTE: First run may take several minutes to download @datadog/datadog-ci package");
+
+                // Don't redirect streams - let output go directly to console
+                psi.RedirectStandardOutput = false;
+                psi.RedirectStandardError = false;
+                psi.UseShellExecute = false;
 
                 var process = Process.Start(psi);
                 if (process == null)
@@ -252,33 +274,20 @@ namespace Datadog.MAUI.Symbols
                     return false;
                 }
 
-                // Create tasks to read stdout and stderr asynchronously to prevent deadlocks
-                var outputTask = System.Threading.Tasks.Task.Run(() => process.StandardOutput.ReadToEnd());
-                var errorTask = System.Threading.Tasks.Task.Run(() => process.StandardError.ReadToEnd());
+                Log.LogMessage(MessageImportance.High, "[Datadog] Process started, waiting for completion...");
 
-                process.WaitForExit();
+                // Wait with a reasonable timeout (10 minutes for large files/slow networks)
+                bool exited = process.WaitForExit(600000); // 10 minutes
 
-                // Wait for async reads to complete
-                var output = outputTask.Result;
-                var error = errorTask.Result;
-
-                // Always log ALL output at HIGH importance so it's visible
-                if (!string.IsNullOrWhiteSpace(output))
+                if (!exited)
                 {
-                    Log.LogMessage(MessageImportance.High, "[Datadog] datadog-ci stdout:");
-                    foreach (var line in output.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                    Log.LogError("[Datadog] Symbol upload timed out after 10 minutes. Killing process.");
+                    try
                     {
-                        Log.LogMessage(MessageImportance.High, $"  {line}");
+                        process.Kill();
                     }
-                }
-
-                if (!string.IsNullOrWhiteSpace(error))
-                {
-                    Log.LogMessage(MessageImportance.High, "[Datadog] datadog-ci stderr:");
-                    foreach (var line in error.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                    {
-                        Log.LogMessage(MessageImportance.High, $"  {line}");
-                    }
+                    catch { }
+                    return false;
                 }
 
                 if (process.ExitCode != 0)
@@ -290,6 +299,10 @@ namespace Datadog.MAUI.Symbols
 
                 Log.LogMessage(MessageImportance.High, $"[Datadog] ========================================");
                 Log.LogMessage(MessageImportance.High, $"[Datadog] Successfully uploaded {TargetPlatform} symbols!");
+                Log.LogMessage(MessageImportance.High, $"[Datadog]   Service: {serviceName}");
+                Log.LogMessage(MessageImportance.High, $"[Datadog]   Version: {AppVersion}");
+                Log.LogMessage(MessageImportance.High, $"[Datadog]   Flavor: {Flavor ?? "(not set)"}");
+                Log.LogMessage(MessageImportance.High, $"[Datadog]   Unique Key: ({serviceName}, {AppVersion}, {Flavor ?? "none"})");
                 Log.LogMessage(MessageImportance.High, $"[Datadog] ========================================");
                 return true;
             }

@@ -6,8 +6,10 @@
     It handles both iOS (dSYMs) and Android (Proguard mapping.txt) symbol files.
   -->
 
+  <!-- Load task from NuGet package location (only if not already loaded by csproj) -->
   <UsingTask TaskName="Datadog.MAUI.Symbols.UploadSymbolsTask"
-             AssemblyFile="$(MSBuildThisFileDirectory)..\lib\netstandard2.0\Datadog.MAUI.Symbols.dll" />
+             AssemblyFile="$(MSBuildThisFileDirectory)..\lib\netstandard2.0\Datadog.MAUI.Symbols.dll"
+             Condition="Exists('$(MSBuildThisFileDirectory)..\lib\netstandard2.0\Datadog.MAUI.Symbols.dll')" />
 
   <!-- Run after publish completes successfully -->
   <Target Name="DatadogUploadSymbols" AfterTargets="Publish">
@@ -25,11 +27,17 @@
       <_DatadogShouldRun Condition="'$(Configuration)' != 'Release' AND '$(DatadogUploadInDebug)' != 'true'">false</_DatadogShouldRun>
 
       <!-- Set default values -->
-      <_DatadogAppVersion Condition="'$(DatadogAppVersion)' == ''">$(ApplicationDisplayVersion)</_DatadogAppVersion>
+      <!-- Debug: Show what DatadogAppVersion is set to -->
+      <_DatadogAppVersion Condition="'$(DatadogAppVersion)' != ''">$(DatadogAppVersion)</_DatadogAppVersion>
+      <_DatadogAppVersion Condition="'$(_DatadogAppVersion)' == ''">$(ApplicationDisplayVersion)</_DatadogAppVersion>
       <_DatadogAppVersion Condition="'$(_DatadogAppVersion)' == ''">1.0.0</_DatadogAppVersion>
       <_DatadogSite Condition="'$(DatadogSite)' == ''">datadoghq.com</_DatadogSite>
       <_DatadogDryRun Condition="'$(DatadogDryRun)' == 'true'">true</_DatadogDryRun>
       <_DatadogDryRun Condition="'$(_DatadogDryRun)' == ''">false</_DatadogDryRun>
+      <_DatadogFlavor Condition="'$(DatadogFlavor)' != ''">$(DatadogFlavor)</_DatadogFlavor>
+      <_DatadogFlavor Condition="'$(_DatadogFlavor)' == '' AND '$(Configuration)' == 'Debug'">debug</_DatadogFlavor>
+      <_DatadogFlavor Condition="'$(_DatadogFlavor)' == '' AND '$(Configuration)' == 'Release'">release</_DatadogFlavor>
+      <_DatadogFlavor Condition="'$(_DatadogFlavor)' == ''">release</_DatadogFlavor>
     </PropertyGroup>
 
     <!-- Android: Locate mapping.txt -->
@@ -71,6 +79,7 @@
       ApiKey="$(DatadogApiKey)"
       Site="$(_DatadogSite)"
       DryRun="$(_DatadogDryRun)"
+      Flavor="$(_DatadogFlavor)"
       ContinueOnError="true"
     />
 
@@ -85,6 +94,7 @@
       ApiKey="$(DatadogApiKey)"
       Site="$(_DatadogSite)"
       DryRun="$(_DatadogDryRun)"
+      Flavor="$(_DatadogFlavor)"
       ContinueOnError="true"
     />
 
