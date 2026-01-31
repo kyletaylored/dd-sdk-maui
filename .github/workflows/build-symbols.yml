@@ -6,6 +6,8 @@ on:
     paths:
       - 'Datadog.MAUI.Symbols/**'
       - '.github/workflows/build-symbols.yml'
+    tags:
+      - 'symbols-v*'  # Trigger on symbols version tags
   pull_request:
     branches: [ main, develop ]
     paths:
