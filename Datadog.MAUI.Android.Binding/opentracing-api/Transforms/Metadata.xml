@@ -2,13 +2,21 @@
   <!--
     Binding fixes for OpenTracing API (io.opentracing:opentracing-api)
 
-    Just remove the problematic classes and let everything else through with default visibility
+    OpenTracing is a transitive dependency from the Datadog Android SDK. The MAUI plugin
+    does NOT expose any OpenTracing types to users - it provides a custom ISpan interface
+    for complete abstraction.
+
+    Analysis shows:
+    - NO public APIs expose OpenTracing types
+    - Android implementation uses reflection to access native Datadog tracer
+    - iOS uses OpenTelemetry (not OpenTracing)
+    - The only OpenTracing import (IO.Opentracing.Propagation) is in disabled code that
+      throws NotImplementedException due to binding conflicts
+
+    Conclusion: Safe to exclude the entire io.opentracing package to avoid binding issues
+    with generics (Tag<T>), circular dependencies (Span/Scope/Tracer), and nullability.
   -->
 
-  <!-- Remove the entire io.opentracing.tag package - it has binding issues and we don't need it for basic tracing -->
-  <remove-node path="/api/package[@name='io.opentracing.tag']" />
-
-  <!-- Remove problematic util classes that have covariant return type issues -->
-  <remove-node path="/api/package[@name='io.opentracing.util']/class[@name='AutoFinishScopeManager']" />
-  <remove-node path="/api/package[@name='io.opentracing.util']/class[@name='ThreadLocalScopeManager']" />
+  <!-- Remove the entire io.opentracing package - not used by MAUI plugin public APIs -->
+  <remove-node path="/api/package[starts-with(@name, 'io.opentracing')]" />
 </metadata>
