@@ -1,159 +1,347 @@
-name: Check for Datadog SDK Updates
+name: Check Datadog SDK Updates
 
 on:
   schedule:
-    # Run every Monday at 9 AM UTC
-    - cron: '0 9 * * 1'
-  workflow_dispatch:  # Allow manual triggering
+    # Run on the 1st of every month at 9:00 AM UTC
+    - cron: '0 9 1 * *'
+  workflow_dispatch: # Allow manual triggering
 
 jobs:
   check-updates:
     name: Check for SDK Updates
     runs-on: ubuntu-latest
-    outputs:
-      updates-available: ${{ steps.check-versions.outputs.updates-available }}
-      latest-android: ${{ steps.check-versions.outputs.latest-android }}
-      current-android: ${{ steps.check-versions.outputs.current-android }}
-      latest-ios: ${{ steps.check-versions.outputs.latest-ios }}
-      current-ios: ${{ steps.check-versions.outputs.current-ios }}
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Get current SDK versions
         id: current
         run: |
           # Get current version from Directory.Build.props
-          CURRENT_VERSION=$(grep -E '<DatadogSdkVersion>.*</DatadogSdkVersion>' Directory.Build.props | sed 's/.*<DatadogSdkVersion>\(.*\)<\/DatadogSdkVersion>.*/\1/')
+          CURRENT_VERSION=$(grep -oP '<DatadogSdkVersion>\K[^<]+' Directory.Build.props)
           echo "current-version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
-          echo "Current version: $CURRENT_VERSION"
+          echo "Current version in Directory.Build.props: $CURRENT_VERSION"
 
-      - name: Fetch latest SDK versions
-        id: check-versions
+          # Get current Android version from binding project
+          CURRENT_ANDROID=$(grep -oP 'dd-sdk-android-core:\K[0-9.]+' Datadog.MAUI.Android.Binding/dd-sdk-android-core/dd-sdk-android-core.csproj | head -1)
+          echo "current-android=$CURRENT_ANDROID" >> $GITHUB_OUTPUT
+          echo "Current Android binding: $CURRENT_ANDROID"
+
+          # Get current iOS version from binding project
+          CURRENT_IOS=$(grep -oP 'DatadogInternal\.xcframework.*?_\K[0-9.]+' Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj | head -1)
+          echo "current-ios=$CURRENT_IOS" >> $GITHUB_OUTPUT
+          echo "Current iOS binding: $CURRENT_IOS"
+
+      - name: Check Android SDK versions
+        id: check-android
         run: |
-          CURRENT_VERSION="${{ steps.current.outputs.current-version }}"
+          echo "Checking latest Datadog Android SDK versions..."
 
-          # Get latest Android SDK version from GitHub API
-          LATEST_ANDROID=$(curl -s https://api.github.com/repos/DataDog/dd-sdk-android/releases/latest | jq -r '.tag_name')
+          # Fetch latest version from GitHub releases (more reliable than Maven Central for tags)
+          LATEST_ANDROID=$(curl -s https://api.github.com/repos/DataDog/dd-sdk-android/releases/latest | jq -r '.tag_name' | sed 's/^v//')
           echo "latest-android=$LATEST_ANDROID" >> $GITHUB_OUTPUT
-          echo "current-android=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "Latest Android SDK: $LATEST_ANDROID"
 
-          # Get latest iOS SDK version from GitHub API
-          LATEST_IOS=$(curl -s https://api.github.com/repos/DataDog/dd-sdk-ios/releases/latest | jq -r '.tag_name')
-          echo "latest-ios=$LATEST_IOS" >> $GITHUB_OUTPUT
-          echo "current-ios=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          # Also check Maven Central for verification
+          MAVEN_VERSION=$(curl -s "https://search.maven.org/solrsearch/select?q=g:com.datadoghq+AND+a:dd-sdk-android-core&rows=1&wt=json" | jq -r '.response.docs[0].latestVersion')
+          echo "Maven Central version: $MAVEN_VERSION"
 
-          echo "Latest Android: $LATEST_ANDROID"
-          echo "Latest iOS: $LATEST_IOS"
-          echo "Current: $CURRENT_VERSION"
-
-          # Check if updates are available (remove 'v' prefix if present)
-          LATEST_ANDROID_CLEAN=${LATEST_ANDROID#v}
-          LATEST_IOS_CLEAN=${LATEST_IOS#v}
-
-          if [ "$LATEST_ANDROID_CLEAN" != "$CURRENT_VERSION" ] || [ "$LATEST_IOS_CLEAN" != "$CURRENT_VERSION" ]; then
-            echo "updates-available=true" >> $GITHUB_OUTPUT
-            echo "Updates available!"
+          CURRENT_ANDROID="${{ steps.current.outputs.current-android }}"
+          if [ "$LATEST_ANDROID" != "$CURRENT_ANDROID" ]; then
+            echo "android-update-needed=true" >> $GITHUB_OUTPUT
+            echo "Android SDK update available: $CURRENT_ANDROID → $LATEST_ANDROID"
           else
-            echo "updates-available=false" >> $GITHUB_OUTPUT
-            echo "Already up to date"
+            echo "android-update-needed=false" >> $GITHUB_OUTPUT
+            echo "Android SDK is up to date"
           fi
 
-      - name: Create issue if updates available
-        if: steps.check-versions.outputs.updates-available == 'true'
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const latestAndroid = '${{ steps.check-versions.outputs.latest-android }}';
-            const currentAndroid = '${{ steps.check-versions.outputs.current-android }}';
-            const latestIos = '${{ steps.check-versions.outputs.latest-ios }}';
-            const currentIos = '${{ steps.check-versions.outputs.current-ios }}';
+      - name: Check iOS SDK versions
+        id: check-ios
+        run: |
+          echo "Checking latest Datadog iOS SDK versions..."
 
-            const title = 'New Datadog SDK versions available';
-            let body = '## New Datadog SDK Releases Available\n\n';
+          # Fetch latest version from GitHub releases
+          LATEST_IOS=$(curl -s https://api.github.com/repos/DataDog/dd-sdk-ios/releases/latest | jq -r '.tag_name' | sed 's/^v//')
+          echo "latest-ios=$LATEST_IOS" >> $GITHUB_OUTPUT
+          echo "Latest iOS SDK: $LATEST_IOS"
 
-            const latestAndroidClean = latestAndroid.replace(/^v/, '');
-            const latestIosClean = latestIos.replace(/^v/, '');
+          # Also check CocoaPods for verification
+          COCOAPODS_VERSION=$(curl -s "https://trunk.cocoapods.org/api/v1/pods/DatadogCore/specs/latest" | jq -r '.version')
+          echo "CocoaPods version: $COCOAPODS_VERSION"
 
-            if (latestAndroidClean !== currentAndroid) {
-              body += `### Android SDK\n`;
-              body += `- Current: \`${currentAndroid}\`\n`;
-              body += `- Latest: \`${latestAndroidClean}\` ([Release Notes](https://github.com/DataDog/dd-sdk-android/releases/tag/${latestAndroid}))\n\n`;
-            }
+          CURRENT_IOS="${{ steps.current.outputs.current-ios }}"
+          if [ "$LATEST_IOS" != "$CURRENT_IOS" ]; then
+            echo "ios-update-needed=true" >> $GITHUB_OUTPUT
+            echo "iOS SDK update available: $CURRENT_IOS → $LATEST_IOS"
+          else
+            echo "ios-update-needed=false" >> $GITHUB_OUTPUT
+            echo "iOS SDK is up to date"
+          fi
 
-            if (latestIosClean !== currentIos) {
-              body += `### iOS SDK\n`;
-              body += `- Current: \`${currentIos}\`\n`;
-              body += `- Latest: \`${latestIosClean}\` ([Release Notes](https://github.com/DataDog/dd-sdk-ios/releases/tag/${latestIos}))\n\n`;
-            }
+      - name: Fetch release notes
+        if: steps.check-android.outputs.android-update-needed == 'true' || steps.check-ios.outputs.ios-update-needed == 'true'
+        id: release-notes
+        run: |
+          echo "Fetching release notes..."
 
-            body += `## Update Instructions\n\n`;
-            body += `To update to the latest versions:\n\n`;
-            body += `1. Update the \`<DatadogSdkVersion>\` in \`Directory.Build.props\`\n`;
-            body += `2. Run \`./scripts/download-ios-frameworks.sh <version> Datadog.MAUI.iOS.Binding\` for iOS\n`;
-            body += `3. Test the builds (dependencies are automatically fetched via Maven)\n`;
-            body += `4. Update \`docs/CHANGELOG.md\`\n`;
-            body += `5. Create a pull request\n\n`;
+          # Fetch Android release notes from GitHub
+          if [ "${{ steps.check-android.outputs.android-update-needed }}" == "true" ]; then
+            ANDROID_VERSION="${{ steps.check-android.outputs.latest-android }}"
+            ANDROID_NOTES=$(curl -s "https://api.github.com/repos/DataDog/dd-sdk-android/releases/tags/$ANDROID_VERSION" | jq -r '.body // "No release notes available"')
 
-            body += `### Automated Update\n\n`;
-            body += `Or use the version update commands:\n\n`;
-            body += `\`\`\`bash\n`;
-            body += `# Update Directory.Build.props\n`;
-            body += `sed -i '' 's/<DatadogSdkVersion>.*<\\/DatadogSdkVersion>/<DatadogSdkVersion>${latestAndroidClean}<\\/DatadogSdkVersion>/' Directory.Build.props\n\n`;
-            body += `# Download new iOS frameworks\n`;
-            body += `./scripts/download-ios-frameworks.sh ${latestIosClean} Datadog.MAUI.iOS.Binding\n\n`;
-            body += `# Android dependencies are automatically fetched via AndroidMavenLibrary during build\n`;
-            body += `\`\`\`\n`;
+            cat > /tmp/android_notes.md <<EOF
+          ## Android SDK $ANDROID_VERSION Release Notes
 
-            // Check if issue already exists
-            const issues = await github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-              labels: 'sdk-update'
-            });
+          $ANDROID_NOTES
 
-            const existingIssue = issues.data.find(issue =>
-              issue.title === title
-            );
+          [View full release](https://github.com/DataDog/dd-sdk-android/releases/tag/$ANDROID_VERSION)
+          EOF
+          fi
 
-            if (existingIssue) {
-              // Update existing issue
-              await github.rest.issues.update({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: existingIssue.number,
-                body: body
-              });
-              console.log(`Updated existing issue #${existingIssue.number}`);
-            } else {
-              // Create new issue
-              const issue = await github.rest.issues.create({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                title: title,
-                body: body,
-                labels: ['sdk-update', 'enhancement']
-              });
-              console.log(`Created new issue #${issue.data.number}`);
-            }
+          # Fetch iOS release notes from GitHub
+          if [ "${{ steps.check-ios.outputs.ios-update-needed }}" == "true" ]; then
+            IOS_VERSION="${{ steps.check-ios.outputs.latest-ios }}"
+            IOS_NOTES=$(curl -s "https://api.github.com/repos/DataDog/dd-sdk-ios/releases/tags/$IOS_VERSION" | jq -r '.body // "No release notes available"')
+
+            cat > /tmp/ios_notes.md <<EOF
+          ## iOS SDK $IOS_VERSION Release Notes
+
+          $IOS_NOTES
+
+          [View full release](https://github.com/DataDog/dd-sdk-ios/releases/tag/$IOS_VERSION)
+          EOF
+          fi
+
+      - name: Create feature branch and PR
+        if: steps.check-android.outputs.android-update-needed == 'true' || steps.check-ios.outputs.ios-update-needed == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Determine version for branch name
+          ANDROID_VER="${{ steps.check-android.outputs.latest-android }}"
+          IOS_VER="${{ steps.check-ios.outputs.latest-ios }}"
+          BRANCH_NAME="feature/sdk-update-android-${ANDROID_VER}-ios-${IOS_VER}"
+
+          # Create feature branch
+          git checkout -b "$BRANCH_NAME"
+
+          # Create a comprehensive update checklist
+          cat > SDK_UPDATE_CHECKLIST.md <<EOF
+          # SDK Update Checklist
+
+          This PR tracks the update to newer native Datadog SDK versions.
+
+          ## Version Changes
+
+          ### Android SDK
+          - Current: \`${{ steps.current.outputs.current-android }}\`
+          - Latest: \`${{ steps.check-android.outputs.latest-android }}\`
+          - Update needed: ${{ steps.check-android.outputs.android-update-needed }}
+
+          ### iOS SDK
+          - Current: \`${{ steps.current.outputs.current-ios }}\`
+          - Latest: \`${{ steps.check-ios.outputs.latest-ios }}\`
+          - Update needed: ${{ steps.check-ios.outputs.ios-update-needed }}
+
+          ## Manual Update Steps Required
+
+          ### 1. Update Directory.Build.props
+          Update the \`<DatadogSdkVersion>\` property to the new version (use the higher of Android/iOS versions or choose based on features):
+
+          \`\`\`bash
+          # Example - adjust version as needed
+          sed -i '' 's/<DatadogSdkVersion>.*<\/DatadogSdkVersion>/<DatadogSdkVersion>${ANDROID_VER}<\/DatadogSdkVersion>/' Directory.Build.props
+          \`\`\`
+
+          ### 2. Update Android Bindings
+
+          Android dependencies are automatically fetched from Maven Central via \`AndroidMavenLibrary\` entries.
+          Update the version in each binding project's \`.csproj\` file:
+
+          \`\`\`bash
+          # Update all dd-sdk-android-* project versions
+          find Datadog.MAUI.Android.Binding -name "*.csproj" -exec sed -i '' 's/dd-sdk-android-[^:]*:[0-9.]*/&${ANDROID_VER}/' {} \;
+          \`\`\`
+
+          Or manually update each project in \`Datadog.MAUI.Android.Binding/\`:
+          - dd-sdk-android-core
+          - dd-sdk-android-logs
+          - dd-sdk-android-rum
+          - dd-sdk-android-trace
+          - dd-sdk-android-ndk
+          - dd-sdk-android-okhttp
+          - dd-sdk-android-session-replay
+          - dd-sdk-android-webview
+          - And any other binding projects
+
+          ### 3. Update iOS Bindings
+
+          Download new xcframeworks and update references:
+
+          \`\`\`bash
+          # Use the download script if available
+          ./scripts/download-ios-frameworks.sh ${IOS_VER} Datadog.MAUI.iOS.Binding
+
+          # Or manually download from CocoaPods and update Datadog.MAUI.iOS.Binding.csproj
+          \`\`\`
+
+          Required frameworks:
+          - DatadogCore ${IOS_VER}
+          - DatadogLogs ${IOS_VER}
+          - DatadogRUM ${IOS_VER}
+          - DatadogTrace ${IOS_VER}
+          - DatadogInternal ${IOS_VER}
+          - DatadogCrashReporting ${IOS_VER} (if applicable)
+          - DatadogSessionReplay ${IOS_VER} (if applicable)
+
+          ### 4. Build and Fix Binding Errors
+
+          \`\`\`bash
+          # Build Android bindings
+          dotnet build Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.csproj
+
+          # Build iOS bindings
+          dotnet build Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj
+
+          # Build main plugin
+          dotnet build Datadog.MAUI.Plugin/Datadog.MAUI.Plugin.csproj
+          \`\`\`
+
+          If binding errors occur:
+          - Update \`Metadata.xml\` files to exclude problematic APIs
+          - Check for new abstract methods that need implementation
+          - Review nullability warnings and add \`!\` operators as needed
+
+          ### 5. Testing Checklist
+
+          - [ ] Android binding projects build successfully
+          - [ ] iOS binding projects build successfully
+          - [ ] Main plugin project builds successfully
+          - [ ] Sample app builds for Android
+          - [ ] Sample app builds for iOS
+          - [ ] Test RUM features (views, actions, resources, errors)
+          - [ ] Test logging functionality
+          - [ ] Test tracing/APM
+          - [ ] Test error tracking with exceptions
+          - [ ] Test crash reporting
+          - [ ] Test session replay (if supported)
+          - [ ] Verify WebView tracking works
+
+          ### 6. Version Updates
+
+          Update package versions following our versioning strategy:
+
+          **Binding Libraries (4-part versioning):**
+          - \`Datadog.MAUI.Android.Binding\` → \`${ANDROID_VER}.0\`
+          - \`Datadog.MAUI.iOS.Binding\` → \`${IOS_VER}.0\`
+
+          **Main Plugin (3-part versioning):**
+          - Decide on new version based on changes:
+            - Patch bump: Bug fixes or binding-only updates
+            - Minor bump: New features from native SDKs
+            - Major bump: Breaking API changes
+
+          - [ ] Update binding package versions in \`.csproj\` files
+          - [ ] Update main plugin version if needed
+          - [ ] Update \`CHANGELOG.md\` with new features/fixes
+
+          ### 7. Documentation Updates
+
+          - [ ] Review native SDK release notes for breaking changes
+          - [ ] Update README if new features are available
+          - [ ] Update sample app if new APIs should be demonstrated
+          - [ ] Document any MAUI-specific changes or workarounds
+
+          ## Native SDK Release Notes
+
+          EOF
+
+          # Append release notes if they exist
+          [ -f /tmp/android_notes.md ] && cat /tmp/android_notes.md >> SDK_UPDATE_CHECKLIST.md
+          echo "" >> SDK_UPDATE_CHECKLIST.md
+          [ -f /tmp/ios_notes.md ] && cat /tmp/ios_notes.md >> SDK_UPDATE_CHECKLIST.md
+
+          # Append quick reference commands
+          cat >> SDK_UPDATE_CHECKLIST.md <<EOF
+
+          ---
+
+          ## Quick Reference Commands
+
+          \`\`\`bash
+          # Update Directory.Build.props
+          sed -i '' 's/<DatadogSdkVersion>.*<\/DatadogSdkVersion>/<DatadogSdkVersion>${ANDROID_VER}<\/DatadogSdkVersion>/' Directory.Build.props
+
+          # Download iOS frameworks (if script exists)
+          ./scripts/download-ios-frameworks.sh ${IOS_VER} Datadog.MAUI.iOS.Binding
+
+          # Build all projects
+          dotnet build
+
+          # Run sample app (Android)
+          dotnet build -t:Run -f net9.0-android samples/DatadogMauiSample/DatadogMauiSample.csproj
+
+          # Run sample app (iOS)
+          dotnet build -t:Run -f net9.0-ios samples/DatadogMauiSample/DatadogMauiSample.csproj
+          \`\`\`
+
+          ## See Also
+
+          - [Versioning Strategy](VERSIONING.md)
+          - [Android SDK Releases](https://github.com/DataDog/dd-sdk-android/releases)
+          - [iOS SDK Releases](https://github.com/DataDog/dd-sdk-ios/releases)
+          EOF
+
+          # Add the checklist file
+          git add SDK_UPDATE_CHECKLIST.md
+          git commit -m "chore: SDK update checklist for Android ${ANDROID_VER} / iOS ${IOS_VER}
+
+          Automated check detected new SDK versions available:
+          - Android: ${{ steps.current.outputs.current-android }} → ${ANDROID_VER}
+          - iOS: ${{ steps.current.outputs.current-ios }} → ${IOS_VER}
+
+          This checklist tracks manual steps required to complete the update.
+          See SDK_UPDATE_CHECKLIST.md for full instructions."
+
+          # Push branch
+          git push origin "$BRANCH_NAME"
+
+          # Create PR with comprehensive description
+          gh pr create \
+            --title "Update Datadog SDKs: Android ${ANDROID_VER}, iOS ${IOS_VER}" \
+            --body "$(cat SDK_UPDATE_CHECKLIST.md)" \
+            --base main \
+            --head "$BRANCH_NAME" \
+            --label "dependencies" \
+            --label "sdk-update"
+
+          echo "✅ Created PR for SDK updates"
 
       - name: Summary
         run: |
-          echo "## SDK Version Check" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Current Version" >> $GITHUB_STEP_SUMMARY
-          echo "- \`${{ steps.check-versions.outputs.current-android }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Latest Available" >> $GITHUB_STEP_SUMMARY
-          echo "- Android: \`${{ steps.check-versions.outputs.latest-android }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- iOS: \`${{ steps.check-versions.outputs.latest-ios }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "## SDK Version Check Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          if [ "${{ steps.check-versions.outputs.updates-available }}" == "true" ]; then
-            echo "🔔 **Updates available!** An issue has been created." >> $GITHUB_STEP_SUMMARY
+          echo "### Current Versions" >> $GITHUB_STEP_SUMMARY
+          echo "- Directory.Build.props: \`${{ steps.current.outputs.current-version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Android binding: \`${{ steps.current.outputs.current-android }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- iOS binding: \`${{ steps.current.outputs.current-ios }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### Latest Available" >> $GITHUB_STEP_SUMMARY
+          echo "- Android: \`${{ steps.check-android.outputs.latest-android }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- iOS: \`${{ steps.check-ios.outputs.latest-ios }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.check-android.outputs.android-update-needed }}" == "true" ] || [ "${{ steps.check-ios.outputs.ios-update-needed }}" == "true" ]; then
+            echo "🔔 **Updates available!** A PR has been created with update instructions." >> $GITHUB_STEP_SUMMARY
           else
-            echo "✅ **SDK is up to date**" >> $GITHUB_STEP_SUMMARY
+            echo "✅ **All SDKs are up to date**" >> $GITHUB_STEP_SUMMARY
           fi
