@@ -33,6 +33,10 @@
   <attr path="/api/package[@name='com.datadog.android.telemetry.internal']" name="managedName">Datadog.Android.Telemetry.Internal</attr>
   <attr path="/api/package[@name='com.datadog.android.telemetry.model']" name="managedName">Datadog.Android.Telemetry.Model</attr>
 
+  <!-- Fix nullability mismatch for DatadogDatabaseErrorHandler.OnCorruption -->
+  <!-- The interface IDatabaseErrorHandler expects nullable SQLiteDatabase, so we mark the parameter as nullable -->
+  <attr path="/api/package[@name='com.datadog.android.sqlite']/class[@name='DatadogDatabaseErrorHandler']/method[@name='onCorruption']/parameter[@name='dbObj']" name="managedType">Android.Database.Sqlite.SQLiteDatabase?</attr>
+
   <!-- Hide internal implementation packages -->
   <!-- These are SDK internals not meant for public consumption -->
   <attr path="/api/package[starts-with(@name, 'com.datadog.android.rum.internal')]" name="visibility">internal</attr>
