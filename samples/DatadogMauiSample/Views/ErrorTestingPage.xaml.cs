@@ -70,7 +70,7 @@ public partial class ErrorTestingPage : ContentPage
                 }
             );
 
-            DisplayAlertAsync("Success", $"NullReferenceException reported to Datadog Error Tracking", "OK");
+            DisplayAlert("Success", $"NullReferenceException reported to Datadog Error Tracking", "OK");
         }
     }
 
@@ -98,7 +98,7 @@ public partial class ErrorTestingPage : ContentPage
                 }
             );
 
-            DisplayAlertAsync("Success", $"DivideByZeroException reported to Datadog Error Tracking", "OK");
+            DisplayAlert("Success", $"DivideByZeroException reported to Datadog Error Tracking", "OK");
         }
     }
 
@@ -126,7 +126,7 @@ public partial class ErrorTestingPage : ContentPage
                 }
             );
 
-            DisplayAlertAsync("Success", $"IndexOutOfRangeException reported to Datadog Error Tracking", "OK");
+            DisplayAlert("Success", $"IndexOutOfRangeException reported to Datadog Error Tracking", "OK");
         }
     }
 
@@ -154,7 +154,7 @@ public partial class ErrorTestingPage : ContentPage
                 }
             );
 
-            DisplayAlertAsync("Success", $"InvalidOperationException reported to Datadog Error Tracking", "OK");
+            DisplayAlert("Success", $"InvalidOperationException reported to Datadog Error Tracking", "OK");
         }
     }
 
@@ -181,7 +181,7 @@ public partial class ErrorTestingPage : ContentPage
                 }
             );
 
-            DisplayAlertAsync("Success", $"ArgumentException reported to Datadog Error Tracking", "OK");
+            DisplayAlert("Success", $"ArgumentException reported to Datadog Error Tracking", "OK");
         }
     }
 
@@ -222,7 +222,7 @@ public partial class ErrorTestingPage : ContentPage
                 }
             );
 
-            await DisplayAlertAsync("Success", $"TaskCanceledException reported to Datadog Error Tracking", "OK");
+            await DisplayAlert("Success", $"TaskCanceledException reported to Datadog Error Tracking", "OK");
         }
         catch (Exception ex)
         {
@@ -239,7 +239,7 @@ public partial class ErrorTestingPage : ContentPage
                 }
             );
 
-            await DisplayAlertAsync("Error", $"Unexpected error reported: {ex.Message}", "OK");
+            await DisplayAlert("Error", $"Unexpected error reported: {ex.Message}", "OK");
         }
     }
 
@@ -254,7 +254,7 @@ public partial class ErrorTestingPage : ContentPage
             throw new InvalidOperationException("Unhandled exception in background task");
         });
 
-        await DisplayAlertAsync("Info", "Unhandled task exception triggered. Check logs in 1 second.", "OK");
+        await DisplayAlert("Info", "Unhandled task exception triggered. Check logs in 1 second.", "OK");
     }
 
     private async void OnAggregateException(object sender, EventArgs e)
@@ -294,7 +294,7 @@ public partial class ErrorTestingPage : ContentPage
                 }
             );
 
-            await DisplayAlertAsync("Success", $"AggregateException with {ex.InnerExceptions.Count} inner exceptions reported to Datadog", "OK");
+            await DisplayAlert("Success", $"AggregateException with {ex.InnerExceptions.Count} inner exceptions reported to Datadog", "OK");
         }
         catch (Exception ex)
         {
@@ -311,7 +311,7 @@ public partial class ErrorTestingPage : ContentPage
                 }
             );
 
-            await DisplayAlertAsync("Error", $"Unexpected error reported: {ex.Message}", "OK");
+            await DisplayAlert("Error", $"Unexpected error reported: {ex.Message}", "OK");
         }
     }
 
@@ -353,7 +353,7 @@ public partial class ErrorTestingPage : ContentPage
                 }
             );
 
-            await DisplayAlertAsync("Success", "HTTP timeout reported to Datadog Error Tracking", "OK");
+            await DisplayAlert("Success", "HTTP timeout reported to Datadog Error Tracking", "OK");
         }
         catch (Exception ex)
         {
@@ -369,7 +369,7 @@ public partial class ErrorTestingPage : ContentPage
                 }
             );
 
-            await DisplayAlertAsync("Error", $"Unexpected error reported: {ex.Message}", "OK");
+            await DisplayAlert("Error", $"Unexpected error reported: {ex.Message}", "OK");
         }
     }
 
@@ -404,7 +404,7 @@ public partial class ErrorTestingPage : ContentPage
                     }
                 );
 
-                await DisplayAlertAsync("Success", $"HTTP 404 error reported to Datadog Error Tracking", "OK");
+                await DisplayAlert("Success", $"HTTP 404 error reported to Datadog Error Tracking", "OK");
             }
         }
         catch (Exception ex)
@@ -421,7 +421,7 @@ public partial class ErrorTestingPage : ContentPage
                 }
             );
 
-            await DisplayAlertAsync("Error", $"Unexpected error reported: {ex.Message}", "OK");
+            await DisplayAlert("Error", $"Unexpected error reported: {ex.Message}", "OK");
         }
     }
 
@@ -456,7 +456,7 @@ public partial class ErrorTestingPage : ContentPage
                     }
                 );
 
-                await DisplayAlertAsync("Success", $"HTTP 500 error reported to Datadog Error Tracking", "OK");
+                await DisplayAlert("Success", $"HTTP 500 error reported to Datadog Error Tracking", "OK");
             }
         }
         catch (Exception ex)
@@ -473,7 +473,7 @@ public partial class ErrorTestingPage : ContentPage
                 }
             );
 
-            await DisplayAlertAsync("Error", $"Unexpected error reported: {ex.Message}", "OK");
+            await DisplayAlert("Error", $"Unexpected error reported: {ex.Message}", "OK");
         }
     }
 
@@ -503,7 +503,7 @@ public partial class ErrorTestingPage : ContentPage
             }
         );
 
-        DisplayAlertAsync("Success", "Error log sent to Datadog Logs AND Error Tracking", "OK");
+        DisplayAlert("Success", "Error log sent to Datadog Logs AND Error Tracking", "OK");
     }
 
     private void OnLogWarning(object sender, EventArgs e)
@@ -515,7 +515,7 @@ public partial class ErrorTestingPage : ContentPage
             ["severity"] = "medium"
         });
 
-        DisplayAlertAsync("Success", "Warning log sent to Datadog", "OK");
+        DisplayAlert("Success", "Warning log sent to Datadog", "OK");
     }
 
     private void OnLogInfoWithAttributes(object sender, EventArgs e)
@@ -531,7 +531,7 @@ public partial class ErrorTestingPage : ContentPage
             ["custom_tags"] = new[] { "testing", "manual", "info" }
         });
 
-        DisplayAlertAsync("Success", "Info log with attributes sent to Datadog", "OK");
+        DisplayAlert("Success", "Info log with attributes sent to Datadog", "OK");
     }
 
     #endregion
@@ -540,7 +540,7 @@ public partial class ErrorTestingPage : ContentPage
 
     private async void OnNativeCrash(object sender, EventArgs e)
     {
-        var result = await DisplayAlertAsync("Warning", "This will crash the app immediately!", "Cancel", "Crash");
+        var result = await DisplayAlert("Warning", "This will crash the app immediately!", "Cancel", "Crash");
 
         if (!result) // User clicked "Crash"
         {
@@ -576,7 +576,7 @@ public partial class ErrorTestingPage : ContentPage
 
     private async void OnFatalException(object sender, EventArgs e)
     {
-        var result = await DisplayAlertAsync("Warning", "This will crash the app with an unhandled exception!", "Cancel", "Crash");
+        var result = await DisplayAlert("Warning", "This will crash the app with an unhandled exception!", "Cancel", "Crash");
 
         if (!result) // User clicked "Crash"
         {

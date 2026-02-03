@@ -127,7 +127,7 @@ public partial class CartPage : ContentPage
             var item = _cartService.Items.FirstOrDefault(i => i.Product.Id == productId);
             if (item != null)
             {
-                var confirmed = await DisplayAlertAsync(
+                var confirmed = await DisplayAlert(
                     "Remove Item",
                     $"Remove {item.Product.Name} from cart?",
                     "Yes",
@@ -158,11 +158,11 @@ public partial class CartPage : ContentPage
     {
         if (_cartService.ItemCount == 0)
         {
-            await DisplayAlertAsync("Empty Cart", "Your cart is already empty", "OK");
+            await DisplayAlert("Empty Cart", "Your cart is already empty", "OK");
             return;
         }
 
-        var confirmed = await DisplayAlertAsync(
+        var confirmed = await DisplayAlert(
             "Clear Cart",
             $"Remove all {_cartService.ItemCount} items from cart?",
             "Yes",
@@ -185,7 +185,7 @@ public partial class CartPage : ContentPage
                 { "items_removed", itemCount }
             });
 
-            await DisplayAlertAsync("Success", "Cart cleared successfully", "OK");
+            await DisplayAlert("Success", "Cart cleared successfully", "OK");
         }
     }
 
@@ -193,7 +193,7 @@ public partial class CartPage : ContentPage
     {
         if (_cartService.ItemCount == 0)
         {
-            await DisplayAlertAsync("Empty Cart", "Please add items to your cart first", "OK");
+            await DisplayAlert("Empty Cart", "Please add items to your cart first", "OK");
             return;
         }
 
@@ -211,7 +211,7 @@ public partial class CartPage : ContentPage
         });
 
         // Simulate checkout
-        await DisplayAlertAsync(
+        await DisplayAlert(
             "Checkout",
             $"Processing checkout for {_cartService.ItemCount} items\n" +
             $"Total: ${_cartService.TotalAmount:F2}\n\n" +
@@ -221,7 +221,7 @@ public partial class CartPage : ContentPage
 
         // In a real app, you would navigate to a checkout flow here
         // For demo purposes, we'll just clear the cart
-        var success = await DisplayAlertAsync(
+        var success = await DisplayAlert(
             "Complete Purchase?",
             "Simulate successful purchase and clear cart?",
             "Yes",
@@ -248,7 +248,7 @@ public partial class CartPage : ContentPage
                 { "total_amount", totalAmount }
             });
 
-            await DisplayAlertAsync("Success", "Purchase completed successfully!", "OK");
+            await DisplayAlert("Success", "Purchase completed successfully!", "OK");
         }
     }
 }

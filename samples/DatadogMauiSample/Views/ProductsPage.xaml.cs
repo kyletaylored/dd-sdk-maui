@@ -164,7 +164,7 @@ public partial class ProductsPage : ContentPage
 
             if (showSuccessAlert)
             {
-                await DisplayAlertAsync("Success", $"Loaded {_products.Count} products", "OK");
+                await DisplayAlert("Success", $"Loaded {_products.Count} products", "OK");
             }
         }
         catch (Exception ex)
@@ -187,7 +187,7 @@ public partial class ProductsPage : ContentPage
                 { "stack_trace", ex.StackTrace ?? "N/A" }
             });
 
-            await DisplayAlertAsync("Error", $"Failed to load products: {ex.Message}", "OK");
+            await DisplayAlert("Error", $"Failed to load products: {ex.Message}", "OK");
         }
         finally
         {
@@ -214,7 +214,7 @@ public partial class ProductsPage : ContentPage
                 { "price", product.Price }
             });
 
-            var action = await DisplayActionSheetAsync(
+            var action = await DisplayActionSheet(
                 $"{product.Name}",
                 "Cancel",
                 null,
@@ -276,12 +276,12 @@ public partial class ProductsPage : ContentPage
                 await _apiService.AddItemToCartAsync(cartId, product.Id);
             }
 
-            await DisplayAlertAsync("Success", $"Added {product.Name} to cart!\n\nTotal items: {_cartService.ItemCount}", "OK");
+            await DisplayAlert("Success", $"Added {product.Name} to cart!\n\nTotal items: {_cartService.ItemCount}", "OK");
         }
         catch (Exception ex)
         {
             _logger.Error($"Error adding to cart: {ex.Message}", ex);
-            await DisplayAlertAsync("Error", $"Error: {ex.Message}", "OK");
+            await DisplayAlert("Error", $"Error: {ex.Message}", "OK");
         }
     }
 
@@ -310,16 +310,16 @@ public partial class ProductsPage : ContentPage
 
             if (success)
             {
-                await DisplayAlertAsync("Success", $"Successfully purchased {product.Name}!", "OK");
+                await DisplayAlert("Success", $"Successfully purchased {product.Name}!", "OK");
             }
             else
             {
-                await DisplayAlertAsync("Error", "Purchase failed. Please try again.", "OK");
+                await DisplayAlert("Error", "Purchase failed. Please try again.", "OK");
             }
         }
         catch (Exception ex)
         {
-            await DisplayAlertAsync("Error", $"Error: {ex.Message}", "OK");
+            await DisplayAlert("Error", $"Error: {ex.Message}", "OK");
         }
         finally
         {
@@ -332,7 +332,7 @@ public partial class ProductsPage : ContentPage
     {
         if (_products.Count == 0)
         {
-            await DisplayAlertAsync("No Products", "Please load products first", "OK");
+            await DisplayAlert("No Products", "Please load products first", "OK");
             return;
         }
 
