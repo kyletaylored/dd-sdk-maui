@@ -618,11 +618,42 @@ jobs:
           echo "❌ Plugin build failed - this is a critical failure"
           exit 1
 
+  # Validate version before creating release
+  validate-release-version:
+    name: Validate Release Version
+    runs-on: ubuntu-latest
+    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Validate version matches tag
+        run: |
+          TAG_VERSION="${GITHUB_REF#refs/tags/v}"
+          FILE_VERSION=$(grep -oPm1 "(?<=<DatadogSdkVersion>)[^<]+" Directory.Build.props)
+
+          echo "🏷️  Git tag version: $TAG_VERSION"
+          echo "📄 Directory.Build.props version: $FILE_VERSION"
+
+          if [ "$TAG_VERSION" != "$FILE_VERSION" ]; then
+            echo "❌ Version Mismatch Detected!"
+            echo ""
+            echo "The git tag version does not match the version in Directory.Build.props."
+            echo "Please ensure both versions are synchronized before creating a release."
+            echo ""
+            echo "Expected: $FILE_VERSION"
+            echo "Got: $TAG_VERSION"
+            exit 1
+          fi
+
+          echo "✅ Version validation passed: $TAG_VERSION"
+
   # Optional: Create GitHub release (when tagged)
   create-release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
-    needs: validate-builds
+    needs: [validate-builds, validate-release-version]
     if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
     permissions:
       contents: write

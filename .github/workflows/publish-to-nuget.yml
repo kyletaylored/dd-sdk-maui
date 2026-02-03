@@ -17,8 +17,16 @@ env:
   NUGET_SOURCE: 'https://api.nuget.org/v3/index.json'
 
 jobs:
+  # Validate version before proceeding
+  validate-version:
+    name: Validate Version
+    uses: ./.github/workflows/validate-version.yml
+    with:
+      release_tag: ${{ github.event.inputs.release_tag }}
+
   # Download packages from GitHub Release
   download-release-packages:
+    needs: validate-version
     name: Download Release Packages
     runs-on: ubuntu-latest
 

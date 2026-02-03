@@ -21,7 +21,59 @@ on:
     types: [published]
 
 jobs:
+  # Validate version before proceeding
+  validate-version:
+    name: Validate Version
+    runs-on: ubuntu-latest
+    # Only run validation for symbols releases or manual dispatch
+    if: |
+      (github.event_name == 'release' && startsWith(github.event.release.tag_name, 'symbols-v')) ||
+      github.event_name == 'workflow_dispatch'
+    outputs:
+      version: ${{ steps.determine-tag.outputs.tag }}
+      is_valid: ${{ steps.validate.outputs.is_valid }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Determine release tag
+        id: determine-tag
+        run: |
+          if [ "${{ github.event_name }}" == "release" ]; then
+            # Use tag from release event
+            TAG="${GITHUB_REF#refs/tags/}"
+          else
+            # Construct tag from manual input
+            TAG="symbols-v${{ inputs.version }}"
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "Release tag: $TAG"
+
+      - name: Validate version
+        id: validate
+        run: |
+          TAG="${{ steps.determine-tag.outputs.tag }}"
+          VERSION="${TAG#symbols-v}"
+
+          # Extract version from Symbols .csproj
+          FILE_VERSION=$(grep -oPm1 "(?<=<Version>)[^<]+" Datadog.MAUI.Symbols/Datadog.MAUI.Symbols.csproj)
+
+          echo "Tag version: $VERSION"
+          echo "File version: $FILE_VERSION"
+
+          if [ "$VERSION" != "$FILE_VERSION" ]; then
+            echo "::error::Version mismatch! Tag: $VERSION, File: $FILE_VERSION"
+            echo "::error::Update <Version> in Datadog.MAUI.Symbols/Datadog.MAUI.Symbols.csproj to $VERSION"
+            echo "is_valid=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          echo "is_valid=true" >> $GITHUB_OUTPUT
+          echo "✅ Version validation passed"
+
   publish-to-nuget:
+    needs: validate-version
     name: Publish to NuGet.org
     runs-on: ubuntu-latest
     # Only run for symbols releases (tagged with symbols-v*)
