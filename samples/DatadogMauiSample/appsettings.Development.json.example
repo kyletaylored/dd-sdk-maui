@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json.schemastore.org/appsettings.json",
+  "Datadog": {
+    "Environment": "development",
+    "VerboseLogging": true,
+    "Android": {
+      "ClientToken": "",
+      "RumApplicationId": ""
+    },
+    "iOS": {
+      "ClientToken": "",
+      "RumApplicationId": ""
+    }
+  }
+}

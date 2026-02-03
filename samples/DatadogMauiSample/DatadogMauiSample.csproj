@@ -83,6 +83,16 @@
 		<DatadogDryRun>true</DatadogDryRun>		<!-- Set to false for actual uploads -->
 	</PropertyGroup>
 
+	<!-- iOS Code Signing Configuration -->
+	<PropertyGroup Condition="$(TargetFramework.Contains('ios'))">
+		<!-- Automatic signing - Xcode will manage provisioning profiles -->
+		<CodesignProvision></CodesignProvision>
+		<CodesignKey>Apple Development</CodesignKey>
+		<CodesignEntitlements>Platforms/iOS/Entitlements.plist</CodesignEntitlements>
+		<!-- Set your Team ID here after getting it from Apple Developer portal -->
+		<DevelopmentTeam>LPGVJL9H49</DevelopmentTeam>
+	</PropertyGroup>
+
 	<!-- Custom target to remove duplicate tracing AAR before dex compilation -->
 	<Target Name="RemoveDuplicateTracingAAR" BeforeTargets="_CompileToDalvik" Condition="'$(TargetFramework)' == 'net10.0-android'">
 		<Exec Command="find $(IntermediateOutputPath)lp -type d -name '12*' -o -name '16*' | while read dir; do if [ -f &quot;$$dir/jl/classes.jar&quot; ] &amp;&amp; unzip -l &quot;$$dir/jl/classes.jar&quot; 2&gt;/dev/null | grep -q 'androidx/tracing/TraceKt.class' &amp;&amp; echo &quot;$$dir&quot; | grep -q '/12'; then echo &quot;Removing duplicate tracing-android from $$dir&quot;; rm -rf &quot;$$dir/jl/classes.jar&quot;; fi; done" IgnoreExitCode="true" Condition="Exists('$(IntermediateOutputPath)lp')" />
@@ -109,7 +119,15 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.9" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- Configuration files as embedded resources -->
+		<MauiAsset Include="appsettings.json" />
+		<MauiAsset Include="appsettings.*.json" />
 	</ItemGroup>
 
 	<!-- Android-specific package exclusions -->
@@ -157,45 +175,5 @@
 		<RestoreAdditionalProjectSources>$(MSBuildProjectDirectory)/../../artifacts;$(RestoreAdditionalProjectSources)</RestoreAdditionalProjectSources>
 	</PropertyGroup>
 
-	<!-- ================================================================ -->
-	<!-- MSBuild Targets for Platform-Specific RUM Configuration         -->
-	<!-- ================================================================ -->
-
-	<!-- Property resolution: Read from environment if not set via command line -->
-	<PropertyGroup>
-		<AndroidClientToken Condition="'$(AndroidClientToken)' == ''">$(DD_RUM_ANDROID_CLIENT_TOKEN)</AndroidClientToken>
-		<AndroidApplicationId Condition="'$(AndroidApplicationId)' == ''">$(DD_RUM_ANDROID_APPLICATION_ID)</AndroidApplicationId>
-		<IosClientToken Condition="'$(IosClientToken)' == ''">$(DD_RUM_IOS_CLIENT_TOKEN)</IosClientToken>
-		<IosApplicationId Condition="'$(IosApplicationId)' == ''">$(DD_RUM_IOS_APPLICATION_ID)</IosApplicationId>
-	</PropertyGroup>
-
-	<!-- Generate Android config file before build -->
-	<Target Name="GenerateAndroidRumConfig" BeforeTargets="BeforeBuild" Condition="$(TargetFramework.Contains('android'))">
-		<Message Text="🐕 Generating Android RUM config file..." Importance="high" Condition="'$(AndroidClientToken)' != ''" />
-		<Message Text="  Client Token: $(AndroidClientToken)" Importance="high" Condition="'$(AndroidClientToken)' != ''" />
-		<Message Text="  Application ID: $(AndroidApplicationId)" Importance="high" Condition="'$(AndroidApplicationId)' != ''" />
-		<Message Text="⚠️  No Android RUM credentials found! App will use placeholder values." Importance="high" Condition="'$(AndroidClientToken)' == ''" />
-
-		<WriteLinesToFile File="$(MSBuildProjectDirectory)/Config/datadog-rum-android.config" Lines="DD_RUM_ANDROID_CLIENT_TOKEN=$(AndroidClientToken);DD_RUM_ANDROID_APPLICATION_ID=$(AndroidApplicationId)" Overwrite="true" Condition="'$(AndroidClientToken)' != ''" />
-	</Target>
-
-	<!-- Generate iOS config file before build -->
-	<Target Name="GenerateIosRumConfig" BeforeTargets="BeforeBuild" Condition="$(TargetFramework.Contains('ios'))">
-		<Message Text="🐕 Generating iOS RUM config file..." Importance="high" Condition="'$(IosClientToken)' != ''" />
-		<Message Text="  Client Token: $(IosClientToken)" Importance="high" Condition="'$(IosClientToken)' != ''" />
-		<Message Text="  Application ID: $(IosApplicationId)" Importance="high" Condition="'$(IosApplicationId)' != ''" />
-		<Message Text="⚠️  No iOS RUM credentials found! App will use placeholder values." Importance="high" Condition="'$(IosClientToken)' == ''" />
-
-		<WriteLinesToFile File="$(MSBuildProjectDirectory)/Config/datadog-rum-ios.config" Lines="DD_RUM_IOS_CLIENT_TOKEN=$(IosClientToken);DD_RUM_IOS_APPLICATION_ID=$(IosApplicationId)" Overwrite="true" Condition="'$(IosClientToken)' != ''" />
-	</Target>
-
-	<!-- Embed config files as resources -->
-	<ItemGroup Condition="$(TargetFramework.Contains('android'))">
-		<EmbeddedResource Include="Config/datadog-rum-android.config" Condition="Exists('Config/datadog-rum-android.config')" />
-	</ItemGroup>
-
-	<ItemGroup Condition="$(TargetFramework.Contains('ios'))">
-		<EmbeddedResource Include="Config/datadog-rum-ios.config" Condition="Exists('Config/datadog-rum-ios.config')" />
-	</ItemGroup>
 
 </Project>

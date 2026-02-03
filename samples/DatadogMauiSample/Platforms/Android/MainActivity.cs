@@ -38,9 +38,6 @@ public class MainActivity : MauiAppCompatActivity
         {
             System.Diagnostics.Debug.WriteLine("[Datadog] Initializing for Android");
 
-            // Load configuration from environment
-            DatadogConfig.LoadFromEnvironment();
-
             System.Diagnostics.Debug.WriteLine($"[Datadog] - Environment: {DatadogConfig.Environment}");
             System.Diagnostics.Debug.WriteLine($"[Datadog] - Service: {DatadogConfig.ServiceName}");
 

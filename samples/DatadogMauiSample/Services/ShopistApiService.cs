@@ -3,6 +3,9 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using DatadogMauiSample.Models;
+using Datadog.Maui.Logs;
+using Datadog.Maui.Rum;
+using Datadog.Maui.Tracing;
 
 namespace DatadogMauiSample.Services;
 
@@ -12,6 +15,7 @@ namespace DatadogMauiSample.Services;
 public class ShopistApiService
 {
     private readonly HttpClient _httpClient;
+    private readonly ILogger _logger;
     private const string BaseUrl = "https://fakestoreapi.com";
     private string? _authToken; // Store auth token after login
 
@@ -20,6 +24,8 @@ public class ShopistApiService
     /// </summary>
     public ShopistApiService()
     {
+        // Create a logger for this service
+        _logger = Logs.CreateLogger("shopist-api");
 #if IOS && FALSE  // Temporarily disabled for testing
         // On iOS, use Datadog's HTTP message handler for automatic span creation and trace header injection
         var datadogHandler = new Datadog.Maui.Http.DatadogHttpMessageHandler(new[] { "fakestoreapi.com" });
@@ -77,8 +83,21 @@ public class ShopistApiService
     /// </summary>
     public async Task<(bool success, string? token, string? error)> LoginAsync(string username, string password)
     {
+        // Start a trace span for login operation
+        using var span = Tracer.StartSpan("api.login");
+        span.SetTag("username", username);
+
+        // Track as RUM resource
+        var resourceKey = $"login_{Guid.NewGuid()}";
+        Rum.StartResource(resourceKey, "POST", $"{BaseUrl}/auth/login");
+
         try
         {
+            _logger.Info("Attempting user login", error: null, attributes: new Dictionary<string, object>
+            {
+                { "username", username }
+            });
+
             System.Diagnostics.Debug.WriteLine($"[API] POST /auth/login - Attempting login for user: {username}");
 
             var loginData = new { username, password };
@@ -87,6 +106,23 @@ public class ShopistApiService
             if (!response.IsSuccessStatusCode)
             {
                 System.Diagnostics.Debug.WriteLine($"[API] ✗ Login failed with status: {response.StatusCode}");
+
+                _logger.Warn("Login failed", error: null, attributes: new Dictionary<string, object>
+                {
+                    { "username", username },
+                    { "status_code", (int)response.StatusCode }
+                });
+
+                span.SetTag("login_success", "false");
+                span.SetTag("status_code", ((int)response.StatusCode).ToString());
+
+                Rum.StopResource(resourceKey, statusCode: (int)response.StatusCode, kind: RumResourceKind.Xhr);
+                Rum.AddAction(RumActionType.Custom, "login_failed", new Dictionary<string, object>
+                {
+                    { "username", username },
+                    { "status_code", (int)response.StatusCode }
+                });
+
                 return (false, null, $"Login failed: {response.StatusCode}");
             }
 
@@ -97,11 +133,38 @@ public class ShopistApiService
 
             _authToken = result?.Token;
             System.Diagnostics.Debug.WriteLine($"[API] ✓ Login successful, token received");
+
+            _logger.Info("Login successful", error: null, attributes: new Dictionary<string, object>
+            {
+                { "username", username }
+            });
+
+            span.SetTag("login_success", "true");
+            Rum.StopResource(resourceKey, statusCode: (int)response.StatusCode, kind: RumResourceKind.Xhr);
+            Rum.AddAction(RumActionType.Custom, "login_success", new Dictionary<string, object>
+            {
+                { "username", username }
+            });
+
             return (true, _authToken, null);
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[API] ✗ Login error: {ex.Message}");
+
+            _logger.Error("Login error", ex, new Dictionary<string, object>
+            {
+                { "username", username }
+            });
+
+            span.SetError(ex);
+            Rum.StopResourceWithError(resourceKey, ex);
+            Rum.AddError(ex, RumErrorSource.Network, new Dictionary<string, object>
+            {
+                { "username", username },
+                { "operation", "login" }
+            });
+
             return (false, null, ex.Message);
         }
     }
@@ -115,9 +178,26 @@ public class ShopistApiService
     /// </summary>
     public async Task<List<Product>> GetProductsAsync(int? limit = null)
     {
+        // Start a distributed trace span
+        using var span = Tracer.StartSpan("api.get_products");
+        if (limit.HasValue)
+        {
+            span.SetTag("limit", limit.Value.ToString());
+        }
+
+        // Track as RUM resource
+        var resourceKey = $"get_products_{Guid.NewGuid()}";
+        var url = limit.HasValue ? $"/products?limit={limit.Value}" : "/products";
+        Rum.StartResource(resourceKey, "GET", $"{BaseUrl}{url}");
+
         try
         {
-            var url = limit.HasValue ? $"/products?limit={limit.Value}" : "/products";
+            _logger.Info("Fetching products", error: null, attributes: new Dictionary<string, object>
+            {
+                { "limit", limit ?? -1 },
+                { "url", url }
+            });
+
             System.Diagnostics.Debug.WriteLine($"[API] GET {url} - Fetching products");
 
             var response = await _httpClient.GetAsync(url);
@@ -129,9 +209,24 @@ public class ShopistApiService
             });
 
             if (products == null)
+            {
+                _logger.Warn("Received null products response");
+                Rum.StopResource(resourceKey, statusCode: (int)response.StatusCode, size: 0, kind: RumResourceKind.Xhr);
                 return new List<Product>();
+            }
 
             System.Diagnostics.Debug.WriteLine($"[API] ✓ Received {products.Count} products");
+
+            _logger.Info("Products fetched successfully", error: null, attributes: new Dictionary<string, object>
+            {
+                { "product_count", products.Count }
+            });
+
+            span.SetTag("product_count", products.Count.ToString());
+            Rum.StopResource(resourceKey,
+                statusCode: (int)response.StatusCode,
+                size: response.Content.Headers.ContentLength ?? 0,
+                kind: RumResourceKind.Xhr);
 
             // Convert FakeStore API products to our display model
             return products.Select(p => new Product
@@ -148,6 +243,16 @@ public class ShopistApiService
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[API] ✗ Error fetching products: {ex.Message}");
+
+            _logger.Error("Failed to fetch products", ex, new Dictionary<string, object>
+            {
+                { "url", url }
+            });
+
+            span.SetError(ex);
+            Rum.StopResourceWithError(resourceKey, ex);
+            Rum.AddError(ex, RumErrorSource.Network);
+
             return new List<Product>();
         }
     }
@@ -455,43 +560,127 @@ public class ShopistApiService
     /// </summary>
     public async Task<bool> SimulateFullPurchaseFlowAsync(string productId)
     {
+        // Create a parent span for the entire purchase flow
+        using var purchaseSpan = Tracer.StartSpan("api.purchase_flow");
+        purchaseSpan.SetTag("product_id", productId);
+
+        // Track this as a custom RUM action
+        Rum.AddAction(RumActionType.Custom, "purchase_flow_started", new Dictionary<string, object>
+        {
+            { "product_id", productId }
+        });
+
         try
         {
-            // Step 1: Get product details
-            var product = await GetProductByIdAsync(productId);
-            if (product == null)
+            _logger.Info("Starting purchase flow", error: null, attributes: new Dictionary<string, object>
             {
-                System.Diagnostics.Debug.WriteLine("[API] Failed to get product details");
-                return false;
+                { "product_id", productId }
+            });
+
+            // Step 1: Get product details
+            using (var getProductSpan = Tracer.StartSpan("api.get_product", purchaseSpan))
+            {
+                getProductSpan.SetTag("product_id", productId);
+                var product = await GetProductByIdAsync(productId);
+                if (product == null)
+                {
+                    _logger.Error("Failed to get product details in purchase flow");
+                    System.Diagnostics.Debug.WriteLine("[API] Failed to get product details");
+                    Rum.AddError("Product not found", RumErrorSource.Source, attributes: new Dictionary<string, object>
+                    {
+                        { "product_id", productId },
+                        { "step", "get_product" }
+                    });
+                    return false;
+                }
+                getProductSpan.SetTag("product_name", product.Name);
+                getProductSpan.SetTag("product_price", product.Price.ToString());
             }
 
             // Step 2: Create cart
-            var cartId = await CreateCartAsync(1, new List<(string, int)> { (productId, 1) });
-            if (string.IsNullOrEmpty(cartId))
+            string? cartId;
+            using (var createCartSpan = Tracer.StartSpan("api.create_cart", purchaseSpan))
             {
-                System.Diagnostics.Debug.WriteLine("[API] Failed to create cart");
-                return false;
+                cartId = await CreateCartAsync(1, new List<(string, int)> { (productId, 1) });
+                if (string.IsNullOrEmpty(cartId))
+                {
+                    _logger.Error("Failed to create cart in purchase flow");
+                    System.Diagnostics.Debug.WriteLine("[API] Failed to create cart");
+                    Rum.AddError("Cart creation failed", RumErrorSource.Source, attributes: new Dictionary<string, object>
+                    {
+                        { "product_id", productId },
+                        { "step", "create_cart" }
+                    });
+                    return false;
+                }
+                createCartSpan.SetTag("cart_id", cartId);
+                System.Diagnostics.Debug.WriteLine($"[API] Created cart: {cartId}");
             }
 
-            System.Diagnostics.Debug.WriteLine($"[API] Created cart: {cartId}");
+            purchaseSpan.SetTag("cart_id", cartId);
+            Rum.AddTiming("cart_created");
 
             // Step 3: Get cart details to verify
-            var cart = await GetCartByIdAsync(cartId);
-            System.Diagnostics.Debug.WriteLine($"[API] Cart contains {cart?.Products?.Count ?? 0} items");
+            using (var getCartSpan = Tracer.StartSpan("api.get_cart", purchaseSpan))
+            {
+                var cart = await GetCartByIdAsync(cartId);
+                var itemCount = cart?.Products?.Count ?? 0;
+                getCartSpan.SetTag("item_count", itemCount.ToString());
+                System.Diagnostics.Debug.WriteLine($"[API] Cart contains {itemCount} items");
+            }
 
             // Step 4: Apply coupon
-            var couponApplied = await ApplyCouponAsync(cartId);
-            System.Diagnostics.Debug.WriteLine($"[API] Coupon applied: {couponApplied}");
+            using (var couponSpan = Tracer.StartSpan("api.apply_coupon", purchaseSpan))
+            {
+                var couponApplied = await ApplyCouponAsync(cartId);
+                couponSpan.SetTag("coupon_applied", couponApplied.ToString());
+                System.Diagnostics.Debug.WriteLine($"[API] Coupon applied: {couponApplied}");
+                Rum.AddTiming("coupon_applied");
+            }
 
             // Step 5: Checkout
-            var checkoutSuccess = await CheckoutAsync($"/carts/{cartId}");
-            System.Diagnostics.Debug.WriteLine($"[API] Checkout success: {checkoutSuccess}");
+            bool checkoutSuccess;
+            using (var checkoutSpan = Tracer.StartSpan("api.checkout", purchaseSpan))
+            {
+                checkoutSuccess = await CheckoutAsync($"/carts/{cartId}");
+                checkoutSpan.SetTag("checkout_success", checkoutSuccess.ToString());
+                System.Diagnostics.Debug.WriteLine($"[API] Checkout success: {checkoutSuccess}");
+            }
+
+            if (checkoutSuccess)
+            {
+                _logger.Info("Purchase flow completed successfully", error: null, attributes: new Dictionary<string, object>
+                {
+                    { "product_id", productId },
+                    { "cart_id", cartId }
+                });
+
+                purchaseSpan.SetTag("purchase_success", "true");
+                Rum.AddAction(RumActionType.Custom, "purchase_completed", new Dictionary<string, object>
+                {
+                    { "product_id", productId },
+                    { "cart_id", cartId }
+                });
+            }
 
             return checkoutSuccess;
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[API] Error in purchase flow: {ex.Message}");
+
+            _logger.Error("Purchase flow failed", ex, new Dictionary<string, object>
+            {
+                { "product_id", productId }
+            });
+
+            purchaseSpan.SetError(ex);
+            Rum.AddError(ex, RumErrorSource.Source, new Dictionary<string, object>
+            {
+                { "product_id", productId },
+                { "flow", "purchase" }
+            });
+
             return false;
         }
     }

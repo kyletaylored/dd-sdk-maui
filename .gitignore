@@ -99,6 +99,10 @@ _reference/
 *.env
 !.env.example
 
+# appsettings files with secrets
+**/appsettings.Development.json
+!**/appsettings.Development.json.example
+
 # Generated Datadog RUM config files (contain credentials)
 **/Config/datadog-rum-*.config
 
