@@ -103,14 +103,14 @@ public partial class ProfilePage : ContentPage
         if (string.IsNullOrWhiteSpace(name))
         {
             _logger.Warn("Sign-in attempted with empty name");
-            DisplayAlert("Error", "Please enter your name", "OK");
+            DisplayAlertAsync("Error", "Please enter your name", "OK");
             return;
         }
 
         if (string.IsNullOrWhiteSpace(email))
         {
             _logger.Warn("Sign-in attempted with empty email");
-            DisplayAlert("Error", "Please enter your email", "OK");
+            DisplayAlertAsync("Error", "Please enter your email", "OK");
             return;
         }
 
@@ -188,21 +188,21 @@ public partial class ProfilePage : ContentPage
                     Log($"[Datadog] User signed in via API: {_currentUser.Name} ({_currentUser.Email})");
 
                     UpdateUI();
-                    await DisplayAlert("Success", $"Welcome, {_currentUser.Name}!\n\nAuthentication token received.", "OK");
+                    await DisplayAlertAsync("Success", $"Welcome, {_currentUser.Name}!\n\nAuthentication token received.", "OK");
                     return true;
                 }
             }
             else
             {
                 Log($"[ProfilePage] Login failed: {error}");
-                await DisplayAlert("Login Failed", error ?? "Unknown error", "OK");
+                await DisplayAlertAsync("Login Failed", error ?? "Unknown error", "OK");
                 return false;
             }
         }
         catch (Exception ex)
         {
             Log($"[ProfilePage] Login exception: {ex.Message}");
-            await DisplayAlert("Error", $"Login error: {ex.Message}", "OK");
+            await DisplayAlertAsync("Error", $"Login error: {ex.Message}", "OK");
         }
 
         return false;
@@ -239,7 +239,7 @@ public partial class ProfilePage : ContentPage
         Console.WriteLine($"[Datadog] User signed in: {_currentUser.Name} ({_currentUser.Email})");
 
         UpdateUI();
-        DisplayAlert("Success", $"Welcome, {_currentUser.Name}!", "OK");
+        DisplayAlertAsync("Success", $"Welcome, {_currentUser.Name}!", "OK");
     }
 
     private void OnSignOutClicked(object? sender, EventArgs e)
@@ -268,7 +268,7 @@ public partial class ProfilePage : ContentPage
         Console.WriteLine("[Datadog] User signed out");
 
         UpdateUI();
-        DisplayAlert("Signed Out", "You have been signed out", "OK");
+        DisplayAlertAsync("Signed Out", "You have been signed out", "OK");
     }
 
     private void OnUpdateProfileClicked(object? sender, EventArgs e)
@@ -280,7 +280,7 @@ public partial class ProfilePage : ContentPage
         // On iOS:
         // RUMMonitor.shared().addUserAttribute(forKey: "plan", value: "premium")
 
-        DisplayAlert("Profile Updated", "User attributes updated in Datadog RUM", "OK");
+        DisplayAlertAsync("Profile Updated", "User attributes updated in Datadog RUM", "OK");
     }
 
     private void UpdateUI()
