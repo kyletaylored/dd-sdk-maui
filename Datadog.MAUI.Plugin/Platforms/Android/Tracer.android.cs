@@ -1,5 +1,3 @@
-using IO.Opentracing.Propagation;
-
 namespace Datadog.Maui.Tracing;
 
 public static partial class Tracer
@@ -14,8 +12,8 @@ public static partial class Tracer
             {
                 // Use reflection to call GlobalDatadogTracer.get()
                 var globalTracerClass = Java.Lang.Class.ForName("com.datadog.android.trace.GlobalDatadogTracer");
-                var getMethod = globalTracerClass?.GetMethod("get");
-                _nativeTracer = getMethod?.Invoke(null) as Java.Lang.Object;
+                var getMethod = globalTracerClass!.GetMethod("get");
+                _nativeTracer = getMethod!.Invoke(null, Array.Empty<Java.Lang.Object>()) as Java.Lang.Object;
 
                 if (_nativeTracer == null)
                 {
@@ -29,9 +27,9 @@ public static partial class Tracer
     private static partial ISpan PlatformStartSpan(string operationName, ISpan? parent, DateTimeOffset? startTime)
     {
         // Call tracer.buildSpan(operationName)
-        var tracerClass = NativeTracer.Class;
-        var buildSpanMethod = tracerClass?.GetMethod("buildSpan", Java.Lang.Class.FromType(typeof(Java.Lang.String)));
-        var spanBuilder = buildSpanMethod?.Invoke(NativeTracer, new Java.Lang.String(operationName)) as Java.Lang.Object;
+        var tracerClass = NativeTracer.Class!;
+        var buildSpanMethod = tracerClass.GetMethod("buildSpan", Java.Lang.Class.FromType(typeof(Java.Lang.String))!)!;
+        var spanBuilder = buildSpanMethod.Invoke(NativeTracer, new Java.Lang.String(operationName)) as Java.Lang.Object;
 
         if (spanBuilder == null)
         {
@@ -41,25 +39,26 @@ public static partial class Tracer
         // Set parent if provided
         if (parent is Platforms.Android.AndroidSpan androidParent)
         {
-            var spanBuilderClass = spanBuilder.Class;
-            var asChildOfMethod = spanBuilderClass?.GetMethod("asChildOf", Java.Lang.Class.FromType(typeof(Java.Lang.Object)));
+            var spanBuilderClass = spanBuilder.Class!;
+            var asChildOfMethod = spanBuilderClass.GetMethod("asChildOf", Java.Lang.Class.FromType(typeof(Java.Lang.Object))!)!;
             var parentContext = androidParent.GetContext();
-            spanBuilder = asChildOfMethod?.Invoke(spanBuilder, parentContext) as Java.Lang.Object;
+            var args = parentContext != null ? new[] { parentContext } : Array.Empty<Java.Lang.Object>();
+            spanBuilder = asChildOfMethod.Invoke(spanBuilder, args) as Java.Lang.Object;
         }
 
         // Set start time if provided
         if (startTime.HasValue)
         {
             var microseconds = startTime.Value.ToUnixTimeMilliseconds() * 1000;
-            var spanBuilderClass = spanBuilder.Class;
-            var withStartTimestampMethod = spanBuilderClass?.GetMethod("withStartTimestamp", Java.Lang.Long.Type);
-            spanBuilder = withStartTimestampMethod?.Invoke(spanBuilder, Java.Lang.Long.ValueOf(microseconds)) as Java.Lang.Object;
+            var spanBuilderClass = spanBuilder!.Class!;
+            var withStartTimestampMethod = spanBuilderClass.GetMethod("withStartTimestamp", Java.Lang.Long.Type!)!;
+            spanBuilder = withStartTimestampMethod.Invoke(spanBuilder, Java.Lang.Long.ValueOf(microseconds)) as Java.Lang.Object;
         }
 
         // Call start() to create the span
-        var finalSpanBuilderClass = spanBuilder.Class;
-        var startMethod = finalSpanBuilderClass?.GetMethod("start");
-        var nativeSpan = startMethod?.Invoke(spanBuilder) as Java.Lang.Object;
+        var finalSpanBuilderClass = spanBuilder!.Class!;
+        var startMethod = finalSpanBuilderClass.GetMethod("start")!;
+        var nativeSpan = startMethod.Invoke(spanBuilder) as Java.Lang.Object;
 
         if (nativeSpan == null)
         {

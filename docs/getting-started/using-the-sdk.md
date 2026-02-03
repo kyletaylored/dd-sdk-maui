@@ -77,7 +77,7 @@ public static class MauiProgram
 ### 2. Start Logging
 
 ```csharp
-using Datadog.Maui;
+using Datadog.Maui.Logs;
 
 // Create a logger
 var logger = Logs.CreateLogger("my-logger");
@@ -104,7 +104,7 @@ catch (Exception ex)
 ### 3. Track User Interactions (RUM)
 
 ```csharp
-using Datadog.Maui;
+using Datadog.Maui.Rum;
 
 // Track a view
 Rum.StartView("home_screen", "Home Screen");
@@ -129,7 +129,7 @@ Rum.StopView("home_screen");
 ### 4. Trace Operations
 
 ```csharp
-using Datadog.Maui;
+using Datadog.Maui.Tracing;
 
 // Start a span
 using (var span = Tracer.StartSpan("api.fetch_users"))

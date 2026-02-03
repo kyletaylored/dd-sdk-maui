@@ -43,6 +43,7 @@ public class DatadogConfigurationBuilder
     private RumConfiguration? _rum;
     private LogsConfiguration? _logs;
     private TracingConfiguration? _tracing;
+    private SessionReplayConfiguration? _sessionReplay;
 
     /// <summary>
     /// Sets the client token for authentication with Datadog.
@@ -50,6 +51,22 @@ public class DatadogConfigurationBuilder
     public string ClientToken
     {
         set => _clientToken = value;
+    }
+
+    /// <summary>
+    /// Sets platform-specific client tokens for authentication with Datadog.
+    /// </summary>
+    /// <param name="android">Client token for Android.</param>
+    /// <param name="ios">Client token for iOS.</param>
+    public void SetClientToken(string android, string ios)
+    {
+#if ANDROID
+        _clientToken = android;
+#elif IOS
+        _clientToken = ios;
+#else
+        _clientToken = android; // Default to Android for other platforms
+#endif
     }
 
     /// <summary>
@@ -135,6 +152,16 @@ public class DatadogConfigurationBuilder
         _tracing = builder.Build();
     }
 
+    /// <summary>
+    /// Configures Session Replay.
+    /// </summary>
+    public void EnableSessionReplay(Action<SessionReplayConfiguration.Builder> configure)
+    {
+        var builder = new SessionReplayConfiguration.Builder();
+        configure(builder);
+        _sessionReplay = builder.Build();
+    }
+
     internal DatadogConfiguration Build()
     {
         if (string.IsNullOrWhiteSpace(_clientToken))
@@ -158,7 +185,8 @@ public class DatadogConfigurationBuilder
             FirstPartyHosts = _firstPartyHosts,
             Rum = _rum,
             Logs = _logs,
-            Tracing = _tracing
+            Tracing = _tracing,
+            SessionReplay = _sessionReplay
         };
     }
 }

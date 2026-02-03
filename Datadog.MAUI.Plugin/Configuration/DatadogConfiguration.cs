@@ -61,6 +61,11 @@ public class DatadogConfiguration
     public TracingConfiguration? Tracing { get; init; }
 
     /// <summary>
+    /// Session Replay configuration.
+    /// </summary>
+    public SessionReplayConfiguration? SessionReplay { get; init; }
+
+    /// <summary>
     /// Builder for creating DatadogConfiguration instances.
     /// </summary>
     public class Builder
@@ -76,6 +81,7 @@ public class DatadogConfiguration
         private RumConfiguration? _rum;
         private LogsConfiguration? _logs;
         private TracingConfiguration? _tracing;
+        private SessionReplayConfiguration? _sessionReplay;
 
         /// <summary>
         /// Creates a new configuration builder.
@@ -186,6 +192,17 @@ public class DatadogConfiguration
         }
 
         /// <summary>
+        /// Configures Session Replay.
+        /// </summary>
+        public Builder EnableSessionReplay(Action<SessionReplayConfiguration.Builder> configure)
+        {
+            var builder = new SessionReplayConfiguration.Builder();
+            configure(builder);
+            _sessionReplay = builder.Build();
+            return this;
+        }
+
+        /// <summary>
         /// Builds the configuration.
         /// </summary>
         public DatadogConfiguration Build()
@@ -208,7 +225,8 @@ public class DatadogConfiguration
                 FirstPartyHosts = _firstPartyHosts,
                 Rum = _rum,
                 Logs = _logs,
-                Tracing = _tracing
+                Tracing = _tracing,
+                SessionReplay = _sessionReplay
             };
         }
     }

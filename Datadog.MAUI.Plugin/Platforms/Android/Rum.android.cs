@@ -12,28 +12,30 @@ public static partial class Rum
     static partial void PlatformStartView(string key, string name, Dictionary<string, object>? attributes)
     {
         var rumMonitor = GlobalRumMonitor.Get();
+        var javaKey = (Java.Lang.Object)new Java.Lang.String(key);
         if (attributes != null && attributes.Count > 0)
         {
             var javaAttributes = attributes.ToDictionary(kvp => kvp.Key, kvp => ConvertToJavaObject(kvp.Value));
-            rumMonitor.StartView(key, name, javaAttributes);
+            rumMonitor.StartView(javaKey, name, javaAttributes);
         }
         else
         {
-            rumMonitor.StartView(key, name, new Dictionary<string, Java.Lang.Object>());
+            rumMonitor.StartView(javaKey, name, new Dictionary<string, Java.Lang.Object>());
         }
     }
 
     static partial void PlatformStopView(string key, Dictionary<string, object>? attributes)
     {
         var rumMonitor = GlobalRumMonitor.Get();
+        var javaKey = (Java.Lang.Object)new Java.Lang.String(key);
         if (attributes != null && attributes.Count > 0)
         {
             var javaAttributes = attributes.ToDictionary(kvp => kvp.Key, kvp => ConvertToJavaObject(kvp.Value));
-            rumMonitor.StopView(key, javaAttributes);
+            rumMonitor.StopView(javaKey, javaAttributes);
         }
         else
         {
-            rumMonitor.StopView(key, new Dictionary<string, Java.Lang.Object>());
+            rumMonitor.StopView(javaKey, new Dictionary<string, Java.Lang.Object>());
         }
     }
 
@@ -56,7 +58,7 @@ public static partial class Rum
     static partial void PlatformStartResource(string key, string method, string url, Dictionary<string, object>? attributes)
     {
         var rumMonitor = GlobalRumMonitor.Get();
-        var resourceMethod = RumResourceMethod.ValueOf(method.ToUpperInvariant());
+        var resourceMethod = RumResourceMethod.ValueOf(method.ToUpperInvariant())!;
 
         if (attributes != null && attributes.Count > 0)
         {
@@ -90,7 +92,7 @@ public static partial class Rum
     static partial void PlatformStopResourceWithError(string key, Exception error, Dictionary<string, object>? attributes)
     {
         var rumMonitor = GlobalRumMonitor.Get();
-        var throwable = error.ToJavaThrowable();
+        var throwable = error.ToJavaThrowable()!;
 
         if (attributes != null && attributes.Count > 0)
         {
@@ -202,6 +204,7 @@ public static partial class Rum
         }
 
         // Convert .NET types to Java types
+#pragma warning disable CS8603 // Possible null reference return - all switch cases return non-null Java.Lang.Object
         return value switch
         {
             string s => new Java.Lang.String(s),
@@ -214,5 +217,6 @@ public static partial class Rum
             short sh => Java.Lang.Short.ValueOf(sh),
             _ => new Java.Lang.String(value?.ToString() ?? "")
         };
+#pragma warning restore CS8603
     }
 }

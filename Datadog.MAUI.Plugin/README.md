@@ -79,7 +79,7 @@ public static class MauiProgram
 ### 2. Log Messages
 
 ```csharp
-using Datadog.Maui;
+using Datadog.Maui.Logs;
 
 var logger = Logs.CreateLogger("my-logger");
 
@@ -107,7 +107,7 @@ catch (Exception ex)
 ### 3. Track User Activity (RUM)
 
 ```csharp
-using Datadog.Maui;
+using Datadog.Maui.Rum;
 
 // Track views
 Rum.StartView("home_screen", "Home");
@@ -148,7 +148,7 @@ catch (Exception ex)
 ### 4. Distributed Tracing
 
 ```csharp
-using Datadog.Maui;
+using Datadog.Maui.Tracing;
 
 // Create a span
 using (var span = Tracer.StartSpan("process_order"))

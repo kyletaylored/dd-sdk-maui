@@ -52,6 +52,12 @@ public static partial class Datadog
         {
             InitializeTracing(configuration.Tracing);
         }
+
+        // Enable Session Replay if configured
+        if (configuration.SessionReplay != null)
+        {
+            SessionReplayInitializer.Initialize(configuration.SessionReplay);
+        }
     }
 
     private static void InitializeRum(RumConfiguration rumConfig)

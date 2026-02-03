@@ -62,15 +62,15 @@ internal class AndroidSpan : ISpan
         else if (value is bool b)
         {
             var setTagMethod = spanClass?.GetMethod("setTag",
-                Java.Lang.Class.FromType(typeof(Java.Lang.String)),
-                Java.Lang.Boolean.Type);
+                Java.Lang.Class.FromType(typeof(Java.Lang.String))!,
+                Java.Lang.Boolean.Type!);
             setTagMethod?.Invoke(_nativeSpan, new Java.Lang.String(key), Java.Lang.Boolean.ValueOf(b));
         }
         else if (value is int i)
         {
             var setTagMethod = spanClass?.GetMethod("setTag",
-                Java.Lang.Class.FromType(typeof(Java.Lang.String)),
-                Java.Lang.Integer.Type);
+                Java.Lang.Class.FromType(typeof(Java.Lang.String))!,
+                Java.Lang.Integer.Type!);
             setTagMethod?.Invoke(_nativeSpan, new Java.Lang.String(key), Java.Lang.Integer.ValueOf(i));
         }
         else if (value is double d)

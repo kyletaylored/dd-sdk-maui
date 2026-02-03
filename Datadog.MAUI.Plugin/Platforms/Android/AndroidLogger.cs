@@ -108,6 +108,7 @@ internal class AndroidLogger : ILogger
         }
 
         // Convert .NET types to Java types
+#pragma warning disable CS8603 // Possible null reference return - all switch cases return non-null Java.Lang.Object
         return value switch
         {
             string s => new Java.Lang.String(s),
@@ -120,6 +121,7 @@ internal class AndroidLogger : ILogger
             short sh => Java.Lang.Short.ValueOf(sh),
             _ => new Java.Lang.String(value?.ToString() ?? "")
         };
+#pragma warning restore CS8603
     }
 }
 

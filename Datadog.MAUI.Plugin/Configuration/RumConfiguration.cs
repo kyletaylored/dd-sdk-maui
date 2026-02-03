@@ -69,6 +69,23 @@ public class RumConfiguration
         }
 
         /// <summary>
+        /// Sets platform-specific RUM application IDs.
+        /// </summary>
+        /// <param name="android">Application ID for Android.</param>
+        /// <param name="ios">Application ID for iOS.</param>
+        public Builder SetApplicationId(string android, string ios)
+        {
+#if ANDROID
+            _applicationId = android;
+#elif IOS
+            _applicationId = ios;
+#else
+            _applicationId = android; // Default to Android for other platforms
+#endif
+            return this;
+        }
+
+        /// <summary>
         /// Sets the session sampling rate (0-100).
         /// </summary>
         public Builder SetSessionSampleRate(int rate)

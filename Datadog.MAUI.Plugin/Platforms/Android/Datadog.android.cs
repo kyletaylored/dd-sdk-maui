@@ -78,6 +78,12 @@ public static partial class Datadog
         {
             InitializeTracing(configuration.Tracing);
         }
+
+        // Enable Session Replay if configured
+        if (configuration.SessionReplay != null)
+        {
+            SessionReplayInitializer.Initialize(configuration.SessionReplay);
+        }
     }
 
     private static void InitializeRum(global::Datadog.Maui.Configuration.RumConfiguration rumConfig)
@@ -125,10 +131,10 @@ public static partial class Datadog
     static partial void PlatformSetUser(UserInfo userInfo)
     {
         DatadogCore.SetUserInfo(
-            userInfo.Id,
+            userInfo.Id ?? string.Empty,
             userInfo.Name,
             userInfo.Email,
-            userInfo.ExtraInfo?.ToDictionary(kvp => kvp.Key, kvp => (Java.Lang.Object)kvp.Value)
+            userInfo.ExtraInfo?.ToDictionary(kvp => kvp.Key, kvp => (Java.Lang.Object)kvp.Value) ?? new Dictionary<string, Java.Lang.Object>()
         );
     }
 
@@ -148,7 +154,7 @@ public static partial class Datadog
 
     static partial void PlatformClearUser()
     {
-        DatadogCore.SetUserInfo(null, null, null, null);
+        DatadogCore.SetUserInfo(string.Empty, null, null, new Dictionary<string, Java.Lang.Object>());
     }
 
     // Helper methods to map enums
