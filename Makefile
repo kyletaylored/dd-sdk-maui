@@ -130,8 +130,8 @@ sample-android: ## Build and run Android sample app (Debug mode)
 	@echo "$(BLUE)Building and running Android sample app...$(NC)"
 	@echo "$(YELLOW)Note: Credentials loaded from appsettings.Development.json$(NC)"
 	@cd samples/DatadogMauiSample && \
-		dotnet build -f net10.0-android -c Debug && \
-		dotnet build -f net10.0-android -c Debug -t:Run
+		dotnet build -f net9.0-android -c Debug && \
+		dotnet build -f net9.0-android -c Debug -t:Run
 	@echo "$(GREEN)✓ Android sample app launched$(NC)"
 
 sample-build-ios: ## Build iOS sample in Debug mode (uses ProjectReference)
@@ -147,7 +147,7 @@ sample-build-android: ## Build Android sample in Debug mode (uses ProjectReferen
 	@echo "$(YELLOW)Note: Credentials loaded from appsettings.Development.json$(NC)"
 	@cd samples/DatadogMauiSample && \
 		dotnet restore && \
-		dotnet build -f net10.0-android -c Debug
+		dotnet build -f net9.0-android -c Debug
 	@echo "$(GREEN)✓ Android sample built$(NC)"
 
 run-ios: ## Build and run iOS sample app (loads credentials from appsettings.Development.json)
@@ -182,15 +182,25 @@ run-android: ## Build and run Android sample app (loads credentials from appsett
 	@echo "$(GREEN)✓ Found appsettings.Development.json$(NC)"
 	@echo "$(YELLOW)Note: Credentials loaded from appsettings.Development.json$(NC)"
 	@cd samples/DatadogMauiSample && \
-		dotnet build -f net10.0-android -c Debug && \
-		dotnet build -f net10.0-android -c Debug -t:Run
+		dotnet build -f net9.0-android -c Debug && \
+		dotnet build -f net9.0-android -c Debug -t:Run
 	@echo "$(GREEN)✓ Android sample app launched$(NC)"
 
-sample-logs-android: ## View Android logs (filtered for Datadog and app)
-	@echo "$(BLUE)Viewing Android logs (filtering for Datadog and app output)...$(NC)"
+sample-logs-android: ## View Android logs (WARN and up: WARN, ERROR, FATAL)
+	@echo "$(BLUE)Viewing Android logs (WARN, ERROR, FATAL only)...$(NC)"
 	@echo "$(YELLOW)Press Ctrl+C to exit$(NC)"
 	@if command -v adb >/dev/null 2>&1; then \
-		adb logcat | grep -E "\[Datadog\]|mono-stdout|DatadogMauiSample|DOTNET"; \
+		adb logcat -v color '*:W'; \
+	else \
+		echo "$(RED)❌ adb not found in PATH$(NC)"; \
+		echo "Try: ~/Library/Android/sdk/platform-tools/adb logcat -v color '*:W'"; \
+	fi
+
+sample-logs-android-filtered: ## View Android logs (filtered for Datadog and app only)
+	@echo "$(BLUE)Viewing Android logs (filtering for Datadog and app output)...$(NC)"
+	@echo "$(YELLOW)Press Ctrl+C to exit. For all logs use: make sample-logs-android$(NC)"
+	@if command -v adb >/dev/null 2>&1; then \
+		adb logcat -v color '*:*' | grep --color=never -E "\[Datadog\]|mono-stdout|DatadogMauiSample|DOTNET|FATAL|AndroidRuntime"; \
 	else \
 		echo "$(RED)❌ adb not found in PATH$(NC)"; \
 		echo "Try: ~/Library/Android/sdk/platform-tools/adb logcat | grep '\\[Datadog\\]'"; \
