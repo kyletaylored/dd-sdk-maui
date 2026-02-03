@@ -27,23 +27,23 @@
   <!-- Meta-package dependencies: PackageReference to avoid duplicate class errors -->
   <ItemGroup>
     <!-- Core packages -->
-    <PackageReference Include="Datadog.MAUI.Android.Internal" Version="$(DatadogSdkVersion)" />
-    <PackageReference Include="Datadog.MAUI.Android.Core" Version="$(DatadogSdkVersion)" />
-    <PackageReference Include="Datadog.MAUI.Android.OpenTracingApi" Version="$(DatadogSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.Android.Internal" Version="$(DatadogAndroidSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.Android.Core" Version="$(DatadogAndroidSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.Android.OpenTracingApi" Version="$(DatadogAndroidSdkVersion)" />
 
     <!-- Feature packages -->
-    <PackageReference Include="Datadog.MAUI.Android.RUM" Version="$(DatadogSdkVersion)" />
-    <PackageReference Include="Datadog.MAUI.Android.Logs" Version="$(DatadogSdkVersion)" />
-    <PackageReference Include="Datadog.MAUI.Android.Trace" Version="$(DatadogSdkVersion)" />
-    <PackageReference Include="Datadog.MAUI.Android.NDK" Version="$(DatadogSdkVersion)" />
-    <PackageReference Include="Datadog.MAUI.Android.SessionReplay" Version="$(DatadogSdkVersion)" />
-    <PackageReference Include="Datadog.MAUI.Android.WebView" Version="$(DatadogSdkVersion)" />
-    <PackageReference Include="Datadog.MAUI.Android.Flags" Version="$(DatadogSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.Android.RUM" Version="$(DatadogAndroidSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.Android.Logs" Version="$(DatadogAndroidSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.Android.Trace" Version="$(DatadogAndroidSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.Android.NDK" Version="$(DatadogAndroidSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.Android.SessionReplay" Version="$(DatadogAndroidSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.Android.WebView" Version="$(DatadogAndroidSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.Android.Flags" Version="$(DatadogAndroidSdkVersion)" />
 
     <!-- Integration packages -->
-    <PackageReference Include="Datadog.MAUI.Android.OkHttp" Version="$(DatadogSdkVersion)" />
-    <PackageReference Include="Datadog.MAUI.Android.Trace.OpenTelemetry" Version="$(DatadogSdkVersion)" />
-    <PackageReference Include="Datadog.MAUI.Android.OkHttp.OpenTelemetry" Version="$(DatadogSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.Android.OkHttp" Version="$(DatadogAndroidSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.Android.Trace.OpenTelemetry" Version="$(DatadogAndroidSdkVersion)" />
+    <PackageReference Include="Datadog.MAUI.Android.OkHttp.OpenTelemetry" Version="$(DatadogAndroidSdkVersion)" />
 
   </ItemGroup>
 

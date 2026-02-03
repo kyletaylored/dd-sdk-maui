@@ -3,6 +3,10 @@
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
 
   <PropertyGroup>
+    <!-- Override Version to use Android binding version for all Android binding packages -->
+    <Version>$(AndroidBindingVersion)</Version>
+    <PackageVersion>$(AndroidBindingVersion)</PackageVersion>
+
     <!-- Suppress benign Android binding warnings that are expected when binding Kotlin/Java libraries -->
     <!-- These warnings are informational and do not indicate actual problems with the bindings -->
 

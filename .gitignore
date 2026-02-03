@@ -109,3 +109,6 @@ _reference/
 # Claude docs
 /*.md
 !/README.md
+*.bak
+*.log
+*.swift

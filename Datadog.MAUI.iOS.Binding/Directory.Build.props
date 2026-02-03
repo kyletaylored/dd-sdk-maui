@@ -3,6 +3,10 @@
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
 
   <PropertyGroup>
+    <!-- Override Version to use iOS binding version for all iOS binding packages -->
+    <Version>$(iOSBindingVersion)</Version>
+    <PackageVersion>$(iOSBindingVersion)</PackageVersion>
+
     <!-- Suppress missing XML documentation warnings for binding projects -->
     <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>

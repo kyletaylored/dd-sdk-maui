@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-okhttp-otel" Version="$(DatadogSdkVersion)" VerifyDependencies="false" />
+    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-okhttp-otel" Version="$(DatadogAndroidSdkVersion)" VerifyDependencies="false" />
   </ItemGroup>
 
   <!-- AndroidX and third-party dependencies as NuGet packages -->
