@@ -1,14 +1,31 @@
 <Project>
   <PropertyGroup>
-    <!-- Datadog SDK Version - Keep in sync across iOS and Android -->
+    <!-- Base SDK Version - Default version for all components when not individually specified -->
     <DatadogSdkVersion>3.5.0</DatadogSdkVersion>
+
+    <!-- Native SDK Versions (what we fetch from upstream repos) -->
+    <!-- These control which version of the native iOS/Android SDKs to download and bind -->
+    <!-- Example: iOS releases 3.5.1 with critical fix, but Android still at 3.5.0 -->
+    <DatadogAndroidSdkVersion Condition="'$(DatadogAndroidSdkVersion)' == ''">$(DatadogSdkVersion)</DatadogAndroidSdkVersion>
+    <DatadogiOSSdkVersion Condition="'$(DatadogiOSSdkVersion)' == ''">$(DatadogSdkVersion)</DatadogiOSSdkVersion>
+
+    <!-- Platform-Specific Binding Versions (NuGet package versions we publish) -->
+    <!-- These default to the native SDK version they're binding, but can diverge for binding-specific fixes -->
+    <!-- Example: Android binding needs C# marshalling patch -> set AndroidBindingVersion to 3.5.0.1 -->
+    <AndroidBindingVersion Condition="'$(AndroidBindingVersion)' == ''">$(DatadogAndroidSdkVersion)</AndroidBindingVersion>
+    <iOSBindingVersion Condition="'$(iOSBindingVersion)' == ''">$(DatadogiOSSdkVersion)</iOSBindingVersion>
+
+    <!-- Plugin Version (the unified Datadog.MAUI package that references bindings) -->
+    <!-- Can diverge from binding versions for plugin-only enhancements -->
+    <PluginVersion Condition="'$(PluginVersion)' == ''">$(DatadogSdkVersion)</PluginVersion>
 
     <!-- Datadog Symbols Package Version - Independent versioning -->
     <DatadogSymbolsVersion>0.0.2</DatadogSymbolsVersion>
 
-    <!-- .NET MAUI Binding Package Version -->
-    <Version>$(DatadogSdkVersion)</Version>
-    <PackageVersion>$(DatadogSdkVersion)</PackageVersion>
+    <!-- Default Version for all packages (uses PluginVersion) -->
+    <!-- Platform-specific bindings can override by setting Version=$(AndroidBindingVersion) or Version=$(iOSBindingVersion) -->
+    <Version>$(PluginVersion)</Version>
+    <PackageVersion>$(PluginVersion)</PackageVersion>
 
     <!-- Common Package Metadata -->
     <Authors>Datadog</Authors>
@@ -16,8 +33,8 @@
     <Product>Datadog SDK for .NET MAUI</Product>
     <Copyright>Copyright © Datadog $(Year)</Copyright>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/DataDog/dd-sdk-maui</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/DataDog/dd-sdk-maui</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/kyletaylored/dd-sdk-maui</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/kyletaylored/dd-sdk-maui</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageTags>datadog;monitoring;rum;apm;logs;trace;maui;ios;android</PackageTags>

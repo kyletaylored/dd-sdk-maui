@@ -631,23 +631,60 @@ jobs:
       - name: Validate version matches tag
         run: |
           TAG_VERSION="${GITHUB_REF#refs/tags/v}"
-          FILE_VERSION=$(grep -oPm1 "(?<=<DatadogSdkVersion>)[^<]+" Directory.Build.props)
 
+          # Extract all version properties from Directory.Build.props
+          BASE_VERSION=$(grep -oPm1 "(?<=<DatadogSdkVersion>)[^<]+" Directory.Build.props)
+
+          # Extract native SDK versions (they may not be explicitly set, default to BASE_VERSION)
+          ANDROID_SDK_VERSION=$(grep -oPm1 "(?<=<DatadogAndroidSdkVersion>)[^<]+" Directory.Build.props || echo "$BASE_VERSION")
+          IOS_SDK_VERSION=$(grep -oPm1 "(?<=<DatadogiOSSdkVersion>)[^<]+" Directory.Build.props || echo "$BASE_VERSION")
+
+          # Extract binding package versions (default to their respective SDK versions)
+          ANDROID_VERSION=$(grep -oPm1 "(?<=<AndroidBindingVersion>)[^<]+" Directory.Build.props || echo "$ANDROID_SDK_VERSION")
+          IOS_VERSION=$(grep -oPm1 "(?<=<iOSBindingVersion>)[^<]+" Directory.Build.props || echo "$IOS_SDK_VERSION")
+          PLUGIN_VERSION=$(grep -oPm1 "(?<=<PluginVersion>)[^<]+" Directory.Build.props || echo "$BASE_VERSION")
+
+          echo "📦 Version Information"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo "🏷️  Git tag version: $TAG_VERSION"
-          echo "📄 Directory.Build.props version: $FILE_VERSION"
+          echo ""
+          echo "📄 Native SDK Versions (what we fetch):"
+          echo "   Android SDK version:     $ANDROID_SDK_VERSION"
+          echo "   iOS SDK version:         $IOS_SDK_VERSION"
+          echo ""
+          echo "📦 Binding Package Versions (what we publish):"
+          echo "   Android binding version: $ANDROID_VERSION"
+          echo "   iOS binding version:     $IOS_VERSION"
+          echo "   Plugin version:          $PLUGIN_VERSION"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
 
-          if [ "$TAG_VERSION" != "$FILE_VERSION" ]; then
+          # Validation: Git tag should match base SDK version (for now)
+          # In Phase 2, when versions diverge, we'll compare tag to PluginVersion instead
+          if [ "$TAG_VERSION" != "$BASE_VERSION" ]; then
             echo "❌ Version Mismatch Detected!"
             echo ""
-            echo "The git tag version does not match the version in Directory.Build.props."
+            echo "The git tag version does not match DatadogSdkVersion in Directory.Build.props."
             echo "Please ensure both versions are synchronized before creating a release."
             echo ""
-            echo "Expected: $FILE_VERSION"
+            echo "Expected: $BASE_VERSION"
             echo "Got: $TAG_VERSION"
+            echo ""
+            echo "Note: For now, git tags should match DatadogSdkVersion (base SDK version)."
+            echo "In the future (Phase 2), tags will represent PluginVersion instead."
             exit 1
           fi
 
-          echo "✅ Version validation passed: $TAG_VERSION"
+          # Check if versions have diverged
+          if [ "$ANDROID_VERSION" != "$BASE_VERSION" ] || [ "$IOS_VERSION" != "$BASE_VERSION" ] || [ "$PLUGIN_VERSION" != "$BASE_VERSION" ]; then
+            echo "ℹ️  Note: Platform versions have diverged from base version"
+            echo "   This is expected when making platform-specific or plugin-specific releases."
+          else
+            echo "✅ All versions are synchronized at $TAG_VERSION"
+          fi
+
+          echo ""
+          echo "✅ Version validation passed"
 
   # Optional: Create GitHub release (when tagged)
   create-release:
@@ -674,6 +711,25 @@ jobs:
           TAG_NAME=${GITHUB_REF#refs/tags/v}
           echo "version=$TAG_NAME" >> $GITHUB_OUTPUT
           echo "Release version: $TAG_NAME"
+
+          # Extract all version properties for release notes
+          BASE_VERSION=$(grep -oPm1 "(?<=<DatadogSdkVersion>)[^<]+" Directory.Build.props)
+
+          # Extract native SDK versions
+          ANDROID_SDK_VERSION=$(grep -oPm1 "(?<=<DatadogAndroidSdkVersion>)[^<]+" Directory.Build.props || echo "$BASE_VERSION")
+          IOS_SDK_VERSION=$(grep -oPm1 "(?<=<DatadogiOSSdkVersion>)[^<]+" Directory.Build.props || echo "$BASE_VERSION")
+
+          # Extract binding package versions
+          ANDROID_VERSION=$(grep -oPm1 "(?<=<AndroidBindingVersion>)[^<]+" Directory.Build.props || echo "$ANDROID_SDK_VERSION")
+          IOS_VERSION=$(grep -oPm1 "(?<=<iOSBindingVersion>)[^<]+" Directory.Build.props || echo "$IOS_SDK_VERSION")
+          PLUGIN_VERSION=$(grep -oPm1 "(?<=<PluginVersion>)[^<]+" Directory.Build.props || echo "$BASE_VERSION")
+
+          echo "base-version=$BASE_VERSION" >> $GITHUB_OUTPUT
+          echo "android-sdk-version=$ANDROID_SDK_VERSION" >> $GITHUB_OUTPUT
+          echo "ios-sdk-version=$IOS_SDK_VERSION" >> $GITHUB_OUTPUT
+          echo "android-version=$ANDROID_VERSION" >> $GITHUB_OUTPUT
+          echo "ios-version=$IOS_VERSION" >> $GITHUB_OUTPUT
+          echo "plugin-version=$PLUGIN_VERSION" >> $GITHUB_OUTPUT
 
       - name: Generate checksums
         run: |
@@ -709,10 +765,23 @@ jobs:
           echo ""
 
           # Start building release notes
-          cat > ../release-notes.md << EOF
+          cat > ../release-notes.md << 'EOF'
           # Datadog MAUI SDK ${{ steps.get-version.outputs.version }}
 
           .NET MAUI bindings for Datadog's native iOS and Android Mobile SDKs.
+
+          ## Version Information
+
+          ### Native SDK Versions (what we bind)
+          - **Android SDK**: ${{ steps.get-version.outputs.android-sdk-version }}
+          - **iOS SDK**: ${{ steps.get-version.outputs.ios-sdk-version }}
+
+          ### Binding Package Versions (what we publish)
+          - **Android Bindings**: ${{ steps.get-version.outputs.android-version }}
+          - **iOS Bindings**: ${{ steps.get-version.outputs.ios-version }}
+          - **Unified Plugin**: ${{ steps.get-version.outputs.plugin-version }}
+
+          > **Note**: When all versions are the same, packages are synchronized. Different native SDK versions indicate we're binding different upstream releases. Different binding versions indicate platform-specific fixes or enhancements.
 
           ## Packages
 

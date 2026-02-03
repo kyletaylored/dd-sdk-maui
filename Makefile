@@ -47,7 +47,10 @@ download-ios-frameworks: ## Download iOS XCFrameworks (macOS only)
 		echo "$(RED)Error: iOS framework download requires macOS$(NC)"; \
 		exit 1; \
 	fi
-	@SDK_VERSION=$$(grep -E '<DatadogSdkVersion>.*</DatadogSdkVersion>' Directory.Build.props | sed 's/.*<DatadogSdkVersion>\(.*\)<\/DatadogSdkVersion>.*/\1/'); \
+	@SDK_VERSION=$$(grep -E '<DatadogiOSSdkVersion>.*</DatadogiOSSdkVersion>' Directory.Build.props | sed 's/.*<DatadogiOSSdkVersion>\(.*\)<\/DatadogiOSSdkVersion>.*/\1/'); \
+	if [ -z "$$SDK_VERSION" ]; then \
+		SDK_VERSION=$$(grep -E '<DatadogSdkVersion>.*</DatadogSdkVersion>' Directory.Build.props | sed 's/.*<DatadogSdkVersion>\(.*\)<\/DatadogSdkVersion>.*/\1/'); \
+	fi; \
 	VERSION_FILE="Datadog.MAUI.iOS.Binding/artifacts/.version"; \
 	NEED_DOWNLOAD=false; \
 	if [ ! -d "Datadog.MAUI.iOS.Binding/artifacts" ] || [ -z "$$(ls -A Datadog.MAUI.iOS.Binding/artifacts/*.xcframework 2>/dev/null)" ]; then \
@@ -65,7 +68,7 @@ download-ios-frameworks: ## Download iOS XCFrameworks (macOS only)
 	if [ "$$NEED_DOWNLOAD" = "true" ]; then \
 		echo "$(BLUE)Downloading iOS XCFrameworks v$$SDK_VERSION...$(NC)"; \
 		chmod +x scripts/download-ios-frameworks.sh; \
-		if scripts/download-ios-frameworks.sh; then \
+		if scripts/download-ios-frameworks.sh "$$SDK_VERSION"; then \
 			echo "$$SDK_VERSION" > "$$VERSION_FILE"; \
 			echo "$(GREEN)✓ XCFrameworks downloaded$(NC)"; \
 		else \
