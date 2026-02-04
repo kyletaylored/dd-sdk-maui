@@ -27,14 +27,6 @@ public partial class CartPage : ContentPage
 
         // Subscribe to cart updates
         _cartService.CartUpdated += OnCartUpdated;
-
-        // Start RUM view tracking
-        Rum.StartView("cart", "Shopping Cart", new Dictionary<string, object>
-        {
-            { "screen_class", "CartPage" },
-            { "initial_item_count", _cartService.ItemCount }
-        });
-
         _logger.Info("CartPage initialized", null, new Dictionary<string, object>
         {
             { "item_count", _cartService.ItemCount },
@@ -50,14 +42,6 @@ public partial class CartPage : ContentPage
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
-
-        // Stop RUM view tracking
-        Rum.StopView("cart", new Dictionary<string, object>
-        {
-            { "final_item_count", _cartService.ItemCount },
-            { "final_total_amount", _cartService.TotalAmount }
-        });
-
         _logger.Debug("CartPage disappeared");
     }
 
