@@ -7,15 +7,8 @@ using Datadog.iOS.Internal;
 namespace Datadog.iOS.RUM
 {
 	// @protocol DDSwiftUIRUMActionsPredicate
-	/*
-  Check whether adding [Model] to this declaration is appropriate.
-  [Model] is used to generate a C# class that implements this protocol,
-  and might be useful for protocols that consumers are supposed to implement,
-  since consumers can subclass the generated class instead of implementing
-  the generated interface. If consumers are not supposed to implement this
-  protocol, then [Model] is redundant and will generate code that will never
-  be used.
-*/[Protocol]
+	[Protocol, Model]
+	[BaseType(typeof(NSObject))]
 	interface DDSwiftUIRUMActionsPredicate
 	{
 		// @required -(DDRUMAction * _Nullable)rumActionWith:(NSString * _Nonnull)componentName __attribute__((warn_unused_result("")));
@@ -28,7 +21,7 @@ namespace Datadog.iOS.RUM
 	// @interface DDDefaultSwiftUIRUMActionsPredicate : NSObject <DDSwiftUIRUMActionsPredicate>
 	[BaseType (typeof(NSObject))]
 	[DisableDefaultCtor]
-	interface DDDefaultSwiftUIRUMActionsPredicate : IDDSwiftUIRUMActionsPredicate
+	interface DDDefaultSwiftUIRUMActionsPredicate
 	{
 		// -(instancetype _Nonnull)initWithIsLegacyDetectionEnabled:(BOOL)isLegacyDetectionEnabled __attribute__((objc_designated_initializer));
 		[Export ("initWithIsLegacyDetectionEnabled:")]
@@ -42,15 +35,8 @@ namespace Datadog.iOS.RUM
 	}
 
 	// @protocol DDSwiftUIRUMViewsPredicate
-	/*
-  Check whether adding [Model] to this declaration is appropriate.
-  [Model] is used to generate a C# class that implements this protocol,
-  and might be useful for protocols that consumers are supposed to implement,
-  since consumers can subclass the generated class instead of implementing
-  the generated interface. If consumers are not supposed to implement this
-  protocol, then [Model] is redundant and will generate code that will never
-  be used.
-*/[Protocol]
+	[Protocol, Model]
+	[BaseType(typeof(NSObject))]
 	interface DDSwiftUIRUMViewsPredicate
 	{
 		// @required -(DDRUMView * _Nullable)rumViewFor:(NSString * _Nonnull)extractedViewName __attribute__((warn_unused_result("")));
@@ -62,7 +48,7 @@ namespace Datadog.iOS.RUM
 
 	// @interface DDDefaultSwiftUIRUMViewsPredicate : NSObject <DDSwiftUIRUMViewsPredicate>
 	[BaseType (typeof(NSObject))]
-	interface DDDefaultSwiftUIRUMViewsPredicate : IDDSwiftUIRUMViewsPredicate
+	interface DDDefaultSwiftUIRUMViewsPredicate
 	{
 		// -(DDRUMView * _Nullable)rumViewFor:(NSString * _Nonnull)extractedViewName __attribute__((warn_unused_result("")));
 		[Export ("rumViewFor:")]
@@ -71,15 +57,8 @@ namespace Datadog.iOS.RUM
 	}
 
 	// @protocol DDUITouchRUMActionsPredicate
-	/*
-  Check whether adding [Model] to this declaration is appropriate.
-  [Model] is used to generate a C# class that implements this protocol,
-  and might be useful for protocols that consumers are supposed to implement,
-  since consumers can subclass the generated class instead of implementing
-  the generated interface. If consumers are not supposed to implement this
-  protocol, then [Model] is redundant and will generate code that will never
-  be used.
-*/[Protocol]
+	[Protocol, Model]
+	[BaseType(typeof(NSObject))]
 	interface DDUITouchRUMActionsPredicate
 	{
 		// @required -(DDRUMAction * _Nullable)rumActionWithTargetView:(UIView * _Nonnull)targetView __attribute__((warn_unused_result("")));
@@ -90,22 +69,15 @@ namespace Datadog.iOS.RUM
 	}
 
 	// @protocol DDUIKitRUMActionsPredicate <DDUITouchRUMActionsPredicate>
-	/*
-  Check whether adding [Model] to this declaration is appropriate.
-  [Model] is used to generate a C# class that implements this protocol,
-  and might be useful for protocols that consumers are supposed to implement,
-  since consumers can subclass the generated class instead of implementing
-  the generated interface. If consumers are not supposed to implement this
-  protocol, then [Model] is redundant and will generate code that will never
-  be used.
-*/[Protocol]
-	interface DDUIKitRUMActionsPredicate : IDDUITouchRUMActionsPredicate
+	[Protocol, Model]
+	[BaseType(typeof(NSObject))]
+	interface DDUIKitRUMActionsPredicate
 	{
 	}
 
 	// @interface DDDefaultUIKitRUMActionsPredicate : NSObject <DDUIKitRUMActionsPredicate>
 	[BaseType (typeof(NSObject))]
-	interface DDDefaultUIKitRUMActionsPredicate : IDDUIKitRUMActionsPredicate
+	interface DDDefaultUIKitRUMActionsPredicate
 	{
 		// -(DDRUMAction * _Nullable)rumActionWithTargetView:(UIView * _Nonnull)targetView __attribute__((warn_unused_result("")));
 		[Export ("rumActionWithTargetView:")]
@@ -114,15 +86,8 @@ namespace Datadog.iOS.RUM
 	}
 
 	// @protocol DDUIKitRUMViewsPredicate
-	/*
-  Check whether adding [Model] to this declaration is appropriate.
-  [Model] is used to generate a C# class that implements this protocol,
-  and might be useful for protocols that consumers are supposed to implement,
-  since consumers can subclass the generated class instead of implementing
-  the generated interface. If consumers are not supposed to implement this
-  protocol, then [Model] is redundant and will generate code that will never
-  be used.
-*/[Protocol]
+	[Protocol, Model]
+	[BaseType(typeof(NSObject))]
 	interface DDUIKitRUMViewsPredicate
 	{
 		// @required -(DDRUMView * _Nullable)rumViewFor:(UIViewController * _Nonnull)viewController __attribute__((warn_unused_result("")));
@@ -134,7 +99,7 @@ namespace Datadog.iOS.RUM
 
 	// @interface DDDefaultUIKitRUMViewsPredicate : NSObject <DDUIKitRUMViewsPredicate>
 	[BaseType (typeof(NSObject))]
-	interface DDDefaultUIKitRUMViewsPredicate : IDDUIKitRUMViewsPredicate
+	interface DDDefaultUIKitRUMViewsPredicate
 	{
 		// -(DDRUMView * _Nullable)rumViewFor:(UIViewController * _Nonnull)viewController __attribute__((warn_unused_result("")));
 		[Export ("rumViewFor:")]
@@ -512,7 +477,7 @@ namespace Datadog.iOS.RUM
 
 		// @property (readonly, copy, nonatomic) NSString * _Nullable selector;
 		[NullAllowed, Export ("selector")]
-		string Selector { get; }
+		string CssSelector { get; }
 
 		// @property (readonly, nonatomic, strong) NSNumber * _Nullable width;
 		[NullAllowed, Export ("width", ArgumentSemantic.Strong)]
