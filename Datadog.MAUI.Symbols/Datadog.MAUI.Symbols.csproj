@@ -16,12 +16,12 @@
     <Description>MSBuild SDK for automatically uploading .NET MAUI debug symbols (dSYMs and Proguard mapping files) to Datadog during build/publish.</Description>
     <PackageTags>Datadog;MAUI;Symbols;dSYM;Proguard;Symbolication;MSBuild</PackageTags>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/DataDog/dd-sdk-dotnet</RepositoryUrl>
+    <RepositoryUrl>https://github.com/kyletaylored/dd-sdk-maui</RepositoryUrl>
     <PackageProjectUrl>https://docs.datadoghq.com/</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
 
     <!-- MSBuild SDK Package Settings -->
-    <DevelopmentDependency>true</DevelopmentDependency>
+    <DevelopmentDependency>false</DevelopmentDependency>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <NoWarn>$(NoWarn);NU5128;NU5129</NoWarn>
   </PropertyGroup>
@@ -33,12 +33,26 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Bundle a local datadog-ci npm tarball inside the NuGet -->
+    <None Include="tools\datadog-ci.tgz" Pack="true" PackagePath="tools\" Visible="false" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- Include the .targets file in the build folder of the NuGet package -->
     <None Include="build\Datadog.MAUI.Symbols.targets" Pack="true" PackagePath="build\" />
     <None Include="build\Datadog.MAUI.Symbols.targets" Pack="true" PackagePath="buildTransitive\" />
 
     <!-- Include README in the package -->
     <None Include="README.md" Pack="true" PackagePath="\" />
+
+    <!-- Optional but recommended: include LICENSE if present -->
+    <None Include="LICENSE" Pack="true" PackagePath="\" Condition="Exists('LICENSE')" />
   </ItemGroup>
+
+  <!-- Fail the pack if the tgz is missing (prevents shipping a broken package) -->
+  <Target Name="EnsureBundledDatadogCiExists" BeforeTargets="Pack">
+    <Error Condition="!Exists('tools\datadog-ci.tgz')"
+           Text="tools\datadog-ci.tgz is missing. Add it before packing so bundled datadog-ci mode can work." />
+  </Target>
 
 </Project>

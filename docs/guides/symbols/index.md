@@ -50,11 +50,11 @@ Add to your `.csproj`:
 ```xml
 <PropertyGroup>
   <!-- Required: Service name -->
-  <DatadogServiceNameAndroid>com.example.app.android</DatadogServiceNameAndroid>
-  <DatadogServiceNameiOS>com.example.app.ios</DatadogServiceNameiOS>
+  <DatadogSymbolsServiceNameAndroid>com.example.app.android</DatadogSymbolsServiceNameAndroid>
+  <DatadogSymbolsServiceNameiOS>com.example.app.ios</DatadogSymbolsServiceNameiOS>
 
   <!-- Optional: Set via environment variable instead -->
-  <!-- <DatadogApiKey>your-api-key</DatadogApiKey> -->
+  <!-- <DatadogSymbolsApiKey>your-api-key</DatadogSymbolsApiKey> -->
 </PropertyGroup>
 ```
 
@@ -84,6 +84,9 @@ That's it! Your symbols are now automatically uploaded to Datadog.
 - ✅ **CI/CD Ready**: Environment variable support
 - ✅ **Dry-run Mode**: Test without uploading
 - ✅ **Smart Defaults**: Works with standard MAUI project structures
+- ✅ **Build ID Support**: Generates unique build IDs for crash symbolication
+- ✅ **Bundled datadog-ci**: Ships with bundled CLI for deterministic behavior
+- ✅ **Flavor/Variant Support**: Differentiate between debug, release, staging builds
 
 ## How It Works
 
@@ -113,10 +116,19 @@ That's it! Your symbols are now automatically uploaded to Datadog.
 ## Requirements
 
 - **.NET MAUI** app (net6.0+)
-- **Node.js & npm** (for `datadog-ci`)
+- **Node.js (>= 18) & npm** (for `npx` and `datadog-ci`)
 - **Datadog API Key**
 - **Android**: ProGuard/R8 enabled for Release builds
 - **iOS**: Building with dSYM generation enabled
+
+## New in Latest Version
+
+The plugin now uses **namespaced MSBuild properties** (prefixed with `DatadogSymbols*`) to avoid conflicts with other Datadog packages. Key improvements:
+
+- **Bundled datadog-ci**: Enabled by default for deterministic behavior
+- **Build ID generation**: Automatic unique IDs for crash-to-symbol association
+- **Variant/Flavor support**: Track different build flavors (debug, release, staging)
+- **Runtime integration**: Generated `DatadogBuildInfo` class for RUM SDK integration
 
 ## Version Compatibility
 

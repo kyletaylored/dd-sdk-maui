@@ -105,7 +105,12 @@ build-plugin: ## Build the MAUI plugin project
 	@dotnet build Datadog.MAUI.Plugin/Datadog.MAUI.Plugin.csproj --configuration Release --no-restore --verbosity minimal
 	@echo "$(GREEN)✓ MAUI Plugin built$(NC)"
 
-build: build-android build-ios build-plugin ## Build all projects (Android, iOS, Plugin)
+build-symbols: ## Build the Symbols upload plugin
+	@echo "$(BLUE)Building Symbols plugin...$(NC)"
+	@dotnet build Datadog.MAUI.Symbols/Datadog.MAUI.Symbols.csproj --configuration Release --nologo --verbosity minimal
+	@echo "$(GREEN)✓ Symbols plugin built$(NC)"
+
+build: build-android build-ios build-plugin build-symbols ## Build all projects (Android, iOS, Plugin, Symbols)
 
 ##@ Packaging
 
@@ -231,12 +236,13 @@ publish-android: ## Publish Android sample in Release mode with symbols (APK for
 	@echo "$(YELLOW)Building Symbols package in Release...$(NC)"
 	@dotnet build Datadog.MAUI.Symbols/Datadog.MAUI.Symbols.csproj -c Release --nologo -v q
 	@if [ -z "$$DD_API_KEY" ]; then \
-		echo "$(YELLOW)⚠️  DD_API_KEY not set - symbols will not be uploaded$(NC)"; \
+		echo "$(YELLOW)⚠️  DD_API_KEY not set - symbol upload may fail$(NC)"; \
 	fi
 	@cd samples/DatadogMauiSample && \
 		dotnet publish -f net9.0-android -c Release -v normal \
 			-p:AndroidPackageFormat=apk \
-			-p:DatadogApiKey="$$DD_API_KEY"
+			-p:DatadogSymbolsApiKey="$$DD_API_KEY" \
+			$$( [ -n "$$DD_BUILD_FLAVOR" ] && echo -p:DatadogSymbolsFlavor=\"$$DD_BUILD_FLAVOR\" )
 	@echo "$(GREEN)✓ Android app published with symbols$(NC)"
 	@echo "$(YELLOW)Output: samples/DatadogMauiSample/bin/Release/net9.0-android/publish/$(NC)"
 	@MAPPING_FILE=$$(find samples/DatadogMauiSample -name "mapping.txt" -type f 2>/dev/null | head -1); \
@@ -251,21 +257,20 @@ publish-android: ## Publish Android sample in Release mode with symbols (APK for
 		echo "$(YELLOW)Install with: make install-android$(NC)"; \
 	fi
 
-publish-android-staging: ## Publish Android app with 'staging' flavor for symbol upload
-	@echo "$(BLUE)Publishing Android app with staging flavor...$(NC)"
+publish-android-staging:
 	@DD_BUILD_FLAVOR=staging $(MAKE) publish-android
 
-publish-android-prod: ## Publish Android app with 'production' flavor for symbol upload
-	@echo "$(BLUE)Publishing Android app with production flavor...$(NC)"
+publish-android-prod:
 	@DD_BUILD_FLAVOR=production $(MAKE) publish-android
 
-publish-android-dev: ## Publish Android app with developer-specific flavor (e.g., dev-kyle)
+publish-android-dev:
 	@if [ -z "$$USER" ]; then \
 		echo "$(RED)❌ USER environment variable not set$(NC)"; \
 		exit 1; \
 	fi
-	@echo "$(BLUE)Publishing Android app with dev-$$USER flavor...$(NC)"
-	@DD_BUILD_FLAVOR=dev-$$USER $(MAKE) publish-android
+	@SAFE_USER=$$(echo "$$USER" | tr '.@' '--'); \
+	echo "$(BLUE)Publishing Android app with dev-$$SAFE_USER flavor...$(NC)"; \
+	DD_BUILD_FLAVOR=dev-$$SAFE_USER $(MAKE) publish-android
 
 install-android: ## Install published Android APK to connected device/emulator
 	@echo "$(BLUE)Installing Android APK...$(NC)"
@@ -301,7 +306,7 @@ run-android-release: ## Install and run published Android APK
 	adb shell am start -n com.datadog.datadog_maui_shopist.demo/crc64f2aa0ed48bd5d29c.MainActivity && \
 	echo "$(GREEN)✓ App launched$(NC)"
 
-test-ios-symbols: ## Test iOS symbol upload without full publish (macOS only)
+test-ios-symbols: ## Test iOS symbol upload via MSBuild target (macOS only)
 	@echo "$(BLUE)Testing iOS symbol upload...$(NC)"
 	@if [ "$$(uname)" != "Darwin" ]; then \
 		echo "$(RED)Error: iOS operations require macOS$(NC)"; \
@@ -309,35 +314,19 @@ test-ios-symbols: ## Test iOS symbol upload without full publish (macOS only)
 	fi
 	@if [ ! -f samples/DatadogMauiSample/appsettings.Development.json ]; then \
 		echo "$(RED)❌ appsettings.Development.json not found$(NC)"; \
-		echo "$(YELLOW)Create from template:$(NC)"; \
-		echo "  cp samples/DatadogMauiSample/appsettings.Development.json.example samples/DatadogMauiSample/appsettings.Development.json"; \
 		exit 1; \
 	fi
 	@echo "$(YELLOW)Building Symbols package in Release...$(NC)"
 	@dotnet build Datadog.MAUI.Symbols/Datadog.MAUI.Symbols.csproj -c Release --nologo -v q
-	@echo "$(YELLOW)Building iOS app (without provisioning)...$(NC)"
 	@cd samples/DatadogMauiSample && \
-		dotnet build -f net9.0-ios -c Release -v normal \
+		dotnet publish -f net9.0-ios -c Release -v normal \
 			-p:CreatePackage=false \
-			-p:BuildIpa=false
-	@echo "$(GREEN)✓ iOS app built$(NC)"
-	@DSYM_DIR=$$(find samples/DatadogMauiSample/bin/Release/net9.0-ios -type d -name "*.app.dSYM" 2>/dev/null | head -1); \
-	if [ -z "$$DSYM_DIR" ]; then \
-		echo "$(RED)❌ No .dSYM folder found$(NC)"; \
-		exit 1; \
-	fi; \
-	echo "$(GREEN)✓ dSYM folder found: $$DSYM_DIR$(NC)"; \
-	echo "$(YELLOW)Manually uploading dSYM files...$(NC)"; \
-	npx @datadog/datadog-ci flutter-symbols upload \
-		--service "datadog-maui-ios" \
-		--dart-symbols-location "$$DSYM_DIR" \
-		--version "1.0" \
-		--flavor "release" \
-		--site "datadoghq.com" \
-		--dry-run
-	@echo "$(GREEN)✓ Symbol upload test complete$(NC)"
+			-p:BuildIpa=false \
+			-p:DatadogSymbolsApiKey="$$DD_API_KEY" \
+			$$( [ -n "$$DD_BUILD_FLAVOR" ] && echo -p:DatadogSymbolsFlavor=\"$$DD_BUILD_FLAVOR\" )
+	@echo "$(GREEN)✓ iOS symbol upload test complete$(NC)"
 
-publish-ios: ## Publish iOS sample in Release mode with symbols (requires provisioning) (macOS only)
+publish-ios: ## Publish iOS sample in Release mode with symbols (macOS only)
 	@echo "$(BLUE)Publishing iOS sample with symbols...$(NC)"
 	@if [ "$$(uname)" != "Darwin" ]; then \
 		echo "$(RED)Error: iOS publish requires macOS$(NC)"; \
@@ -345,34 +334,34 @@ publish-ios: ## Publish iOS sample in Release mode with symbols (requires provis
 	fi
 	@if [ ! -f samples/DatadogMauiSample/appsettings.Development.json ]; then \
 		echo "$(RED)❌ appsettings.Development.json not found$(NC)"; \
-		echo "$(YELLOW)Create from template:$(NC)"; \
-		echo "  cp samples/DatadogMauiSample/appsettings.Development.json.example samples/DatadogMauiSample/appsettings.Development.json"; \
 		exit 1; \
 	fi
 	@echo "$(YELLOW)Building Symbols package in Release...$(NC)"
 	@dotnet build Datadog.MAUI.Symbols/Datadog.MAUI.Symbols.csproj -c Release --nologo -v q
 	@if [ -z "$$DD_API_KEY" ]; then \
-		echo "$(YELLOW)⚠️  DD_API_KEY not set - symbols will not be uploaded$(NC)"; \
+		echo "$(YELLOW)⚠️  DD_API_KEY not set - symbol upload may fail$(NC)"; \
 	fi
 	@cd samples/DatadogMauiSample && \
 		dotnet publish -f net9.0-ios -c Release -v normal \
 			-p:RuntimeIdentifier=ios-arm64 \
 			-p:CodesignKey="Apple Development" \
 			-p:CodesignProvision="Automatic" \
-			-p:DatadogApiKey="$$DD_API_KEY"
+			-p:DatadogSymbolsApiKey="$$DD_API_KEY" \
+			$$( [ -n "$$DD_BUILD_FLAVOR" ] && echo -p:DatadogSymbolsFlavor=\"$$DD_BUILD_FLAVOR\" )
 	@echo "$(GREEN)✓ iOS app published with symbols$(NC)"
-	@echo "$(YELLOW)Output: samples/DatadogMauiSample/bin/Release/net9.0-ios/ios-arm64/$(NC)"
-	@DSYM_DIR=$$(find samples/DatadogMauiSample/bin/Release/net9.0-ios -type d -name "*.app.dSYM" 2>/dev/null | head -1); \
-	APP_DIR=$$(find samples/DatadogMauiSample/bin/Release/net9.0-ios/ios-arm64 -type d -name "*.app" 2>/dev/null | head -1); \
-	if [ -n "$$DSYM_DIR" ]; then \
-		echo "$(GREEN)✓ dSYM folder: $$DSYM_DIR$(NC)"; \
-	else \
-		echo "$(YELLOW)⚠️  No .dSYM folder found$(NC)"; \
-	fi; \
-	if [ -n "$$APP_DIR" ]; then \
-		echo "$(GREEN)✓ App bundle: $$APP_DIR$(NC)"; \
-		echo "$(YELLOW)Install with: make install-ios$(NC)"; \
+
+publish-ios-staging:
+	@DD_BUILD_FLAVOR=staging $(MAKE) publish-ios
+
+publish-ios-prod:
+	@DD_BUILD_FLAVOR=production $(MAKE) publish-ios
+
+publish-ios-dev:
+	@if [ -z "$$USER" ]; then \
+		echo "$(RED)❌ USER environment variable not set$(NC)"; \
+		exit 1; \
 	fi
+	@DD_BUILD_FLAVOR=dev-$$USER $(MAKE) publish-ios
 
 install-ios: ## Install published iOS app to running simulator (macOS only)
 	@echo "$(BLUE)Installing iOS app to simulator...$(NC)"

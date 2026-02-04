@@ -58,7 +58,7 @@ The plugin supports all .NET versions (6.0+) as it targets `netstandard2.0`.
 
 ### No Service Name Configured
 
-**Error**: `Datadog Service Name is required. Set <DatadogServiceName> or <DatadogServiceNameAndroid>/<DatadogServiceNameiOS>.`
+**Error**: `Datadog Service Name is required. Set <DatadogSymbolsServiceName> or <DatadogSymbolsServiceNameAndroid>/<DatadogSymbolsServiceNameiOS>.`
 
 **Solution**:
 
@@ -66,8 +66,8 @@ Add to your `.csproj`:
 
 ```xml
 <PropertyGroup>
-  <DatadogServiceNameAndroid>com.yourapp.android</DatadogServiceNameAndroid>
-  <DatadogServiceNameiOS>com.yourapp.ios</DatadogServiceNameiOS>
+  <DatadogSymbolsServiceNameAndroid>com.yourapp.android</DatadogSymbolsServiceNameAndroid>
+  <DatadogSymbolsServiceNameiOS>com.yourapp.ios</DatadogSymbolsServiceNameiOS>
 </PropertyGroup>
 ```
 
@@ -84,7 +84,7 @@ Add to your `.csproj`:
 
 2. Or add to `.csproj` (not recommended for production):
    ```xml
-   <DatadogApiKey>your-api-key</DatadogApiKey>
+   <DatadogSymbolsApiKey>your-api-key</DatadogSymbolsApiKey>
    ```
 
 3. Verify it's set:
@@ -138,9 +138,8 @@ Add to your `.csproj`:
 
 1. Enable R8/ProGuard in `.csproj`:
    ```xml
-   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-     <AndroidLinkTool>r8</AndroidLinkTool>
-     <AndroidEnableProguard>true</AndroidEnableProguard>
+   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+      <AndroidLinkTool>r8</AndroidLinkTool>
    </PropertyGroup>
    ```
 
@@ -219,7 +218,7 @@ Add to your `.csproj`:
 3. Verify Datadog site:
    ```xml
    <!-- Match your Datadog instance -->
-   <DatadogSite>us5.datadoghq.com</DatadogSite>
+   <DatadogSymbolsSite>us5.datadoghq.com</DatadogSymbolsSite>
    ```
 
 ### Upload Failed - Network Error
@@ -271,7 +270,7 @@ Add to your `.csproj`:
 
    ```xml
    <!-- Symbols plugin -->
-   <DatadogServiceNameAndroid>com.yourapp.android</DatadogServiceNameAndroid>
+   <DatadogSymbolsServiceNameAndroid>com.yourapp.android</DatadogSymbolsServiceNameAndroid>
    ```
 
 2. Check app version matches:
@@ -355,7 +354,7 @@ Add to your `.csproj`:
 
 2. **Azure DevOps**:
    - Pipelines → Library → Variable Groups
-   - Create group with `DatadogApiKey` (mark as secret)
+   - Create group with `DatadogSymbolsApiKey` (mark as secret)
 
 3. **GitLab CI**:
    - Settings → CI/CD → Variables
@@ -388,7 +387,7 @@ Add to your `.csproj`:
 
 4. Check if dry-run is faster (indicates network issue):
    ```bash
-   dotnet publish -c Release -p:DatadogDryRun=true
+   dotnet publish -c Release -p:DatadogSymbolsDryRun=true
    ```
 
 ### Build Hangs During Upload
@@ -495,7 +494,7 @@ If you're still stuck:
 | `npx: command not found` | Install Node.js |
 | `mapping.txt not found` | Enable ProGuard/R8 for Release |
 | `dSYM folder not found` | Build in Release configuration |
-| `Service Name is required` | Add `DatadogServiceName*` properties |
+| `Service Name is required` | Add `DatadogSymbolsServiceName*` properties |
 | `DD_API_KEY is not set` | Set environment variable or MSBuild property |
 | `403 Forbidden` | Check API key and permissions |
 | `ENOTFOUND` / `ETIMEDOUT` | Check network connectivity |

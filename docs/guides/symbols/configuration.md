@@ -12,7 +12,7 @@ Complete reference for all configuration options available in Datadog.MAUI.Symbo
 
 ## MSBuild Properties
 
-All configuration is done through MSBuild properties in your `.csproj` file.
+All configuration is done through MSBuild properties in your `.csproj` file. All properties are **namespaced with `DatadogSymbols*`** to avoid conflicts with other packages.
 
 ### Required Properties
 
@@ -23,17 +23,17 @@ At least one service name property must be set:
 ```xml
 <PropertyGroup>
   <!-- Option 1: Platform-specific (recommended) -->
-  <DatadogServiceNameAndroid>com.example.app.android</DatadogServiceNameAndroid>
-  <DatadogServiceNameiOS>com.example.app.ios</DatadogServiceNameiOS>
+  <DatadogSymbolsServiceNameAndroid>com.example.app.android</DatadogSymbolsServiceNameAndroid>
+  <DatadogSymbolsServiceNameiOS>com.example.app.ios</DatadogSymbolsServiceNameiOS>
 
   <!-- Option 2: Global fallback -->
-  <DatadogServiceName>com.example.app</DatadogServiceName>
+  <DatadogSymbolsServiceName>com.example.app</DatadogSymbolsServiceName>
 </PropertyGroup>
 ```
 
 **Service Name Hierarchy:**
-1. Platform-specific (`DatadogServiceNameAndroid` or `DatadogServiceNameiOS`)
-2. Global fallback (`DatadogServiceName`)
+1. Platform-specific (`DatadogSymbolsServiceNameAndroid` or `DatadogSymbolsServiceNameiOS`)
+2. Global fallback (`DatadogSymbolsServiceName`)
 3. Error if none are set
 
 {: .important }
@@ -45,10 +45,10 @@ Provide via environment variable (recommended) or MSBuild property:
 
 ```xml
 <!-- Option 1: Environment variable (recommended) -->
-<!-- Set DD_API_KEY in your environment -->
+<!-- Set DD_API_KEY or DATADOG_API_KEY in your environment -->
 
 <!-- Option 2: MSBuild property (not recommended for source control) -->
-<DatadogApiKey>your-api-key</DatadogApiKey>
+<DatadogSymbolsApiKey>your-api-key</DatadogSymbolsApiKey>
 ```
 
 ### Optional Properties
@@ -57,16 +57,48 @@ Provide via environment variable (recommended) or MSBuild property:
 
 ```xml
 <!-- Defaults to ApplicationDisplayVersion -->
-<DatadogAppVersion>1.2.3</DatadogAppVersion>
+<DatadogSymbolsAppVersion>1.2.3</DatadogSymbolsAppVersion>
 ```
 
 If not specified, uses `$(ApplicationDisplayVersion)` from your project, or `1.0.0` as final fallback.
+
+{: .important }
+**Do not** append build IDs to the version. The version must match exactly what the RUM SDK reports.
+
+#### Build ID
+
+```xml
+<!-- Auto-generated per build when bundled CI is enabled -->
+<!-- Can override if needed: -->
+<DatadogSymbolsBuildId>abc123</DatadogSymbolsBuildId>
+```
+
+Build IDs are automatically generated and embedded in your app via the `DatadogBuildInfo` class. This allows the RUM SDK to associate crashes with the correct symbols.
+
+**Default behavior:**
+- Automatically generated: Yes (8-character GUID prefix)
+- Passed to datadog-ci: Only when `DatadogSymbolsUseBundledCi=true`
+- Available at runtime: Yes, via `Datadog.MAUI.Symbols.DatadogBuildInfo.BuildId`
+
+#### Flavor/Variant
+
+```xml
+<!-- Defaults to "debug" or "release" based on Configuration -->
+<DatadogSymbolsFlavor>staging</DatadogSymbolsFlavor>
+```
+
+Or set via environment variable:
+```bash
+export DD_BUILD_FLAVOR=production
+```
+
+Flavors allow you to upload symbols for different build variants (debug, release, staging, production) to the same service.
 
 #### Datadog Site
 
 ```xml
 <!-- Defaults to datadoghq.com (US1) -->
-<DatadogSite>us5.datadoghq.com</DatadogSite>
+<DatadogSymbolsSite>us5.datadoghq.com</DatadogSymbolsSite>
 ```
 
 **Available sites:**
@@ -84,23 +116,36 @@ export DD_SITE="us5.datadoghq.com"
 #### Dry Run Mode
 
 ```xml
-<!-- Test without actually uploading -->
-<DatadogDryRun>true</DatadogDryRun>
+<!-- Test without actually uploading (default: true for safety) -->
+<DatadogSymbolsDryRun>false</DatadogSymbolsDryRun>
 ```
 
-Useful for testing configuration without consuming API quotas.
+{: .warning }
+**Default is `true`!** You must explicitly set to `false` to perform actual uploads.
 
 #### Enable/Disable Upload
 
 ```xml
 <!-- Disable upload completely -->
-<DatadogUploadEnabled>false</DatadogUploadEnabled>
+<DatadogSymbolsUploadEnabled>false</DatadogSymbolsUploadEnabled>
 
 <!-- Enable upload in Debug configuration (default: false) -->
-<DatadogUploadInDebug>true</DatadogUploadInDebug>
+<DatadogSymbolsUploadInDebug>true</DatadogSymbolsUploadInDebug>
 ```
 
 By default, upload only runs in Release configuration.
+
+#### Bundled datadog-ci
+
+```xml
+<!-- Use bundled datadog-ci tarball (default: true) -->
+<DatadogSymbolsUseBundledCi>true</DatadogSymbolsUseBundledCi>
+
+<!-- Override tarball path (optional) -->
+<DatadogSymbolsCiTgzPath>/path/to/custom/datadog-ci.tgz</DatadogSymbolsCiTgzPath>
+```
+
+The bundled CLI is enabled by default for deterministic behavior and build ID support. Set to `false` to use upstream `@datadog/datadog-ci` from npm registry.
 
 ## Configuration Examples
 
@@ -110,8 +155,9 @@ Minimal setup with environment variable for API key:
 
 ```xml
 <PropertyGroup>
-  <DatadogServiceNameAndroid>com.myapp.android</DatadogServiceNameAndroid>
-  <DatadogServiceNameiOS>com.myapp.ios</DatadogServiceNameiOS>
+  <DatadogSymbolsServiceNameAndroid>com.myapp.android</DatadogSymbolsServiceNameAndroid>
+  <DatadogSymbolsServiceNameiOS>com.myapp.ios</DatadogSymbolsServiceNameiOS>
+  <DatadogSymbolsDryRun>false</DatadogSymbolsDryRun>
 </PropertyGroup>
 ```
 
@@ -125,11 +171,40 @@ Different settings per platform:
 
 ```xml
 <PropertyGroup>
-  <DatadogServiceNameAndroid>com.myapp.android</DatadogServiceNameAndroid>
-  <DatadogServiceNameiOS>com.myapp.ios</DatadogServiceNameiOS>
-  <DatadogAppVersion>$(ApplicationDisplayVersion)</DatadogAppVersion>
-  <DatadogSite>us5.datadoghq.com</DatadogSite>
+  <DatadogSymbolsServiceNameAndroid>com.myapp.android</DatadogSymbolsServiceNameAndroid>
+  <DatadogSymbolsServiceNameiOS>com.myapp.ios</DatadogSymbolsServiceNameiOS>
+  <DatadogSymbolsAppVersion>$(ApplicationDisplayVersion)</DatadogSymbolsAppVersion>
+  <DatadogSymbolsSite>us5.datadoghq.com</DatadogSymbolsSite>
+  <DatadogSymbolsDryRun>false</DatadogSymbolsDryRun>
 </PropertyGroup>
+```
+
+### Multi-Environment with Flavors
+
+Different flavors for staging vs production:
+
+```xml
+<!-- Base configuration -->
+<PropertyGroup>
+  <DatadogSymbolsServiceNameAndroid>com.myapp.android</DatadogSymbolsServiceNameAndroid>
+  <DatadogSymbolsServiceNameiOS>com.myapp.ios</DatadogSymbolsServiceNameiOS>
+  <DatadogSymbolsDryRun>false</DatadogSymbolsDryRun>
+</PropertyGroup>
+
+<!-- Flavor from environment -->
+<PropertyGroup Condition="'$(DD_BUILD_FLAVOR)' != ''">
+  <DatadogSymbolsFlavor>$(DD_BUILD_FLAVOR)</DatadogSymbolsFlavor>
+</PropertyGroup>
+```
+
+```bash
+# Production build
+export DD_BUILD_FLAVOR=production
+dotnet publish -c Release
+
+# Staging build
+export DD_BUILD_FLAVOR=staging
+dotnet publish -c Release
 ```
 
 ### Conditional Configuration
@@ -139,15 +214,17 @@ Enable only for specific configurations:
 ```xml
 <!-- Upload only in Release builds -->
 <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-  <DatadogServiceNameAndroid>com.myapp.android</DatadogServiceNameAndroid>
-  <DatadogServiceNameiOS>com.myapp.ios</DatadogServiceNameiOS>
+  <DatadogSymbolsServiceNameAndroid>com.myapp.android</DatadogSymbolsServiceNameAndroid>
+  <DatadogSymbolsServiceNameiOS>com.myapp.ios</DatadogSymbolsServiceNameiOS>
+  <DatadogSymbolsDryRun>false</DatadogSymbolsDryRun>
 </PropertyGroup>
 
 <!-- Dry run in Debug builds -->
 <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-  <DatadogServiceNameAndroid>com.myapp.android.debug</DatadogServiceNameAndroid>
-  <DatadogServiceNameiOS>com.myapp.ios.debug</DatadogServiceNameiOS>
-  <DatadogDryRun>true</DatadogDryRun>
+  <DatadogSymbolsServiceNameAndroid>com.myapp.android.debug</DatadogSymbolsServiceNameAndroid>
+  <DatadogSymbolsServiceNameiOS>com.myapp.ios.debug</DatadogSymbolsServiceNameiOS>
+  <DatadogSymbolsDryRun>true</DatadogSymbolsDryRun>
+  <DatadogSymbolsUploadInDebug>true</DatadogSymbolsUploadInDebug>
 </PropertyGroup>
 ```
 
@@ -158,8 +235,9 @@ Use environment variables for secrets:
 ```xml
 <PropertyGroup>
   <!-- Service names in source control -->
-  <DatadogServiceNameAndroid>com.myapp.android</DatadogServiceNameAndroid>
-  <DatadogServiceNameiOS>com.myapp.ios</DatadogServiceNameiOS>
+  <DatadogSymbolsServiceNameAndroid>com.myapp.android</DatadogSymbolsServiceNameAndroid>
+  <DatadogSymbolsServiceNameiOS>com.myapp.ios</DatadogSymbolsServiceNameiOS>
+  <DatadogSymbolsDryRun>false</DatadogSymbolsDryRun>
 
   <!-- API key and site from environment -->
   <!-- DD_API_KEY environment variable -->
@@ -173,25 +251,38 @@ Use environment variables for secrets:
 env:
   DD_API_KEY: ${{ secrets.DATADOG_API_KEY }}
   DD_SITE: us5.datadoghq.com
+  DD_BUILD_FLAVOR: production
 ```
 {% endraw %}
 
-### Multi-Environment Configuration
+### Using with RUM SDK
 
-Different service names per environment:
+Pass build metadata to the RUM SDK:
 
 ```xml
-<!-- Production -->
-<PropertyGroup Condition="'$(Configuration)' == 'Release'">
-  <DatadogServiceNameAndroid>com.myapp.android</DatadogServiceNameAndroid>
-  <DatadogServiceNameiOS>com.myapp.ios</DatadogServiceNameiOS>
+<PropertyGroup>
+  <DatadogSymbolsServiceNameAndroid>com.myapp.android</DatadogSymbolsServiceNameAndroid>
+  <DatadogSymbolsServiceNameiOS>com.myapp.ios</DatadogSymbolsServiceNameiOS>
+  <DatadogSymbolsDryRun>false</DatadogSymbolsDryRun>
+  <!-- Build ID and Variant are auto-generated -->
 </PropertyGroup>
+```
 
-<!-- Staging -->
-<PropertyGroup Condition="'$(Configuration)' == 'Staging'">
-  <DatadogServiceNameAndroid>com.myapp.android.staging</DatadogServiceNameAndroid>
-  <DatadogServiceNameiOS>com.myapp.ios.staging</DatadogServiceNameiOS>
-</PropertyGroup>
+```csharp
+using Datadog.MAUI.Symbols;
+
+// In your RUM configuration
+datadog.EnableRum(rum =>
+{
+    rum.SetApplicationId(
+        android: "android-rum-app-id",
+        ios: "ios-rum-app-id"
+    );
+
+    // Pass build metadata for symbolication
+    rum.Variant = DatadogBuildInfo.Variant;  // e.g., "release", "staging"
+    rum.BuildId = DatadogBuildInfo.BuildId;  // e.g., "a1b2c3d4"
+});
 ```
 
 ## Environment Variables
@@ -200,24 +291,29 @@ The plugin respects these environment variables:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `DD_API_KEY` | Datadog API key | (required if not in .csproj) |
+| `DD_API_KEY` or `DATADOG_API_KEY` | Datadog API key | (required if not in .csproj) |
 | `DD_SITE` | Datadog site | `datadoghq.com` |
+| `DD_BUILD_FLAVOR` | Build flavor/variant | Configuration name (Debug/Release) |
 
-Environment variables take precedence over `.csproj` values for `DD_SITE`.
+Environment variables take precedence over `.csproj` values where applicable.
 
 ## Property Reference Table
 
 | Property | Type | Required | Default | Description |
 |----------|------|----------|---------|-------------|
-| `DatadogServiceName` | string | Conditional | - | Global service name fallback |
-| `DatadogServiceNameAndroid` | string | Conditional | - | Android-specific service name |
-| `DatadogServiceNameiOS` | string | Conditional | - | iOS-specific service name |
-| `DatadogApiKey` | string | Conditional | `DD_API_KEY` env var | Datadog API key |
-| `DatadogAppVersion` | string | No | `ApplicationDisplayVersion` | App version for symbols |
-| `DatadogSite` | string | No | `datadoghq.com` | Datadog site URL |
-| `DatadogDryRun` | boolean | No | `false` | Run without uploading |
-| `DatadogUploadEnabled` | boolean | No | `true` | Enable/disable plugin |
-| `DatadogUploadInDebug` | boolean | No | `false` | Upload in Debug builds |
+| `DatadogSymbolsServiceName` | string | Conditional | - | Global service name fallback |
+| `DatadogSymbolsServiceNameAndroid` | string | Conditional | - | Android-specific service name |
+| `DatadogSymbolsServiceNameiOS` | string | Conditional | - | iOS-specific service name |
+| `DatadogSymbolsApiKey` | string | Conditional | `DD_API_KEY` env var | Datadog API key |
+| `DatadogSymbolsAppVersion` | string | No | `ApplicationDisplayVersion` | App version for symbols |
+| `DatadogSymbolsBuildId` | string | No | Auto-generated | Unique build identifier |
+| `DatadogSymbolsFlavor` | string | No | Configuration name | Build flavor/variant |
+| `DatadogSymbolsSite` | string | No | `datadoghq.com` | Datadog site URL |
+| `DatadogSymbolsDryRun` | boolean | No | `true` | Run without uploading |
+| `DatadogSymbolsUploadEnabled` | boolean | No | `true` | Enable/disable plugin |
+| `DatadogSymbolsUploadInDebug` | boolean | No | `false` | Upload in Debug builds |
+| `DatadogSymbolsUseBundledCi` | boolean | No | `true` | Use bundled datadog-ci |
+| `DatadogSymbolsCiTgzPath` | string | No | Auto-detected | Custom datadog-ci tarball path |
 
 ## Advanced Configuration
 
@@ -241,7 +337,7 @@ The plugin automatically detects symbol files. If you have a custom build setup,
 ```xml
 <!-- Upload only iOS symbols -->
 <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0-android'">
-  <DatadogUploadEnabled>false</DatadogUploadEnabled>
+  <DatadogSymbolsUploadEnabled>false</DatadogSymbolsUploadEnabled>
 </PropertyGroup>
 ```
 
@@ -251,13 +347,25 @@ Use dry-run to verify your configuration without uploading:
 
 ```bash
 # Set dry-run in .csproj or via command line
-dotnet publish -c Release -p:DatadogDryRun=true
+dotnet publish -c Release -p:DatadogSymbolsDryRun=true
 ```
 
 Check the build output for:
 ```
 [Datadog] Command: npx @datadog/datadog-ci flutter-symbols upload --dry-run ...
 ```
+
+### Using Upstream datadog-ci
+
+To use the official npm registry version instead of bundled:
+
+```xml
+<PropertyGroup>
+  <DatadogSymbolsUseBundledCi>false</DatadogSymbolsUseBundledCi>
+</PropertyGroup>
+```
+
+Note: Build ID support may not be available in upstream CLI yet.
 
 ## Best Practices
 
@@ -272,14 +380,26 @@ Check the build output for:
 3. **Version Consistency**
    - Use `$(ApplicationDisplayVersion)` for automatic sync
    - Or manage version centrally in `Directory.Build.props`
+   - **Never** append build IDs to version strings
 
 4. **Conditional Upload**
    - Only upload in Release builds by default
    - Use dry-run for testing in development
+   - Remember to set `DatadogSymbolsDryRun=false` for real uploads
 
 5. **Service Name Matching**
    - Ensure exact match with RUM SDK initialization
    - Case-sensitive!
+
+6. **Flavor/Variant Usage**
+   - Use flavors to differentiate environments (staging, production)
+   - Pass variant to RUM SDK via `DatadogBuildInfo.Variant`
+   - Each flavor uploads symbols independently
+
+7. **Build ID Integration**
+   - Let the plugin auto-generate build IDs
+   - Pass to RUM SDK via `DatadogBuildInfo.BuildId`
+   - Ensures crashes are symbolicated with correct symbols
 
 ## Validation
 
@@ -288,7 +408,7 @@ The plugin validates configuration at build time:
 ❌ **Missing Service Name:**
 ```
 error: Datadog Service Name is required.
-Set <DatadogServiceName> or <DatadogServiceNameAndroid>/<DatadogServiceNameiOS>.
+Set <DatadogSymbolsServiceName> or <DatadogSymbolsServiceNameAndroid>/<DatadogSymbolsServiceNameiOS>.
 ```
 
 ⚠️ **Missing Symbol Files:**
@@ -302,6 +422,29 @@ Ensure ProGuard/R8 is enabled for Release builds.
 warning: DD_API_KEY is not set.
 Upload may fail if not configured elsewhere.
 ```
+
+⚠️ **Dry-run enabled:**
+```
+[Datadog] Dry Run: true
+```
+
+## Migration from Old Property Names
+
+If you were using older versions of the plugin, update your property names:
+
+| Old Property | New Property |
+|-------------|-------------|
+| `DatadogServiceName` | `DatadogSymbolsServiceName` |
+| `DatadogServiceNameAndroid` | `DatadogSymbolsServiceNameAndroid` |
+| `DatadogServiceNameiOS` | `DatadogSymbolsServiceNameiOS` |
+| `DatadogApiKey` | `DatadogSymbolsApiKey` |
+| `DatadogAppVersion` | `DatadogSymbolsAppVersion` |
+| `DatadogFlavor` | `DatadogSymbolsFlavor` |
+| `DatadogSite` | `DatadogSymbolsSite` |
+| `DatadogDryRun` | `DatadogSymbolsDryRun` |
+| `DatadogUploadEnabled` | `DatadogSymbolsUploadEnabled` |
+| `DatadogUploadInDebug` | `DatadogSymbolsUploadInDebug` |
+| `DatadogUseBundledCi` | `DatadogSymbolsUseBundledCi` |
 
 ## Next Steps
 

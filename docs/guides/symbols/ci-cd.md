@@ -14,7 +14,7 @@ Guide for integrating Datadog.MAUI.Symbols into your CI/CD pipelines.
 
 The symbols plugin works in any CI/CD environment that supports:
 - .NET SDK
-- Node.js and npm (for `datadog-ci`)
+- Node.js (>= 18) and npm (for `npx`)
 - Environment variables
 
 ## Prerequisites
@@ -27,7 +27,7 @@ All CI/CD environments need:
 # .NET SDK (6.0+)
 dotnet --version
 
-# Node.js and npm
+# Node.js and npm (>= 18)
 node --version
 npm --version
 ```
@@ -68,7 +68,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
 
       - name: Restore dependencies
         run: dotnet restore
@@ -77,6 +77,7 @@ jobs:
         env:
           DD_API_KEY: ${{ secrets.DATADOG_API_KEY }}
           DD_SITE: ${{ secrets.DATADOG_SITE }}
+          DD_BUILD_FLAVOR: production
         run: |
           dotnet publish -f net8.0-android -c Release
 
@@ -84,6 +85,7 @@ jobs:
         env:
           DD_API_KEY: ${{ secrets.DATADOG_API_KEY }}
           DD_SITE: ${{ secrets.DATADOG_SITE }}
+          DD_BUILD_FLAVOR: production
         run: |
           dotnet publish -f net8.0-ios -c Release
 ```
@@ -99,10 +101,66 @@ jobs:
 - name: Publish Android
   env:
     DD_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+    DD_BUILD_FLAVOR: production
   run: |
     dotnet publish -f net8.0-android -c Release \
       -p:AndroidSigningKeyStore=${{ secrets.ANDROID_KEYSTORE }} \
       -p:AndroidSigningStorePass=${{ secrets.KEYSTORE_PASSWORD }}
+```
+{% endraw %}
+
+### Multi-Environment with Flavors
+
+Use different flavors for staging vs production:
+
+{% raw %}
+```yaml
+name: Multi-Environment Build
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Determine Build Flavor
+        id: flavor
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "flavor=production" >> $GITHUB_OUTPUT
+          else
+            echo "flavor=staging" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Publish Android
+        env:
+          DD_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+          DD_BUILD_FLAVOR: ${{ steps.flavor.outputs.flavor }}
+        run: |
+          dotnet publish -f net8.0-android -c Release
+
+      - name: Publish iOS
+        env:
+          DD_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+          DD_BUILD_FLAVOR: ${{ steps.flavor.outputs.flavor }}
+        run: |
+          dotnet publish -f net8.0-ios -c Release
 ```
 {% endraw %}
 
@@ -128,6 +186,7 @@ steps:
   - name: Publish ${{ matrix.platform }}
     env:
       DD_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+      DD_BUILD_FLAVOR: production
     run: |
       dotnet publish -f ${{ matrix.framework }} -c Release
 ```
@@ -156,7 +215,7 @@ steps:
   - task: NodeTool@0
     displayName: 'Install Node.js'
     inputs:
-      versionSpec: '18.x'
+      versionSpec: '20.x'
 
   - script: dotnet workload install maui
     displayName: 'Install MAUI Workload'
@@ -167,6 +226,7 @@ steps:
     env:
       DD_API_KEY: $(DatadogApiKey)
       DD_SITE: $(DatadogSite)
+      DD_BUILD_FLAVOR: production
 
   - script: |
       dotnet publish -f net8.0-ios -c Release
@@ -174,6 +234,7 @@ steps:
     env:
       DD_API_KEY: $(DatadogApiKey)
       DD_SITE: $(DatadogSite)
+      DD_BUILD_FLAVOR: production
 ```
 
 ### Variable Groups
@@ -196,7 +257,7 @@ stages:
 
 variables:
   DOTNET_VERSION: "8.0"
-  NODE_VERSION: "18"
+  NODE_VERSION: "20"
 
 build-android:
   stage: build
@@ -209,6 +270,7 @@ build-android:
   variables:
     DD_API_KEY: $DATADOG_API_KEY
     DD_SITE: $DATADOG_SITE
+    DD_BUILD_FLAVOR: production
 
 build-ios:
   stage: build
@@ -221,6 +283,7 @@ build-ios:
   variables:
     DD_API_KEY: $DATADOG_API_KEY
     DD_SITE: $DATADOG_SITE
+    DD_BUILD_FLAVOR: production
 ```
 
 ### Protected Variables
@@ -243,6 +306,7 @@ pipeline {
     environment {
         DD_API_KEY = credentials('datadog-api-key')
         DD_SITE = 'us5.datadoghq.com'
+        DD_BUILD_FLAVOR = 'production'
         DOTNET_ROOT = '/usr/local/share/dotnet'
     }
 
@@ -316,6 +380,7 @@ jobs:
             dotnet publish -f net8.0-android -c Release
           environment:
             DD_API_KEY: $DATADOG_API_KEY
+            DD_BUILD_FLAVOR: production
 
       - run:
           name: Publish iOS
@@ -323,6 +388,7 @@ jobs:
             dotnet publish -f net8.0-ios -c Release
           environment:
             DD_API_KEY: $DATADOG_API_KEY
+            DD_BUILD_FLAVOR: production
 
 workflows:
   version: 2
@@ -347,6 +413,7 @@ dotnet workload install maui
 # Set Datadog environment (from App Center environment variables)
 export DD_API_KEY="$DATADOG_API_KEY"
 export DD_SITE="$DATADOG_SITE"
+export DD_BUILD_FLAVOR="production"
 
 # Publish with symbol upload
 if [ "$APPCENTER_XCODE_PROJECT" ]; then
@@ -372,7 +439,7 @@ Never hardcode secrets:
 
 ```xml
 <!-- ❌ DON'T DO THIS -->
-<DatadogApiKey>abcd1234...</DatadogApiKey>
+<DatadogSymbolsApiKey>abcd1234...</DatadogSymbolsApiKey>
 
 <!-- ✅ DO THIS -->
 <!-- DD_API_KEY set via CI/CD secrets -->
@@ -389,6 +456,7 @@ Only upload from main/release branches:
   if: github.ref == 'refs/heads/main'
   env:
     DD_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+    DD_BUILD_FLAVOR: production
   run: dotnet publish -c Release
 ```
 {% endraw %}
@@ -397,13 +465,37 @@ Only upload from main/release branches:
 
 Test configuration in pull requests without uploading:
 
+{% raw %}
 ```yaml
 - name: Test Symbol Upload (Dry Run)
   if: github.event_name == 'pull_request'
-  run: dotnet publish -c Release -p:DatadogDryRun=true
+  run: dotnet publish -c Release -p:DatadogSymbolsDryRun=true
 ```
+{% endraw %}
 
-### 4. Caching
+### 4. Build Flavors per Environment
+
+Use flavors to differentiate builds:
+
+{% raw %}
+```yaml
+# Production
+- name: Production Build
+  if: github.ref == 'refs/heads/main'
+  env:
+    DD_BUILD_FLAVOR: production
+  run: dotnet publish -c Release
+
+# Staging
+- name: Staging Build
+  if: github.ref == 'refs/heads/staging'
+  env:
+    DD_BUILD_FLAVOR: staging
+  run: dotnet publish -c Release
+```
+{% endraw %}
+
+### 5. Caching
 
 Cache NuGet packages and Node modules:
 
@@ -424,10 +516,11 @@ Cache NuGet packages and Node modules:
 ```
 {% endraw %}
 
-### 5. Build Artifacts
+### 6. Build Artifacts
 
 Save build artifacts for debugging:
 
+{% raw %}
 ```yaml
 - name: Upload Build Artifacts
   if: failure()
@@ -438,6 +531,17 @@ Save build artifacts for debugging:
       **/*.binlog
       **/msbuild.log
 ```
+{% endraw %}
+
+## Bundled datadog-ci in CI/CD
+
+The plugin uses a bundled `datadog-ci` by default (`DatadogSymbolsUseBundledCi=true`). This provides:
+
+- **Deterministic builds**: Same CLI version every time
+- **No registry auth**: Works without npm authentication
+- **Build ID support**: Enables unique build identifiers
+
+No special configuration needed - it works out of the box in CI/CD.
 
 ## Troubleshooting CI/CD
 
@@ -451,7 +555,7 @@ Save build artifacts for debugging:
 - name: Setup Node.js
   uses: actions/setup-node@v4
   with:
-    node-version: '18'
+    node-version: '20'
 ```
 
 ### API Key Not Set
@@ -490,6 +594,24 @@ Save build artifacts for debugging:
     find . -name "mapping.txt" -o -name "*.dSYM"
 ```
 
+### Dry-run Always Enabled
+
+**Error**: Symbols never actually upload
+
+**Solution**: Set `DatadogSymbolsDryRun=false` in your `.csproj`:
+
+```xml
+<PropertyGroup>
+  <DatadogSymbolsDryRun>false</DatadogSymbolsDryRun>
+</PropertyGroup>
+```
+
+Or pass via command line:
+
+```bash
+dotnet publish -c Release -p:DatadogSymbolsDryRun=false
+```
+
 ## Validation
 
 Test your CI/CD setup:
@@ -499,9 +621,84 @@ Test your CI/CD setup:
 3. **Check CI logs** for:
    ```
    [Datadog] Uploading android symbols to Datadog...
-   [Datadog] Successfully uploaded android symbols.
+   [Datadog] Successfully uploaded android symbols!
    ```
 4. **Verify in Datadog** under Settings → Symbol Files
+
+Look for your service name, version, and flavor in the uploaded symbols list.
+
+## Example: Complete GitHub Actions Workflow
+
+{% raw %}
+```yaml
+name: Production Build with Symbol Upload
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install MAUI
+        run: dotnet workload install maui
+
+      - name: Test Build (Dry Run)
+        if: github.event_name == 'pull_request'
+        run: dotnet publish -f net8.0-android -c Release -p:DatadogSymbolsDryRun=true
+
+      - name: Production Build
+        if: github.ref == 'refs/heads/main'
+        env:
+          DD_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+          DD_BUILD_FLAVOR: production
+        run: dotnet publish -f net8.0-android -c Release
+
+  build-ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install MAUI
+        run: dotnet workload install maui
+
+      - name: Test Build (Dry Run)
+        if: github.event_name == 'pull_request'
+        run: dotnet publish -f net8.0-ios -c Release -p:DatadogSymbolsDryRun=true
+
+      - name: Production Build
+        if: github.ref == 'refs/heads/main'
+        env:
+          DD_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+          DD_BUILD_FLAVOR: production
+        run: dotnet publish -f net8.0-ios -c Release
+```
+{% endraw %}
 
 ## Next Steps
 

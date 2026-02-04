@@ -65,21 +65,32 @@ namespace Datadog.MAUI.Symbols
         public string? Flavor { get; set; }
 
         /// <summary>
+        /// Optional application build Id for mapping.txt association.
+        /// </summary>
+        public string? AppBuildId { get; set; }
+
+        /// <summary>
+        /// Option to use custom embedded datadog-ci.
+        /// </summary>
+        public bool UseBundledDatadogCi { get; set; } = false;
+
+        /// <summary>
+        /// Optional override; if set, use this path directly
+        /// </summary>
+        public string? DatadogCiTgzPath { get; set; }
+
+        /// <summary>
+        /// Directory where the .targets file lives (passed from MSBuildThisFileDirectory)
+        /// </summary>
+        public string? ThisTargetsDirectory { get; set; }
+
+
+        /// <summary>
         /// Executes the symbol upload task.
         /// </summary>
         /// <returns>True if the upload succeeded, false otherwise.</returns>
         public override bool Execute()
         {
-            Log.LogMessage(MessageImportance.High, "[Datadog] Symbol upload task started");
-            Log.LogMessage(MessageImportance.High, $"[Datadog]   TargetPlatform: {TargetPlatform}");
-            Log.LogMessage(MessageImportance.High, $"[Datadog]   AppVersion: {AppVersion}");
-            Log.LogMessage(MessageImportance.High, $"[Datadog]   FilePath: {FilePath ?? "(not set)"}");
-            Log.LogMessage(MessageImportance.High, $"[Datadog]   ServiceName: {ServiceName ?? "(not set)"}");
-            Log.LogMessage(MessageImportance.High, $"[Datadog]   ServiceNameAndroid: {ServiceNameAndroid ?? "(not set)"}");
-            Log.LogMessage(MessageImportance.High, $"[Datadog]   ServiceNameIOS: {ServiceNameIOS ?? "(not set)"}");
-            Log.LogMessage(MessageImportance.High, $"[Datadog]   DryRun: {DryRun}");
-            Log.LogMessage(MessageImportance.High, $"[Datadog]   ApiKey: {(string.IsNullOrEmpty(ApiKey) ? "(not set)" : "***SET***")}");
-
             // 1. Check if npx is available before doing anything else
             Log.LogMessage(MessageImportance.High, "[Datadog] Checking if npx is available...");
             if (!CheckNpxAvailable())
@@ -125,10 +136,26 @@ namespace Datadog.MAUI.Symbols
             string args = BuildCommandArguments(finalServiceName!);
             Log.LogMessage(MessageImportance.High, $"[Datadog] Built command arguments successfully");
 
+            // Output configuration to stdout for visibility in build logs
+            Console.WriteLine("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            Console.WriteLine("[Datadog] Symbol Upload Configuration");
+            Console.WriteLine("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            Console.WriteLine($"  Platform:  {TargetPlatform}");
+            Console.WriteLine($"  Version:   {AppVersion}");
+            Console.WriteLine($"  Build ID:  {AppBuildId ?? "(not set)"}");
+            Console.WriteLine($"  Service:   {finalServiceName ?? "(not set)"}");
+            Console.WriteLine($"  Dry Run:   {DryRun}");
+            Console.WriteLine($"  API Key:   {(HasApiKeyConfigured() ? "***SET***" : "(not set)")}");
+            Console.WriteLine("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+
             // 5. Execute via NPX
             return ExecuteNpx(args, finalServiceName!);
         }
 
+        /// <summary>
+        /// Check if npx is available on the system.
+        /// </summary>
+        /// <returns></returns>
         private bool CheckNpxAvailable()
         {
             try
@@ -158,6 +185,24 @@ namespace Datadog.MAUI.Symbols
             }
         }
 
+        /// <summary>
+        /// Check if API is configured.
+        /// </summary>
+        /// <returns></returns>
+        private bool HasApiKeyConfigured()
+        {
+            if (!string.IsNullOrEmpty(ApiKey)) return true;
+
+            var envDatadog = Environment.GetEnvironmentVariable("DATADOG_API_KEY");
+            var envDd = Environment.GetEnvironmentVariable("DD_API_KEY");
+            return !string.IsNullOrEmpty(envDatadog) || !string.IsNullOrEmpty(envDd);
+        }
+
+
+        /// <summary>
+        /// Resolve service name based on platform.
+        /// </summary>
+        /// <returns></returns>
         private string? ResolveServiceName()
         {
             // Priority: Platform Specific > Global
@@ -173,6 +218,11 @@ namespace Datadog.MAUI.Symbols
             return ServiceName;
         }
 
+        /// <summary>
+        /// Generate command line arguments for symbols upload.
+        /// </summary>
+        /// <param name="serviceName"></param>
+        /// <returns></returns>
         private string BuildCommandArguments(string serviceName)
         {
             // Base command: datadog-ci flutter-symbols upload
@@ -191,6 +241,13 @@ namespace Datadog.MAUI.Symbols
                 args += $" --ios-dsyms --ios-dsyms-location \"{FilePath}\"";
             }
 
+            // Add the Build ID to the command
+            if (!string.IsNullOrEmpty(AppBuildId))
+            {
+                // Tagging the upload with the unique build ID
+                args += $" --build-id \"{AppBuildId}\"";
+            }
+
             // Add optional parameters
             if (DryRun)
             {
@@ -205,6 +262,12 @@ namespace Datadog.MAUI.Symbols
             return args;
         }
 
+        /// <summary>
+        /// Execute datadog-ci command via npx.
+        /// </summary>
+        /// <param name="arguments"></param>
+        /// <param name="serviceName"></param>
+        /// <returns></returns>
         private bool ExecuteNpx(string arguments, string serviceName)
         {
             try
@@ -212,12 +275,47 @@ namespace Datadog.MAUI.Symbols
                 var psi = new ProcessStartInfo
                 {
                     FileName = "npx",
-                    Arguments = $"--yes @datadog/datadog-ci {arguments}",
+                    // Arguments will be set below based on whether we're using bundled datadog-ci
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     CreateNoWindow = true
                 };
+
+                // Optionally use a bundled/embedded datadog-ci .tgz instead of pulling from npm registry.
+                // This allows distributing a known fork/version without requiring registry access.
+                string? tgzPath = DatadogCiTgzPath;
+
+                if (UseBundledDatadogCi)
+                {
+                    if (string.IsNullOrEmpty(tgzPath))
+                    {
+                        if (string.IsNullOrEmpty(ThisTargetsDirectory))
+                        {
+                            Log.LogError("[Datadog] ThisTargetsDirectory was not provided; cannot locate bundled datadog-ci.tgz.");
+                            return false;
+                        }
+
+                        // Expected layout:
+                        //   <packageRoot>/build/Datadog.MAUI.Symbols.targets  => ThisTargetsDirectory
+                        //   <packageRoot>/tools/datadog-ci.tgz               => bundled tgz
+                        tgzPath = Path.GetFullPath(Path.Combine(ThisTargetsDirectory, "..", "tools", "datadog-ci.tgz"));
+                    }
+
+                    if (!File.Exists(tgzPath))
+                    {
+                        Log.LogError($"[Datadog] Bundled datadog-ci.tgz not found at: {tgzPath}");
+                        return false;
+                    }
+
+                    // Force npx to use the local tgz, then run the datadog-ci bin
+                    psi.Arguments = $"--yes --package \"{tgzPath}\" datadog-ci {arguments}";
+                }
+                else
+                {
+                    // Old behavior (registry)
+                    psi.Arguments = $"--yes @datadog/datadog-ci {arguments}";
+                }
 
                 // Set API Key from Property or fall back to environment variable
                 if (!string.IsNullOrEmpty(ApiKey))
@@ -257,7 +355,17 @@ namespace Datadog.MAUI.Symbols
 
                 // Sanitize command for logging (hide API key if present in arguments)
                 string sanitizedArgs = !string.IsNullOrEmpty(ApiKey) ? arguments.Replace(ApiKey, "***") : arguments;
-                Log.LogMessage(MessageImportance.High, $"[Datadog]   Command: npx @datadog/datadog-ci {sanitizedArgs}");
+
+                // Log which form of npx we're using
+                if (UseBundledDatadogCi)
+                {
+                    Log.LogMessage(MessageImportance.High, $"[Datadog]   Command: npx --package \"{DatadogCiTgzPath ?? "(auto-resolved)"}\" datadog-ci {sanitizedArgs}");
+                }
+                else
+                {
+                    Log.LogMessage(MessageImportance.High, $"[Datadog]   Command: npx @datadog/datadog-ci {sanitizedArgs}");
+                }
+
                 Log.LogMessage(MessageImportance.High, $"[Datadog] ========================================");
                 Log.LogMessage(MessageImportance.High, "[Datadog] Starting npx process...");
                 Log.LogMessage(MessageImportance.High, "[Datadog] NOTE: First run may take several minutes to download @datadog/datadog-ci package");

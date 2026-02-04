@@ -80,7 +80,7 @@ Add to your `.csproj` (not recommended for production):
 
 ```xml
 <PropertyGroup>
-  <DatadogApiKey>your-api-key-here</DatadogApiKey>
+  <DatadogSymbolsApiKey>your-api-key-here</DatadogSymbolsApiKey>
 </PropertyGroup>
 ```
 
@@ -94,24 +94,23 @@ Add service name configuration to your `.csproj`:
 ```xml
 <PropertyGroup>
   <!-- Use your app's bundle identifier -->
-  <DatadogServiceNameAndroid>com.yourcompany.yourapp.android</DatadogServiceNameAndroid>
-  <DatadogServiceNameiOS>com.yourcompany.yourapp.ios</DatadogServiceNameiOS>
+  <DatadogSymbolsServiceNameAndroid>com.yourcompany.yourapp.android</DatadogSymbolsServiceNameAndroid>
+  <DatadogSymbolsServiceNameiOS>com.yourcompany.yourapp.ios</DatadogSymbolsServiceNameiOS>
 </PropertyGroup>
 ```
 
 {: .note }
-The service name should match what you configured in the Datadog RUM SDK initialization.
+The service name should match what you configured in the Datadog RUM SDK initialization. Note that property names are now prefixed with `DatadogSymbols*` to avoid conflicts with other packages.
 
 ## Platform-Specific Setup
 
 ### Android Setup
 
-Enable ProGuard/R8 for Release builds. Add to your `.csproj`:
+Enable R8 for Release builds. Add to your `.csproj`:
 
 ```xml
-<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   <AndroidLinkTool>r8</AndroidLinkTool>
-  <AndroidEnableProguard>true</AndroidEnableProguard>
 </PropertyGroup>
 ```
 
@@ -129,7 +128,7 @@ Before doing a real upload, test with dry-run mode:
 
 ```xml
 <PropertyGroup>
-  <DatadogDryRun>true</DatadogDryRun>
+  <DatadogSymbolsDryRun>true</DatadogSymbolsDryRun>
 </PropertyGroup>
 ```
 
@@ -194,15 +193,14 @@ Here's a complete `.csproj` configuration:
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
 
     <!-- Datadog Symbols Configuration -->
-    <DatadogServiceNameAndroid>com.yourcompany.yourapp.android</DatadogServiceNameAndroid>
-    <DatadogServiceNameiOS>com.yourcompany.yourapp.ios</DatadogServiceNameiOS>
-    <!-- DatadogApiKey set via DD_API_KEY environment variable -->
+    <DatadogSymbolsServiceNameAndroid>com.yourcompany.yourapp.android</DatadogSymbolsServiceNameAndroid>
+    <DatadogSymbolsServiceNameiOS>com.yourcompany.yourapp.ios</DatadogSymbolsServiceNameiOS>
+    <!-- DatadogSymbolsApiKey set via DD_API_KEY environment variable -->
   </PropertyGroup>
 
   <!-- Android Release Configuration -->
-  <PropertyGroup Condition="'$(Configuration)' == 'Release' and '$(TargetFramework)' == 'net8.0-android'">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <AndroidLinkTool>r8</AndroidLinkTool>
-    <AndroidEnableProguard>true</AndroidEnableProguard>
   </PropertyGroup>
 
   <ItemGroup>
@@ -242,7 +240,7 @@ Now that you have basic symbol upload working:
 
 **Problem**: Missing service name properties.
 
-**Solution**: Add `DatadogServiceNameAndroid` and `DatadogServiceNameiOS` to your `.csproj`.
+**Solution**: Add `DatadogSymbolsServiceNameAndroid` and `DatadogSymbolsServiceNameiOS` to your `.csproj`.
 
 ### Upload succeeds but symbols don't work
 

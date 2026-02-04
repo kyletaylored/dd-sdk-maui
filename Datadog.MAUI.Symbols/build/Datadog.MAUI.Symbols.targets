@@ -1,114 +1,123 @@
 <Project>
   <!--
-    Datadog.MAUI.Symbols MSBuild Targets
-
-    This file automatically triggers symbol uploads to Datadog after publishing a .NET MAUI app.
-    It handles both iOS (dSYMs) and Android (Proguard mapping.txt) symbol files.
+    Datadog.MAUI.Symbols MSBuild Targets (namespaced properties)
+    Bundled datadog-ci is ON by default (DatadogSymbolsUseBundledCi = true)
   -->
 
   <!-- Load task from NuGet package location (only if not already loaded by csproj) -->
-  <UsingTask TaskName="Datadog.MAUI.Symbols.UploadSymbolsTask"
-             AssemblyFile="$(MSBuildThisFileDirectory)..\lib\netstandard2.0\Datadog.MAUI.Symbols.dll"
-             Condition="Exists('$(MSBuildThisFileDirectory)..\lib\netstandard2.0\Datadog.MAUI.Symbols.dll')" />
+  <UsingTask TaskName="Datadog.MAUI.Symbols.UploadSymbolsTask" AssemblyFile="$(MSBuildThisFileDirectory)..\lib\netstandard2.0\Datadog.MAUI.Symbols.dll" Condition="Exists('$(MSBuildThisFileDirectory)..\lib\netstandard2.0\Datadog.MAUI.Symbols.dll')" />
+
+  <!-- Generate a build id once per build/publish and embed it into the compilation -->
+  <Target Name="DatadogGenerateMetadata" BeforeTargets="BeforeBuild;CoreCompile">
+    <PropertyGroup>
+      <_DatadogGeneratedId>$([System.Guid]::NewGuid().ToString().Substring(0,8))</_DatadogGeneratedId>
+
+      <!-- Default Variant comes from DatadogSymbolsFlavor, else Debug/Release -->
+      <_DatadogGeneratedVariant Condition="'$(DatadogSymbolsFlavor)' != ''">$(DatadogSymbolsFlavor)</_DatadogGeneratedVariant>
+      <_DatadogGeneratedVariant Condition="'$(_DatadogGeneratedVariant)' == '' AND '$(Configuration)' == 'Debug'">debug</_DatadogGeneratedVariant>
+      <_DatadogGeneratedVariant Condition="'$(_DatadogGeneratedVariant)' == '' AND '$(Configuration)' == 'Release'">release</_DatadogGeneratedVariant>
+      <_DatadogGeneratedVariant Condition="'$(_DatadogGeneratedVariant)' == ''">release</_DatadogGeneratedVariant>
+
+      <DatadogMetadataClass>
+namespace Datadog.MAUI.Symbols%3b
+public static class DatadogBuildInfo {
+    public const string BuildId = "$(_DatadogGeneratedId)"%3b
+    public const string Variant = "$(_DatadogGeneratedVariant)"%3b
+}
+      </DatadogMetadataClass>
+    </PropertyGroup>
+
+    <WriteLinesToFile File="$(IntermediateOutputPath)DatadogBuildInfo.g.cs" Lines="$(DatadogMetadataClass)" Overwrite="true" WriteOnlyWhenDifferent="false" />
+
+    <ItemGroup>
+      <Compile Include="$(IntermediateOutputPath)DatadogBuildInfo.g.cs" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <DatadogSymbolsGeneratedBuildId>$(_DatadogGeneratedId)</DatadogSymbolsGeneratedBuildId>
+      <DatadogSymbolsGeneratedVariant>$(_DatadogGeneratedVariant)</DatadogSymbolsGeneratedVariant>
+    </PropertyGroup>
+  </Target>
+
 
   <!-- Run after publish completes successfully -->
   <Target Name="DatadogUploadSymbols" AfterTargets="Publish">
-
-    <!-- Debug logging -->
     <Message Importance="high" Text="[Datadog] Symbol upload target triggered for $(TargetPlatformIdentifier)" />
 
-    <!-- Determine if upload should run -->
+    <!-- Determine if upload should run and set defaults (namespaced) -->
     <PropertyGroup>
-      <!-- Allow users to explicitly disable with <DatadogUploadEnabled>false</DatadogUploadEnabled> -->
-      <_DatadogShouldRun Condition="'$(DatadogUploadEnabled)' == 'false'">false</_DatadogShouldRun>
-      <_DatadogShouldRun Condition="'$(_DatadogShouldRun)' == ''">true</_DatadogShouldRun>
+      <!-- Toggle to enable/disable overall upload -->
+      <DatadogSymbolsUploadEnabled Condition="'$(DatadogSymbolsUploadEnabled)' == ''">true</DatadogSymbolsUploadEnabled>
 
       <!-- Only run in Release configuration by default -->
-      <_DatadogShouldRun Condition="'$(Configuration)' != 'Release' AND '$(DatadogUploadInDebug)' != 'true'">false</_DatadogShouldRun>
+      <DatadogSymbolsUploadInDebug Condition="'$(DatadogSymbolsUploadInDebug)' == ''">false</DatadogSymbolsUploadInDebug>
 
-      <!-- Set default values -->
-      <!-- Debug: Show what DatadogAppVersion is set to -->
-      <_DatadogAppVersion Condition="'$(DatadogAppVersion)' != ''">$(DatadogAppVersion)</_DatadogAppVersion>
-      <_DatadogAppVersion Condition="'$(_DatadogAppVersion)' == ''">$(ApplicationDisplayVersion)</_DatadogAppVersion>
-      <_DatadogAppVersion Condition="'$(_DatadogAppVersion)' == ''">1.0.0</_DatadogAppVersion>
-      <_DatadogSite Condition="'$(DatadogSite)' == ''">datadoghq.com</_DatadogSite>
-      <_DatadogDryRun Condition="'$(DatadogDryRun)' == 'true'">true</_DatadogDryRun>
-      <_DatadogDryRun Condition="'$(_DatadogDryRun)' == ''">false</_DatadogDryRun>
-      <_DatadogFlavor Condition="'$(DatadogFlavor)' != ''">$(DatadogFlavor)</_DatadogFlavor>
-      <_DatadogFlavor Condition="'$(_DatadogFlavor)' == '' AND '$(Configuration)' == 'Debug'">debug</_DatadogFlavor>
-      <_DatadogFlavor Condition="'$(_DatadogFlavor)' == '' AND '$(Configuration)' == 'Release'">release</_DatadogFlavor>
-      <_DatadogFlavor Condition="'$(_DatadogFlavor)' == ''">release</_DatadogFlavor>
+      <_DatadogShouldRun Condition="'$(DatadogSymbolsUploadEnabled)' == 'false'">false</_DatadogShouldRun>
+      <_DatadogShouldRun Condition="'$(_DatadogShouldRun)' == ''">true</_DatadogShouldRun>
+      <_DatadogShouldRun Condition="'$(Configuration)' != 'Release' AND '$(DatadogSymbolsUploadInDebug)' != 'true'">false</_DatadogShouldRun>
+
+      <!-- Default to bundled datadog-ci = true (opt-in upstream later) -->
+      <DatadogSymbolsUseBundledCi Condition="'$(DatadogSymbolsUseBundledCi)' == ''">true</DatadogSymbolsUseBundledCi>
+
+      <!-- Version (app) selection -->
+      <DatadogSymbolsAppVersion Condition="'$(DatadogSymbolsAppVersion)' != ''">$(DatadogSymbolsAppVersion)</DatadogSymbolsAppVersion>
+      <DatadogSymbolsAppVersion Condition="'$(_DatadogAppVersion)' == '' AND '$(ApplicationDisplayVersion)' != ''">$(ApplicationDisplayVersion)</DatadogSymbolsAppVersion>
+      <DatadogSymbolsAppVersion Condition="'$(DatadogSymbolsAppVersion)' == ''">1.0.0</DatadogSymbolsAppVersion>
+
+      <!-- Build ID is separate and only used when bundled CI is enabled -->
+      <DatadogSymbolsBuildId Condition="'$(DatadogSymbolsUseBundledCi)' == 'true' AND '$(DatadogSymbolsBuildId)' == '' AND '$(DatadogSymbolsGeneratedBuildId)' != ''">$(DatadogSymbolsGeneratedBuildId)</DatadogSymbolsBuildId>
+
+      <!-- Site, dry-run, flavor defaults -->
+      <DatadogSymbolsSite Condition="'$(DatadogSymbolsSite)' != ''">$(DatadogSymbolsSite)</DatadogSymbolsSite>
+      <DatadogSymbolsSite Condition="'$(_DatadogSite)' == ''">datadoghq.com</DatadogSymbolsSite>
+
+      <!-- Get API key -->
+      <DatadogSymbolsApiKey Condition="'$(DatadogSymbolsApiKey)' == '' AND '$(DD_API_KEY)' != ''">$(DD_API_KEY)</DatadogSymbolsApiKey>
+      <DatadogSymbolsApiKey Condition="'$(DatadogSymbolsApiKey)' == '' AND '$(DATADOG_API_KEY)' != ''">$(DATADOG_API_KEY)</DatadogSymbolsApiKey>
+
+      <DatadogSymbolsDryRun Condition="'$(DatadogSymbolsDryRun)' == ''">true</DatadogSymbolsDryRun>
+
+      <DatadogSymbolsFlavor Condition="'$(DatadogSymbolsFlavor)' != ''">$(DatadogSymbolsFlavor)</DatadogSymbolsFlavor>
+      <DatadogSymbolsFlavor Condition="'$(DatadogSymbolsFlavor)' == '' And '$(Configuration)' == 'Debug'">debug</DatadogSymbolsFlavor>
+      <DatadogSymbolsFlavor Condition="'$(DatadogSymbolsFlavor)' == '' And '$(Configuration)' == 'Release'">release</DatadogSymbolsFlavor>
     </PropertyGroup>
+
+    <!-- Early exit when disabled -->
+    <Message Condition="'$(_DatadogShouldRun)' != 'true'" Importance="high" Text="[Datadog] Symbol upload disabled (DatadogSymbolsUploadEnabled=false or not Release and DatadogSymbolsUploadInDebug!=true). Skipping." />
 
     <!-- Android: Locate mapping.txt -->
     <ItemGroup Condition="'$(TargetPlatformIdentifier)' == 'android' AND '$(_DatadogShouldRun)' == 'true'">
-      <!-- Try common locations for mapping.txt -->
       <_DDMappingFile Include="$(OutputPath)\mapping.txt" Condition="Exists('$(OutputPath)\mapping.txt')" />
       <_DDMappingFile Include="$(OutputPath)\..\mapping.txt" Condition="Exists('$(OutputPath)\..\mapping.txt') AND '@(_DDMappingFile)' == ''" />
       <_DDMappingFile Include="$(IntermediateOutputPath)\mapping.txt" Condition="Exists('$(IntermediateOutputPath)\mapping.txt') AND '@(_DDMappingFile)' == ''" />
-      <_DDMappingFile Include="$(ProjectDir)\obj\$(Configuration)\$(TargetFramework)\android-arm64\mapping.txt"
-                      Condition="Exists('$(ProjectDir)\obj\$(Configuration)\$(TargetFramework)\android-arm64\mapping.txt') AND '@(_DDMappingFile)' == ''" />
+      <_DDMappingFile Include="$(ProjectDir)\obj\$(Configuration)\$(TargetFramework)\android-arm64\mapping.txt" Condition="Exists('$(ProjectDir)\obj\$(Configuration)\$(TargetFramework)\android-arm64\mapping.txt') AND '@(_DDMappingFile)' == ''" />
     </ItemGroup>
 
-    <!-- Debug: Show what we found -->
-    <Message Condition="'$(TargetPlatformIdentifier)' == 'android' AND '@(_DDMappingFile)' != ''"
-             Importance="high"
-             Text="[Datadog] Found Android mapping file: @(_DDMappingFile)" />
+    <Message Condition="'$(TargetPlatformIdentifier)' == 'android' AND '@(_DDMappingFile)' != ''" Importance="high" Text="[Datadog] Found Android mapping file: @(_DDMappingFile)" />
 
-    <!-- iOS: Locate .dSYM folder -->
+    <!-- iOS: Locate .dSYM -->
     <ItemGroup Condition="'$(TargetPlatformIdentifier)' == 'ios' AND '$(_DatadogShouldRun)' == 'true'">
-      <!-- Try common locations for .dSYM -->
       <_DDDsymFolder Include="$(OutputPath)\$(AssemblyName).app.dSYM" Condition="Exists('$(OutputPath)\$(AssemblyName).app.dSYM')" />
       <_DDDsymFolder Include="$(OutputPath)\..\$(AssemblyName).app.dSYM" Condition="Exists('$(OutputPath)\..\$(AssemblyName).app.dSYM') AND '@(_DDDsymFolder)' == ''" />
       <_DDDsymFolder Include="$(AppBundleDir).dSYM" Condition="Exists('$(AppBundleDir).dSYM') AND '@(_DDDsymFolder)' == ''" />
     </ItemGroup>
 
-    <!-- Debug: Show what we found -->
-    <Message Condition="'$(TargetPlatformIdentifier)' == 'ios' AND '@(_DDDsymFolder)' != ''"
-             Importance="high"
-             Text="[Datadog] Found iOS dSYM folder: @(_DDDsymFolder)" />
+    <Message Condition="'$(TargetPlatformIdentifier)' == 'ios' AND '@(_DDDsymFolder)' != ''" Importance="high" Text="[Datadog] Found iOS dSYM folder: @(_DDDsymFolder)" />
 
-    <!-- Upload Android Mapping File -->
-    <UploadSymbolsTask
-      Condition="'$(TargetPlatformIdentifier)' == 'android' AND '@(_DDMappingFile)' != ''"
-      TargetPlatform="android"
-      ServiceName="$(DatadogServiceName)"
-      ServiceNameAndroid="$(DatadogServiceNameAndroid)"
-      AppVersion="$(_DatadogAppVersion)"
-      FilePath="@(_DDMappingFile)"
-      ApiKey="$(DatadogApiKey)"
-      Site="$(_DatadogSite)"
-      DryRun="$(_DatadogDryRun)"
-      Flavor="$(_DatadogFlavor)"
-      ContinueOnError="true"
-    />
+    <!-- Upload Android mapping file (pass namespaced props into the task) -->
+    <UploadSymbolsTask Condition="'$(TargetPlatformIdentifier)' == 'android' AND '$(_DatadogShouldRun)' == 'true' AND '@(_DDMappingFile)' != ''" TargetPlatform="android" ServiceName="$(DatadogSymbolsServiceName)" ServiceNameAndroid="$(DatadogSymbolsServiceNameAndroid)" AppVersion="$(DatadogSymbolsAppVersion)" AppBuildId="$(DatadogSymbolsBuildId)" FilePath="@(_DDMappingFile)" ApiKey="$(DatadogSymbolsApiKey)" Site="$(DatadogSymbolsSite)" DryRun="$(DatadogSymbolsDryRun)" Flavor="$(DatadogSymbolsFlavor)" ThisTargetsDirectory="$(MSBuildThisFileDirectory)" UseBundledDatadogCi="$(DatadogSymbolsUseBundledCi)" DatadogCiTgzPath="$(DatadogSymbolsCiTgzPath)" ContinueOnError="true" />
 
-    <!-- Upload iOS dSYM Files -->
-    <UploadSymbolsTask
-      Condition="'$(TargetPlatformIdentifier)' == 'ios' AND '@(_DDDsymFolder)' != ''"
-      TargetPlatform="ios"
-      ServiceName="$(DatadogServiceName)"
-      ServiceNameIOS="$(DatadogServiceNameiOS)"
-      AppVersion="$(_DatadogAppVersion)"
-      FilePath="@(_DDDsymFolder)"
-      ApiKey="$(DatadogApiKey)"
-      Site="$(_DatadogSite)"
-      DryRun="$(_DatadogDryRun)"
-      Flavor="$(_DatadogFlavor)"
-      ContinueOnError="true"
-    />
+    <!-- Upload iOS dSYM -->
+    <UploadSymbolsTask Condition="'$(TargetPlatformIdentifier)' == 'ios' AND '$(_DatadogShouldRun)' == 'true' AND '@(_DDDsymFolder)' != ''" TargetPlatform="ios" ServiceName="$(DatadogSymbolsServiceName)" ServiceNameIOS="$(DatadogSymbolsServiceNameiOS)" AppVersion="$(DatadogSymbolsAppVersion)" AppBuildId="$(DatadogSymbolsBuildId)" FilePath="@(_DDDsymFolder)" ApiKey="$(DatadogSymbolsApiKey)" Site="$(DatadogSymbolsSite)" DryRun="$(DatadogSymbolsDryRun)" Flavor="$(DatadogSymbolsFlavor)" ThisTargetsDirectory="$(MSBuildThisFileDirectory)" UseBundledDatadogCi="$(DatadogSymbolsUseBundledCi)" DatadogCiTgzPath="$(DatadogSymbolsCiTgzPath)" ContinueOnError="true" />
 
-    <!-- Log when files are not found -->
-    <Message
-      Condition="'$(TargetPlatformIdentifier)' == 'android' AND '$(_DatadogShouldRun)' == 'true' AND '@(_DDMappingFile)' == ''"
-      Importance="high"
-      Text="[Datadog] Android mapping.txt not found. Ensure ProGuard/R8 is enabled for Release builds." />
+    <Message Condition="'$(TargetPlatformIdentifier)' == 'android' AND '$(_DatadogShouldRun)' == 'true' AND '@(_DDMappingFile)' == ''" Importance="high" Text="[Datadog] Android mapping.txt not found. Ensure R8 is enabled for Release builds." />
 
-    <Message
-      Condition="'$(TargetPlatformIdentifier)' == 'ios' AND '$(_DatadogShouldRun)' == 'true' AND '@(_DDDsymFolder)' == ''"
-      Importance="high"
-      Text="[Datadog] iOS dSYM folder not found at expected locations." />
+    <Message Condition="'$(TargetPlatformIdentifier)' == 'ios' AND '$(_DatadogShouldRun)' == 'true' AND '@(_DDDsymFolder)' == ''" Importance="high" Text="[Datadog] iOS dSYM folder not found at expected locations." />
+
+    <!-- Optional: show whether build-id is being used -->
+    <Message Condition="'$(DatadogSymbolsUseBundledCi)' == 'true' AND '$(DatadogSymbolsBuildId)' != ''" Importance="high" Text="[Datadog] Using Build ID (bundled CI enabled): $(DatadogSymbolsBuildId)" />
+
+    <Message Condition="'$(DatadogSymbolsUseBundledCi)' != 'true' AND '$(DatadogSymbolsBuildId)' != ''" Importance="high" Text="[Datadog] DatadogSymbolsBuildId is set but DatadogSymbolsUseBundledCi is false; build-id will not be passed." />
 
   </Target>
-
 </Project>
