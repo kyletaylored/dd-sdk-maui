@@ -93,11 +93,22 @@ fi
 echo -e "${CYAN}Discovering XCFrameworks in $ARTIFACTS_DIR...${NC}"
 FRAMEWORKS=()
 if [ -d "$ARTIFACTS_DIR" ]; then
+    # First, add DatadogInternal if it exists (must be processed first as other frameworks depend on it)
+    if [ -d "$ARTIFACTS_DIR/DatadogInternal.xcframework" ]; then
+        FRAMEWORKS+=("DatadogInternal")
+        echo -e "  ${GREEN}Found:${NC} DatadogInternal ${YELLOW}(processing first - dependency)${NC}"
+    fi
+
+    # Then add all other frameworks
     while IFS= read -r -d '' xcframework; do
         # Extract framework name (remove .xcframework extension)
         framework_name=$(basename "$xcframework" .xcframework)
-        FRAMEWORKS+=("$framework_name")
-        echo -e "  ${GREEN}Found:${NC} $framework_name"
+
+        # Skip DatadogInternal as it's already added
+        if [ "$framework_name" != "DatadogInternal" ]; then
+            FRAMEWORKS+=("$framework_name")
+            echo -e "  ${GREEN}Found:${NC} $framework_name"
+        fi
     done < <(find "$ARTIFACTS_DIR" -maxdepth 1 -name "*.xcframework" -type d -print0 | sort -z)
 else
     echo -e "${RED}Error: Artifacts directory not found: $ARTIFACTS_DIR${NC}"
