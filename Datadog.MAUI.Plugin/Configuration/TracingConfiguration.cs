@@ -11,11 +11,6 @@ public class TracingConfiguration
     public int SampleRate { get; init; } = 100;
 
     /// <summary>
-    /// Enable trace ID generation.
-    /// </summary>
-    public bool TraceIdGenerationEnabled { get; init; } = true;
-
-    /// <summary>
     /// First-party hosts for distributed tracing.
     /// </summary>
     public string[] FirstPartyHosts { get; init; } = Array.Empty<string>();
@@ -26,7 +21,6 @@ public class TracingConfiguration
     public class Builder
     {
         private int _sampleRate = 100;
-        private bool _traceIdGenerationEnabled = true;
         private string[] _firstPartyHosts = Array.Empty<string>();
 
         /// <summary>
@@ -38,15 +32,6 @@ public class TracingConfiguration
                 throw new ArgumentOutOfRangeException(nameof(rate), "Sample rate must be between 0 and 100");
 
             _sampleRate = rate;
-            return this;
-        }
-
-        /// <summary>
-        /// Enables or disables trace ID generation.
-        /// </summary>
-        public Builder EnableTraceIdGeneration(bool enable)
-        {
-            _traceIdGenerationEnabled = enable;
             return this;
         }
 
@@ -67,7 +52,6 @@ public class TracingConfiguration
             return new TracingConfiguration
             {
                 SampleRate = _sampleRate,
-                TraceIdGenerationEnabled = _traceIdGenerationEnabled,
                 FirstPartyHosts = _firstPartyHosts
             };
         }

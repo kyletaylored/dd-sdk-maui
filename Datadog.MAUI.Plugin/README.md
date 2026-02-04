@@ -30,7 +30,34 @@ Install-Package Datadog.MAUI
 
 ## Quick Start
 
-### 1. Initialize the SDK
+### Option A: Configuration-Based (Simplest)
+
+Initialize using `appsettings.json` - no custom classes needed:
+
+**1. Create appsettings.json:**
+
+```json
+{
+  "Datadog": {
+    "Android": {
+      "ClientToken": "pub...",
+      "RumApplicationId": "..."
+    },
+    "iOS": {
+      "ClientToken": "pub...",
+      "RumApplicationId": "..."
+    }
+  }
+}
+```
+
+**2. Initialize in one line:**
+
+```csharp
+builder.UseDatadogFromConfiguration();
+```
+
+### Option B: Programmatic
 
 In your `MauiProgram.cs`:
 

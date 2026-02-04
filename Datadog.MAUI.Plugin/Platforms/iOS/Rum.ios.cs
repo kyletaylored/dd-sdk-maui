@@ -1,6 +1,5 @@
 using Datadog.iOS.RUM;
 using Foundation;
-using Datadog.iOS.Internal;
 
 namespace Datadog.Maui.Rum;
 
@@ -9,147 +8,88 @@ public static partial class Rum
     static partial void PlatformStartView(string key, string name, Dictionary<string, object>? attributes)
     {
         var monitor = DDRUMMonitor.Shared;
-        var nsAttributes = attributes != null ? ConvertAttributes(attributes) : null;
-
-        monitor.StartView(
-            key: key,
-            name: name,
-            attributes: nsAttributes
-        );
+        var nsAttributes = ConvertAttributes(attributes);
+        monitor.StartView(key, name, nsAttributes);
     }
 
     static partial void PlatformStopView(string key, Dictionary<string, object>? attributes)
     {
         var monitor = DDRUMMonitor.Shared;
-        var nsAttributes = attributes != null ? ConvertAttributes(attributes) : null;
-
-        monitor.StopView(
-            key: key,
-            attributes: nsAttributes
-        );
+        var nsAttributes = ConvertAttributes(attributes);
+        monitor.StopView(key, nsAttributes);
     }
 
     static partial void PlatformAddAction(RumActionType type, string name, Dictionary<string, object>? attributes)
     {
         var monitor = DDRUMMonitor.Shared;
         var actionType = MapActionType(type);
-        var nsAttributes = attributes != null ? ConvertAttributes(attributes) : null;
-
-        monitor.AddAction(
-            type: actionType,
-            name: name,
-            attributes: nsAttributes
-        );
+        var nsAttributes = ConvertAttributes(attributes);
+        monitor.AddAction(actionType, name, nsAttributes);
     }
 
+    // Note: Resource tracking is intentionally NOT implemented here.
+    // The iOS SDK's URLSessionInstrumentation automatically tracks HTTP resources when enabled.
+    // Manual resource tracking is complex and error-prone. Instead, configure URLSessionInstrumentation
+    // in your Datadog initialization code (see Swift example in shopist-appdelegate.swift lines 82, 95).
     static partial void PlatformStartResource(string key, string method, string url, Dictionary<string, object>? attributes)
     {
-        var monitor = DDRUMMonitor.Shared;
-        var nsAttributes = attributes != null ? ConvertAttributes(attributes) : null;
-
-        monitor.StartResource(
-            resourceKey: key,
-            httpMethod: method,
-            urlString: url,
-            attributes: nsAttributes
-        );
+        // No-op: Let URLSessionInstrumentation handle this automatically
     }
 
     static partial void PlatformStopResource(string key, int? statusCode, long? size, RumResourceKind kind, Dictionary<string, object>? attributes)
     {
-        var monitor = DDRUMMonitor.Shared;
-        var resourceKind = MapResourceKind(kind);
-        var nsAttributes = attributes != null ? ConvertAttributes(attributes) : null;
-
-        monitor.StopResource(
-            resourceKey: key,
-            statusCode: statusCode.HasValue ? new NSNumber(statusCode.Value) : null,
-            kind: resourceKind,
-            size: size.HasValue ? new NSNumber(size.Value) : null,
-            attributes: nsAttributes
-        );
+        // No-op: Let URLSessionInstrumentation handle this automatically
     }
 
     static partial void PlatformStopResourceWithError(string key, Exception error, Dictionary<string, object>? attributes)
     {
-        var monitor = DDRUMMonitor.Shared;
-        var nsAttributes = attributes != null ? ConvertAttributes(attributes) : null;
-        var nsError = NSError.FromDomain(
-            new NSString("Exception"),
-            0,
-            NSDictionary<NSString, NSObject>.FromObjectAndKey(
-                new NSString(error.ToString()),
-                NSError.LocalizedDescriptionKey
-            )
-        );
-
-        monitor.StopResourceWithError(
-            resourceKey: key,
-            error: nsError,
-            attributes: nsAttributes
-        );
+        // No-op: Let URLSessionInstrumentation handle this automatically
     }
 
     static partial void PlatformAddError(string message, RumErrorSource source, Exception? exception, Dictionary<string, object>? attributes)
     {
         var monitor = DDRUMMonitor.Shared;
         var errorSource = MapErrorSource(source);
-        var nsAttributes = attributes != null ? ConvertAttributes(attributes) : null;
+        var nsAttributes = attributes != null ? ConvertAttributes(attributes) : new NSDictionary<NSString, NSObject>();
 
         if (exception != null)
         {
-            // Create NSError with detailed exception information including stack trace
-            var userInfo = new NSMutableDictionary<NSString, NSObject>();
+            // Create NSError with detailed exception information
+            var userInfo = new NSMutableDictionary<NSString, NSObject>
+            {
+                [NSError.LocalizedDescriptionKey] = new NSString(message ?? exception.Message),
+                [new NSString("ExceptionType")] = new NSString(exception.GetType().FullName ?? exception.GetType().Name),
+                [new NSString("Message")] = new NSString(exception.Message)
+            };
 
-            // Use provided message or exception message
-            var errorMessage = message ?? exception.Message;
-            userInfo[NSError.LocalizedDescriptionKey] = new NSString(errorMessage);
-
-            // Include exception type and full details
-            userInfo[new NSString("ExceptionType")] = new NSString(exception.GetType().FullName ?? exception.GetType().Name);
-            userInfo[new NSString("Message")] = new NSString(exception.Message);
-
-            // Include full stack trace if available
             if (!string.IsNullOrEmpty(exception.StackTrace))
             {
                 userInfo[new NSString("StackTrace")] = new NSString(exception.StackTrace);
             }
 
-            // Include inner exception if present
             if (exception.InnerException != null)
             {
                 userInfo[new NSString("InnerException")] = new NSString(exception.InnerException.ToString());
             }
 
-            // Create NSError with exception type as domain
             var nsError = NSError.FromDomain(
                 new NSString(exception.GetType().Name),
                 -1,
                 userInfo
             );
 
-            // Add error using NSError overload
-            monitor.AddError(
-                error: nsError,
-                source: errorSource,
-                attributes: nsAttributes
-            );
+            monitor.AddError(nsError, errorSource, nsAttributes);
         }
         else
         {
-            monitor.AddError(
-                message: message,
-                source: errorSource,
-                stack: null,
-                attributes: nsAttributes
-            );
+            monitor.AddError(message, errorSource, null, nsAttributes);
         }
     }
 
     static partial void PlatformAddTiming(string name)
     {
         var monitor = DDRUMMonitor.Shared;
-        monitor.AddTiming(name: name);
+        monitor.AddTiming(name);
     }
 
     static partial void PlatformAddAttribute(string key, object value)
@@ -189,24 +129,6 @@ public static partial class Rum
         };
     }
 
-    private static DDRUMResourceType MapResourceKind(Maui.Rum.RumResourceKind kind)
-    {
-        return kind switch
-        {
-            Maui.Rum.RumResourceKind.Image => DDRUMResourceType.Image,
-            Maui.Rum.RumResourceKind.Xhr => DDRUMResourceType.Xhr,
-            Maui.Rum.RumResourceKind.Beacon => DDRUMResourceType.Beacon,
-            Maui.Rum.RumResourceKind.Css => DDRUMResourceType.Css,
-            Maui.Rum.RumResourceKind.Document => DDRUMResourceType.Document,
-            Maui.Rum.RumResourceKind.Font => DDRUMResourceType.Font,
-            Maui.Rum.RumResourceKind.Js => DDRUMResourceType.Js,
-            Maui.Rum.RumResourceKind.Media => DDRUMResourceType.Media,
-            Maui.Rum.RumResourceKind.Native => DDRUMResourceType.Native,
-            Maui.Rum.RumResourceKind.Other => DDRUMResourceType.Other,
-            _ => DDRUMResourceType.Native
-        };
-    }
-
     private static DDRUMErrorSource MapErrorSource(Maui.Rum.RumErrorSource source)
     {
         return source switch
@@ -219,24 +141,10 @@ public static partial class Rum
         };
     }
 
-    private static DDRUMMethod MapHttpMethod(string method)
-    {
-        return method.ToUpperInvariant() switch
-        {
-            "GET" => DDRUMMethod.Get,
-            "POST" => DDRUMMethod.Post,
-            "PUT" => DDRUMMethod.Put,
-            "DELETE" => DDRUMMethod.Delete,
-            "HEAD" => DDRUMMethod.Head,
-            "PATCH" => DDRUMMethod.Patch,
-            _ => DDRUMMethod.Get
-        };
-    }
-
-    private static NSDictionary<NSString, NSObject>? ConvertAttributes(Dictionary<string, object> attributes)
+    private static NSDictionary<NSString, NSObject> ConvertAttributes(Dictionary<string, object>? attributes)
     {
         if (attributes == null || attributes.Count == 0)
-            return null;
+            return new NSDictionary<NSString, NSObject>();
 
         var keys = attributes.Keys.Select(k => new NSString(k)).ToArray();
         var values = attributes.Values.Select(v => NSObject.FromObject(v)).ToArray();

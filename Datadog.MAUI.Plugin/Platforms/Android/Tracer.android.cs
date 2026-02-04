@@ -26,10 +26,19 @@ public static partial class Tracer
 
     private static partial ISpan PlatformStartSpan(string operationName, ISpan? parent, DateTimeOffset? startTime)
     {
-        // Call tracer.buildSpan(operationName)
-        var tracerClass = NativeTracer.Class!;
-        var buildSpanMethod = tracerClass.GetMethod("buildSpan", Java.Lang.Class.FromType(typeof(Java.Lang.String))!)!;
-        var spanBuilder = buildSpanMethod.Invoke(NativeTracer, new Java.Lang.String(operationName)) as Java.Lang.Object;
+        try
+        {
+            // Call tracer.buildSpan(operationName)
+            var tracerClass = NativeTracer.Class!;
+            var buildSpanMethod = tracerClass.GetMethod("buildSpan", Java.Lang.Class.FromType(typeof(Java.Lang.String))!);
+
+            // If buildSpan method doesn't exist (NoOpTracer), return a no-op span
+            if (buildSpanMethod == null)
+            {
+                return new Platforms.Android.NoOpSpan();
+            }
+
+            var spanBuilder = buildSpanMethod.Invoke(NativeTracer, new Java.Lang.String(operationName)) as Java.Lang.Object;
 
         if (spanBuilder == null)
         {
@@ -60,12 +69,22 @@ public static partial class Tracer
         var startMethod = finalSpanBuilderClass.GetMethod("start")!;
         var nativeSpan = startMethod.Invoke(spanBuilder) as Java.Lang.Object;
 
-        if (nativeSpan == null)
-        {
-            throw new InvalidOperationException("Failed to start span");
-        }
+            if (nativeSpan == null)
+            {
+                throw new InvalidOperationException("Failed to start span");
+            }
 
-        return new Platforms.Android.AndroidSpan(nativeSpan);
+            return new Platforms.Android.AndroidSpan(nativeSpan);
+        }
+        catch (Java.Lang.NoSuchMethodException)
+        {
+            // Datadog tracer not properly initialized (NoOpTracer)
+            return new Platforms.Android.NoOpSpan();
+        }
+        catch (Exception)
+        {
+            return new Platforms.Android.NoOpSpan();
+        }
     }
 
     private static partial ISpan? PlatformGetActiveSpan()

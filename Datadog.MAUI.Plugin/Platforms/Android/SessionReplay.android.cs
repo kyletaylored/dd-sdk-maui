@@ -11,12 +11,6 @@ internal static class SessionReplayInitializer
             .Build();
 
         Android.SessionReplay.SessionReplay.Enable(sessionReplayConfig, Android.Datadog.Instance);
-
-        System.Diagnostics.Debug.WriteLine($"[Datadog] Session Replay enabled (Android)");
-        System.Diagnostics.Debug.WriteLine($"[Datadog]   - Sample Rate: {config.SampleRate}%");
-        System.Diagnostics.Debug.WriteLine($"[Datadog]   - Text Privacy: {config.TextAndInputPrivacy}");
-        System.Diagnostics.Debug.WriteLine($"[Datadog]   - Image Privacy: {config.ImagePrivacy}");
-        System.Diagnostics.Debug.WriteLine($"[Datadog]   - Touch Privacy: {config.TouchPrivacy}");
     }
 
     private static Android.SessionReplay.TextAndInputPrivacy MapTextAndInputPrivacy(Configuration.TextAndInputPrivacy privacy)

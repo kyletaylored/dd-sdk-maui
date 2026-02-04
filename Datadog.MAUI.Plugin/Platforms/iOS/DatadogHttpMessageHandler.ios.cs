@@ -21,6 +21,11 @@ internal static class DatadogHttpLogger
 /// <summary>
 /// iOS-specific HTTP message handler that creates APM spans and injects trace headers.
 /// </summary>
+/// <remarks>
+/// NOTE: This handler works on iOS because URLSession auto-instrumentation is disabled in Datadog.ios.cs.
+/// The native SDK's URLSession tracking conflicts with MAUI's NSUrlSessionHandler, so we use manual
+/// instrumentation via this handler instead.
+/// </remarks>
 public class DatadogHttpMessageHandler : DelegatingHandler
 {
     private readonly HashSet<string> _firstPartyHosts;

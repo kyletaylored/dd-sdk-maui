@@ -31,19 +31,22 @@ public class RumConfiguration
     public bool TrackUserInteractions { get; init; } = true;
 
     /// <summary>
-    /// Automatically track network resources.
-    /// </summary>
-    public bool TrackResources { get; init; } = true;
-
-    /// <summary>
-    /// Automatically track errors.
-    /// </summary>
-    public bool TrackErrors { get; init; } = true;
-
-    /// <summary>
     /// Vitals update frequency.
     /// </summary>
     public VitalsUpdateFrequency VitalsUpdateFrequency { get; init; } = VitalsUpdateFrequency.Average;
+
+    /// <summary>
+    /// Build variant (e.g., "debug", "release", "staging").
+    /// Used to differentiate between different build configurations.
+    /// </summary>
+    public string? Variant { get; init; }
+
+    /// <summary>
+    /// Unique build identifier for symbol matching.
+    /// This should match the Build ID used when uploading symbol files (dSYMs/ProGuard mappings).
+    /// Example: Use DatadogBuildInfo.BuildId from the Datadog.MAUI.Symbols package.
+    /// </summary>
+    public string? BuildId { get; init; }
 
     /// <summary>
     /// Builder for creating RumConfiguration instances.
@@ -55,9 +58,20 @@ public class RumConfiguration
         private int _telemetrySampleRate = 20;
         private bool _trackViewsAutomatically = true;
         private bool _trackUserInteractions = true;
-        private bool _trackResources = true;
-        private bool _trackErrors = true;
         private VitalsUpdateFrequency _vitalsUpdateFrequency = VitalsUpdateFrequency.Average;
+
+        /// <summary>
+        /// Build variant (e.g., "Debug", "Release", "Staging").
+        /// Can be set from MSBuild using $(Configuration).
+        /// </summary>
+        public string? Variant { get; set; }
+
+        /// <summary>
+        /// Unique build identifier for symbol matching.
+        /// Should match the Build ID used when uploading symbol files.
+        /// Example: Use DatadogBuildInfo.BuildId from the Datadog.MAUI.Symbols package.
+        /// </summary>
+        public string? BuildId { get; set; }
 
         /// <summary>
         /// Sets the RUM application ID.
@@ -128,24 +142,6 @@ public class RumConfiguration
         }
 
         /// <summary>
-        /// Enables or disables automatic resource tracking.
-        /// </summary>
-        public Builder TrackResources(bool enable)
-        {
-            _trackResources = enable;
-            return this;
-        }
-
-        /// <summary>
-        /// Enables or disables automatic error tracking.
-        /// </summary>
-        public Builder TrackErrors(bool enable)
-        {
-            _trackErrors = enable;
-            return this;
-        }
-
-        /// <summary>
         /// Sets the vitals update frequency.
         /// </summary>
         public Builder SetVitalsUpdateFrequency(VitalsUpdateFrequency frequency)
@@ -169,9 +165,9 @@ public class RumConfiguration
                 TelemetrySampleRate = _telemetrySampleRate,
                 TrackViewsAutomatically = _trackViewsAutomatically,
                 TrackUserInteractions = _trackUserInteractions,
-                TrackResources = _trackResources,
-                TrackErrors = _trackErrors,
-                VitalsUpdateFrequency = _vitalsUpdateFrequency
+                VitalsUpdateFrequency = _vitalsUpdateFrequency,
+                Variant = Variant,
+                BuildId = BuildId
             };
         }
     }

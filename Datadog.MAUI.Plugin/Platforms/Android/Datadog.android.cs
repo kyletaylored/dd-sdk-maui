@@ -106,6 +106,17 @@ public static partial class Datadog
         }
 
         global::Datadog.Android.RUM.Rum.Enable(rumConfigBuilder.Build());
+
+        // Set variant and buildId as global RUM attributes
+        var rumMonitor = global::Datadog.Android.RUM.GlobalRumMonitor.Get();
+        if (!string.IsNullOrEmpty(rumConfig.Variant))
+        {
+            rumMonitor.AddAttribute("variant", rumConfig.Variant);
+        }
+        if (!string.IsNullOrEmpty(rumConfig.BuildId))
+        {
+            rumMonitor.AddAttribute("app_build_id", rumConfig.BuildId);
+        }
     }
 
     private static void InitializeLogs(global::Datadog.Maui.Configuration.LogsConfiguration logsConfig)

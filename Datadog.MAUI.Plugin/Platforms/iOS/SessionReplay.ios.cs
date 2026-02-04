@@ -9,38 +9,46 @@ internal static class SessionReplayInitializer
 {
     internal static void Initialize(SessionReplayConfiguration config)
     {
+        // Use the full 4-parameter constructor for better compatibility with iOS SDK
         var sessionReplayConfig = new DDSessionReplayConfiguration(
-            replaySampleRate: config.SampleRate
+            replaySampleRate: config.SampleRate,
+            textAndInputPrivacyLevel: MapTextAndInputPrivacy(config.TextAndInputPrivacy),
+            imagePrivacyLevel: MapImagePrivacy(config.ImagePrivacy),
+            touchPrivacyLevel: MapTouchPrivacy(config.TouchPrivacy)
         );
 
-        // Set privacy levels
-        sessionReplayConfig.DefaultPrivacyLevel = MapPrivacyLevel(config.TextAndInputPrivacy, config.ImagePrivacy);
-
-        // Note: iOS SDK doesn't have separate touch privacy configuration
-        // Touch interactions are controlled by the privacy level
-
         DDSessionReplay.EnableWith(sessionReplayConfig);
-
-        System.Diagnostics.Debug.WriteLine($"[Datadog] Session Replay enabled (iOS)");
-        System.Diagnostics.Debug.WriteLine($"[Datadog]   - Sample Rate: {config.SampleRate}%");
-        System.Diagnostics.Debug.WriteLine($"[Datadog]   - Text Privacy: {config.TextAndInputPrivacy}");
-        System.Diagnostics.Debug.WriteLine($"[Datadog]   - Image Privacy: {config.ImagePrivacy}");
-        System.Diagnostics.Debug.WriteLine($"[Datadog]   - Touch Privacy: {config.TouchPrivacy}");
     }
 
-    private static DDSessionReplayConfigurationPrivacyLevel MapPrivacyLevel(
-        TextAndInputPrivacy textPrivacy,
-        ImagePrivacy imagePrivacy)
+    private static DDTextAndInputPrivacyLevel MapTextAndInputPrivacy(TextAndInputPrivacy privacy)
     {
-        // iOS SDK has a simpler privacy model with three levels
-        // We map based on the most restrictive setting provided
-
-        return textPrivacy switch
+        return privacy switch
         {
-            TextAndInputPrivacy.MaskAll => DDSessionReplayConfigurationPrivacyLevel.Mask,
-            TextAndInputPrivacy.MaskAllInputs => DDSessionReplayConfigurationPrivacyLevel.MaskUserInput,
-            TextAndInputPrivacy.MaskSensitiveInputs => DDSessionReplayConfigurationPrivacyLevel.MaskUserInput,
-            _ => DDSessionReplayConfigurationPrivacyLevel.Allow
+            TextAndInputPrivacy.MaskAll => DDTextAndInputPrivacyLevel.All,
+            TextAndInputPrivacy.MaskAllInputs => DDTextAndInputPrivacyLevel.AllInputs,
+            TextAndInputPrivacy.MaskSensitiveInputs => DDTextAndInputPrivacyLevel.SensitiveInputs,
+            _ => DDTextAndInputPrivacyLevel.SensitiveInputs
+        };
+    }
+
+    private static DDImagePrivacyLevel MapImagePrivacy(ImagePrivacy privacy)
+    {
+        return privacy switch
+        {
+            ImagePrivacy.MaskAll => DDImagePrivacyLevel.All,
+            ImagePrivacy.MaskNonBundledOnly => DDImagePrivacyLevel.NonBundledOnly,
+            ImagePrivacy.MaskNone => DDImagePrivacyLevel.None,
+            _ => DDImagePrivacyLevel.NonBundledOnly
+        };
+    }
+
+    private static DDTouchPrivacyLevel MapTouchPrivacy(TouchPrivacy privacy)
+    {
+        return privacy switch
+        {
+            TouchPrivacy.Show => DDTouchPrivacyLevel.Show,
+            TouchPrivacy.Hide => DDTouchPrivacyLevel.Hide,
+            _ => DDTouchPrivacyLevel.Show
         };
     }
 }
