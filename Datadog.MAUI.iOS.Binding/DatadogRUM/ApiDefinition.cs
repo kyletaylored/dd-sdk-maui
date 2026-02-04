@@ -2,6 +2,7 @@ using System;
 using Foundation;
 using ObjCRuntime;
 using UIKit;
+using Datadog.iOS.Internal;
 
 namespace Datadog.iOS.RUM
 {
@@ -924,9 +925,9 @@ namespace Datadog.iOS.RUM
 		[NullAllowed, Export ("onSessionStart", ArgumentSemantic.Copy)]
 		Action<NSString, bool> OnSessionStart { get; set; }
 
-		// @property (copy, nonatomic) NSURL * _Nullable customEndpoint;
+		// @property (copy, nonatomic) NSUrl * _Nullable customEndpoint;
 		[NullAllowed, Export ("customEndpoint", ArgumentSemantic.Copy)]
-		NSURL CustomEndpoint { get; set; }
+		NSUrl CustomEndpoint { get; set; }
 
 		// @property (nonatomic) BOOL trackAnonymousUser;
 		[Export ("trackAnonymousUser")]
@@ -2347,7 +2348,6 @@ namespace Datadog.iOS.RUM
 		// +(DDRUMMonitor * _Nonnull)shared __attribute__((warn_unused_result("")));
 		[Static]
 		[Export ("shared")]
-		[Verify (MethodToProperty)]
 		DDRUMMonitor Shared { get; }
 
 		// -(void)currentSessionIDWithCompletion:(void (^ _Nonnull)(NSString * _Nullable))completion;
@@ -2410,37 +2410,37 @@ namespace Datadog.iOS.RUM
 		[Export ("addErrorWithError:source:attributes:")]
 		void AddErrorWithError (NSError error, DDRUMErrorSource source, NSDictionary<NSString, NSObject> attributes);
 
-		// -(void)startResourceWithResourceKey:(NSString * _Nonnull)resourceKey request:(NSURLRequest * _Nonnull)request attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
+		// -(void)startResourceWithResourceKey:(NSString * _Nonnull)resourceKey request:(NSUrlRequest * _Nonnull)request attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
 		[Export ("startResourceWithResourceKey:request:attributes:")]
-		void StartResourceWithResourceKey (string resourceKey, NSURLRequest request, NSDictionary<NSString, NSObject> attributes);
+		void StartResourceWithResourceKey (string resourceKey, NSUrlRequest request, NSDictionary<NSString, NSObject> attributes);
 
-		// -(void)startResourceWithResourceKey:(NSString * _Nonnull)resourceKey url:(NSURL * _Nonnull)url attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
+		// -(void)startResourceWithResourceKey:(NSString * _Nonnull)resourceKey url:(NSUrl * _Nonnull)url attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
 		[Export ("startResourceWithResourceKey:url:attributes:")]
-		void StartResourceWithResourceKey (string resourceKey, NSURL url, NSDictionary<NSString, NSObject> attributes);
+		void StartResourceWithResourceKey (string resourceKey, NSUrl url, NSDictionary<NSString, NSObject> attributes);
 
 		// -(void)startResourceWithResourceKey:(NSString * _Nonnull)resourceKey httpMethod:(enum DDRUMMethod)httpMethod urlString:(NSString * _Nonnull)urlString attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
 		[Export ("startResourceWithResourceKey:httpMethod:urlString:attributes:")]
 		void StartResourceWithResourceKey (string resourceKey, DDRUMMethod httpMethod, string urlString, NSDictionary<NSString, NSObject> attributes);
 
-		// -(void)addResourceMetricsWithResourceKey:(NSString * _Nonnull)resourceKey metrics:(NSURLSessionTaskMetrics * _Nonnull)metrics attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
+		// -(void)addResourceMetricsWithResourceKey:(NSString * _Nonnull)resourceKey metrics:(NSUrlSessionTaskMetrics * _Nonnull)metrics attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
 		[Export ("addResourceMetricsWithResourceKey:metrics:attributes:")]
-		void AddResourceMetricsWithResourceKey (string resourceKey, NSURLSessionTaskMetrics metrics, NSDictionary<NSString, NSObject> attributes);
+		void AddResourceMetricsWithResourceKey (string resourceKey, NSUrlSessionTaskMetrics metrics, NSDictionary<NSString, NSObject> attributes);
 
-		// -(void)stopResourceWithResourceKey:(NSString * _Nonnull)resourceKey response:(NSURLResponse * _Nonnull)response size:(NSNumber * _Nullable)size attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
+		// -(void)stopResourceWithResourceKey:(NSString * _Nonnull)resourceKey response:(NSUrlResponse * _Nonnull)response size:(NSNumber * _Nullable)size attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
 		[Export ("stopResourceWithResourceKey:response:size:attributes:")]
-		void StopResourceWithResourceKey (string resourceKey, NSURLResponse response, [NullAllowed] NSNumber size, NSDictionary<NSString, NSObject> attributes);
+		void StopResourceWithResourceKey (string resourceKey, NSUrlResponse response, [NullAllowed] NSNumber size, NSDictionary<NSString, NSObject> attributes);
 
 		// -(void)stopResourceWithResourceKey:(NSString * _Nonnull)resourceKey statusCode:(NSNumber * _Nullable)statusCode kind:(enum DDRUMResourceType)kind size:(NSNumber * _Nullable)size attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
 		[Export ("stopResourceWithResourceKey:statusCode:kind:size:attributes:")]
 		void StopResourceWithResourceKey (string resourceKey, [NullAllowed] NSNumber statusCode, DDRUMResourceType kind, [NullAllowed] NSNumber size, NSDictionary<NSString, NSObject> attributes);
 
-		// -(void)stopResourceWithErrorWithResourceKey:(NSString * _Nonnull)resourceKey error:(NSError * _Nonnull)error response:(NSURLResponse * _Nullable)response attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
+		// -(void)stopResourceWithErrorWithResourceKey:(NSString * _Nonnull)resourceKey error:(NSError * _Nonnull)error response:(NSUrlResponse * _Nullable)response attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
 		[Export ("stopResourceWithErrorWithResourceKey:error:response:attributes:")]
-		void StopResourceWithErrorWithResourceKey (string resourceKey, NSError error, [NullAllowed] NSURLResponse response, NSDictionary<NSString, NSObject> attributes);
+		void StopResourceWithErrorWithResourceKey (string resourceKey, NSError error, [NullAllowed] NSUrlResponse response, NSDictionary<NSString, NSObject> attributes);
 
-		// -(void)stopResourceWithErrorWithResourceKey:(NSString * _Nonnull)resourceKey message:(NSString * _Nonnull)message response:(NSURLResponse * _Nullable)response attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
+		// -(void)stopResourceWithErrorWithResourceKey:(NSString * _Nonnull)resourceKey message:(NSString * _Nonnull)message response:(NSUrlResponse * _Nullable)response attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
 		[Export ("stopResourceWithErrorWithResourceKey:message:response:attributes:")]
-		void StopResourceWithErrorWithResourceKey (string resourceKey, string message, [NullAllowed] NSURLResponse response, NSDictionary<NSString, NSObject> attributes);
+		void StopResourceWithErrorWithResourceKey (string resourceKey, string message, [NullAllowed] NSUrlResponse response, NSDictionary<NSString, NSObject> attributes);
 
 		// -(void)startActionWithType:(enum DDRUMActionType)type name:(NSString * _Nonnull)name attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
 		[Export ("startActionWithType:name:attributes:")]
@@ -7191,8 +7191,8 @@ namespace Datadog.iOS.RUM
 		[Export ("setFirstPartyHostsTracing:")]
 		void SetFirstPartyHostsTracing (DDRUMFirstPartyHostsTracing firstPartyHostsTracing);
 
-		// -(void)setResourceAttributesProvider:(NSDictionary<NSString *,id> * _Nullable (^ _Nonnull)(NSURLRequest * _Nonnull, NSURLResponse * _Nullable, NSData * _Nullable, NSError * _Nullable))provider;
+		// -(void)setResourceAttributesProvider:(NSDictionary<NSString *,id> * _Nullable (^ _Nonnull)(NSUrlRequest * _Nonnull, NSUrlResponse * _Nullable, NSData * _Nullable, NSError * _Nullable))provider;
 		[Export ("setResourceAttributesProvider:")]
-		void SetResourceAttributesProvider (Func<NSURLRequest, NSURLResponse, NSData, NSError, NSDictionary<NSString, NSObject>> provider);
+		void SetResourceAttributesProvider (Func<NSUrlRequest, NSUrlResponse, NSData, NSError, NSDictionary<NSString, NSObject>> provider);
 	}
 }
