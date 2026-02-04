@@ -238,10 +238,27 @@ namespace Datadog.iOS.RUM
 	}
 
 	/// <summary>
+	/// Protocol for filtering which UIKit view controllers should be tracked in RUM.
+	/// </summary>
+	[Protocol]
+	[BaseType(typeof(NSObject))]
+	interface DDUIKitRUMViewsPredicate
+	{
+		/// <summary>
+		/// Called for each view controller to determine if it should be tracked in RUM.
+		/// Return a DDRUMView to track it, or null to ignore it.
+		/// </summary>
+		[Abstract]
+		[Export("rumViewFor:")]
+		[return: NullAllowed]
+		DDRUMView RumViewFor(UIViewController viewController);
+	}
+
+	/// <summary>
 	/// Default predicate that tracks all UIKit view controllers.
 	/// </summary>
 	[BaseType(typeof(NSObject))]
-	interface DDDefaultUIKitRUMViewsPredicate
+	interface DDDefaultUIKitRUMViewsPredicate : DDUIKitRUMViewsPredicate
 	{
 	}
 
@@ -257,13 +274,21 @@ namespace Datadog.iOS.RUM
 	/// Represents a RUM view to be tracked.
 	/// </summary>
 	[BaseType(typeof(NSObject))]
+	[DisableDefaultCtor]
 	interface DDRUMView
 	{
 		[Export("name")]
 		string Name { get; }
 
-		[Export("attributes")]
-		NSDictionary Attributes { get; }
+		[Export("attributes", ArgumentSemantic.Copy)]
+		NSDictionary<NSString, NSObject> Attributes { get; }
+
+		/// <summary>
+		/// Creates a new RUM view with the specified name and attributes.
+		/// </summary>
+		[Export("initWithName:attributes:")]
+		[DesignatedInitializer]
+		NativeHandle Constructor(string name, NSDictionary<NSString, NSObject> attributes);
 	}
 
 	/// <summary>
