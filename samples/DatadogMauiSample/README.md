@@ -77,10 +77,10 @@ The ShopistApiService demonstrates HTTP request tracing:
 
 **Configuration (MauiProgram.cs)**:
 ```csharp
-.WithTracing(tracing => tracing
-    .WithSampleRate(100.0)
-)
-.WithFirstPartyHosts(new[] { "fakestoreapi.com" })
+datadog.EnableTracing(tracing =>
+{
+    tracing.SetFirstPartyHosts(new[] { "fakestoreapi.com" });
+});
 ```
 
 ## App Structure
@@ -170,32 +170,45 @@ export DD_RUM_ANDROID_APPLICATION_ID="your-android-app-id"
 
 ### 3. Configure in MauiProgram.cs
 
-The app automatically loads configuration from the `.env` file:
+The app automatically loads configuration from the `.env` file via `appsettings.json`:
 
 ```csharp
-.UseDatadog(config =>
+.UseDatadog(datadog =>
 {
-    config
-        .WithClientToken(clientToken)
-        .WithEnvironment("dev")
-        .WithServiceName("datadog-maui-sample")
-        .WithSite(DatadogSite.US1) // or US3, US5, EU1, AP1
-        .WithRum(rum => rum
-            .WithApplicationId(rumApplicationId)
-            .WithSessionSampleRate(100.0)
-            .WithTrackUserInteractions(true)
-            .WithVitalsUpdateFrequency(VitalsUpdateFrequency.Average)
-        )
-        .WithLogs(logs => logs
-            .WithNetworkInfoEnabled(true)
-            .WithBundleWithRum(true)
-        )
-        .WithTracing(tracing => tracing
-            .WithSampleRate(100.0)
-        )
-        .WithFirstPartyHosts(firstPartyHosts)
-        .WithTrackingConsent(TrackingConsent.Granted)
-        .WithVerboseLogging(true);
+    datadog.SetClientToken(
+        android: datadogSettings.Android.ClientToken ?? string.Empty,
+        ios: datadogSettings.iOS.ClientToken ?? string.Empty
+    );
+    datadog.Environment = datadogSettings.Environment;
+    datadog.ServiceName = datadogSettings.ServiceName ?? "shopist-maui-demo";
+    datadog.Site = datadogSettings.Site;
+    datadog.TrackingConsent = TrackingConsent.Granted;
+    datadog.FirstPartyHosts = datadogSettings.FirstPartyHosts;
+
+    datadog.EnableRum(rum =>
+    {
+        rum.SetApplicationId(
+            android: datadogSettings.Android.RumApplicationId ?? string.Empty,
+            ios: datadogSettings.iOS.RumApplicationId ?? string.Empty
+        );
+        rum.Variant = Datadog.MAUI.Symbols.DatadogBuildInfo.Variant;
+        rum.BuildId = Datadog.MAUI.Symbols.DatadogBuildInfo.BuildId;
+    });
+
+    datadog.EnableLogs();
+
+    datadog.EnableTracing(tracing =>
+    {
+        tracing.SetFirstPartyHosts(datadogSettings.FirstPartyHosts);
+    });
+
+    datadog.EnableSessionReplay(sessionReplay =>
+    {
+        sessionReplay.SetSampleRate(20);
+        sessionReplay.SetTextAndInputPrivacy(TextAndInputPrivacy.MaskSensitiveInputs);
+        sessionReplay.SetImagePrivacy(ImagePrivacy.MaskNonBundledOnly);
+        sessionReplay.SetTouchPrivacy(TouchPrivacy.Show);
+    });
 });
 ```
 

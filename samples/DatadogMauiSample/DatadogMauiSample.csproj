@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>
 		<!-- Only targeting Android and iOS for Datadog SDK -->
 		<TargetFrameworks>net9.0-android;net9.0-ios</TargetFrameworks>
@@ -30,7 +29,7 @@
 	</PropertyGroup>
 
 	<!-- Android-specific settings to fix tracing library conflicts -->
-	<PropertyGroup Condition="'$(TargetFramework)' == 'net10.0-android' And '$(Configuration)' == 'Debug'">
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net9.0-android' And '$(Configuration)' == 'Debug'">
 		<!-- Use multidex and disable R8 optimizations for Debug to avoid duplicate class errors -->
 		<AndroidDexTool>d8</AndroidDexTool>
 		<AndroidEnableMultiDex>true</AndroidEnableMultiDex>
@@ -43,8 +42,7 @@
 
 	<!-- Android Release configuration with R8 code shrinking -->
 	<PropertyGroup Condition="$(TargetFramework.Contains('android')) And '$(Configuration)' == 'Release'">
-		<!-- Enable R8 code shrinker to generate mapping files -->
-		<AndroidEnableR8>True</AndroidEnableR8>
+		<!-- Use R8 as the link tool (modern guidance) -->
 		<AndroidLinkTool>r8</AndroidLinkTool>
 		<AndroidLinkMode>SdkOnly</AndroidLinkMode>
 		<AndroidPackageFormat>aab</AndroidPackageFormat>
@@ -54,65 +52,50 @@
 		<RunAOTCompilation>false</RunAOTCompilation>
 	</PropertyGroup>
 
-	<!-- Datadog Symbol Upload Configuration -->
-	<!-- NOTE: Symbol upload only runs in Release builds by default (when mapping files are generated) -->
-	<!-- To test in Debug, add: <DatadogUploadInDebug>true</DatadogUploadInDebug> -->
-
-	<!--
-		Flavor Strategy for Symbol Upload Uniqueness:
-		- Use environment variable DD_BUILD_FLAVOR to override (e.g., export DD_BUILD_FLAVOR=staging)
-		- Default: "debug" for Debug config, "release" for Release config
-		- Production: Set DD_BUILD_FLAVOR=production when building production releases
-		- Staging: Set DD_BUILD_FLAVOR=staging for staging builds
-		- Development: Use "debug" or set DD_BUILD_FLAVOR=dev-{username} for unique developer builds
-	-->
+	<!-- Datadog Symbol Upload Configuration (namespaced) -->
 	<PropertyGroup>
 		<!-- Read flavor from environment variable if set, otherwise default to configuration name -->
-		<DatadogFlavor Condition="'$(DD_BUILD_FLAVOR)' != ''">$(DD_BUILD_FLAVOR)</DatadogFlavor>
+		<DatadogSymbolsFlavor Condition="'$(DD_BUILD_FLAVOR)' != ''">$(DD_BUILD_FLAVOR)</DatadogSymbolsFlavor>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="$(TargetFramework.Contains('android'))">
-		<DatadogServiceNameAndroid>datadog-maui-android</DatadogServiceNameAndroid>
-		<DatadogSite>datadoghq.com</DatadogSite>
-		<DatadogDryRun>false</DatadogDryRun>		<!-- Set to false for actual uploads -->
+		<DatadogSymbolsServiceNameAndroid>datadog-maui-android</DatadogSymbolsServiceNameAndroid>
+		<DatadogSymbolsSite>datadoghq.com</DatadogSymbolsSite>
+
+		<!-- Keep sample in dry-run by default to avoid accidental uploads; flip for real runs -->
+		<DatadogSymbolsDryRun>true</DatadogSymbolsDryRun>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="$(TargetFramework.Contains('ios'))">
-		<DatadogServiceNameiOS>datadog-maui-ios</DatadogServiceNameiOS>
-		<DatadogSite>datadoghq.com</DatadogSite>
-		<DatadogDryRun>true</DatadogDryRun>		<!-- Set to false for actual uploads -->
+		<DatadogSymbolsServiceNameiOS>datadog-maui-ios</DatadogSymbolsServiceNameiOS>
+		<DatadogSymbolsSite>datadoghq.com</DatadogSymbolsSite>
+		<DatadogSymbolsDryRun>true</DatadogSymbolsDryRun>
 	</PropertyGroup>
 
-	<!-- iOS Code Signing Configuration -->
+	<!-- iOS Code Signing Configuration (untouched) -->
 	<PropertyGroup Condition="$(TargetFramework.Contains('ios'))">
-		<!-- Automatic signing - Xcode will manage provisioning profiles -->
 		<CodesignProvision></CodesignProvision>
 		<CodesignKey>Apple Development</CodesignKey>
 		<CodesignEntitlements>Platforms/iOS/Entitlements.plist</CodesignEntitlements>
-		<!-- Set your Team ID here after getting it from Apple Developer portal -->
 		<DevelopmentTeam>LPGVJL9H49</DevelopmentTeam>
 	</PropertyGroup>
 
 	<!-- Custom target to remove duplicate tracing AAR before dex compilation -->
-	<Target Name="RemoveDuplicateTracingAAR" BeforeTargets="_CompileToDalvik" Condition="'$(TargetFramework)' == 'net10.0-android'">
+	<Target Name="RemoveDuplicateTracingAAR" BeforeTargets="_CompileToDalvik" Condition="'$(TargetFramework)' == 'net9.0-android'">
 		<Exec Command="find $(IntermediateOutputPath)lp -type d -name '12*' -o -name '16*' | while read dir; do if [ -f &quot;$$dir/jl/classes.jar&quot; ] &amp;&amp; unzip -l &quot;$$dir/jl/classes.jar&quot; 2&gt;/dev/null | grep -q 'androidx/tracing/TraceKt.class' &amp;&amp; echo &quot;$$dir&quot; | grep -q '/12'; then echo &quot;Removing duplicate tracing-android from $$dir&quot;; rm -rf &quot;$$dir/jl/classes.jar&quot;; fi; done" IgnoreExitCode="true" Condition="Exists('$(IntermediateOutputPath)lp')" />
 	</Target>
 
 	<ItemGroup>
 		<!-- App Icon -->
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
-
 		<!-- Splash Screen -->
 		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
-
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
 		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
-
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />
-
-		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
+		<!-- Raw Assets -->
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
 
@@ -125,40 +108,26 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<!-- Configuration files as embedded resources -->
 		<MauiAsset Include="appsettings.json" />
 		<MauiAsset Include="appsettings.*.json" />
 	</ItemGroup>
 
 	<!-- Android-specific package exclusions -->
 	<ItemGroup Condition="$(TargetFramework.Contains('android'))">
-		<!-- Exclude JVM variant of Compose runtime annotations to prevent R8 duplicate class errors -->
 		<PackageReference Include="Xamarin.AndroidX.Compose.Runtime.Annotation.Jvm" Version="1.10.0.1" ExcludeAssets="All" />
-
-		<!-- Force consistent SavedState version to prevent duplicate class errors -->
 		<PackageReference Include="Xamarin.AndroidX.SavedState" Version="1.4.0.1" />
 		<PackageReference Include="Xamarin.AndroidX.SavedState.SavedState.Ktx" Version="1.3.1.1" ExcludeAssets="compile;runtime;native" />
 	</ItemGroup>
 
-
-	<!-- ================================================================ -->
-	<!-- Datadog.MAUI Plugin Reference Strategy                           -->
-	<!-- ================================================================ -->
-	<!-- Debug builds: Use ProjectReference for fast iteration            -->
-	<!-- Release builds: Use PackageReference to test actual NuGet packages -->
-	<!-- CI builds: Use PackageReference from pipeline artifacts          -->
-
-	<!-- Use ProjectReference for both Debug and Release for local development -->
+	<!-- Datadog.MAUI Plugin Reference Strategy -->
 	<ItemGroup>
 		<ProjectReference Include="..\..\Datadog.MAUI.Plugin\Datadog.MAUI.Plugin.csproj" />
-		<!-- Symbols project is NOT referenced - must be built manually via scripts/test-symbols-local.sh -->
 	</ItemGroup>
 
 	<!-- Load the Symbols MSBuild task from local build output (always from Release) -->
-	<!-- IMPORTANT: Run scripts/test-symbols-local.sh before building to ensure this DLL exists -->
 	<UsingTask TaskName="Datadog.MAUI.Symbols.UploadSymbolsTask" AssemblyFile="$(MSBuildProjectDirectory)\..\..\Datadog.MAUI.Symbols\bin\Release\netstandard2.0\Datadog.MAUI.Symbols.dll" />
 
-	<!-- Import the Symbols upload target (skips the UsingTask since we already loaded it) -->
+	<!-- Import the Symbols upload target -->
 	<Import Project="..\..\Datadog.MAUI.Symbols\build\Datadog.MAUI.Symbols.targets" />
 
 	<!-- For CI builds, use PackageReference instead (commented out for local dev) -->
@@ -174,6 +143,4 @@
 	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
 		<RestoreAdditionalProjectSources>$(MSBuildProjectDirectory)/../../artifacts;$(RestoreAdditionalProjectSources)</RestoreAdditionalProjectSources>
 	</PropertyGroup>
-
-
 </Project>

@@ -3,9 +3,13 @@ using Microsoft.Extensions.Configuration;
 namespace DatadogMauiSample.Config;
 
 /// <summary>
-/// Configuration settings for Datadog RUM and logging.
-/// Loads from appsettings.json using IConfiguration.
+/// LEGACY: Configuration settings for Datadog RUM and logging.
+/// This class is NO LONGER NEEDED with the new UseDatadogFromConfiguration() method.
+/// Kept for reference only - can be used for accessing config values in application code if needed.
+///
+/// For Datadog initialization, use UseDatadogFromConfiguration() in MauiProgram.cs instead.
 /// </summary>
+[Obsolete("Use UseDatadogFromConfiguration() extension method for initialization. This class is kept for reference only.")]
 public static class DatadogConfig
 {
     private static IConfiguration? _configuration;

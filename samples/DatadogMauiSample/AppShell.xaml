@@ -8,38 +8,167 @@
     Shell.TabBarBackgroundColor="#512BD4"
     Shell.TabBarForegroundColor="White"
     Shell.TabBarUnselectedColor="#B0FFFFFF"
-    Shell.TabBarTitleColor="White">
+    Shell.TabBarTitleColor="White"
+    Shell.FlyoutBehavior="Flyout"
+    FlyoutBackgroundColor="#512BD4"
+    Shell.FlyoutItemIsVisible="True">
 
+    <Shell.FlyoutIcon>
+        <FontImageSource
+            Glyph="&#x2630;"
+            FontFamily="Arial"
+            Color="White"
+            Size="24"/>
+    </Shell.FlyoutIcon>
+
+    <!-- Flyout Item Template for custom styling -->
+    <Shell.ItemTemplate>
+        <DataTemplate>
+            <Grid Padding="15,10" BackgroundColor="Transparent">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="1"/>
+                </Grid.RowDefinitions>
+                <Label Text="{Binding Title}"
+                       FontSize="16"
+                       TextColor="White"
+                       VerticalOptions="Center"/>
+                <BoxView Grid.Row="1"
+                         BackgroundColor="#B0FFFFFF"
+                         HeightRequest="1"
+                         Opacity="0.3"
+                         Margin="0,10,0,0"/>
+            </Grid>
+        </DataTemplate>
+    </Shell.ItemTemplate>
+
+    <!-- Menu Item Template for custom styling -->
+    <Shell.MenuItemTemplate>
+        <DataTemplate>
+            <Grid Padding="15,10" BackgroundColor="Transparent">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="1"/>
+                </Grid.RowDefinitions>
+                <Label Text="{Binding Text}"
+                       FontSize="16"
+                       TextColor="White"
+                       VerticalOptions="Center"/>
+                <BoxView Grid.Row="1"
+                         BackgroundColor="#B0FFFFFF"
+                         HeightRequest="1"
+                         Opacity="0.3"
+                         Margin="0,10,0,0"/>
+            </Grid>
+        </DataTemplate>
+    </Shell.MenuItemTemplate>
+
+    <!-- Flyout Header -->
+    <Shell.FlyoutHeader>
+        <Grid BackgroundColor="#512BD4" HeightRequest="150" Padding="20">
+            <VerticalStackLayout VerticalOptions="Center">
+                <Label Text="Shopist"
+                       FontSize="28"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       Margin="0,0,0,5"/>
+                <Label Text="Datadog MAUI Demo"
+                       FontSize="14"
+                       TextColor="#B0FFFFFF"/>
+            </VerticalStackLayout>
+        </Grid>
+    </Shell.FlyoutHeader>
+
+    <!-- Main Shopping Experience (Bottom Tabs) -->
     <TabBar>
         <ShellContent
             Title="Products"
             ContentTemplate="{DataTemplate views:ProductsPage}"
             Route="ProductsPage"
-            AutomationId="tab_products" />
+            AutomationId="tab_products">
+        </ShellContent>
 
         <ShellContent
             Title="Cart"
             ContentTemplate="{DataTemplate views:CartPage}"
             Route="CartPage"
-            AutomationId="tab_cart" />
+            AutomationId="tab_cart">
+        </ShellContent>
 
         <ShellContent
             Title="Store"
             ContentTemplate="{DataTemplate views:WebViewPage}"
             Route="WebViewPage"
-            AutomationId="tab_store" />
+            AutomationId="tab_store">
+        </ShellContent>
 
         <ShellContent
             Title="Profile"
             ContentTemplate="{DataTemplate views:ProfilePage}"
             Route="ProfilePage"
-            AutomationId="tab_profile" />
+            AutomationId="tab_profile">
+        </ShellContent>
+    </TabBar>
+
+    <!-- Main Navigation (Flyout) -->
+    <FlyoutItem Title="Shopping">
+        <ShellContent
+            Title="Products"
+            ContentTemplate="{DataTemplate views:ProductsPage}"
+            Route="ProductsPageFlyout"
+            AutomationId="flyout_products" />
 
         <ShellContent
-            Title="Testing"
+            Title="Cart"
+            ContentTemplate="{DataTemplate views:CartPage}"
+            Route="CartPageFlyout"
+            AutomationId="flyout_cart" />
+
+        <ShellContent
+            Title="Store"
+            ContentTemplate="{DataTemplate views:WebViewPage}"
+            Route="WebViewPageFlyout"
+            AutomationId="flyout_store" />
+
+        <ShellContent
+            Title="Profile"
+            ContentTemplate="{DataTemplate views:ProfilePage}"
+            Route="ProfilePageFlyout"
+            AutomationId="flyout_profile" />
+    </FlyoutItem>
+
+    <!-- Developer Tools (Flyout Only) -->
+    <FlyoutItem Title="Developer">
+        <ShellContent
+            Title="Datadog Features"
+            Icon="star.png"
+            ContentTemplate="{DataTemplate views:DatadogFeaturesPage}"
+            Route="DatadogFeaturesPage"
+            AutomationId="flyout_features" />
+
+        <ShellContent
+            Title="Datadog Config"
+            Icon="settings.png"
+            ContentTemplate="{DataTemplate views:DebugInfoPage}"
+            Route="DebugInfoPage"
+            AutomationId="flyout_config" />
+
+        <ShellContent
+            Title="Error Testing"
+            Icon="bug.png"
             ContentTemplate="{DataTemplate views:ErrorTestingPage}"
             Route="ErrorTestingPage"
-            AutomationId="tab_testing" />
-    </TabBar>
+            AutomationId="flyout_testing" />
+    </FlyoutItem>
+
+    <!-- Flyout Footer -->
+    <Shell.FlyoutFooter>
+        <Grid BackgroundColor="#3D1F85" Padding="20,15" HeightRequest="60">
+            <Label Text="v1.0.0 • Datadog SDK"
+                   FontSize="11"
+                   TextColor="#B0FFFFFF"
+                   VerticalOptions="Center"/>
+        </Grid>
+    </Shell.FlyoutFooter>
 
 </Shell>
