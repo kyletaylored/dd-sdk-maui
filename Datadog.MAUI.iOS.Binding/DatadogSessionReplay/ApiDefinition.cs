@@ -1,6 +1,7 @@
 using Foundation;
 using ObjCRuntime;
 using UIKit;
+using Datadog.iOS.RUM;
 
 namespace Datadog.iOS.SessionReplay
 {
