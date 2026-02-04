@@ -1,4 +1,4 @@
-using DatadogMauiSample.Config;
+using Microsoft.Extensions.Configuration;
 
 namespace DatadogMauiSample.Views;
 
@@ -7,48 +7,49 @@ namespace DatadogMauiSample.Views;
 /// </summary>
 public partial class DebugInfoPage : ContentPage
 {
+    private readonly IConfiguration _configuration;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="DebugInfoPage"/> class.
     /// </summary>
     public DebugInfoPage()
     {
         InitializeComponent();
+
+        // Get configuration from the application
+        _configuration = Application.Current?.Handler?.MauiContext?.Services.GetService<IConfiguration>()
+            ?? throw new InvalidOperationException("Configuration service not available");
+
         LoadDebugInfo();
     }
 
     private void LoadDebugInfo()
     {
-        // Check if Datadog SDK is initialized by checking marker file
-        var appDelegateFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), ".datadog_initialized");
-        if (File.Exists(appDelegateFile))
+        // Check if Datadog SDK is initialized using the SDK's initialization flag
+        // This works cross-platform (Android, iOS, etc.)
+        if (Datadog.Maui.Datadog.IsInitialized)
         {
-            try
-            {
-                var content = File.ReadAllText(appDelegateFile);
-                SdkStatusLabel.Text = $"✅ Initialized\n{content}";
-                SdkStatusLabel.TextColor = Colors.Green;
-            }
-            catch
-            {
-                SdkStatusLabel.Text = "✅ Initialized";
-                SdkStatusLabel.TextColor = Colors.Green;
-            }
+            SdkStatusLabel.Text = "✅ SDK Initialized";
+            SdkStatusLabel.TextColor = Colors.Green;
         }
         else
         {
-            SdkStatusLabel.Text = "❌ NOT INITIALIZED\nAppDelegate.FinishedLaunching() was not called";
+            SdkStatusLabel.Text = "❌ NOT INITIALIZED\nDatadog.Initialize() was not called";
             SdkStatusLabel.TextColor = Colors.Red;
         }
+
+        // Load app version information
+        LoadVersionInfo();
 
         // Platform
 #if ANDROID
         PlatformLabel.Text = "Android";
-        ApplicationIdLabel.Text = MaskSensitiveData(DatadogConfig.AndroidRumApplicationId);
-        ClientTokenLabel.Text = MaskToken(DatadogConfig.AndroidClientToken);
+        ApplicationIdLabel.Text = MaskSensitiveData(_configuration["Datadog:Android:RumApplicationId"] ?? "");
+        ClientTokenLabel.Text = MaskToken(_configuration["Datadog:Android:ClientToken"] ?? "");
 #elif IOS
         PlatformLabel.Text = "iOS";
-        ApplicationIdLabel.Text = MaskSensitiveData(DatadogConfig.IosRumApplicationId);
-        ClientTokenLabel.Text = MaskToken(DatadogConfig.IosClientToken);
+        ApplicationIdLabel.Text = MaskSensitiveData(_configuration["Datadog:iOS:RumApplicationId"] ?? "");
+        ClientTokenLabel.Text = MaskToken(_configuration["Datadog:iOS:ClientToken"] ?? "");
 #else
         PlatformLabel.Text = "Unknown";
         ApplicationIdLabel.Text = "N/A";
@@ -56,20 +57,85 @@ public partial class DebugInfoPage : ContentPage
 #endif
 
         // General configuration
-        EnvironmentLabel.Text = DatadogConfig.Environment;
-        ServiceNameLabel.Text = DatadogConfig.ServiceName;
-        SessionSampleRateLabel.Text = $"{DatadogConfig.SessionSampleRate}%";
-        SessionReplaySampleRateLabel.Text = $"{DatadogConfig.SessionReplaySampleRate}%";
-        VerboseLoggingLabel.Text = DatadogConfig.VerboseLogging ? "Enabled" : "Disabled";
+        EnvironmentLabel.Text = _configuration["Datadog:Environment"] ?? "N/A";
+        ServiceNameLabel.Text = _configuration["Datadog:ServiceName"] ?? "N/A";
+
+        var sessionSampleRate = _configuration["Datadog:Rum:SessionSampleRate"] ?? "100";
+        SessionSampleRateLabel.Text = $"{sessionSampleRate}%";
+
+        var sessionReplaySampleRate = _configuration["Datadog:SessionReplay:SampleRate"] ?? "20";
+        SessionReplaySampleRateLabel.Text = $"{sessionReplaySampleRate}%";
+
+        VerboseLoggingLabel.Text = "N/A"; // VerboseLogging not in appsettings.json
 
         // First party hosts
-        if (DatadogConfig.FirstPartyHosts != null && DatadogConfig.FirstPartyHosts.Count > 0)
+        var firstPartyHosts = _configuration.GetSection("Datadog:FirstPartyHosts").Get<string[]>();
+        if (firstPartyHosts != null && firstPartyHosts.Length > 0)
         {
-            FirstPartyHostsLabel.Text = string.Join(", ", DatadogConfig.FirstPartyHosts);
+            FirstPartyHostsLabel.Text = string.Join(", ", firstPartyHosts);
         }
         else
         {
             FirstPartyHostsLabel.Text = "None configured";
+        }
+    }
+
+    private void LoadVersionInfo()
+    {
+        try
+        {
+            // Track the version (must be called before accessing properties)
+            VersionTracking.Track();
+
+            // Current version and build
+            AppVersionLabel.Text = VersionTracking.CurrentVersion;
+            AppBuildLabel.Text = VersionTracking.CurrentBuild;
+
+            // First launch info
+            if (VersionTracking.IsFirstLaunchEver)
+            {
+                FirstLaunchLabel.Text = "Yes (first time ever)";
+                FirstLaunchLabel.TextColor = Colors.Green;
+            }
+            else if (VersionTracking.IsFirstLaunchForCurrentVersion)
+            {
+                FirstLaunchLabel.Text = $"Yes (for v{VersionTracking.CurrentVersion})";
+                FirstLaunchLabel.TextColor = Colors.Orange;
+            }
+            else
+            {
+                FirstLaunchLabel.Text = "No";
+                FirstLaunchLabel.TextColor = Colors.Gray;
+            }
+
+            // When this version was first installed
+            if (VersionTracking.IsFirstLaunchForCurrentVersion)
+            {
+                VersionInstalledLabel.Text = "Just now";
+                VersionInstalledLabel.TextColor = Colors.Green;
+            }
+            else
+            {
+                // Show previous version if available
+                var previousVersion = VersionTracking.PreviousVersion;
+                if (!string.IsNullOrEmpty(previousVersion))
+                {
+                    VersionInstalledLabel.Text = $"Upgraded from v{previousVersion}";
+                    VersionInstalledLabel.TextColor = Colors.Blue;
+                }
+                else
+                {
+                    VersionInstalledLabel.Text = "Current install";
+                    VersionInstalledLabel.TextColor = Colors.Gray;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            AppVersionLabel.Text = "Error loading version info";
+            AppBuildLabel.Text = ex.Message;
+            FirstLaunchLabel.Text = "N/A";
+            VersionInstalledLabel.Text = "N/A";
         }
     }
 
@@ -95,10 +161,5 @@ public partial class DebugInfoPage : ContentPage
             return token.Substring(0, Math.Min(4, token.Length)) + "****";
 
         return $"{token.Substring(0, 4)}{'*'.ToString().PadLeft(token.Length - 8, '*')}{token.Substring(token.Length - 4)}";
-    }
-
-    private async void OnCloseClicked(object sender, EventArgs e)
-    {
-        await Shell.Current.GoToAsync("..");
     }
 }

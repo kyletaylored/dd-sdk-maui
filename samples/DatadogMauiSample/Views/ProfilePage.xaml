@@ -10,42 +10,43 @@
 
         <ScrollView Grid.Row="1">
             <VerticalStackLayout Padding="20" Spacing="20">
-            <!-- User Avatar and Info -->
-            <Frame Padding="20" CornerRadius="10" BackgroundColor="#F5F5F5">
-                <VerticalStackLayout Spacing="15">
-                    <!-- Avatar -->
-                    <Image x:Name="AvatarImage"
+            <!-- Member ID Card -->
+            <Frame Padding="12" CornerRadius="8" BackgroundColor="#F5F5F5" HasShadow="False">
+                <Grid ColumnDefinitions="50,*" ColumnSpacing="12">
+                    <!-- Avatar/Icon -->
+                    <Image Grid.Column="0"
+                           x:Name="AvatarImage"
                            Source="https://api.dicebear.com/7.x/avataaars/svg?seed=guest"
-                           WidthRequest="120"
-                           HeightRequest="120"
+                           WidthRequest="50"
+                           HeightRequest="50"
                            Aspect="AspectFill"
-                           HorizontalOptions="Center">
+                           VerticalOptions="Center">
                         <Image.Clip>
-                            <EllipseGeometry Center="60,60" RadiusX="60" RadiusY="60"/>
+                            <EllipseGeometry Center="25,25" RadiusX="25" RadiusY="25"/>
                         </Image.Clip>
                     </Image>
 
-                    <!-- User Name -->
-                    <Label x:Name="UserNameLabel"
-                           Text="Guest"
-                           FontSize="24"
-                           FontAttributes="Bold"
-                           HorizontalTextAlignment="Center"/>
+                    <!-- User Info -->
+                    <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                        <!-- User Name -->
+                        <Label x:Name="UserNameLabel"
+                               Text="Guest"
+                               FontSize="16"
+                               FontAttributes="Bold"/>
 
-                    <!-- User Email -->
-                    <Label x:Name="UserEmailLabel"
-                           Text="guest@example.com"
-                           FontSize="14"
-                           TextColor="Gray"
-                           HorizontalTextAlignment="Center"/>
+                        <!-- User Email -->
+                        <Label x:Name="UserEmailLabel"
+                               Text="guest@example.com"
+                               FontSize="12"
+                               TextColor="Gray"/>
 
-                    <!-- User ID -->
-                    <Label x:Name="UserIdLabel"
-                           Text="ID: guest"
-                           FontSize="12"
-                           TextColor="Gray"
-                           HorizontalTextAlignment="Center"/>
-                </VerticalStackLayout>
+                        <!-- User ID -->
+                        <Label x:Name="UserIdLabel"
+                               Text="ID: guest"
+                               FontSize="10"
+                               TextColor="Gray"/>
+                    </VerticalStackLayout>
+                </Grid>
             </Frame>
 
             <!-- Login Form (visible when not logged in) -->
@@ -157,12 +158,6 @@
                 </VerticalStackLayout>
             </Frame>
 
-            <!-- Debug Info Button -->
-            <Button Text="View Datadog Configuration"
-                    Clicked="OnDebugInfoClicked"
-                    BackgroundColor="#673AB7"
-                    TextColor="White"
-                    Margin="0,10,0,20"/>
             </VerticalStackLayout>
         </ScrollView>
     </Grid>

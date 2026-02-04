@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="DatadogMauiSample.Views.DatadogFeaturesPage"
+             Title="Datadog Features Test"
+             BackgroundColor="{DynamicResource PageBackgroundColor}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+
+            <!-- Page Header -->
+            <Frame BackgroundColor="{DynamicResource Primary}" Padding="15" CornerRadius="8">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="Datadog SDK Feature Testing"
+                           FontSize="20"
+                           FontAttributes="Bold"
+                           TextColor="White" />
+                    <Label Text="Test all SDK features: RUM, Logs, Tracing, Session Replay"
+                           FontSize="12"
+                           TextColor="White"
+                           Opacity="0.9" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- RUM Features -->
+            <Frame Padding="15" CornerRadius="8" HasShadow="True">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="📊 RUM (Real User Monitoring)"
+                           FontSize="18"
+                           FontAttributes="Bold" />
+
+                    <Button Text="Start Custom View"
+                            Clicked="OnStartViewClicked"
+                            BackgroundColor="{DynamicResource Primary}" />
+
+                    <Button Text="Stop Custom View"
+                            Clicked="OnStopViewClicked"
+                            BackgroundColor="{DynamicResource Primary}" />
+
+                    <Button Text="Add Custom Action"
+                            Clicked="OnAddActionClicked"
+                            BackgroundColor="{DynamicResource Primary}" />
+
+                    <Button Text="Add RUM Error"
+                            Clicked="OnAddRumErrorClicked"
+                            BackgroundColor="{DynamicResource Tertiary}" />
+
+                    <Button Text="Add Global Attribute"
+                            Clicked="OnAddGlobalAttributeClicked"
+                            BackgroundColor="{DynamicResource Secondary}" />
+
+                    <Button Text="Remove Global Attribute"
+                            Clicked="OnRemoveGlobalAttributeClicked"
+                            BackgroundColor="{DynamicResource Secondary}" />
+
+                    <Button Text="Set User Info"
+                            Clicked="OnSetUserClicked"
+                            BackgroundColor="{DynamicResource Secondary}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Logs Features -->
+            <Frame Padding="15" CornerRadius="8" HasShadow="True">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="📝 Logs"
+                           FontSize="18"
+                           FontAttributes="Bold" />
+
+                    <Button Text="Log Debug"
+                            Clicked="OnLogDebugClicked"
+                            BackgroundColor="{DynamicResource Primary}" />
+
+                    <Button Text="Log Info"
+                            Clicked="OnLogInfoClicked"
+                            BackgroundColor="{DynamicResource Primary}" />
+
+                    <Button Text="Log Warning"
+                            Clicked="OnLogWarnClicked"
+                            BackgroundColor="#FFA500" />
+
+                    <Button Text="Log Error"
+                            Clicked="OnLogErrorClicked"
+                            BackgroundColor="{DynamicResource Tertiary}" />
+
+                    <Button Text="Log with Attributes"
+                            Clicked="OnLogWithAttributesClicked"
+                            BackgroundColor="{DynamicResource Secondary}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Tracing Features -->
+            <Frame Padding="15" CornerRadius="8" HasShadow="True">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="🔗 Distributed Tracing"
+                           FontSize="18"
+                           FontAttributes="Bold" />
+
+                    <Button Text="Create Simple Span"
+                            Clicked="OnCreateSpanClicked"
+                            BackgroundColor="{DynamicResource Primary}" />
+
+                    <Button Text="Create Parent-Child Spans"
+                            Clicked="OnCreateNestedSpansClicked"
+                            BackgroundColor="{DynamicResource Primary}" />
+
+                    <Button Text="Create Span with Error"
+                            Clicked="OnCreateSpanWithErrorClicked"
+                            BackgroundColor="{DynamicResource Tertiary}" />
+
+                    <Button Text="Test HTTP Tracing"
+                            Clicked="OnTestHttpTracingClicked"
+                            BackgroundColor="{DynamicResource Secondary}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Session Replay -->
+            <Frame Padding="15" CornerRadius="8" HasShadow="True">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="📹 Session Replay"
+                           FontSize="18"
+                           FontAttributes="Bold" />
+
+                    <Label Text="Session Replay is automatically recording this session based on the configured sample rate (20%)."
+                           FontSize="12"
+                           TextColor="{DynamicResource Gray600}"
+                           Margin="0,0,0,10" />
+
+                    <Button Text="Trigger UI Interaction"
+                            Clicked="OnTriggerInteractionClicked"
+                            BackgroundColor="{DynamicResource Primary}" />
+
+                    <Entry x:Name="TestEntry"
+                           Placeholder="Type here to test input masking"
+                           Margin="0,5,0,0" />
+
+                    <Label Text="☝️ This input should be masked in Session Replay"
+                           FontSize="11"
+                           TextColor="{DynamicResource Gray600}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Test Results -->
+            <Frame Padding="15" CornerRadius="8" HasShadow="True" BackgroundColor="{DynamicResource Gray100}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="📋 Test Results"
+                           FontSize="18"
+                           FontAttributes="Bold" />
+
+                    <ScrollView HeightRequest="200">
+                        <Label x:Name="ResultsLabel"
+                               Text="Test results will appear here..."
+                               FontSize="12"
+                               FontFamily="Courier New"
+                               TextColor="{DynamicResource Gray900}" />
+                    </ScrollView>
+
+                    <Button Text="Clear Results"
+                            Clicked="OnClearResultsClicked"
+                            BackgroundColor="{DynamicResource Gray600}" />
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

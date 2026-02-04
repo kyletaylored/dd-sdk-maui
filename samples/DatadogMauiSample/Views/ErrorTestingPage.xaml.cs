@@ -1,4 +1,4 @@
-using System.Net;
+using Datadog.Maui.Rum;
 
 namespace DatadogMauiSample.Views;
 
@@ -24,13 +24,6 @@ public partial class ErrorTestingPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
-
-        // Start RUM view tracking for error testing page
-        Datadog.Maui.Rum.Rum.StartView("error_testing", "Error Testing Page", new Dictionary<string, object>
-        {
-            ["page_type"] = "testing",
-            ["features"] = new[] { "error_tracking", "crash_reporting" }
-        });
     }
 
     /// <summary>
@@ -39,9 +32,6 @@ public partial class ErrorTestingPage : ContentPage
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
-
-        // Stop RUM view tracking
-        Datadog.Maui.Rum.Rum.StopView("error_testing");
     }
 
     #region Exception Errors
@@ -59,9 +49,9 @@ public partial class ErrorTestingPage : ContentPage
             _logger.Error("NullReferenceException occurred", ex);
 
             // Report error to RUM Error Tracking
-            Datadog.Maui.Rum.Rum.AddError(
+            Rum.AddError(
                 "NullReferenceException test",
-                Datadog.Maui.Rum.RumErrorSource.Source,
+                RumErrorSource.Source,
                 ex,
                 new Dictionary<string, object>
                 {
@@ -87,9 +77,9 @@ public partial class ErrorTestingPage : ContentPage
             _logger.Error("DivideByZeroException occurred", ex);
 
             // Report error to RUM Error Tracking
-            Datadog.Maui.Rum.Rum.AddError(
+            Rum.AddError(
                 "DivideByZeroException test",
-                Datadog.Maui.Rum.RumErrorSource.Source,
+                RumErrorSource.Source,
                 ex,
                 new Dictionary<string, object>
                 {
@@ -115,9 +105,9 @@ public partial class ErrorTestingPage : ContentPage
             _logger.Error("IndexOutOfRangeException occurred", ex);
 
             // Report error to RUM Error Tracking
-            Datadog.Maui.Rum.Rum.AddError(
+            Rum.AddError(
                 "IndexOutOfRangeException test",
-                Datadog.Maui.Rum.RumErrorSource.Source,
+                RumErrorSource.Source,
                 ex,
                 new Dictionary<string, object>
                 {
@@ -143,9 +133,9 @@ public partial class ErrorTestingPage : ContentPage
             _logger.Error("InvalidOperationException occurred", ex);
 
             // Report error to RUM Error Tracking
-            Datadog.Maui.Rum.Rum.AddError(
+            Rum.AddError(
                 "InvalidOperationException test",
-                Datadog.Maui.Rum.RumErrorSource.Source,
+                RumErrorSource.Source,
                 ex,
                 new Dictionary<string, object>
                 {
@@ -170,9 +160,9 @@ public partial class ErrorTestingPage : ContentPage
             _logger.Error("ArgumentException occurred", ex);
 
             // Report error to RUM Error Tracking
-            Datadog.Maui.Rum.Rum.AddError(
+            Rum.AddError(
                 "ArgumentException test",
-                Datadog.Maui.Rum.RumErrorSource.Source,
+                RumErrorSource.Source,
                 ex,
                 new Dictionary<string, object>
                 {
@@ -211,9 +201,9 @@ public partial class ErrorTestingPage : ContentPage
             _logger.Error("TaskCanceledException occurred", ex);
 
             // Report error to RUM Error Tracking
-            Datadog.Maui.Rum.Rum.AddError(
+            Rum.AddError(
                 "TaskCanceledException test",
-                Datadog.Maui.Rum.RumErrorSource.Source,
+                RumErrorSource.Source,
                 ex,
                 new Dictionary<string, object>
                 {
@@ -228,9 +218,9 @@ public partial class ErrorTestingPage : ContentPage
         {
             _logger.Error("Unexpected exception in TaskCancellation", ex);
 
-            Datadog.Maui.Rum.Rum.AddError(
+            Rum.AddError(
                 "Unexpected exception in TaskCancellation",
-                Datadog.Maui.Rum.RumErrorSource.Source,
+                RumErrorSource.Source,
                 ex,
                 new Dictionary<string, object>
                 {
@@ -281,9 +271,9 @@ public partial class ErrorTestingPage : ContentPage
             });
 
             // Report error to RUM Error Tracking
-            Datadog.Maui.Rum.Rum.AddError(
+            Rum.AddError(
                 "AggregateException test",
-                Datadog.Maui.Rum.RumErrorSource.Source,
+                RumErrorSource.Source,
                 ex,
                 new Dictionary<string, object>
                 {
@@ -300,9 +290,9 @@ public partial class ErrorTestingPage : ContentPage
         {
             _logger.Error("Unexpected exception in AggregateException test", ex);
 
-            Datadog.Maui.Rum.Rum.AddError(
+            Rum.AddError(
                 "Unexpected exception in AggregateException test",
-                Datadog.Maui.Rum.RumErrorSource.Source,
+                RumErrorSource.Source,
                 ex,
                 new Dictionary<string, object>
                 {
@@ -341,7 +331,7 @@ public partial class ErrorTestingPage : ContentPage
             });
 
             // Report error to RUM Error Tracking
-            Datadog.Maui.Rum.Rum.AddError(
+            Rum.AddError(
                 "HTTP request timeout",
                 Datadog.Maui.Rum.RumErrorSource.Network,
                 ex,
@@ -359,7 +349,7 @@ public partial class ErrorTestingPage : ContentPage
         {
             _logger.Error("HTTP timeout test failed", ex);
 
-            Datadog.Maui.Rum.Rum.AddError(
+            Rum.AddError(
                 "HTTP timeout test failed",
                 Datadog.Maui.Rum.RumErrorSource.Network,
                 ex,
@@ -392,7 +382,7 @@ public partial class ErrorTestingPage : ContentPage
                 });
 
                 // Report error to RUM Error Tracking
-                Datadog.Maui.Rum.Rum.AddError(
+                Rum.AddError(
                     "HTTP 404 Not Found",
                     Datadog.Maui.Rum.RumErrorSource.Network,
                     error,
@@ -411,7 +401,7 @@ public partial class ErrorTestingPage : ContentPage
         {
             _logger.Error("HTTP 404 test failed", ex);
 
-            Datadog.Maui.Rum.Rum.AddError(
+            Rum.AddError(
                 "HTTP 404 test failed",
                 Datadog.Maui.Rum.RumErrorSource.Network,
                 ex,
@@ -444,7 +434,7 @@ public partial class ErrorTestingPage : ContentPage
                 });
 
                 // Report error to RUM Error Tracking
-                Datadog.Maui.Rum.Rum.AddError(
+                Rum.AddError(
                     "HTTP 500 Server Error",
                     Datadog.Maui.Rum.RumErrorSource.Network,
                     error,
@@ -463,7 +453,7 @@ public partial class ErrorTestingPage : ContentPage
         {
             _logger.Error("HTTP 500 test failed", ex);
 
-            Datadog.Maui.Rum.Rum.AddError(
+            Rum.AddError(
                 "HTTP 500 test failed",
                 Datadog.Maui.Rum.RumErrorSource.Network,
                 ex,
@@ -491,9 +481,9 @@ public partial class ErrorTestingPage : ContentPage
         });
 
         // Also report to RUM Error Tracking
-        Datadog.Maui.Rum.Rum.AddError(
+        Rum.AddError(
             "Manual error log test - Test error message from manual logging",
-            Datadog.Maui.Rum.RumErrorSource.Source,
+            RumErrorSource.Source,
             null, // No exception for manual logging
             new Dictionary<string, object>
             {

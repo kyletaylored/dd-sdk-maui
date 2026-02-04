@@ -21,9 +21,6 @@ public partial class MainPage : ContentPage
 		// Create a logger for this page
 		_logger = Logs.CreateLogger("MainPage");
 
-		// Start RUM view tracking for this page
-		Rum.StartView("MainPage", "Main Page");
-
 		_logger.Info("MainPage initialized");
 	}
 

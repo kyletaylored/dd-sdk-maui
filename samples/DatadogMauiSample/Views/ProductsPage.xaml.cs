@@ -32,12 +32,6 @@ public partial class ProductsPage : ContentPage
         Resources.Add("StockStatusConverter", new StockStatusConverter());
         Resources.Add("StockColorConverter", new StockColorConverter());
 
-        // Start RUM view tracking
-        Rum.StartView("products", "Products Page", new Dictionary<string, object>
-        {
-            { "screen_class", "ProductsPage" }
-        });
-
         _logger.Info("ProductsPage initialized");
 
         // Set default limit
@@ -99,9 +93,6 @@ public partial class ProductsPage : ContentPage
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
-
-        // Stop RUM view tracking when page disappears
-        Rum.StopView("products");
 
         _logger.Debug("ProductsPage disappeared");
     }

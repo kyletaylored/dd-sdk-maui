@@ -99,6 +99,26 @@
                 </VerticalStackLayout>
             </Frame>
 
+            <!-- App Version Info -->
+            <Frame BorderColor="LightGray" Padding="15" CornerRadius="8" BackgroundColor="#E8F5E9">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="App Version Info" FontAttributes="Bold" FontSize="16"/>
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="5">
+                        <Label Grid.Row="0" Grid.Column="0" Text="Version:" FontSize="12" TextColor="Gray"/>
+                        <Label Grid.Row="0" Grid.Column="1" x:Name="AppVersionLabel" FontSize="12" TextColor="Gray"/>
+
+                        <Label Grid.Row="1" Grid.Column="0" Text="Build:" FontSize="12" TextColor="Gray"/>
+                        <Label Grid.Row="1" Grid.Column="1" x:Name="AppBuildLabel" FontSize="12" TextColor="Gray"/>
+
+                        <Label Grid.Row="2" Grid.Column="0" Text="First Launch:" FontSize="12" TextColor="Gray"/>
+                        <Label Grid.Row="2" Grid.Column="1" x:Name="FirstLaunchLabel" FontSize="12" TextColor="Gray"/>
+
+                        <Label Grid.Row="3" Grid.Column="0" Text="Version Installed:" FontSize="12" TextColor="Gray"/>
+                        <Label Grid.Row="3" Grid.Column="1" x:Name="VersionInstalledLabel" FontSize="12" TextColor="Gray"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
             <!-- SDK Version Info -->
             <Frame BorderColor="LightGray" Padding="15" CornerRadius="8" BackgroundColor="#F0F8FF">
                 <VerticalStackLayout Spacing="5">
@@ -112,13 +132,6 @@
                            Margin="0,5,0,0"/>
                 </VerticalStackLayout>
             </Frame>
-
-            <!-- Close Button -->
-            <Button Text="Close"
-                    Clicked="OnCloseClicked"
-                    BackgroundColor="#512BD4"
-                    TextColor="White"
-                    Margin="0,10,0,0"/>
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

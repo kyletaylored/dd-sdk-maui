@@ -18,20 +18,25 @@
                    Margin="0,0,0,10"/>
 
             <!-- Action Buttons Row -->
-            <HorizontalStackLayout Grid.Row="1" Spacing="10" Margin="0,0,0,10" FlowDirection="LeftToRight" HorizontalOptions="Start">
-                <Button x:Name="RefreshButton"
+            <Grid Grid.Row="1"
+                  ColumnDefinitions="Auto,*,Auto,Auto,Auto"
+                  ColumnSpacing="8"
+                  Margin="0,0,0,10">
+                <Button Grid.Column="0"
+                        x:Name="RefreshButton"
                         AutomationId="refresh_products_button"
                         Text="Refresh"
                         Clicked="OnRefreshClicked"/>
 
-                <Picker x:Name="CategoryPicker"
-                        Title="Category"
-                        WidthRequest="150"
+                <Picker Grid.Column="1"
+                        x:Name="CategoryPicker"
+                        Title="All Categories"
                         SelectedIndexChanged="OnCategoryChanged"/>
 
-                <Picker x:Name="LimitPicker"
-                        Title="Limit"
-                        WidthRequest="100"
+                <Picker Grid.Column="2"
+                        x:Name="LimitPicker"
+                        Title="20"
+                        WidthRequest="70"
                         SelectedIndexChanged="OnLimitChanged">
                     <Picker.ItemsSource>
                         <x:Array Type="{x:Type x:String}">
@@ -43,20 +48,22 @@
                     </Picker.ItemsSource>
                 </Picker>
 
-                <Button x:Name="ViewCartButton"
+                <Button Grid.Column="3"
+                        x:Name="ViewCartButton"
                         AutomationId="view_cart_button"
-                        Text="View Cart"
+                        Text="Cart"
                         Clicked="OnViewCartClicked"
                         BackgroundColor="#2196F3"
                         TextColor="White"/>
 
-                <Button x:Name="TestPurchaseButton"
+                <Button Grid.Column="4"
+                        x:Name="TestPurchaseButton"
                         AutomationId="test_purchase_button"
-                        Text="Test Purchase"
+                        Text="Buy"
                         Clicked="OnTestPurchaseClicked"
                         BackgroundColor="#4CAF50"
                         TextColor="White"/>
-            </HorizontalStackLayout>
+            </Grid>
         </Grid>
 
         <!-- Products List -->

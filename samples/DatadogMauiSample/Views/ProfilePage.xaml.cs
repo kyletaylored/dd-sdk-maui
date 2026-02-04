@@ -42,12 +42,6 @@ public partial class ProfilePage : ContentPage
     {
         base.OnAppearing();
 
-        // Start tracking this view manually
-        Rum.StartView(ViewKey, "Profile", new Dictionary<string, object>
-        {
-            { "user_type", _currentUser.Id == "guest" ? "guest" : "authenticated" }
-        });
-
         _logger.Info("Profile page appeared", error: null, attributes: new Dictionary<string, object>
         {
             { "user_id", _currentUser.Id }
@@ -66,9 +60,6 @@ public partial class ProfilePage : ContentPage
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
-
-        // Stop tracking this view
-        Rum.StopView(ViewKey);
         _logger.Info("Profile page disappeared");
     }
 
@@ -299,10 +290,5 @@ public partial class ProfilePage : ContentPage
     {
         Log("[ProfilePage] Testing bad login credentials");
         await SignInWithApiAsync("invaliduser", "wrongpassword");
-    }
-
-    private async void OnDebugInfoClicked(object? sender, EventArgs e)
-    {
-        await Navigation.PushAsync(new DebugInfoPage());
     }
 }
