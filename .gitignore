@@ -112,3 +112,4 @@ _reference/
 *.bak
 *.log
 *.swift
+*.kt

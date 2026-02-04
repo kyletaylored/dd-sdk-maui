@@ -8,6 +8,7 @@ Official Datadog monitoring SDK for .NET MAUI applications. Monitor your iOS and
 ## Features
 
 - **Real User Monitoring (RUM)** - Track user sessions, views, actions, resources, and errors
+- **Session Replay** - Visual reproduction of user sessions with privacy controls
 - **Log Collection** - Centralized logging with context enrichment
 - **Distributed Tracing** - End-to-end visibility across mobile and backend services
 - **Cross-Platform** - Single API for both iOS and Android
@@ -35,6 +36,8 @@ In your `MauiProgram.cs`:
 
 ```csharp
 using Datadog.Maui;
+using Datadog.Maui.Configuration;
+using Datadog.Maui.Extensions;
 
 public static class MauiProgram
 {
@@ -44,30 +47,43 @@ public static class MauiProgram
 
         builder
             .UseMauiApp<App>()
-            .UseDatadog(config =>
+            .UseDatadog(datadog =>
             {
-                config.ClientToken = "YOUR_CLIENT_TOKEN";
-                config.Environment = "production";
-                config.ServiceName = "my-maui-app";
-                config.Site = DatadogSite.US1;
+                // Platform-specific client tokens
+                datadog.SetClientToken(
+                    android: "YOUR_ANDROID_CLIENT_TOKEN",
+                    ios: "YOUR_IOS_CLIENT_TOKEN"
+                );
+                datadog.Environment = "production";
+                datadog.ServiceName = "my-maui-app";
+                datadog.Site = DatadogSite.US1;
+                datadog.TrackingConsent = TrackingConsent.Granted;
 
                 // Enable RUM
-                config.EnableRum(rum =>
+                datadog.EnableRum(rum =>
                 {
-                    rum.SetApplicationId("YOUR_APPLICATION_ID");
-                    rum.SetSessionSampleRate(100);
+                    rum.SetApplicationId(
+                        android: "YOUR_ANDROID_RUM_ID",
+                        ios: "YOUR_IOS_RUM_ID"
+                    );
                 });
 
-                // Enable Logs
-                config.EnableLogs(logs =>
-                {
-                    logs.SetSampleRate(100);
-                });
+                // Enable Logs (no configuration needed)
+                datadog.EnableLogs();
 
                 // Enable Tracing
-                config.EnableTracing(tracing =>
+                datadog.EnableTracing(tracing =>
                 {
-                    tracing.SetSampleRate(100);
+                    tracing.SetFirstPartyHosts(new[] { "api.example.com" });
+                });
+
+                // Enable Session Replay
+                datadog.EnableSessionReplay(sessionReplay =>
+                {
+                    sessionReplay.SetSampleRate(20);
+                    sessionReplay.SetTextAndInputPrivacy(TextAndInputPrivacy.MaskSensitiveInputs);
+                    sessionReplay.SetImagePrivacy(ImagePrivacy.MaskNonBundledOnly);
+                    sessionReplay.SetTouchPrivacy(TouchPrivacy.Show);
                 });
             });
 
@@ -81,10 +97,10 @@ public static class MauiProgram
 ```csharp
 using Datadog.Maui.Logs;
 
-var logger = Logs.CreateLogger("my-logger");
+var logger = Logger.Create("my-logger");
 
 logger.Info("User logged in");
-logger.Warn("Low memory warning", new Dictionary<string, object>
+logger.Warn("Low memory warning", attributes: new Dictionary<string, object>
 {
     { "available_memory", 256 },
     { "threshold", 512 }
@@ -96,7 +112,7 @@ try
 }
 catch (Exception ex)
 {
-    logger.Error("Payment failed", ex, new Dictionary<string, object>
+    logger.Error("Payment failed", error: ex, attributes: new Dictionary<string, object>
     {
         { "amount", 99.99 },
         { "payment_method", "credit_card" }

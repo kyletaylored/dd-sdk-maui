@@ -697,9 +697,11 @@ rumConfig.TrackUIKitViews();
 
 2. **Or track manually** in view lifecycle:
 ```csharp
-override func viewDidAppear(_ animated: Bool) {
-    super.viewDidAppear(animated)
-    monitor.startView(key: "MyView", name: "My View", attributes: [:])
+// In a custom UIViewController subclass
+public override void ViewDidAppear(bool animated)
+{
+    base.ViewDidAppear(animated);
+    monitor.StartView("MyView", "My View", new NSDictionary());
 }
 ```
 

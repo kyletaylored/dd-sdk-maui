@@ -182,12 +182,12 @@ DDDatadog.ClearAllData();
 #### Datadog Sites
 
 ```csharp
-config.Site = DDSite.US1;      // US (datadoghq.com)
-config.Site = DDSite.US3;      // US3 (us3.datadoghq.com)
-config.Site = DDSite.US5;      // US5 (us5.datadoghq.com)
-config.Site = DDSite.EU1;      // EU (datadoghq.eu)
-config.Site = DDSite.US1_FED;  // FedRAMP (ddog-gov.com)
-config.Site = DDSite.AP1;      // AP1 (ap1.datadoghq.com)
+config.Site = DDSite.Us1;      // US (datadoghq.com)
+config.Site = DDSite.Us3;      // US3 (us3.datadoghq.com)
+config.Site = DDSite.Us5;      // US5 (us5.datadoghq.com)
+config.Site = DDSite.Eu1;      // EU (datadoghq.eu)
+config.Site = DDSite.Us1Fed;   // FedRAMP (ddog-gov.com)
+config.Site = DDSite.Ap1;      // AP1 (ap1.datadoghq.com)
 ```
 
 #### Batch Size and Upload Frequency
@@ -604,6 +604,9 @@ For detailed API documentation, see the individual module READMEs:
 - [DatadogSessionReplay README](DatadogSessionReplay/README.md) - Session replay APIs
 - [DatadogCrashReporting README](DatadogCrashReporting/README.md) - Crash reporting APIs
 - [DatadogWebViewTracking README](DatadogWebViewTracking/README.md) - WebView tracking APIs
+- [DatadogFlags README](DatadogFlags/README.md) - Feature flags APIs
+- [DatadogInternal README](DatadogInternal/README.md) - Internal infrastructure (not for direct use)
+- [OpenTelemetryApi README](OpenTelemetryApi/README.md) - OpenTelemetry tracing interface
 
 ## Resources
 

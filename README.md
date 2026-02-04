@@ -37,7 +37,9 @@ Install-Package Datadog.MAUI
 In your `MauiProgram.cs`, initialize Datadog before building the app:
 
 ```csharp
-using Datadog.MAUI;
+using Datadog.Maui;
+using Datadog.Maui.Configuration;
+using Datadog.Maui.Extensions;
 
 public static class MauiProgram
 {
@@ -50,23 +52,42 @@ public static class MauiProgram
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+            })
+            // Initialize Datadog
+            .UseDatadog(datadog =>
+            {
+                datadog.SetClientToken(
+                    android: "YOUR_ANDROID_CLIENT_TOKEN",
+                    ios: "YOUR_IOS_CLIENT_TOKEN"
+                );
+                datadog.Environment = "production";
+                datadog.ServiceName = "my-maui-app";
+                datadog.Site = DatadogSite.US1;
+                datadog.TrackingConsent = TrackingConsent.Granted;
+
+                datadog.EnableRum(rum =>
+                {
+                    rum.SetApplicationId(
+                        android: "YOUR_ANDROID_RUM_ID",
+                        ios: "YOUR_IOS_RUM_ID"
+                    );
+                });
+
+                datadog.EnableLogs();
+
+                datadog.EnableTracing(tracing =>
+                {
+                    tracing.SetFirstPartyHosts(new[] { "api.example.com" });
+                });
+
+                datadog.EnableSessionReplay(sessionReplay =>
+                {
+                    sessionReplay.SetSampleRate(20);
+                    sessionReplay.SetTextAndInputPrivacy(TextAndInputPrivacy.MaskSensitiveInputs);
+                    sessionReplay.SetImagePrivacy(ImagePrivacy.MaskNonBundledOnly);
+                    sessionReplay.SetTouchPrivacy(TouchPrivacy.Show);
+                });
             });
-
-        // Initialize Datadog
-        DatadogSdk.Initialize(new DatadogConfiguration
-        {
-            ClientToken = "YOUR_CLIENT_TOKEN",
-            Environment = "production",
-            ApplicationId = "YOUR_RUM_APPLICATION_ID", // Required for RUM
-            ServiceName = "my-maui-app",
-            Site = DatadogSite.US1,
-
-            // Optional: Configure features
-            EnableCrashReporting = true,
-            TrackUserInteractions = true,
-            TrackNetworkRequests = true,
-            SessionSampleRate = 100.0f, // Sample 100% of sessions
-        });
 
         return builder.Build();
     }
@@ -76,11 +97,15 @@ public static class MauiProgram
 ### 2. Set User Information
 
 ```csharp
-DatadogSdk.Instance.SetUser(
-    id: "user-123",
-    name: "John Doe",
-    email: "john.doe@example.com"
-);
+using Datadog.Maui;
+
+// Set user information for RUM and Logs
+Datadog.SetUser(new UserInfo
+{
+    Id = "user-123",
+    Name = "John Doe",
+    Email = "john.doe@example.com"
+});
 ```
 
 ### 3. Track Custom Events
@@ -88,8 +113,11 @@ DatadogSdk.Instance.SetUser(
 #### Logging
 
 ```csharp
-DatadogSdk.Logger.Info("User logged in successfully");
-DatadogSdk.Logger.Error("Failed to process payment", new Dictionary<string, object>
+using Datadog.Maui.Logs;
+
+var logger = Logger.Create("MyLogger");
+logger.Info("User logged in successfully");
+logger.Error("Failed to process payment", error: null, attributes: new Dictionary<string, object>
 {
     { "user_id", "user-123" },
     { "amount", 99.99 }
@@ -99,27 +127,37 @@ DatadogSdk.Logger.Error("Failed to process payment", new Dictionary<string, obje
 #### RUM Views
 
 ```csharp
-DatadogSdk.Rum.StartView("checkout", "Checkout Page");
+using Datadog.Maui.Rum;
+
+GlobalRum.Get().StartView("checkout", "Checkout Page");
 
 // ... user interacts with the page ...
 
-DatadogSdk.Rum.StopView("checkout");
+GlobalRum.Get().StopView("checkout");
 ```
 
 #### Custom Actions
 
 ```csharp
-DatadogSdk.Rum.AddAction("tap", "Purchase Button", new Dictionary<string, object>
-{
-    { "product_id", "prod-456" },
-    { "price", 49.99 }
-});
+using Datadog.Maui.Rum;
+
+GlobalRum.Get().AddAction(
+    RumActionType.Custom,
+    "Purchase Button",
+    attributes: new Dictionary<string, object>
+    {
+        { "product_id", "prod-456" },
+        { "price", 49.99 }
+    }
+);
 ```
 
 #### Distributed Tracing
 
 ```csharp
-using var span = DatadogSdk.Trace.StartSpan("process_payment");
+using Datadog.Maui.Tracing;
+
+using var span = Tracer.StartSpan("process_payment");
 span.SetTag("payment_method", "credit_card");
 
 try
@@ -155,33 +193,41 @@ Specify your Datadog site based on your account region:
 Control the percentage of sessions and traces collected:
 
 ```csharp
-new DatadogConfiguration
+.UseDatadog(datadog =>
 {
     // ... other config ...
-    SessionSampleRate = 75.0f, // Sample 75% of RUM sessions
-    TraceSampleRate = 50.0f,   // Sample 50% of traces
-};
+
+    datadog.EnableRum(rum =>
+    {
+        rum.SetApplicationId(android: "...", ios: "...");
+        rum.SetSessionSampleRate(75.0f); // Sample 75% of RUM sessions
+    });
+
+    datadog.EnableTracing(tracing =>
+    {
+        tracing.SetSampleRate(50.0f); // Sample 50% of traces
+    });
+
+    datadog.EnableSessionReplay(sessionReplay =>
+    {
+        sessionReplay.SetSampleRate(20); // Sample 20% for session replay
+    });
+});
 ```
 
 ### Global Attributes
 
-Add custom attributes to all events:
+Add custom attributes to all RUM events:
 
 ```csharp
-// During initialization
-new DatadogConfiguration
-{
-    // ... other config ...
-    AdditionalAttributes = new Dictionary<string, object>
-    {
-        { "app_version", "1.2.3" },
-        { "build_number", "456" }
-    }
-};
+using Datadog.Maui.Rum;
 
-// At runtime
-DatadogSdk.Instance.AddAttribute("user_tier", "premium");
-DatadogSdk.Instance.RemoveAttribute("user_tier");
+// Add global attributes at runtime
+GlobalRum.Get().AddAttribute("user_tier", "premium");
+GlobalRum.Get().AddAttribute("app_version", "1.2.3");
+
+// Remove attributes when no longer needed
+GlobalRum.Get().RemoveAttribute("user_tier");
 ```
 
 ## Platform Requirements

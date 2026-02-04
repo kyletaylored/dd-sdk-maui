@@ -155,14 +155,17 @@ finally
 
 For detailed documentation on specific modules, see the README files in each package directory:
 
-- Core SDK
-- RUM (Real User Monitoring)
-- Logs
-- Trace (APM)
-- Session Replay
-- NDK Crash Reporting
-- WebView Tracking
-- Feature Flags
+- [Core SDK](./dd-sdk-android-core/README.md) - Foundation for all Datadog features
+- [RUM (Real User Monitoring)](./dd-sdk-android-rum/README.md) - Track user sessions and interactions
+- [Logs](./dd-sdk-android-logs/README.md) - Centralized log collection
+- [Trace (APM)](./dd-sdk-android-trace/README.md) - Distributed tracing
+- [Session Replay](./dd-sdk-android-session-replay/README.md) - Visual session recording
+- [NDK Crash Reporting](./dd-sdk-android-ndk/README.md) - Native crash tracking
+- [WebView Tracking](./dd-sdk-android-webview/README.md) - Hybrid app monitoring
+- [Feature Flags](./dd-sdk-android-flags/README.md) - Remote configuration and A/B testing
+- [OkHttp Instrumentation](./dd-sdk-android-okhttp/README.md) - HTTP client tracing
+- [OpenTracing API](./opentracing-api/README.md) - Standard tracing interface
+- [Internal](./dd-sdk-android-internal/README.md) - Infrastructure package (internal use)
 
 ## Using Individual Packages
 

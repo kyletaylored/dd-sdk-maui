@@ -122,7 +122,7 @@ var config = new Configuration.Builder(
 .SetProxy(new Proxy(Proxy.Type.Http, new InetSocketAddress("proxy.example.com", 8080)))
 
 // Custom endpoint (optional - for EU or custom domains)
-.UseSite(DatadogSite.Eu1)
+.SetSite(DatadogSite.Eu1)
 ```
 
 #### Initialize SDK
