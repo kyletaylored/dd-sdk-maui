@@ -187,6 +187,22 @@ for FRAMEWORK in "${FRAMEWORKS[@]}"; do
     if [ -f "$TEMP_OUTPUT/ApiDefinitions.cs" ]; then
         # Rename ApiDefinitions.cs to ApiDefinition.cs (singular)
         cp "$TEMP_OUTPUT/ApiDefinitions.cs" "$BINDING_PROJECT_DIR/ApiDefinition.cs"
+
+        # Post-process to fix common Sharpie issues
+        awk '
+        # Remove circular using statement (e.g. "using DatadogCore;" in DatadogCore binding)
+        /^using '"$FRAMEWORK"';$/ { next }
+
+        # Fix NSURL → NSUrl (correct .NET casing)
+        { gsub(/\bNSURL\b/, "NSUrl") }
+
+        { print }
+        ' "$BINDING_PROJECT_DIR/ApiDefinition.cs" > "$BINDING_PROJECT_DIR/ApiDefinition.cs.tmp" && \
+            mv "$BINDING_PROJECT_DIR/ApiDefinition.cs.tmp" "$BINDING_PROJECT_DIR/ApiDefinition.cs"
+
+        # Note: Protocol interface fixes (e.g., NSUrlSessionDelegate → INSUrlSessionDelegate)
+        # need to be done manually on a case-by-case basis as they are context-dependent
+
         echo -e "${GREEN}  ✓ Generated ApiDefinition.cs → $BINDING_PROJECT_DIR/ApiDefinition.cs${NC}"
     else
         echo -e "${RED}  ✗ Failed to generate ApiDefinitions.cs${NC}"
