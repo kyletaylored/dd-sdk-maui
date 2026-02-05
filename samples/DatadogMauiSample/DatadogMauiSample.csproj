@@ -52,6 +52,12 @@
 		<RunAOTCompilation>false</RunAOTCompilation>
 	</PropertyGroup>
 
+	<!-- iOS dSYM Configuration (generates debug symbol files) -->
+	<PropertyGroup Condition="$(TargetFramework.Contains('ios')) And '$(Configuration)' == 'Release'">
+		<MtouchDebugSymbols>true</MtouchDebugSymbols>
+		<GenerateDsymBundle>true</GenerateDsymBundle>
+	</PropertyGroup>
+
 	<!-- Datadog Symbol Upload Configuration (namespaced) -->
 	<PropertyGroup>
 		<!-- Read flavor from environment variable if set, otherwise default to configuration name -->
