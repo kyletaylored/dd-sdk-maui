@@ -48,8 +48,8 @@ namespace Datadog.iOS.SessionReplay
 		float ReplaySampleRate { get; set; }
 
 		// @property (nonatomic) enum DDSessionReplayConfigurationPrivacyLevel defaultPrivacyLevel __attribute__((deprecated("This will be removed in future versions of the SDK. Use the new privacy levels instead.")));
-		[Export ("defaultPrivacyLevel", ArgumentSemantic.Assign)]
-		DDSessionReplayConfigurationPrivacyLevel DefaultPrivacyLevel { get; set; }
+		// [Export ("defaultPrivacyLevel", ArgumentSemantic.Assign)]
+		// DDSessionReplayConfigurationPrivacyLevel DefaultPrivacyLevel { get; set; }
 
 		// @property (nonatomic) enum DDTextAndInputPrivacyLevel textAndInputPrivacyLevel;
 		[Export ("textAndInputPrivacyLevel", ArgumentSemantic.Assign)]
