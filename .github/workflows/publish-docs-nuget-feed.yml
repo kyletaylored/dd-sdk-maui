@@ -109,7 +109,7 @@ jobs:
         run: |
           mkdir -p pkgs
 
-          # Get all SDK releases (excluding symbols-only releases)
+          # Get all SDK releases
           # Using --json to get structured output, then extract tag_name
           echo "Fetching all SDK releases..."
           RELEASES=$(gh release list --limit 100 --json tagName --jq '.[] | select(.tagName | test("^symbols-v") | not) | .tagName' || echo "")
@@ -135,39 +135,6 @@ jobs:
 
           echo ""
           echo "Total SDK packages downloaded:"
-          find ./pkgs -name "*.nupkg" 2>/dev/null | wc -l || echo "0"
-
-      - name: Download Symbols package releases
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          mkdir -p pkgs
-
-          # Get Symbols package releases using --json for structured output
-          echo "Fetching all Symbols package releases..."
-          SYMBOLS_RELEASES=$(gh release list --limit 100 --json tagName --jq '.[] | select(.tagName | test("^symbols-v")) | .tagName' || echo "")
-
-          if [ -z "$SYMBOLS_RELEASES" ]; then
-            echo "No Symbols package releases found yet"
-          else
-            echo "Found Symbols releases:"
-            echo "$SYMBOLS_RELEASES"
-            echo ""
-
-            # Download Symbols packages from each release
-            echo "$SYMBOLS_RELEASES" | while read -r tag; do
-              if [ -n "$tag" ]; then
-                echo "Downloading Symbols package from release $tag..."
-                gh release download "$tag" \
-                  --pattern "*.nupkg" \
-                  --dir ./pkgs \
-                  --skip-existing || echo "No packages in $tag (or already downloaded)"
-              fi
-            done
-          fi
-
-          echo ""
-          echo "Total packages (SDK + Symbols):"
           find ./pkgs -name "*.nupkg" 2>/dev/null | wc -l || echo "0"
 
       # ================================================================

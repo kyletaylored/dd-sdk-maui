@@ -1,6 +1,6 @@
 .PHONY: help build-android build-ios build-plugin build pack clean clean-all test status check-prereqs dev-setup \
         sample-ios sample-android sample-build-ios sample-build-android run-ios run-android \
-        download-ios-frameworks sample-logs-android sample-logs-clear upload-symbols restore \
+        download-ios-frameworks sample-logs-android sample-logs-clear restore \
         publish-android publish-ios publish-all install-android run-android-release install-ios run-ios-release
 
 # Default target
@@ -105,12 +105,7 @@ build-plugin: ## Build the MAUI plugin project
 	@dotnet build Datadog.MAUI.Plugin/Datadog.MAUI.Plugin.csproj --configuration Release --no-restore --verbosity minimal
 	@echo "$(GREEN)✓ MAUI Plugin built$(NC)"
 
-build-symbols: ## Build the Symbols upload plugin
-	@echo "$(BLUE)Building Symbols plugin...$(NC)"
-	@dotnet build Datadog.MAUI.Symbols/Datadog.MAUI.Symbols.csproj --configuration Release --nologo --verbosity minimal
-	@echo "$(GREEN)✓ Symbols plugin built$(NC)"
-
-build: build-android build-ios build-plugin build-symbols ## Build all projects (Android, iOS, Plugin, Symbols)
+build: build-android build-ios build-plugin ## Build all projects (Android, iOS, Plugin)
 
 ##@ Packaging
 
@@ -225,16 +220,14 @@ sample-logs-clear: ## Clear Android logs
 
 ##@ Symbol Upload & Release Publishing
 
-publish-android: ## Publish Android sample in Release mode with symbols (APK for testing)
-	@echo "$(BLUE)Publishing Android sample with symbols...$(NC)"
+publish-android: ## Publish Android sample in Release mode (APK for testing)
+	@echo "$(BLUE)Publishing Android sample...$(NC)"
 	@if [ ! -f samples/DatadogMauiSample/appsettings.Development.json ]; then \
 		echo "$(RED)❌ appsettings.Development.json not found$(NC)"; \
 		echo "$(YELLOW)Create from template:$(NC)"; \
 		echo "  cp samples/DatadogMauiSample/appsettings.Development.json.example samples/DatadogMauiSample/appsettings.Development.json"; \
 		exit 1; \
 	fi
-	@echo "$(YELLOW)Building Symbols package in Release...$(NC)"
-	@dotnet build Datadog.MAUI.Symbols/Datadog.MAUI.Symbols.csproj -c Release --nologo -v q
 	@if [ -z "$$DD_API_KEY" ]; then \
 		echo "$(YELLOW)⚠️  DD_API_KEY not set - symbol upload may fail$(NC)"; \
 	fi
@@ -243,7 +236,7 @@ publish-android: ## Publish Android sample in Release mode with symbols (APK for
 			-p:AndroidPackageFormat=apk \
 			-p:DatadogSymbolsApiKey="$$DD_API_KEY" \
 			$$( [ -n "$$DD_BUILD_FLAVOR" ] && echo -p:DatadogSymbolsFlavor=\"$$DD_BUILD_FLAVOR\" )
-	@echo "$(GREEN)✓ Android app published with symbols$(NC)"
+	@echo "$(GREEN)✓ Android app published$(NC)"
 	@echo "$(YELLOW)Output: samples/DatadogMauiSample/bin/Release/net9.0-android/publish/$(NC)"
 	@MAPPING_FILE=$$(find samples/DatadogMauiSample -name "mapping.txt" -type f 2>/dev/null | head -1); \
 	APK_FILE=$$(find samples/DatadogMauiSample/bin/Release/net9.0-android -name "*.apk" -type f 2>/dev/null | head -1); \
@@ -306,28 +299,8 @@ run-android-release: ## Install and run published Android APK
 	adb shell am start -n com.datadog.datadog_maui_shopist.demo/crc64f2aa0ed48bd5d29c.MainActivity && \
 	echo "$(GREEN)✓ App launched$(NC)"
 
-test-ios-symbols: ## Test iOS symbol upload via MSBuild target (macOS only)
-	@echo "$(BLUE)Testing iOS symbol upload...$(NC)"
-	@if [ "$$(uname)" != "Darwin" ]; then \
-		echo "$(RED)Error: iOS operations require macOS$(NC)"; \
-		exit 1; \
-	fi
-	@if [ ! -f samples/DatadogMauiSample/appsettings.Development.json ]; then \
-		echo "$(RED)❌ appsettings.Development.json not found$(NC)"; \
-		exit 1; \
-	fi
-	@echo "$(YELLOW)Building Symbols package in Release...$(NC)"
-	@dotnet build Datadog.MAUI.Symbols/Datadog.MAUI.Symbols.csproj -c Release --nologo -v q
-	@cd samples/DatadogMauiSample && \
-		dotnet publish -f net9.0-ios -c Release -v normal \
-			-p:CreatePackage=false \
-			-p:BuildIpa=false \
-			-p:DatadogSymbolsApiKey="$$DD_API_KEY" \
-			$$( [ -n "$$DD_BUILD_FLAVOR" ] && echo -p:DatadogSymbolsFlavor=\"$$DD_BUILD_FLAVOR\" )
-	@echo "$(GREEN)✓ iOS symbol upload test complete$(NC)"
-
-publish-ios: ## Publish iOS sample in Release mode with symbols (macOS only)
-	@echo "$(BLUE)Publishing iOS sample with symbols...$(NC)"
+publish-ios: ## Publish iOS sample in Release mode (macOS only)
+	@echo "$(BLUE)Publishing iOS sample$(NC)"
 	@if [ "$$(uname)" != "Darwin" ]; then \
 		echo "$(RED)Error: iOS publish requires macOS$(NC)"; \
 		exit 1; \
@@ -336,8 +309,6 @@ publish-ios: ## Publish iOS sample in Release mode with symbols (macOS only)
 		echo "$(RED)❌ appsettings.Development.json not found$(NC)"; \
 		exit 1; \
 	fi
-	@echo "$(YELLOW)Building Symbols package in Release...$(NC)"
-	@dotnet build Datadog.MAUI.Symbols/Datadog.MAUI.Symbols.csproj -c Release --nologo -v q
 	@if [ -z "$$DD_API_KEY" ]; then \
 		echo "$(YELLOW)⚠️  DD_API_KEY not set - symbol upload may fail$(NC)"; \
 	fi
@@ -348,7 +319,7 @@ publish-ios: ## Publish iOS sample in Release mode with symbols (macOS only)
 			-p:CodesignProvision="Automatic" \
 			-p:DatadogSymbolsApiKey="$$DD_API_KEY" \
 			$$( [ -n "$$DD_BUILD_FLAVOR" ] && echo -p:DatadogSymbolsFlavor=\"$$DD_BUILD_FLAVOR\" )
-	@echo "$(GREEN)✓ iOS app published with symbols$(NC)"
+	@echo "$(GREEN)✓ iOS app published$(NC)"
 
 publish-ios-staging:
 	@DD_BUILD_FLAVOR=staging $(MAKE) publish-ios
@@ -408,33 +379,7 @@ run-ios-release: ## Install and launch published iOS app in simulator (macOS onl
 	xcrun simctl launch $$SIMULATOR_ID $$BUNDLE_ID && \
 	echo "$(GREEN)✓ App launched$(NC)"
 
-publish-all: publish-android publish-ios ## Publish both Android and iOS samples with symbols
-
-upload-symbols: ## Upload both Android and iOS symbols to Datadog
-	@echo "$(BLUE)Uploading symbols to Datadog...$(NC)"
-	@if [ -z "$(DD_API_KEY)" ]; then \
-		echo "$(RED)Error: DD_API_KEY environment variable not set$(NC)"; \
-		echo "Set it with: export DD_API_KEY=your_api_key"; \
-		exit 1; \
-	fi
-	@MAPPING_FILE=$$(find samples/DatadogMauiSample/bin/Release -name "mapping.txt" | head -1); \
-	DSYM_DIR=$$(find samples/DatadogMauiSample/bin/Release -type d -name "*.app.dSYM" | head -1); \
-	if [ -z "$$MAPPING_FILE" ] && [ -z "$$DSYM_DIR" ]; then \
-		echo "$(RED)Error: No symbol files found. Build in Release mode first.$(NC)"; \
-		echo "Run: make pack && cd samples/DatadogMauiSample && dotnet build -c Release"; \
-		exit 1; \
-	fi; \
-	CMD="npx @datadog/datadog-ci flutter-symbols upload --service-name shopist-maui-demo --version 1.0"; \
-	if [ -n "$$MAPPING_FILE" ]; then \
-		echo "$(YELLOW)Found Android mapping: $$MAPPING_FILE$(NC)"; \
-		CMD="$$CMD --android-mapping --android-mapping-location \"$$MAPPING_FILE\""; \
-	fi; \
-	if [ -n "$$DSYM_DIR" ]; then \
-		echo "$(YELLOW)Found iOS dSYM: $$DSYM_DIR$(NC)"; \
-		CMD="$$CMD --ios-dsyms --ios-dsyms-location \"$$DSYM_DIR\""; \
-	fi; \
-	eval $$CMD
-	@echo "$(GREEN)✓ Symbols uploaded$(NC)"
+publish-all: publish-android publish-ios ## Publish both Android and iOS samples
 
 ##@ Testing
 

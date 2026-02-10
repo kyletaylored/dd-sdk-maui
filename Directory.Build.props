@@ -19,9 +19,6 @@
     <!-- Can diverge from binding versions for plugin-only enhancements -->
     <PluginVersion Condition="'$(PluginVersion)' == ''">$(DatadogSdkVersion)</PluginVersion>
 
-    <!-- Datadog Symbols Package Version - Independent versioning -->
-    <DatadogSymbolsVersion>0.0.2</DatadogSymbolsVersion>
-
     <!-- Default Version for all packages (uses PluginVersion) -->
     <!-- Platform-specific bindings can override by setting Version=$(AndroidBindingVersion) or Version=$(iOSBindingVersion) -->
     <Version>$(PluginVersion)</Version>

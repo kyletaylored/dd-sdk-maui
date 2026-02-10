@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       release_tag:
-        description: 'Release tag (e.g., v3.6.0 or symbols-v0.0.3)'
+        description: 'Release tag (e.g., v3.6.0)'
         required: true
         type: string
     outputs:
@@ -31,14 +31,8 @@ jobs:
         id: package-type
         run: |
           TAG="${{ inputs.release_tag }}"
-
-          if [[ "$TAG" == symbols-v* ]]; then
-            echo "type=symbols" >> $GITHUB_OUTPUT
-            echo "Package type: Symbols (independent versioning)"
-          else
-            echo "type=sdk" >> $GITHUB_OUTPUT
-            echo "Package type: SDK"
-          fi
+          echo "type=sdk" >> $GITHUB_OUTPUT
+          echo "Package type: SDK"
 
       - name: Extract versions
         id: extract
@@ -47,28 +41,16 @@ jobs:
           PACKAGE_TYPE="${{ steps.package-type.outputs.type }}"
 
           # Extract version from git tag
-          if [[ "$TAG" == symbols-v* ]]; then
-            TAG_VERSION="${TAG#symbols-v}"
-          else
-            TAG_VERSION="${TAG#v}"
-          fi
+          TAG_VERSION="${TAG#v}"
 
           echo "tag_version=$TAG_VERSION" >> $GITHUB_OUTPUT
           echo "Git tag version: $TAG_VERSION"
 
-          # Extract version from appropriate source
-          if [ "$PACKAGE_TYPE" == "symbols" ]; then
-            # Symbols package has hardcoded version in .csproj
-            FILE_VERSION=$(grep -oPm1 "(?<=<Version>)[^<]+" Datadog.MAUI.Symbols/Datadog.MAUI.Symbols.csproj)
-            echo "file_version=$FILE_VERSION" >> $GITHUB_OUTPUT
-            echo "Symbols .csproj version: $FILE_VERSION"
-          else
-            # SDK uses Directory.Build.props
-            FILE_VERSION=$(grep -oPm1 "(?<=<DatadogSdkVersion>)[^<]+" Directory.Build.props)
-            echo "file_version=$FILE_VERSION" >> $GITHUB_OUTPUT
-            echo "Directory.Build.props version: $FILE_VERSION"
-          fi
-
+          
+          # SDK uses Directory.Build.props
+          FILE_VERSION=$(grep -oPm1 "(?<=<DatadogSdkVersion>)[^<]+" Directory.Build.props)
+          echo "file_version=$FILE_VERSION" >> $GITHUB_OUTPUT
+          echo "Directory.Build.props version: $FILE_VERSION"
           echo "version=$TAG_VERSION" >> $GITHUB_OUTPUT
 
       - name: Validate version matches
@@ -85,12 +67,7 @@ jobs:
           echo "| Package Type | $PACKAGE_TYPE |" >> $GITHUB_STEP_SUMMARY
           echo "| Git Tag | ${{ inputs.release_tag }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Tag Version | $TAG_VERSION |" >> $GITHUB_STEP_SUMMARY
-
-          if [ "$PACKAGE_TYPE" == "symbols" ]; then
-            echo "| Symbols .csproj Version | $FILE_VERSION |" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "| Directory.Build.props Version | $FILE_VERSION |" >> $GITHUB_STEP_SUMMARY
-          fi
+          echo "| Directory.Build.props Version | $FILE_VERSION |" >> $GITHUB_STEP_SUMMARY
 
           echo "" >> $GITHUB_STEP_SUMMARY
 
@@ -103,16 +80,9 @@ jobs:
             echo "The version in the git tag does not match the version in the project files." >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "**Git tag version:** \`$TAG_VERSION\`" >> $GITHUB_STEP_SUMMARY
-
-            if [ "$PACKAGE_TYPE" == "symbols" ]; then
-              echo "**Symbols .csproj version:** \`$FILE_VERSION\`" >> $GITHUB_STEP_SUMMARY
-              echo "" >> $GITHUB_STEP_SUMMARY
-              echo "**Required action:** Update \`<Version>\` in \`Datadog.MAUI.Symbols/Datadog.MAUI.Symbols.csproj\` to \`$TAG_VERSION\` or update the git tag to \`symbols-v$FILE_VERSION\`" >> $GITHUB_STEP_SUMMARY
-            else
-              echo "**Directory.Build.props version:** \`$FILE_VERSION\`" >> $GITHUB_STEP_SUMMARY
-              echo "" >> $GITHUB_STEP_SUMMARY
-              echo "**Required action:** Update \`<DatadogSdkVersion>\` in \`Directory.Build.props\` to \`$TAG_VERSION\` or update the git tag to \`v$FILE_VERSION\`" >> $GITHUB_STEP_SUMMARY
-            fi
+            echo "**Directory.Build.props version:** \`$FILE_VERSION\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Required action:** Update \`<DatadogSdkVersion>\` in \`Directory.Build.props\` to \`$TAG_VERSION\` or update the git tag to \`v$FILE_VERSION\`" >> $GITHUB_STEP_SUMMARY
 
             exit 1
           fi
@@ -128,15 +98,11 @@ jobs:
           echo "## Hardcoded Version Check" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          # Find any .csproj files with hardcoded versions (excluding Symbols package)
+          # Find any .csproj files with hardcoded versions
           HARDCODED_FOUND=false
 
-          # Check for <Version>x.y.z</Version> patterns (excluding Symbols)
+          # Check for <Version>x.y.z</Version> patterns
           while IFS= read -r file; do
-            # Skip Symbols package (it's intentionally hardcoded)
-            if [[ "$file" == *"Datadog.MAUI.Symbols"* ]]; then
-              continue
-            fi
 
             # Look for hardcoded <Version> tags
             if grep -q '<Version>[0-9]' "$file"; then
@@ -154,7 +120,7 @@ jobs:
           done < <(find . -name "*.csproj" ! -path "./obj/*" ! -path "./bin/*" ! -path "./_reference/*")
 
           if [ "$HARDCODED_FOUND" = false ]; then
-            echo "✅ No hardcoded versions found (excluding Symbols package)" >> $GITHUB_STEP_SUMMARY
+            echo "✅ No hardcoded versions found" >> $GITHUB_STEP_SUMMARY
           else
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "**Note:** Hardcoded versions should reference \`\$(DatadogSdkVersion)\` from Directory.Build.props for consistency." >> $GITHUB_STEP_SUMMARY
@@ -169,11 +135,7 @@ jobs:
           echo "## NuGet Version Check" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          if [ "$PACKAGE_TYPE" == "symbols" ]; then
-            PACKAGE_ID="Datadog.MAUI.Symbols"
-          else
-            PACKAGE_ID="Datadog.MAUI.Plugin"
-          fi
+          PACKAGE_ID="Datadog.MAUI.Plugin"          
 
           # Check if version exists on NuGet.org
           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://api.nuget.org/v3-flatcontainer/$PACKAGE_ID/$VERSION/$PACKAGE_ID.$VERSION.nupkg")
