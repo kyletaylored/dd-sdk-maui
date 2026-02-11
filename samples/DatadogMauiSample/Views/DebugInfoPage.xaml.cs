@@ -25,58 +25,115 @@ public partial class DebugInfoPage : ContentPage
 
     private void LoadDebugInfo()
     {
-        // Check if Datadog SDK is initialized using the SDK's initialization flag
-        // This works cross-platform (Android, iOS, etc.)
-        if (Datadog.Maui.Datadog.IsInitialized)
+        try
         {
-            SdkStatusLabel.Text = "✅ SDK Initialized";
-            SdkStatusLabel.TextColor = Colors.Green;
-        }
-        else
-        {
-            SdkStatusLabel.Text = "❌ NOT INITIALIZED\nDatadog.Initialize() was not called";
-            SdkStatusLabel.TextColor = Colors.Red;
-        }
+            System.Diagnostics.Debug.WriteLine("[DebugInfoPage] LoadDebugInfo started");
 
-        // Load app version information
-        LoadVersionInfo();
+            // Check if Datadog SDK is initialized using the SDK's initialization flag
+            // This works cross-platform (Android, iOS, etc.)
+            if (Datadog.Maui.Datadog.IsInitialized)
+            {
+                SdkStatusLabel.Text = "✅ SDK Initialized";
+                SdkStatusLabel.TextColor = Colors.Green;
+            }
+            else
+            {
+                SdkStatusLabel.Text = "❌ NOT INITIALIZED\nDatadog.Initialize() was not called";
+                SdkStatusLabel.TextColor = Colors.Red;
+            }
 
-        // Platform
+            // Load app version information
+            LoadVersionInfo();
+
+            // Platform
 #if ANDROID
-        PlatformLabel.Text = "Android";
-        ApplicationIdLabel.Text = MaskSensitiveData(_configuration["Datadog:Android:RumApplicationId"] ?? "");
-        ClientTokenLabel.Text = MaskToken(_configuration["Datadog:Android:ClientToken"] ?? "");
+            PlatformLabel.Text = "Android";
+            var appId = _configuration["Datadog:Android:RumApplicationId"] ?? "";
+            var token = _configuration["Datadog:Android:ClientToken"] ?? "";
+            System.Diagnostics.Debug.WriteLine($"[DebugInfoPage] Android AppId: {appId}, Token: {token}");
+            ApplicationIdLabel.Text = MaskSensitiveData(appId);
+            ClientTokenLabel.Text = MaskToken(token);
 #elif IOS
-        PlatformLabel.Text = "iOS";
-        ApplicationIdLabel.Text = MaskSensitiveData(_configuration["Datadog:iOS:RumApplicationId"] ?? "");
-        ClientTokenLabel.Text = MaskToken(_configuration["Datadog:iOS:ClientToken"] ?? "");
+            PlatformLabel.Text = "iOS";
+            var appId = _configuration["Datadog:iOS:RumApplicationId"] ?? "";
+            var token = _configuration["Datadog:iOS:ClientToken"] ?? "";
+            System.Diagnostics.Debug.WriteLine($"[DebugInfoPage] iOS AppId: {appId}, Token: {token}");
+            ApplicationIdLabel.Text = MaskSensitiveData(appId);
+            ClientTokenLabel.Text = MaskToken(token);
 #else
-        PlatformLabel.Text = "Unknown";
-        ApplicationIdLabel.Text = "N/A";
-        ClientTokenLabel.Text = "N/A";
+            PlatformLabel.Text = "Unknown";
+            ApplicationIdLabel.Text = "N/A";
+            ClientTokenLabel.Text = "N/A";
 #endif
 
-        // General configuration
-        EnvironmentLabel.Text = _configuration["Datadog:Environment"] ?? "N/A";
-        ServiceNameLabel.Text = _configuration["Datadog:ServiceName"] ?? "N/A";
+            // General configuration
+            var env = _configuration["Datadog:Environment"] ?? "N/A";
+            var service = _configuration["Datadog:ServiceName"] ?? "N/A";
+            System.Diagnostics.Debug.WriteLine($"[DebugInfoPage] Environment: {env}, Service: {service}");
+            EnvironmentLabel.Text = env;
+            ServiceNameLabel.Text = service;
 
-        var sessionSampleRate = _configuration["Datadog:Rum:SessionSampleRate"] ?? "100";
-        SessionSampleRateLabel.Text = $"{sessionSampleRate}%";
+            var sessionSampleRate = _configuration["Datadog:Rum:SessionSampleRate"] ?? "100";
+            SessionSampleRateLabel.Text = $"{sessionSampleRate}%";
 
-        var sessionReplaySampleRate = _configuration["Datadog:SessionReplay:SampleRate"] ?? "20";
-        SessionReplaySampleRateLabel.Text = $"{sessionReplaySampleRate}%";
+            var sessionReplaySampleRate = _configuration["Datadog:SessionReplay:SampleRate"] ?? "20";
+            SessionReplaySampleRateLabel.Text = $"{sessionReplaySampleRate}%";
 
-        VerboseLoggingLabel.Text = "N/A"; // VerboseLogging not in appsettings.json
+            VerboseLoggingLabel.Text = "N/A"; // VerboseLogging not in appsettings.json
 
-        // First party hosts
-        var firstPartyHosts = _configuration.GetSection("Datadog:FirstPartyHosts").Get<string[]>();
-        if (firstPartyHosts != null && firstPartyHosts.Length > 0)
-        {
-            FirstPartyHostsLabel.Text = string.Join(", ", firstPartyHosts);
+            // First party hosts
+            var firstPartyHosts = _configuration.GetSection("Datadog:FirstPartyHosts").Get<string[]>();
+            if (firstPartyHosts != null && firstPartyHosts.Length > 0)
+            {
+                FirstPartyHostsLabel.Text = string.Join(", ", firstPartyHosts);
+            }
+            else
+            {
+                FirstPartyHostsLabel.Text = "None configured";
+            }
+
+            // Get current session ID (fire and forget - loads asynchronously)
+            _ = LoadSessionIdAsync();
+
+            System.Diagnostics.Debug.WriteLine("[DebugInfoPage] LoadDebugInfo completed successfully");
         }
-        else
+        catch (Exception ex)
         {
-            FirstPartyHostsLabel.Text = "None configured";
+            System.Diagnostics.Debug.WriteLine($"[DebugInfoPage] ERROR loading debug info: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[DebugInfoPage] Stack trace: {ex.StackTrace}");
+
+            // Show error in UI
+            ApplicationIdLabel.Text = $"Error: {ex.Message}";
+            ApplicationIdLabel.TextColor = Colors.Red;
+            ClientTokenLabel.Text = "See logs for details";
+            ClientTokenLabel.TextColor = Colors.Red;
+        }
+    }
+
+    private async Task LoadSessionIdAsync()
+    {
+        try
+        {
+            SessionIdLabel.Text = "Loading...";
+            var sessionId = await Datadog.Maui.Rum.Rum.GetCurrentSessionIdAsync();
+
+            if (!string.IsNullOrEmpty(sessionId))
+            {
+                SessionIdLabel.Text = sessionId;
+                SessionIdLabel.TextColor = Colors.Green;
+                System.Diagnostics.Debug.WriteLine($"[DebugInfoPage] Current Session ID: {sessionId}");
+            }
+            else
+            {
+                SessionIdLabel.Text = "No active session";
+                SessionIdLabel.TextColor = Colors.Orange;
+            }
+        }
+        catch (Exception ex)
+        {
+            SessionIdLabel.Text = $"Error: {ex.Message}";
+            SessionIdLabel.TextColor = Colors.Red;
+            System.Diagnostics.Debug.WriteLine($"[DebugInfoPage] Error getting session ID: {ex.Message}");
         }
     }
 

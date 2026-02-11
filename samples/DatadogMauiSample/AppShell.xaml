@@ -17,7 +17,7 @@
         <FontImageSource
             Glyph="&#x2630;"
             FontFamily="Arial"
-            Color="White"
+            Color="#512BD4"
             Size="24"/>
     </Shell.FlyoutIcon>
 
@@ -140,14 +140,14 @@
     <!-- Developer Tools (Flyout Only) -->
     <FlyoutItem Title="Developer">
         <ShellContent
-            Title="Datadog Features"
+            Title="Features"
             Icon="star.png"
             ContentTemplate="{DataTemplate views:DatadogFeaturesPage}"
             Route="DatadogFeaturesPage"
             AutomationId="flyout_features" />
 
         <ShellContent
-            Title="Datadog Config"
+            Title="Config"
             Icon="settings.png"
             ContentTemplate="{DataTemplate views:DebugInfoPage}"
             Route="DebugInfoPage"

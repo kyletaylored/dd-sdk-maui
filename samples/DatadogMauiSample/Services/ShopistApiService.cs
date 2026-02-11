@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -48,6 +49,21 @@ public class ShopistApiService
         _httpClient.DefaultRequestHeaders.Add("User-Agent", "DatadogMauiSample/1.0");
     }
 
+    /// <summary>
+    /// Logs a message with automatic file path and line number tracking
+    /// </summary>
+    private void LogWithLocation(
+        string message,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
+    {
+        var fileName = System.IO.Path.GetFileName(filePath);
+        var location = $"{fileName}:{lineNumber} ({memberName})";
+        System.Diagnostics.Debug.WriteLine($"[API] {location} - {message}");
+        Console.WriteLine($"[API] {location} - {message}");
+    }
+
     // ============================================================================
     // Authentication
     // ============================================================================
@@ -83,13 +99,21 @@ public class ShopistApiService
     /// </summary>
     public async Task<(bool success, string? token, string? error)> LoginAsync(string username, string password)
     {
+        LogWithLocation($"LoginAsync STARTED for user: {username}");
+
         // Start a trace span for login operation
+        LogWithLocation("About to call Tracer.StartSpan");
         using var span = Tracer.StartSpan("api.login");
+
+        LogWithLocation("About to call span.SetTag");
         span.SetTag("username", username);
 
         // Track as RUM resource
+        LogWithLocation("About to call Rum.StartResource");
         var resourceKey = $"login_{Guid.NewGuid()}";
         Rum.StartResource(resourceKey, "POST", $"{BaseUrl}/auth/login");
+
+        LogWithLocation("Entering try block");
 
         try
         {
@@ -150,7 +174,30 @@ public class ShopistApiService
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[API] ✗ Login error: {ex.Message}");
+            LogWithLocation($"✗ EXCEPTION CAUGHT: {ex.Message}");
+
+            // Log full stack trace for debugging with file:line information
+            System.Diagnostics.Debug.WriteLine("========================================");
+            System.Diagnostics.Debug.WriteLine($"[API] Exception Type: {ex.GetType().FullName}");
+            System.Diagnostics.Debug.WriteLine($"[API] Exception Message: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[API] Stack Trace:");
+            System.Diagnostics.Debug.WriteLine(ex.StackTrace);
+            System.Diagnostics.Debug.WriteLine("========================================");
+
+            if (ex.InnerException != null)
+            {
+                System.Diagnostics.Debug.WriteLine("========== INNER EXCEPTION ==========");
+                System.Diagnostics.Debug.WriteLine($"[API] Inner Exception: {ex.InnerException.GetType().FullName}");
+                System.Diagnostics.Debug.WriteLine($"[API] Inner Message: {ex.InnerException.Message}");
+                System.Diagnostics.Debug.WriteLine($"[API] Inner Stack Trace:");
+                System.Diagnostics.Debug.WriteLine(ex.InnerException.StackTrace);
+                System.Diagnostics.Debug.WriteLine("========================================");
+            }
+
+            // Also log to Console for visibility
+            Console.WriteLine($"[API] ✗ Login error: {ex.Message}");
+            Console.WriteLine($"[API] Exception Type: {ex.GetType().FullName}");
+            Console.WriteLine($"[API] Stack Trace:\n{ex.StackTrace}");
 
             _logger.Error("Login error", ex, new Dictionary<string, object>
             {

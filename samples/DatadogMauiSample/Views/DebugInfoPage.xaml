@@ -65,6 +65,18 @@
                 </VerticalStackLayout>
             </Frame>
 
+            <!-- Current Session ID -->
+            <Frame BorderColor="LightGray" Padding="15" CornerRadius="8" BackgroundColor="#FFF8DC">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="Current Session ID" FontAttributes="Bold" FontSize="16"/>
+                    <Label x:Name="SessionIdLabel"
+                           TextColor="Gray"
+                           LineBreakMode="CharacterWrap"
+                           FontFamily="Courier"
+                           MaxLines="2"/>
+                </VerticalStackLayout>
+            </Frame>
+
             <!-- Session Sample Rate -->
             <Frame BorderColor="LightGray" Padding="15" CornerRadius="8">
                 <VerticalStackLayout Spacing="5">

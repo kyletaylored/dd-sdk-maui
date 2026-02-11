@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using DatadogMauiSample.Models;
 using DatadogMauiSample.Services;
 using Datadog.Maui.Rum;
@@ -16,10 +17,17 @@ public partial class ProfilePage : ContentPage
     private List<FakeStoreUser> _availableUsers = new();
     private const string ViewKey = "profile_page";
 
-    private static void Log(string message)
+    private static void Log(
+        string message,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0)
     {
-        System.Diagnostics.Debug.WriteLine(message);
-        Console.WriteLine(message);
+        var fileName = System.IO.Path.GetFileName(filePath);
+        var location = $"{fileName}:{lineNumber} ({memberName})";
+        var fullMessage = $"[ProfilePage] {location} - {message}";
+        System.Diagnostics.Debug.WriteLine(fullMessage);
+        Console.WriteLine(fullMessage);
     }
 
     /// <summary>
@@ -147,9 +155,12 @@ public partial class ProfilePage : ContentPage
     {
         try
         {
-            Log($"[ProfilePage] Attempting login with username: {username}");
+            Log($"Attempting login with username: {username}");
+            Log("About to call _apiService.LoginAsync");
 
             var (success, token, error) = await _apiService.LoginAsync(username, password);
+
+            Log("LoginAsync completed successfully");
 
             if (success && !string.IsNullOrEmpty(token))
             {
@@ -192,7 +203,31 @@ public partial class ProfilePage : ContentPage
         }
         catch (Exception ex)
         {
-            Log($"[ProfilePage] Login exception: {ex.Message}");
+            Log($"✗ EXCEPTION CAUGHT: {ex.Message}");
+
+            // Log full stack trace for debugging with file:line information
+            System.Diagnostics.Debug.WriteLine("========================================");
+            System.Diagnostics.Debug.WriteLine($"[ProfilePage] Exception Type: {ex.GetType().FullName}");
+            System.Diagnostics.Debug.WriteLine($"[ProfilePage] Exception Message: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[ProfilePage] Stack Trace:");
+            System.Diagnostics.Debug.WriteLine(ex.StackTrace);
+            System.Diagnostics.Debug.WriteLine("========================================");
+
+            if (ex.InnerException != null)
+            {
+                System.Diagnostics.Debug.WriteLine("========== INNER EXCEPTION ==========");
+                System.Diagnostics.Debug.WriteLine($"[ProfilePage] Inner Exception: {ex.InnerException.GetType().FullName}");
+                System.Diagnostics.Debug.WriteLine($"[ProfilePage] Inner Message: {ex.InnerException.Message}");
+                System.Diagnostics.Debug.WriteLine($"[ProfilePage] Inner Stack Trace:");
+                System.Diagnostics.Debug.WriteLine(ex.InnerException.StackTrace);
+                System.Diagnostics.Debug.WriteLine("========================================");
+            }
+
+            // Also log to Console for visibility
+            Console.WriteLine($"[ProfilePage] ✗ Login error: {ex.Message}");
+            Console.WriteLine($"[ProfilePage] Exception Type: {ex.GetType().FullName}");
+            Console.WriteLine($"[ProfilePage] Stack Trace:\n{ex.StackTrace}");
+
             await DisplayAlert("Error", $"Login error: {ex.Message}", "OK");
         }
 

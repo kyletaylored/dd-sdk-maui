@@ -52,30 +52,18 @@
 		<RunAOTCompilation>false</RunAOTCompilation>
 	</PropertyGroup>
 
+	<!-- iOS Debug Configuration (enable debug symbols and line numbers) -->
+	<PropertyGroup Condition="$(TargetFramework.Contains('ios')) And '$(Configuration)' == 'Debug'">
+		<MtouchDebug>true</MtouchDebug>
+		<MtouchDebugSymbols>true</MtouchDebugSymbols>
+		<DebugSymbols>true</DebugSymbols>
+		<DebugType>full</DebugType>
+	</PropertyGroup>
+
 	<!-- iOS dSYM Configuration (generates debug symbol files) -->
 	<PropertyGroup Condition="$(TargetFramework.Contains('ios')) And '$(Configuration)' == 'Release'">
 		<MtouchDebugSymbols>true</MtouchDebugSymbols>
 		<GenerateDsymBundle>true</GenerateDsymBundle>
-	</PropertyGroup>
-
-	<!-- Datadog Symbol Upload Configuration (namespaced) -->
-	<PropertyGroup>
-		<!-- Read flavor from environment variable if set, otherwise default to configuration name -->
-		<DatadogSymbolsFlavor Condition="'$(DD_BUILD_FLAVOR)' != ''">$(DD_BUILD_FLAVOR)</DatadogSymbolsFlavor>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="$(TargetFramework.Contains('android'))">
-		<DatadogSymbolsServiceNameAndroid>datadog-maui-android</DatadogSymbolsServiceNameAndroid>
-		<DatadogSymbolsSite>datadoghq.com</DatadogSymbolsSite>
-
-		<!-- Keep sample in dry-run by default to avoid accidental uploads; flip for real runs -->
-		<DatadogSymbolsDryRun>true</DatadogSymbolsDryRun>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="$(TargetFramework.Contains('ios'))">
-		<DatadogSymbolsServiceNameiOS>datadog-maui-ios</DatadogSymbolsServiceNameiOS>
-		<DatadogSymbolsSite>datadoghq.com</DatadogSymbolsSite>
-		<DatadogSymbolsDryRun>true</DatadogSymbolsDryRun>
 	</PropertyGroup>
 
 	<!-- iOS Code Signing Configuration (untouched) -->
@@ -105,7 +93,16 @@
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
 
+	<!-- Define compilation symbol when Symbols package is installed -->
+	<PropertyGroup>
+		<DefineConstants>$(DefineConstants);HAS_DATADOG_SYMBOLS</DefineConstants>
+	</PropertyGroup>
+
 	<ItemGroup>
+		<PackageReference Include="kyletaylored.Datadog.MAUI.Symbols" Version="0.1.0">
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		  <PrivateAssets>all</PrivateAssets>
+		</PackageReference>
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.9" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
@@ -130,17 +127,10 @@
 		<ProjectReference Include="..\..\Datadog.MAUI.Plugin\Datadog.MAUI.Plugin.csproj" />
 	</ItemGroup>
 
-	<!-- Load the Symbols MSBuild task from local build output (always from Release) -->
-	<UsingTask TaskName="Datadog.MAUI.Symbols.UploadSymbolsTask" AssemblyFile="$(MSBuildProjectDirectory)\..\..\Datadog.MAUI.Symbols\bin\Release\netstandard2.0\Datadog.MAUI.Symbols.dll" />
-
-	<!-- Import the Symbols upload target -->
-	<Import Project="..\..\Datadog.MAUI.Symbols\build\Datadog.MAUI.Symbols.targets" />
-
 	<!-- For CI builds, use PackageReference instead (commented out for local dev) -->
 	<!--
 	<ItemGroup Condition="'$(Configuration)' == 'Release'">
 		<PackageReference Include="Datadog.MAUI" Version="$(DatadogSdkVersion)" />
-		<PackageReference Include="Datadog.MAUI.Symbols" Version="$(DatadogSymbolsVersion)" />
 	</ItemGroup>
 	-->
 
