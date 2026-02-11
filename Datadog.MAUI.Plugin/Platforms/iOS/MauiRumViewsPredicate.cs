@@ -8,12 +8,12 @@ namespace Datadog.Maui.Platforms.iOS;
 /// Custom RUM views predicate that filters out MAUI's internal view controllers
 /// and only tracks meaningful user-facing views.
 /// </summary>
-public class MauiRumViewsPredicate : DDDefaultUIKitRUMViewsPredicate
+public class MauiRumViewsPredicate : DDUIKitRUMViewsPredicate
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="MauiRumViewsPredicate"/> class.
     /// </summary>
-    public MauiRumViewsPredicate() : base()
+    public MauiRumViewsPredicate()
     {
     }
 

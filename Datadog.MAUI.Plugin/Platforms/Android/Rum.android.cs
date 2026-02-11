@@ -152,6 +152,48 @@ public static partial class Rum
         rumMonitor.StopSession();
     }
 
+    private static partial Task<string?> PlatformGetCurrentSessionIdAsync()
+    {
+        var tcs = new TaskCompletionSource<string?>();
+
+        try
+        {
+            var rumMonitor = GlobalRumMonitor.Get();
+
+            // Create a Kotlin Function1 callback to receive the session ID
+            var callback = new KotlinSessionIdCallback(sessionId =>
+            {
+                tcs.TrySetResult(sessionId);
+            });
+
+            rumMonitor.GetCurrentSessionId(callback);
+        }
+        catch (Exception ex)
+        {
+            tcs.TrySetException(ex);
+        }
+
+        return tcs.Task;
+    }
+
+    // Kotlin Function1 callback implementation for session ID
+    private class KotlinSessionIdCallback : Java.Lang.Object, global::Kotlin.Jvm.Functions.IFunction1
+    {
+        private readonly Action<string?> _callback;
+
+        public KotlinSessionIdCallback(Action<string?> callback)
+        {
+            _callback = callback;
+        }
+
+        public Java.Lang.Object? Invoke(Java.Lang.Object? p0)
+        {
+            var sessionId = p0?.ToString();
+            _callback(sessionId);
+            return null;
+        }
+    }
+
     private static global::Datadog.Android.RUM.RumActionType MapActionType(global::Datadog.Maui.Rum.RumActionType type)
     {
         return type switch

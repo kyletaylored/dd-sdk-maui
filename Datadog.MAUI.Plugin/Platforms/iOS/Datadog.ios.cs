@@ -3,6 +3,7 @@ using Datadog.iOS.Core;
 using Datadog.iOS.RUM;
 using Datadog.iOS.Logs;
 using Datadog.iOS.Trace;
+using Datadog.iOS.Internal;
 using Foundation;
 
 namespace Datadog.Maui;
@@ -38,7 +39,7 @@ public static partial class Datadog
         // Enable RUM if configured
         if (configuration.Rum != null)
         {
-            InitializeRum(configuration.Rum);
+            InitializeRum(configuration.Rum, configuration.FirstPartyHosts);
         }
 
         // Enable Logs if configured
@@ -60,13 +61,14 @@ public static partial class Datadog
         }
     }
 
-    private static void InitializeRum(RumConfiguration rumConfig)
+    private static void InitializeRum(RumConfiguration rumConfig, string[] firstPartyHosts)
     {
         var rumConfiguration = new DDRUMConfiguration(applicationID: rumConfig.ApplicationId);
 
         rumConfiguration.SessionSampleRate = rumConfig.SessionSampleRate;
-        rumConfiguration.TrackFrustrations = rumConfig.TrackUserInteractions;
-        rumConfiguration.TrackBackgroundEvents = true;
+        rumConfiguration.TelemetrySampleRate = rumConfig.TelemetrySampleRate;
+        rumConfiguration.TrackFrustrations = rumConfig.TrackFrustrations;
+        rumConfiguration.TrackBackgroundEvents = rumConfig.TrackBackgroundEvents;
         rumConfiguration.VitalsUpdateFrequency = MapVitalsFrequency(rumConfig.VitalsUpdateFrequency);
 
         // Enable automatic UIKit view tracking with MAUI-aware filtering
@@ -75,15 +77,25 @@ public static partial class Datadog
             rumConfiguration.UiKitViewsPredicate = new Platforms.iOS.MauiRumViewsPredicate();
         }
 
-        // Enable automatic UIKit action tracking (taps, swipes, etc.)
-        if (rumConfig.TrackUserInteractions)
-        {
-            rumConfiguration.UiKitActionsPredicate = new DDDefaultUIKitRUMActionsPredicate();
-        }
+        // Note: Automatic UIKit action tracking (taps, swipes, etc.) is handled by TrackFrustrations.
+        // The iOS SDK automatically uses DefaultUIKitRUMActionsPredicate when TrackFrustrations is enabled.
+        // We don't explicitly set UiKitActionsPredicate here to avoid binding type conversion issues.
 
-        // Enable automatic URLSession tracking for HTTP resources (out-of-the-box from native SDK)
-        var urlSessionTracking = new DDRUMURLSessionTracking();
-        rumConfiguration.SetURLSessionTracking(urlSessionTracking);
+        // Enable automatic URLSession tracking for HTTP resources with first-party hosts
+        if (firstPartyHosts.Length > 0)
+        {
+            var urlSessionTracking = new DDRUMURLSessionTracking();
+
+            // Configure first-party hosts for distributed tracing
+            var hostsSet = new NSSet<NSString>(firstPartyHosts.Select(h => new NSString(h)).ToArray());
+            var firstPartyHostsTracing = new DDRUMFirstPartyHostsTracing(
+                hostsSet,
+                sampleRate: rumConfig.FirstPartyHostsTracingSampleRate
+            );
+            urlSessionTracking.SetFirstPartyHostsTracing(firstPartyHostsTracing);
+
+            rumConfiguration.SetURLSessionTracking(urlSessionTracking);
+        }
 
         DDRUM.EnableWith(rumConfiguration);
 
@@ -91,11 +103,11 @@ public static partial class Datadog
         var rumMonitor = DDRUMMonitor.Shared;
         if (!string.IsNullOrEmpty(rumConfig.Variant))
         {
-            rumMonitor.AddAttribute("variant", new NSString(rumConfig.Variant));
+            rumMonitor.AddAttributeForKey("variant", new NSString(rumConfig.Variant));
         }
         if (!string.IsNullOrEmpty(rumConfig.BuildId))
         {
-            rumMonitor.AddAttribute("build_id", new NSString(rumConfig.BuildId));
+            rumMonitor.AddAttributeForKey("build_id", new NSString(rumConfig.BuildId));
         }
     }
 

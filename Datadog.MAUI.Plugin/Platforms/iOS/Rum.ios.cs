@@ -9,14 +9,14 @@ public static partial class Rum
     {
         var monitor = DDRUMMonitor.Shared;
         var nsAttributes = ConvertAttributes(attributes);
-        monitor.StartView(key, name, nsAttributes);
+        monitor.StartViewWithKey(key, name, nsAttributes);
     }
 
     static partial void PlatformStopView(string key, Dictionary<string, object>? attributes)
     {
         var monitor = DDRUMMonitor.Shared;
         var nsAttributes = ConvertAttributes(attributes);
-        monitor.StopView(key, nsAttributes);
+        monitor.StopViewWithKey(key, nsAttributes);
     }
 
     static partial void PlatformAddAction(RumActionType type, string name, Dictionary<string, object>? attributes)
@@ -24,7 +24,7 @@ public static partial class Rum
         var monitor = DDRUMMonitor.Shared;
         var actionType = MapActionType(type);
         var nsAttributes = ConvertAttributes(attributes);
-        monitor.AddAction(actionType, name, nsAttributes);
+        monitor.AddActionWithType(actionType, name, nsAttributes);
     }
 
     // Note: Resource tracking is intentionally NOT implemented here.
@@ -78,42 +78,56 @@ public static partial class Rum
                 userInfo
             );
 
-            monitor.AddError(nsError, errorSource, nsAttributes);
+            monitor.AddErrorWithError(nsError, errorSource, nsAttributes);
         }
         else
         {
-            monitor.AddError(message, errorSource, null, nsAttributes);
+            monitor.AddErrorWithMessage(message, null, errorSource, nsAttributes);
         }
     }
 
     static partial void PlatformAddTiming(string name)
     {
         var monitor = DDRUMMonitor.Shared;
-        monitor.AddTiming(name);
+        monitor.AddTimingWithName(name);
     }
 
     static partial void PlatformAddAttribute(string key, object value)
     {
         var monitor = DDRUMMonitor.Shared;
-        monitor.AddAttribute(key, NSObject.FromObject(value));
+        monitor.AddAttributeForKey(key, NSObject.FromObject(value));
     }
 
     static partial void PlatformRemoveAttribute(string key)
     {
         var monitor = DDRUMMonitor.Shared;
-        monitor.RemoveAttribute(key);
+        monitor.RemoveAttributeForKey(key);
     }
 
     static partial void PlatformStartSession()
     {
-        var monitor = DDRUMMonitor.Shared;
-        monitor.StartSession();
+        // Note: iOS SDK doesn't have a StartSession method.
+        // Sessions are started automatically when the app comes to foreground
+        // or when the first view/action/resource is tracked.
     }
 
     static partial void PlatformStopSession()
     {
         var monitor = DDRUMMonitor.Shared;
         monitor.StopSession();
+    }
+
+    private static partial Task<string?> PlatformGetCurrentSessionIdAsync()
+    {
+        var tcs = new TaskCompletionSource<string?>();
+        var monitor = DDRUMMonitor.Shared;
+
+        monitor.CurrentSessionIDWithCompletion((sessionId) =>
+        {
+            tcs.SetResult(sessionId?.ToString());
+        });
+
+        return tcs.Task;
     }
 
     private static DDRUMActionType MapActionType(Maui.Rum.RumActionType type)

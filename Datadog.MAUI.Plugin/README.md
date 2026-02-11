@@ -372,34 +372,50 @@ public class CheckoutService
 }
 ```
 
-## Dependency Injection
+## Usage in Services
 
-Use the interfaces for dependency injection and testing:
+The Datadog SDK uses static APIs that can be accessed from anywhere in your application:
 
 ```csharp
-// Register in MauiProgram.cs
-builder.Services.AddSingleton<IDatadogSdk>(DatadogSdk.Instance);
-builder.Services.AddSingleton<IDatadogLogger>(DatadogSdk.Logger);
-builder.Services.AddSingleton<IDatadogRum>(DatadogSdk.Rum);
-builder.Services.AddSingleton<IDatadogTrace>(DatadogSdk.Trace);
+using Datadog.Maui.Logging;
+using Datadog.Maui.Rum;
 
-// Use in services
 public class MyService
 {
     private readonly ILogger _logger;
-    private readonly IDatadogRum _rum;
 
     public MyService()
     {
+        // Create a logger for this service
         _logger = Logs.CreateLogger("my-service");
-        _rum = DatadogSdk.Rum;
     }
 
     public async Task DoWork()
     {
+        // Log messages
         _logger.Info("Starting work");
-        _rum.AddAction(RumActionType.Custom, "work_started");
-        // ...
+
+        // Track RUM actions
+        Rum.AddAction(RumActionType.Custom, "work_started", new Dictionary<string, object>
+        {
+            { "user_id", "12345" },
+            { "operation", "sync" }
+        });
+
+        // Add custom attributes to the current view
+        Rum.AddAttribute("service_version", "1.2.3");
+
+        try
+        {
+            // Your business logic
+            await PerformOperationAsync();
+        }
+        catch (Exception ex)
+        {
+            // Report errors to RUM
+            Rum.AddError("Operation failed", RumErrorSource.Source, ex);
+            _logger.Error("Work failed", ex);
+        }
     }
 }
 ```

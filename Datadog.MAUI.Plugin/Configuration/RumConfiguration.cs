@@ -31,6 +31,24 @@ public class RumConfiguration
     public bool TrackUserInteractions { get; init; } = true;
 
     /// <summary>
+    /// Automatically track user frustrations (rage clicks, error clicks, dead clicks).
+    /// Default: true (matches iOS SDK default).
+    /// </summary>
+    public bool TrackFrustrations { get; init; } = true;
+
+    /// <summary>
+    /// Track RUM events when no view is active (background events).
+    /// Default: false (matches iOS SDK default).
+    /// </summary>
+    public bool TrackBackgroundEvents { get; init; } = false;
+
+    /// <summary>
+    /// Sampling rate for distributed tracing on first-party hosts (0-100).
+    /// Default: 20 (matches iOS SDK default).
+    /// </summary>
+    public int FirstPartyHostsTracingSampleRate { get; init; } = 20;
+
+    /// <summary>
     /// Vitals update frequency.
     /// </summary>
     public VitalsUpdateFrequency VitalsUpdateFrequency { get; init; } = VitalsUpdateFrequency.Average;
@@ -58,6 +76,9 @@ public class RumConfiguration
         private int _telemetrySampleRate = 20;
         private bool _trackViewsAutomatically = true;
         private bool _trackUserInteractions = true;
+        private bool _trackFrustrations = true;
+        private bool _trackBackgroundEvents = false;
+        private int _firstPartyHostsTracingSampleRate = 20;
         private VitalsUpdateFrequency _vitalsUpdateFrequency = VitalsUpdateFrequency.Average;
 
         /// <summary>
@@ -142,6 +163,39 @@ public class RumConfiguration
         }
 
         /// <summary>
+        /// Enables or disables automatic frustration tracking (rage clicks, error clicks, dead clicks).
+        /// Default: true (matches iOS SDK default).
+        /// </summary>
+        public Builder TrackFrustrations(bool enable)
+        {
+            _trackFrustrations = enable;
+            return this;
+        }
+
+        /// <summary>
+        /// Enables or disables tracking of RUM events when no view is active.
+        /// Default: false (matches iOS SDK default).
+        /// </summary>
+        public Builder TrackBackgroundEvents(bool enable)
+        {
+            _trackBackgroundEvents = enable;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the sampling rate for distributed tracing on first-party hosts (0-100).
+        /// Default: 20 (matches iOS SDK default).
+        /// </summary>
+        public Builder SetFirstPartyHostsTracingSampleRate(int rate)
+        {
+            if (rate < 0 || rate > 100)
+                throw new ArgumentOutOfRangeException(nameof(rate), "Sample rate must be between 0 and 100");
+
+            _firstPartyHostsTracingSampleRate = rate;
+            return this;
+        }
+
+        /// <summary>
         /// Sets the vitals update frequency.
         /// </summary>
         public Builder SetVitalsUpdateFrequency(VitalsUpdateFrequency frequency)
@@ -165,6 +219,9 @@ public class RumConfiguration
                 TelemetrySampleRate = _telemetrySampleRate,
                 TrackViewsAutomatically = _trackViewsAutomatically,
                 TrackUserInteractions = _trackUserInteractions,
+                TrackFrustrations = _trackFrustrations,
+                TrackBackgroundEvents = _trackBackgroundEvents,
+                FirstPartyHostsTracingSampleRate = _firstPartyHostsTracingSampleRate,
                 VitalsUpdateFrequency = _vitalsUpdateFrequency,
                 Variant = Variant,
                 BuildId = BuildId

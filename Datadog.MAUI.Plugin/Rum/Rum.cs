@@ -137,6 +137,15 @@ public static partial class Rum
         PlatformStopSession();
     }
 
+    /// <summary>
+    /// Gets the current RUM session ID.
+    /// </summary>
+    /// <returns>The current session ID, or null if no session is active.</returns>
+    public static Task<string?> GetCurrentSessionIdAsync()
+    {
+        return PlatformGetCurrentSessionIdAsync();
+    }
+
     // Platform-specific partial methods
     static partial void PlatformStartView(string key, string name, Dictionary<string, object>? attributes);
     static partial void PlatformStopView(string key, Dictionary<string, object>? attributes);
@@ -150,4 +159,5 @@ public static partial class Rum
     static partial void PlatformRemoveAttribute(string key);
     static partial void PlatformStartSession();
     static partial void PlatformStopSession();
+    private static partial Task<string?> PlatformGetCurrentSessionIdAsync();
 }
