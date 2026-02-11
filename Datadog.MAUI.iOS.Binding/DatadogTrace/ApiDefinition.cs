@@ -48,17 +48,10 @@ namespace Datadog.iOS.Trace
 	}
 
 	// @protocol OTSpan
-	/*
-  Check whether adding [Model] to this declaration is appropriate.
-  [Model] is used to generate a C# class that implements this protocol,
-  and might be useful for protocols that consumers are supposed to implement,
-  since consumers can subclass the generated class instead of implementing
-  the generated interface. If consumers are not supposed to implement this
-  protocol, then [Model] is redundant and will generate code that will never
-  be used.
-*/
-[Protocol]
-[BaseType(typeof(NSObject))]
+	// [Model] is needed to generate a proper base class that wraps the protocol
+	// without incorrectly calling base methods (which causes You_Should_Not_Call_base_In_This_Method)
+	[Protocol, Model]
+	[BaseType(typeof(NSObject))]
 	interface OTSpan
 	{
 		// @required @property (readonly, nonatomic, strong) id<OTSpanContext> _Nonnull context;
