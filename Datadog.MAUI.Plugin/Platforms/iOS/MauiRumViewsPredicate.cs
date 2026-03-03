@@ -37,20 +37,33 @@ public class MauiRumViewsPredicate : DDUIKitRUMViewsPredicate
 
     private bool IsMauiInternalViewController(string typeName)
     {
+        // Filter very short/generic names first
+        if (typeName.Length <= 3 || typeName == "STWeb")
+        {
+            return true;
+        }
+
         // List of MAUI internal view controller patterns to ignore
         var internalPatterns = new[]
         {
-            "Microsoft.Maui.Controls.Platform.Compatibility.ShellSectionRenderer",
-            "Microsoft.Maui.Controls.Platform.Compatibility.ShellSectionRootRenderer",
-            "Microsoft.Maui.Controls.Platform.Compatibility.ShellItemRenderer",
+            // MAUI Shell internals
+            "Shell",
+
+            // MAUI platform internals
+            "Microsoft.Maui.Controls.Platform",
             "Microsoft.Maui.Platform.PageViewController",
             "Microsoft.Maui.Platform.ContentViewController",
-            "Microsoft.Maui.Controls.Handlers.Compatibility.NavigationRenderer",
-            "Microsoft.Maui.Controls.Handlers.Compatibility.TabbedRenderer",
-            "Microsoft.Maui.Controls.Platform.ShellPageRendererTracker",
-            "Microsoft.Maui.Controls.Platform.ModalWrapper",
+            "Microsoft.Maui.Controls.Handlers.Compatibility",
+
+            // UIKit system controllers
             "UIKit.UINavigationController",
             "UIKit.UITabBarController",
+            "UIKit.UIAlert",
+            "UIKit.UIInputWindow",
+            "UIKit.UIWindow",
+
+            // Generic/system controllers
+            "HostingController",
         };
 
         foreach (var pattern in internalPatterns)

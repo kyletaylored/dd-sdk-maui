@@ -77,9 +77,14 @@ public static partial class Datadog
             rumConfiguration.UiKitViewsPredicate = new Platforms.iOS.MauiRumViewsPredicate();
         }
 
-        // Note: Automatic UIKit action tracking (taps, swipes, etc.) is handled by TrackFrustrations.
-        // The iOS SDK automatically uses DefaultUIKitRUMActionsPredicate when TrackFrustrations is enabled.
-        // We don't explicitly set UiKitActionsPredicate here to avoid binding type conversion issues.
+        // Enable automatic UIKit action tracking (taps, swipes, etc.)
+        // Note: Due to a binding issue where DDDefaultUIKitRUMActionsPredicate doesn't properly
+        // inherit from DDUIKitRUMActionsPredicate, we use a custom MauiRumActionsPredicate class.
+        // This class inherits properly and provides the same default action tracking behavior.
+        if (rumConfig.TrackUserInteractions)
+        {
+            rumConfiguration.UiKitActionsPredicate = new Platforms.iOS.MauiRumActionsPredicate();
+        }
 
         // Enable automatic URLSession tracking for HTTP resources with first-party hosts
         if (firstPartyHosts.Length > 0)
