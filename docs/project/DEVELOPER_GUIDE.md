@@ -1,9 +1,9 @@
 ---
 layout: default
 title: Developer Guide
-parent: Getting Started
+parent: Project
 nav_order: 2
-permalink: /getting-started/developer-guide
+permalink: /project/developer-guide
 ---
 
 # Datadog MAUI SDK - Developer Guide
@@ -185,7 +185,7 @@ Builds the cross-platform MAUI plugin that wraps Android and iOS bindings.
 make pack
 ```
 
-This follows the proper dependency order documented in [docs/PACKAGING_ARCHITECTURE.md]():
+This follows the proper dependency order documented in [Packaging Architecture](../architecture/packaging):
 
 1. Builds all binding modules
 2. Packs individual Android modules (net9.0-android and net10.0-android)
@@ -253,7 +253,7 @@ This script:
 2. Extracts all dependencies
 3. Generates `<AndroidMavenLibrary>` entries for your `.csproj`
 
-See [docs/ANDROID_DEPENDENCIES.md]() for details.
+See [Android Dependencies](../guides/android/dependencies) for details.
 
 ### Setup Android Binding from Build Errors
 
@@ -269,7 +269,7 @@ This script:
 3. Suggests missing dependencies
 4. Generates dependency entries
 
-See [docs/SCRIPTS_OVERVIEW.md]() for details.
+See [Scripts Overview](../architecture/scripts) for details.
 
 ### Watch Android Bindings for Changes
 
@@ -318,7 +318,7 @@ Requirements:
 - Objective Sharpie installed
 - XCFrameworks in `Datadog.MAUI.iOS.Binding/artifacts/`
 
-See [docs/IOS_BINDING_STRATEGY.md]() for details.
+See [iOS Binding Strategy](../guides/ios/binding-strategy) for details.
 
 ### Watch iOS Bindings for Changes
 
@@ -371,7 +371,7 @@ make pack
 
 **Problem**: `dd-sdk-android-gradle-plugin` version doesn't match SDK version.
 
-**Note**: The gradle plugin has been archived (moved to `_archive/`) because it's incompatible with MAUI's MSBuild system. For mapping file uploads, see [docs/MAPPING_FILE_UPLOADS.md]().
+**Note**: The gradle plugin has been archived (moved to `_archive/`) because it's incompatible with MAUI's MSBuild system. For mapping file uploads, see [Mapping File Uploads](../guides/user/mapping-files).
 
 ### R8 Mapping Files Not Generated
 
@@ -387,43 +387,31 @@ make pack
 </PropertyGroup>
 ```
 
-See [docs/MAPPING_FILE_UPLOADS.md]() for complete guide.
+See [Mapping File Uploads](../guides/user/mapping-files) for complete guide.
 
 ## Architecture Documentation
 
-### Core Documentation
-
-- **[README.md](../README.html)** - Project overview and quick start
-- **[Documentation Index](../index.html)** - Documentation index
-- **[GETTING_STARTED.md]()** - User-facing setup guide
-- **[CONTRIBUTING.md]()** - Contribution guidelines
-
 ### Build & Packaging
 
-- **[PACKAGING_ARCHITECTURE.md]()** - NuGet packaging strategy
-- **[WORKFLOW_ARCHITECTURE.md]()** - GitHub Actions workflows
-- **[SCRIPTS_OVERVIEW.md]()** - Build script documentation
+- **[Packaging Architecture](../architecture/packaging)** - NuGet packaging strategy
+- **[Workflow Architecture](../architecture/workflows)** - GitHub Actions workflows
+- **[Scripts Overview](../architecture/scripts)** - Build script documentation
+- **[Sample App Reference Strategy](../architecture/sample-app-strategy)** - Debug vs Release references
 
 ### Binding Development
 
-- **[ANDROID_DEPENDENCIES.md]()** - Android Maven dependency management
-- **[ANDROID_INTEGRATION_PACKAGES.md]()** - Android integration modules
-- **[IOS_BINDING_STRATEGY.md]()** - iOS binding approach
-- **[IDENTIFYING_USER_FACING_APIS.md]()** - API surface analysis
-
-### API Design
-
-- **[UNIFIED_API_DESIGN.md]()** - Cross-platform API design
-- **[RUM_BINDING_COMPARISON.md]()** - RUM API comparison
-- **[PROJECT_GUIDE.md]()** - Project structure guide
+- **[Android Dependencies](../guides/android/dependencies)** - Android Maven dependency management
+- **[Android Integration Packages](../guides/android/integrations)** - Android integration modules
+- **[iOS Binding Strategy](../guides/ios/binding-strategy)** - iOS binding approach
+- **[Identifying User-Facing APIs](../guides/ios/api-identification)** - API surface analysis
 
 ### Deployment
 
-- **[MAPPING_FILE_UPLOADS.md]()** - R8/ProGuard mapping file uploads for crash symbolication
+- **[Mapping File Uploads](../guides/user/mapping-files)** - R8/ProGuard mapping file uploads for crash symbolication
 
 ### Automation
 
-- **[AUTOMATION_ROADMAP.md]()** - CI/CD automation roadmap
+- **[Automation Roadmap](../project/roadmap)** - CI/CD automation roadmap
 
 ## Quick Command Reference
 
@@ -532,7 +520,7 @@ When Datadog releases a new Android or iOS SDK version:
 
 ## CI/CD Integration
 
-The project uses GitHub Actions for automated builds. See [WORKFLOW_ARCHITECTURE.md]() for details.
+The project uses GitHub Actions for automated builds. See [Workflow Architecture](../architecture/workflows) for details.
 
 ### Workflows
 
@@ -559,4 +547,4 @@ make pack
 
 ## Contributing
 
-See [CONTRIBUTING.md]() for detailed contribution guidelines.
+See [Contributing Guide](contributing) for detailed contribution guidelines.

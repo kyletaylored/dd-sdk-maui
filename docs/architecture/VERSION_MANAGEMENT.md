@@ -1,3 +1,11 @@
+---
+layout: default
+title: Version Management
+parent: Architecture
+nav_order: 4
+permalink: /architecture/version-management
+---
+
 # Version Management Guide
 
 This document explains how versions are managed in the Datadog MAUI SDK project.
@@ -413,10 +421,6 @@ Microsoft uses **fully independent versioning** for each binding package:
 
 ## Related Documentation
 
-- [VERSIONING_ARCHITECTURE_PROPOSAL.md](VERSIONING_ARCHITECTURE_PROPOSAL.md) - Detailed architectural analysis
 - [Directory.Build.props](../Directory.Build.props) - Version property definitions
 - [.github/workflows/build-all.yml](../.github/workflows/build-all.yml) - Version validation logic
-
-## Questions?
-
-Refer to the [versioning proposal](VERSIONING_ARCHITECTURE_PROPOSAL.md) for in-depth discussion of trade-offs and decision matrix.
+- [Packaging Architecture](packaging) - NuGet package structure

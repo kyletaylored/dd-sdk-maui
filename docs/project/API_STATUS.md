@@ -1,3 +1,11 @@
+---
+layout: default
+title: API Implementation Status
+parent: Project
+nav_order: 5
+permalink: /project/api-status
+---
+
 # Datadog MAUI SDK - API Implementation Status
 
 This document provides a comprehensive status of all Datadog features and their implementation in the .NET MAUI SDK.
@@ -18,9 +26,11 @@ This document provides a comprehensive status of all Datadog features and their 
 - ✅ **Application ID Configuration** - Platform-specific with helper methods
 - ✅ **Session Sampling** - 0-100% sampling rate
 - ✅ **Telemetry Sampling** - Internal SDK telemetry sampling
-- ✅ **Automatic View Tracking** - MAUI ContentPage lifecycle (Android works, iOS limited)
-- ✅ **User Interaction Tracking** - Tap/click events (TrackFrustrations on iOS, TrackUserInteractions on Android)
-- ✅ **Resource Tracking** - HTTP requests (automatic on Android, limited on iOS)
+- ✅ **Automatic View Tracking** - MAUI ContentPage lifecycle (Android works, iOS uses MauiRumViewsPredicate)
+- ✅ **User Interaction Tracking** - Tap/click events (MauiRumActionsPredicate on iOS, TrackUserInteractions on Android)
+- ✅ **Frustration Tracking** - Rage taps, error taps, dead clicks (`TrackFrustrations`)
+- ✅ **Background Event Tracking** - Track events when app is backgrounded (`TrackBackgroundEvents`)
+- ✅ **Resource Tracking** - HTTP requests (automatic on Android, DatadogHttpMessageHandler on iOS)
 - ✅ **Error Tracking** - Exceptions and crashes
 - ✅ **Mobile Vitals** - CPU, memory, battery with configurable frequency
 - ✅ **Manual View API** - `Rum.StartView()`, `Rum.StopView()`
@@ -54,16 +64,22 @@ This document provides a comprehensive status of all Datadog features and their 
 - ✅ **Clear User** - Logout handling
 - ✅ **User Extra Info** - Dictionary of custom user data
 
+### Session Replay
+- ✅ **Session Replay Configuration** - `EnableSessionReplay()` with sample rate, privacy settings
+- ✅ **Text and Input Privacy** - MaskSensitiveInputs/Mask/Allow
+- ✅ **Image Privacy** - MaskNonBundledOnly/MaskAll/MaskNone
+- ✅ **Touch Privacy** - Show/Hide
+
 ### WebView Tracking
 - ✅ **Android WebView Handler** - Custom handler for DatadogWebViewHandler
 - ⚠️ **iOS WebView** - Native SDK supports it, needs MAUI integration
 
-## ⚠️ Partially Implemented Features
+### iOS UIKit Predicates
+- ✅ **UIKit Views Predicate** - `MauiRumViewsPredicate` (filters MAUI-internal controllers)
+- ✅ **UIKit Actions Predicate** - `MauiRumActionsPredicate` (tracks UIControl taps, accessibility-labeled views)
+- ❌ **SwiftUI Predicates** - Not applicable (MAUI does not use SwiftUI)
 
-### Session Replay
-- ⚠️ **Android Session Replay** - Native SDK supports it, configuration NOT exposed in API
-- ⚠️ **iOS Session Replay** - Native SDK supports it, configuration NOT exposed in API
-- **Status**: Native SDKs have full support, need to add configuration builders
+## ⚠️ Partially Implemented Features
 
 ### Crash Reporting
 - ⚠️ **Android NDK Crashes** - Automatically enabled in native SDK
@@ -73,24 +89,17 @@ This document provides a comprehensive status of all Datadog features and their 
 
 ### HTTP Tracing
 - ✅ **Android** - Fully automatic via OkHttp interceptor
-- ⚠️ **iOS** - URLSession tracking configured but HttpClient doesn't use URLSession
-  - **Workaround**: Use `DatadogHttpMessageHandler` or manual `Tracer.StartSpan()`
+- ⚠️ **iOS** - URLSession tracking configured but `DDURLSessionInstrumentation` crashes with current SDK
+  - **Workaround**: Use `DatadogHttpMessageHandler` for RUM resource tracking, or manual `Tracer.StartSpan()` for distributed tracing
 
 ## ❌ Not Applicable / Documented Limitations
 
-### iOS UIKit Predicates
-- ❌ **UIKit Views Predicate** - Not exposed (intentional)
-- ❌ **UIKit Actions Predicate** - Not exposed (intentional)
-- ❌ **SwiftUI Predicates** - Not exposed (intentional)
-- **Reason**: MAUI apps use MAUI abstractions, not UIKit/SwiftUI directly
-- **Alternative**: Use manual RUM API (`Rum.StartView()`, `Rum.AddAction()`)
-- **Documentation**: [UIKIT_PREDICATES_ANALYSIS.md](guides/ios/UIKIT_PREDICATES_ANALYSIS.md)
-
 ### iOS URLSession Instrumentation
-- ❌ **Automatic HttpClient Tracing** - .NET HttpClient doesn't use native URLSession
+- ❌ **Automatic HttpClient Tracing** - `DDURLSessionInstrumentation.EnableWithConfiguration()` crashes with current SDK version
 - **Alternative**:
-  - Use `DatadogHttpMessageHandler` wrapper
-  - Use manual `Tracer.StartSpan()` around HTTP calls
+  - Use `DatadogHttpMessageHandler` wrapper for RUM resource tracking
+  - Use manual `Tracer.StartSpan()` around HTTP calls for APM distributed tracing
+- **Documentation**: [HTTP Tracing Guide](../guides/http-tracing)
 
 ### Feature Flags
 - ❌ **Not Implemented** - Not yet bound to native SDKs
@@ -98,35 +107,7 @@ This document provides a comprehensive status of all Datadog features and their 
 
 ## 🚧 API Additions Needed
 
-### 1. Session Replay Configuration
-
-**What needs to be added:**
-
-```csharp
-public class SessionReplayConfiguration
-{
-    public int SampleRate { get; init; } = 100;
-    public TextAndInputPrivacy TextPrivacy { get; init; } = TextAndInputPrivacy.MaskSensitiveInputs;
-    public ImagePrivacy ImagePrivacy { get; init; } = ImagePrivacy.MaskNone;
-    public TouchPrivacy TouchPrivacy { get; init; } = TouchPrivacy.Show;
-
-    public class Builder
-    {
-        public Builder SetSampleRate(int rate) { }
-        public Builder SetTextAndInputPrivacy(TextAndInputPrivacy privacy) { }
-        public Builder SetImagePrivacy(ImagePrivacy privacy) { }
-        public Builder SetTouchPrivacy(TouchPrivacy privacy) { }
-        public SessionReplayConfiguration Build() { }
-    }
-}
-
-// In DatadogConfigurationBuilder:
-public void EnableSessionReplay(Action<SessionReplayConfiguration.Builder> configure) { }
-```
-
-**Priority**: High - Many customers want visual session replay
-
-### 2. Crash Reporting Configuration
+### 1. Crash Reporting Configuration
 
 **What needs to be added:**
 
@@ -150,7 +131,7 @@ public void EnableCrashReporting(Action<CrashReportingConfiguration.Builder> con
 
 **Priority**: Medium - Crashes are automatically captured, this just adds configuration
 
-### 3. Feature Flags
+### 2. Feature Flags
 
 **What needs to be added:**
 
@@ -183,13 +164,14 @@ public void EnableFeatureFlags(Action<FeatureFlagsConfiguration.Builder> configu
 |---------|----------------|------------|-------|
 | RUM Basic Config | ✅ Full | ✅ Full | Parity achieved |
 | RUM Manual API | ✅ Full | ✅ Full | Parity achieved |
+| UIKit Predicates | N/A | ✅ Full | MauiRumViewsPredicate + MauiRumActionsPredicate |
 | Logs Config | ✅ Full | ✅ Full | Parity achieved |
 | Logs Manual API | ✅ Full | ✅ Full | Parity achieved |
 | Tracing Config | ✅ Full | ✅ Full | Parity achieved |
 | Tracing Manual API | ✅ Full | ✅ Full | Parity achieved |
-| Automatic HTTP | ✅ Full | ⚠️ Limited | iOS HttpClient doesn't use URLSession |
+| Automatic HTTP | ✅ Full | ⚠️ Limited | iOS: use DatadogHttpMessageHandler |
 | WebView Tracking | ✅ Full | ⚠️ Partial | iOS needs handler implementation |
-| Session Replay | ⚠️ Config Missing | ⚠️ Config Missing | Both platforms need API exposure |
+| Session Replay | ✅ Full | ✅ Full | Both platforms configured via EnableSessionReplay() |
 | Crash Reporting | ✅ Automatic | ✅ Automatic | Both work, config not exposed |
 | User Info | ✅ Full | ✅ Full | Parity achieved |
 | Global Tags | ✅ Full | ⚠️ Limited | iOS has SDK limitation |
@@ -197,16 +179,14 @@ public void EnableFeatureFlags(Action<FeatureFlagsConfiguration.Builder> configu
 ## 🎯 Recommended Priorities
 
 ### High Priority
-1. **Session Replay Configuration** - High customer demand
-2. **iOS WebView Handler** - Complete cross-platform WebView support
-3. **iOS HTTP Tracing Guide** - Document workarounds clearly
+1. **iOS WebView Handler** - Complete cross-platform WebView support
+2. **iOS HTTP Tracing** - Await next Datadog iOS SDK release with automatic swizzling
 
 ### Medium Priority
-4. **Crash Reporting Configuration** - Expose custom attributes
-5. **Improve iOS Global Tags** - Find workaround or document limitation
+3. **Crash Reporting Configuration** - Expose custom attributes
 
 ### Low Priority
-6. **Feature Flags** - Complete feature if customer demand exists
+4. **Feature Flags** - Complete feature if customer demand exists
 
 ## 📝 Documentation Status
 
@@ -217,11 +197,11 @@ public void EnableFeatureFlags(Action<FeatureFlagsConfiguration.Builder> configu
 - ✅ **Manual Tracing API** - Complete
 - ✅ **Platform-Specific Configuration** - Complete (with new helper methods)
 - ✅ **iOS Limitations** - Complete
-- ⚠️ **Session Replay** - Needs updating when API added
+- ✅ **Session Replay** - Complete
+- ✅ **UIKit Predicates** - Complete ([UIKIT_PREDICATES_ANALYSIS.md](../guides/ios/UIKIT_PREDICATES_ANALYSIS.md))
 - ⚠️ **WebView Tracking** - Needs iOS handler documentation
 
 ## References
 
-- [Feature Testing Checklist](../FEATURE_TESTING_CHECKLIST.md)
-- [iOS UIKit Predicates Analysis](guides/ios/UIKIT_PREDICATES_ANALYSIS.md)
-- [HTTP Tracing Guide](https://kyletaylored.github.io/dd-sdk-maui/guides/http-tracing)
+- [iOS UIKit Predicates Analysis](../guides/ios/UIKIT_PREDICATES_ANALYSIS.md)
+- [HTTP Tracing Guide](../guides/http-tracing)
