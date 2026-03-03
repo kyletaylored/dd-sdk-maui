@@ -837,10 +837,45 @@ RUM-specific configuration.
 | `SessionSampleRate` | `int` | 100 | Session sampling rate (0-100) |
 | `TelemetrySampleRate` | `int` | 20 | Telemetry sampling rate (0-100) |
 | `TrackViewsAutomatically` | `bool` | true | Auto-track views |
-| `TrackUserInteractions` | `bool` | true | Auto-track interactions |
-| `TrackResources` | `bool` | true | Auto-track resources |
-| `TrackErrors` | `bool` | true | Auto-track errors |
+| `TrackUserInteractions` | `bool` | true | Auto-track user interactions (taps, swipes) |
+| `TrackFrustrations` | `bool` | true | Auto-track frustration signals (rage taps, error taps) |
+| `TrackBackgroundEvents` | `bool` | false | Track RUM events when app is backgrounded |
+| `FirstPartyHostsTracingSampleRate` | `int` | 20 | Sampling rate for distributed tracing on first-party hosts (0-100) |
 | `VitalsUpdateFrequency` | `VitalsUpdateFrequency` | Average | Vitals update frequency |
+| `Variant` | `string?` | null | Build variant (e.g., "debug", "release") for symbol matching |
+| `BuildId` | `string?` | null | Unique build ID for symbol matching (use `DatadogBuildInfo.BuildId`) |
+
+#### Builder Methods
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `SetApplicationId(string)` | `Builder` | Sets RUM application ID |
+| `SetApplicationId(string android, string ios)` | `Builder` | Sets platform-specific RUM application IDs |
+| `SetSessionSampleRate(int)` | `Builder` | Sets session sampling rate (0-100) |
+| `SetTelemetrySampleRate(int)` | `Builder` | Sets telemetry sampling rate (0-100) |
+| `TrackViewsAutomatically(bool)` | `Builder` | Enables/disables automatic view tracking |
+| `TrackUserInteractions(bool)` | `Builder` | Enables/disables automatic user interaction tracking |
+| `TrackFrustrations(bool)` | `Builder` | Enables/disables automatic frustration tracking |
+| `TrackBackgroundEvents(bool)` | `Builder` | Enables/disables background event tracking |
+| `SetFirstPartyHostsTracingSampleRate(int)` | `Builder` | Sets distributed tracing sample rate for first-party hosts (0-100) |
+| `SetVitalsUpdateFrequency(VitalsUpdateFrequency)` | `Builder` | Sets vitals update frequency |
+| `Build()` | `RumConfiguration` | Builds the configuration |
+
+**Example:**
+```csharp
+config.EnableRum(rum =>
+{
+    rum.SetApplicationId("YOUR_ANDROID_APP_ID", "YOUR_IOS_APP_ID");
+    rum.SetSessionSampleRate(100);
+    rum.SetTelemetrySampleRate(20);
+    rum.TrackViewsAutomatically(true);
+    rum.TrackUserInteractions(true);
+    rum.TrackFrustrations(true);
+    rum.TrackBackgroundEvents(false);
+    rum.SetFirstPartyHostsTracingSampleRate(20);
+    rum.SetVitalsUpdateFrequency(VitalsUpdateFrequency.Average);
+});
+```
 
 ---
 

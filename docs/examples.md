@@ -84,9 +84,10 @@ builder.UseDatadog(config =>
         rum.SetSessionSampleRate(100);
         rum.SetTelemetrySampleRate(20);
         rum.TrackViewsAutomatically(true);
-        rum.TrackUserInteractions(true);
-        rum.TrackResources(true);
-        rum.TrackErrors(true);
+        rum.TrackUserInteractions(true);     // Enables automatic tap/swipe tracking
+        rum.TrackFrustrations(true);         // Tracks rage taps, error taps, dead clicks
+        rum.TrackBackgroundEvents(false);    // Track events while app is backgrounded
+        rum.SetFirstPartyHostsTracingSampleRate(20); // 20% tracing sample rate on first-party hosts
         rum.SetVitalsUpdateFrequency(VitalsUpdateFrequency.Average);
     });
 

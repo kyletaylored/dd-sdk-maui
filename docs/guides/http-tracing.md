@@ -11,7 +11,7 @@ permalink: /guides/http-tracing
 How to trace HTTP requests and enable distributed tracing in your .NET MAUI application.
 
 {: .warning }
-> **Current Limitation**: Automatic HTTP tracing for iOS `HttpClient` is not yet implemented in the unified Datadog.MAUI plugin. Manual instrumentation is required. See [workarounds](#workarounds) below.
+> **iOS Limitation**: `DDURLSessionInstrumentation` from the native iOS SDK is incompatible with the current SDK version and causes a crash. Use `DatadogHttpMessageHandler` (included in the plugin) for RUM resource tracking on iOS, or manually instrument with the `Tracer` API for APM distributed tracing.
 
 ---
 
@@ -113,89 +113,48 @@ public class ApiService
 
 ## iOS Implementation
 
-### ❌ Automatic HTTP Tracing (Not Yet Implemented)
+### ⚠️ Automatic HTTP Tracing (Current Limitation)
 
 {: .warning }
-> **Known Issue**: The Datadog MAUI plugin does not currently configure iOS URLSession instrumentation, so `HttpClient` requests are **not automatically traced** on iOS.
+> **Known Limitation**: `DDURLSessionInstrumentation` from the native iOS SDK is incompatible with the current Datadog iOS SDK version. Calling `EnableWithConfiguration()` causes an `objc[] Attempt to use unknown class` crash. Automatic URLSession-level HTTP tracing is **not available** until a future SDK release with automatic swizzling.
 
-### Why Doesn't It Work?
+### What's Implemented
 
-In the native iOS Datadog SDK, HTTP tracing requires:
+The iOS platform code in [Datadog.ios.cs](/Datadog.MAUI.Plugin/Platforms/iOS/Datadog.ios.cs) does:
 
-1. **URLSession Instrumentation** - Swizzling `NSURLSession` delegate methods
-2. **Delegate Class Configuration** - Specifying which delegate class to instrument
-3. **First-Party Hosts** - Configuring which hosts to trace
+- ✅ Configure `DDTraceURLSessionTracking` with first-party hosts on `DDTraceConfiguration`
+- ✅ Set `FirstPartyHostsTracingSamplingRate` on `DDRUMURLSessionTracking`
+- ✅ `DatadogHttpMessageHandler` — manually tracks RUM resources for any `HttpClient` requests
 
-The Swift equivalent:
+What's **not** possible with the current SDK version:
+- ❌ `DDURLSessionInstrumentation.EnableWithConfiguration()` — crashes with unknown class error
+- ❌ Automatic APM trace header injection into all `HttpClient` requests on iOS
 
-```swift
-import DatadogTrace
+### Current iOS Workaround: DatadogHttpMessageHandler
 
-// Enable URLSession instrumentation
-URLSessionInstrumentation.enable(
-    with: .init(
-        delegateClass: SessionDelegate.self
-    )
-)
+The MAUI plugin includes `DatadogHttpMessageHandler`, a cross-platform `DelegatingHandler` that automatically tracks all HTTP requests as RUM resources:
 
-// Configure trace with first-party hosts
-Trace.enable(
-    with: Trace.Configuration(
-        urlSessionTracking: .trace(
-            hosts: ["api.myapp.com", "backend.myapp.com"]
-        )
-    )
-)
-```
-
-### Current iOS Implementation Gap
-
-The iOS platform code in `Datadog.MAUI.Plugin/Platforms/iOS/Datadog.ios.cs` does NOT:
-- Enable `URLSessionInstrumentation`
-- Configure first-party hosts on `DDTraceConfiguration`
-- Set `URLSessionTracking` property
-
-**What's implemented:**
 ```csharp
-// Current iOS implementation - incomplete!
-private static void InitializeTracing(TracingConfiguration tracingConfig)
+// Register via DI (recommended)
+// MauiProgram.cs
+builder.Services.AddSingleton<DatadogHttpMessageHandler>();
+builder.Services.AddHttpClient("MyApi", client =>
 {
-    var traceConfiguration = new DDTraceConfiguration();
-    traceConfiguration.SampleRate = tracingConfig.SampleRate;
-    DDTrace.EnableWith(traceConfiguration);
-    // ⚠️ FirstPartyHosts NOT configured
-    // ⚠️ URLSession instrumentation NOT enabled
-}
+    client.BaseAddress = new Uri("https://api.myapp.com");
+})
+.AddHttpMessageHandler<DatadogHttpMessageHandler>();
+
+// Or use directly
+var handler = new DatadogHttpMessageHandler(
+    firstPartyHosts: new[] { "api.myapp.com" }
+);
+var httpClient = new HttpClient(handler)
+{
+    BaseAddress = new Uri("https://api.myapp.com")
+};
 ```
 
-**What's needed:**
-```csharp
-// What the implementation should do
-private static void InitializeTracing(TracingConfiguration tracingConfig)
-{
-    var traceConfiguration = new DDTraceConfiguration();
-    traceConfiguration.SampleRate = tracingConfig.SampleRate;
-
-    // Configure first-party hosts for tracing
-    if (tracingConfig.FirstPartyHosts.Length > 0)
-    {
-        var hosts = new NSSet<NSString>(
-            tracingConfig.FirstPartyHosts.Select(h => new NSString(h)).ToArray()
-        );
-
-        var firstPartyHostsTracing = new DDTraceFirstPartyHostsTracing(hosts);
-        var urlSessionTracking = new DDTraceURLSessionTracking(firstPartyHostsTracing);
-
-        traceConfiguration.SetURLSessionTracking(urlSessionTracking);
-    }
-
-    DDTrace.EnableWith(traceConfiguration);
-
-    // Enable URLSession instrumentation
-    // Note: Requires delegate class - needs investigation
-    // DDURLSessionInstrumentation.EnableWithConfiguration(...);
-}
-```
+This provides RUM resource tracking (latency, status codes, errors) but does **not** inject APM distributed trace headers. For full distributed tracing with header injection, use the manual `Tracer` API below.
 
 ---
 
@@ -490,33 +449,24 @@ public class ApiService
 
 ## Future Improvements
 
-The Datadog MAUI SDK team is working on implementing automatic HTTP tracing for iOS. The planned improvements include:
+The Datadog iOS SDK is expected to release automatic HTTP swizzling in a future version, which will make `DDURLSessionInstrumentation` unnecessary by automatically intercepting all `NSURLSession` calls. Once that release is available:
 
-### Phase 1: Basic URLSession Instrumentation
-- ✅ iOS bindings for `DDURLSessionInstrumentation` (already exists)
-- ⏳ Configure URLSession instrumentation in iOS platform code
-- ⏳ Apply first-party hosts configuration
-- ⏳ Test with standard `HttpClient` using `NSUrlSessionHandler`
+### Phase 1: Automatic Swizzling (Upcoming iOS SDK)
+- ⏳ Upgrade to the Datadog iOS SDK version that includes automatic swizzling
+- ⏳ Remove `DatadogHttpMessageHandler` requirement for basic RUM resource tracking
+- ⏳ All `HttpClient` requests automatically tracked without any code changes
 
-### Phase 2: HttpClient Interception
-- ⏳ Create custom `HttpMessageHandler` for tracing
-- ⏳ Automatic span creation for HTTP requests
-- ⏳ Automatic header injection
-- ⏳ Error and status code tracking
-
-### Phase 3: Unified API
-- ⏳ Single configuration for both platforms
-- ⏳ Automatic platform detection and setup
-- ⏳ Zero-code instrumentation
+### Phase 2: Full Distributed Tracing
+- ⏳ Automatic trace header injection for `HttpClient` requests on iOS
+- ⏳ End-to-end distributed tracing parity with Android
 
 ### How You Can Help
 
-If you'd like to contribute to implementing automatic HTTP tracing:
+If you'd like to contribute:
 
-1. **Test the bindings** - Verify iOS URLSession instrumentation works with native code
-2. **Prototype solutions** - Try different approaches for `HttpClient` instrumentation
-3. **Share feedback** - Report what works and what doesn't in your apps
-4. **Submit PRs** - Contribute implementations to the [GitHub repository](https://github.com/kyletaylored/dd-sdk-maui)
+1. **Test with new SDK releases** — When a new Datadog iOS SDK is released, verify whether `DDURLSessionInstrumentation.EnableWithConfiguration()` works without crashing
+2. **Share feedback** — Report what works and what doesn't in your apps
+3. **Submit PRs** — Contribute implementations to the [GitHub repository](https://github.com/kyletaylored/dd-sdk-maui)
 
 ---
 
@@ -531,9 +481,11 @@ If you'd like to contribute to implementing automatic HTTP tracing:
 
 ## Summary
 
-| Platform | Automatic Tracing | Status | Workaround |
-|----------|------------------|--------|------------|
-| **Android** | ✅ Yes | Works automatically | None needed |
-| **iOS** | ❌ No | Not yet implemented | Manual `Tracer` API or RUM tracking |
+| Platform | RUM Resource Tracking | APM Distributed Tracing | Notes |
+|----------|-----------------------|--------------------------|-------|
+| **Android** | ✅ Automatic | ✅ Automatic | Works with standard `HttpClient` |
+| **iOS** | ✅ via `DatadogHttpMessageHandler` | ⚠️ Manual only | `DDURLSessionInstrumentation` incompatible with current SDK |
 
-For production apps requiring distributed tracing on iOS, use the [manual tracing approach](#manual-http-tracing) or create a [TracedHttpClient wrapper](#creating-a-tracedhttpclient-wrapper) until automatic instrumentation is implemented.
+For production iOS apps:
+- Use `DatadogHttpMessageHandler` for automatic RUM resource tracking (latency, status codes, errors)
+- Use the [manual tracing approach](#manual-http-tracing) or the [TracedHttpClient wrapper](#creating-a-tracedhttpclient-wrapper) for APM distributed tracing with header injection

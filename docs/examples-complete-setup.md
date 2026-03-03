@@ -374,13 +374,18 @@ public class AppDelegate : MauiUIApplicationDelegate
             );
 
             // Automatic tracking features
-            rumConfiguration.UIKitViewsPredicate = new DDDefaultUIKitRUMViewsPredicate();
-            rumConfiguration.UIKitActionsPredicate = new DDDefaultUIKitRUMActionsPredicate();
-            rumConfiguration.URLSessionTracking = DDRUMURLSessionTracking.FirstPartyHostsWithTraces;
+            // Note: The MAUI plugin uses MauiRumViewsPredicate and MauiRumActionsPredicate
+            // internally, which are custom implementations that work with MAUI's architecture.
+            // These are configured automatically by the plugin via RumConfiguration.
+            //
+            // MauiRumViewsPredicate: filters out Shell/MAUI-internal controllers
+            // MauiRumActionsPredicate: tracks taps on UIControls and accessibility-labeled views
+            rumConfiguration.UiKitViewsPredicate = new Datadog.Maui.Platforms.iOS.MauiRumViewsPredicate();
+            rumConfiguration.UiKitActionsPredicate = new Datadog.Maui.Platforms.iOS.MauiRumActionsPredicate();
 
             // Advanced tracking
             rumConfiguration.TrackFrustrations = true;           // Track rage taps, frozen frames
-            rumConfiguration.TrackBackgroundEvents = true;       // Track events when backgrounded
+            rumConfiguration.TrackBackgroundEvents = false;      // Track events when backgrounded (default: false)
             rumConfiguration.LongTaskThreshold = 0.1;            // Track tasks > 100ms
 
             // Vitals monitoring
@@ -612,13 +617,13 @@ Once you've completed the setup above, the following will be tracked **automatic
 
 | Feature | Android | iOS | Description |
 |---------|---------|-----|-------------|
-| **Views** | ✅ | ✅ | Activities/ViewControllers automatically tracked |
-| **Actions** | ✅ | ✅ | Taps, scrolls, swipes on UI elements |
-| **Resources** | ✅ | ✅ | HTTP requests (to first-party hosts) |
+| **Views** | ✅ | ✅ | Activities/ViewControllers automatically tracked (iOS uses MauiRumViewsPredicate to filter internals) |
+| **Actions** | ✅ | ✅ | Taps on UIControls and accessibility-labeled views (iOS uses MauiRumActionsPredicate) |
+| **Resources** | ✅ | ⚠️ | HTTP requests — automatic on Android; use `DatadogHttpMessageHandler` on iOS |
 | **Errors** | ✅ | ✅ | Exceptions and crashes |
 | **Long Tasks** | ✅ | ✅ | Main thread operations > threshold |
 | **Frozen Frames** | ✅ | ✅ | UI freezes and janky animations |
-| **Rage Taps** | ✅ | ✅ | Multiple rapid taps on same element |
+| **Rage Taps** | ✅ | ✅ | Multiple rapid taps on same element (requires `TrackFrustrations = true`) |
 | **ANRs** | ✅ | ⚠️ | Application Not Responding events |
 | **Memory Usage** | ✅ | ✅ | Memory consumption metrics |
 | **CPU Usage** | ✅ | ✅ | CPU utilization metrics |
@@ -628,12 +633,12 @@ Once you've completed the setup above, the following will be tracked **automatic
 
 | Feature | Android | iOS | Description |
 |---------|---------|-----|-------------|
-| **HTTP Tracing** | ✅ | 🧪 | Automatic trace headers for first-party hosts (iOS: Phase 1 testing) |
-| **Span Generation** | ✅ | 🧪 | Automatic spans for HTTP requests (iOS: Phase 1 testing) |
-| **Distributed Tracing** | ✅ | 🧪 | End-to-end trace propagation (iOS: Phase 1 testing) |
+| **HTTP Tracing** | ✅ | ⚠️ | Automatic on Android; manual via `DatadogHttpMessageHandler` on iOS |
+| **Span Generation** | ✅ | ✅ | Manual spans via `Tracer.StartSpan()` on both platforms |
+| **Distributed Tracing** | ✅ | ⚠️ | Automatic on Android; manually inject headers on iOS |
 
-{: .note }
-> **iOS HTTP Tracing Status**: Phase 1 implementation has been deployed (URLSession tracking configuration). This may enable automatic HTTP tracing on iOS. Testing is required to verify functionality. If automatic tracing doesn't work, see the [HTTP Tracing Guide](../guides/http-tracing) for manual instrumentation approaches.
+{: .warning }
+> **iOS HTTP Tracing**: `DDURLSessionInstrumentation` is incompatible with the current Datadog iOS SDK version and cannot be used. Use `DatadogHttpMessageHandler` (included in the plugin) for automatic RUM resource tracking on iOS, or manually call `Rum.StartResource` / `Rum.StopResource`. Full automatic URLSession instrumentation is expected in a future iOS SDK release.
 
 ### ✅ Logs
 
