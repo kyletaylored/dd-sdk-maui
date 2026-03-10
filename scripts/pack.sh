@@ -64,14 +64,15 @@ ANDROID_MODULES=(
     "dd-sdk-android-flags/dd-sdk-android-flags.csproj"
     "dd-sdk-android-okhttp/dd-sdk-android-okhttp.csproj"
     "dd-sdk-android-trace-otel/dd-sdk-android-trace-otel.csproj"
-    # "dd-sdk-android-okhttp-otel/dd-sdk-android-okhttp-otel.csproj"  # Not yet implemented
-    # "dd-sdk-android-gradle-plugin/dd-sdk-android-gradle-plugin.csproj"  # Archived - incompatible with MAUI
+    "dd-sdk-android-okhttp-otel/dd-sdk-android-okhttp-otel.csproj"
+    "opentracing-api/opentracing-api.csproj"
 )
 
 for module in "${ANDROID_MODULES[@]}"; do
     PROJECT_PATH="$ROOT_DIR/Datadog.MAUI.Android.Binding/$module"
     if [ -f "$PROJECT_PATH" ]; then
         echo -e "  Packing: $(basename $(dirname $module))..."
+        dotnet build "$PROJECT_PATH" -c "$CONFIGURATION" -v minimal > /dev/null 2>&1 || true
         dotnet pack "$PROJECT_PATH" -c "$CONFIGURATION" -o "$OUTPUT_DIR" --no-build -v minimal || {
             echo -e "${RED}  ✗ Failed to pack $module${NC}"
             exit 1
@@ -93,14 +94,14 @@ if [ "$(uname)" = "Darwin" ]; then
         "DatadogCrashReporting/DatadogCrashReporting.csproj"
         "DatadogSessionReplay/DatadogSessionReplay.csproj"
         "DatadogWebViewTracking/DatadogWebViewTracking.csproj"
-        "DatadogFlags/DatadogFlags.csproj"
-    )
+        "DatadogFlags/DatadogFlags.csproj"        "OpenTelemetryApi/OpenTelemetryApi.csproj"    )
 
     for module in "${IOS_MODULES[@]}"; do
         PROJECT_PATH="$ROOT_DIR/Datadog.MAUI.iOS.Binding/$module"
         if [ -f "$PROJECT_PATH" ]; then
             echo -e "  Packing: $(basename $(dirname $module))..."
-            dotnet pack "$PROJECT_PATH" -c "$CONFIGURATION" -o "$OUTPUT_DIR" --no-build -v minimal || {
+            dotnet build "$PROJECT_PATH" -c "$CONFIGURATION" -v minimal > /dev/null 2>&1 || true
+            dotnet pack "$PROJECT_PATH" -c "$CONFIGURATION" -o "$OUTPUT_DIR" --source "$OUTPUT_DIR" --no-build -v minimal || {
                 echo -e "${RED}  ✗ Failed to pack $module${NC}"
                 exit 1
             }
@@ -139,8 +140,10 @@ if [ "$(uname)" = "Darwin" ]; then
     IOS_META="$ROOT_DIR/Datadog.MAUI.iOS.Binding/Datadog.MAUI.iOS.Binding.csproj"
     if [ -f "$IOS_META" ]; then
         echo -e "  Packing: Datadog.MAUI.iOS.Binding..."
+        # Restore with local source to resolve package dependencies
+        dotnet restore "$IOS_META" --source "$OUTPUT_DIR" --source https://api.nuget.org/v3/index.json -v minimal > /dev/null 2>&1 || true
         # Use --no-build since meta-packages don't produce assemblies
-        dotnet pack "$IOS_META" -c "$CONFIGURATION" -o "$OUTPUT_DIR" --source "$OUTPUT_DIR" --no-build -v minimal || {
+        dotnet pack "$IOS_META" -c "$CONFIGURATION" -o "$OUTPUT_DIR" --no-build -v minimal || {
             echo -e "${RED}  ✗ Failed to pack iOS meta-package${NC}"
             exit 1
         }
