@@ -37,7 +37,12 @@ Install-Package Datadog.MAUI
 In your `MauiProgram.cs`, initialize Datadog before building the app:
 
 ```csharp
-using Datadog.MAUI;
+using Datadog.Maui;
+using Datadog.Maui.Configuration;
+using Datadog.Maui.Extensions;
+using Datadog.Maui.Logs;
+using Datadog.Maui.Rum;
+using Datadog.Maui.Tracing;
 
 public static class MauiProgram
 {
@@ -52,20 +57,22 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
             });
 
-        // Initialize Datadog
-        DatadogSdk.Initialize(new DatadogConfiguration
+        builder.UseDatadog(config =>
         {
-            ClientToken = "YOUR_CLIENT_TOKEN",
-            Environment = "production",
-            ApplicationId = "YOUR_RUM_APPLICATION_ID", // Required for RUM
-            ServiceName = "my-maui-app",
-            Site = DatadogSite.US1,
+            config.ClientToken = "YOUR_CLIENT_TOKEN";
+            config.Environment = "production";
+            config.ServiceName = "my-maui-app";
+            config.Site = DatadogSite.US1;
 
-            // Optional: Configure features
-            EnableCrashReporting = true,
-            TrackUserInteractions = true,
-            TrackNetworkRequests = true,
-            SessionSampleRate = 100.0f, // Sample 100% of sessions
+            config.EnableRum(rum =>
+            {
+                rum.SetApplicationId("YOUR_RUM_APPLICATION_ID");
+                rum.SetSessionSampleRate(100);
+                rum.TrackUserInteractions(true);
+            });
+
+            config.EnableLogs(logs => logs.SetSampleRate(100));
+            config.EnableTracing(tracing => tracing.SetSampleRate(100));
         });
 
         return builder.Build();
@@ -76,11 +83,12 @@ public static class MauiProgram
 ### 2. Set User Information
 
 ```csharp
-DatadogSdk.Instance.SetUser(
-    id: "user-123",
-    name: "John Doe",
-    email: "john.doe@example.com"
-);
+Datadog.SetUser(new UserInfo
+{
+    Id = "user-123",
+    Name = "John Doe",
+    Email = "john.doe@example.com"
+});
 ```
 
 ### 3. Track Custom Events
@@ -88,8 +96,9 @@ DatadogSdk.Instance.SetUser(
 #### Logging
 
 ```csharp
-DatadogSdk.Logger.Info("User logged in successfully");
-DatadogSdk.Logger.Error("Failed to process payment", new Dictionary<string, object>
+var logger = Logs.CreateLogger("app");
+logger.Info("User logged in successfully");
+logger.Error("Failed to process payment", attributes: new Dictionary<string, object>
 {
     { "user_id", "user-123" },
     { "amount", 99.99 }
@@ -99,17 +108,17 @@ DatadogSdk.Logger.Error("Failed to process payment", new Dictionary<string, obje
 #### RUM Views
 
 ```csharp
-DatadogSdk.Rum.StartView("checkout", "Checkout Page");
+Rum.StartView("checkout", "Checkout Page");
 
 // ... user interacts with the page ...
 
-DatadogSdk.Rum.StopView("checkout");
+Rum.StopView("checkout");
 ```
 
 #### Custom Actions
 
 ```csharp
-DatadogSdk.Rum.AddAction("tap", "Purchase Button", new Dictionary<string, object>
+Rum.AddAction(RumActionType.Tap, "Purchase Button", new Dictionary<string, object>
 {
     { "product_id", "prod-456" },
     { "price", 49.99 }
@@ -119,7 +128,7 @@ DatadogSdk.Rum.AddAction("tap", "Purchase Button", new Dictionary<string, object
 #### Distributed Tracing
 
 ```csharp
-using var span = DatadogSdk.Trace.StartSpan("process_payment");
+using var span = Tracer.StartSpan("process_payment");
 span.SetTag("payment_method", "credit_card");
 
 try
@@ -155,12 +164,10 @@ Specify your Datadog site based on your account region:
 Control the percentage of sessions and traces collected:
 
 ```csharp
-new DatadogConfiguration
-{
-    // ... other config ...
-    SessionSampleRate = 75.0f, // Sample 75% of RUM sessions
-    TraceSampleRate = 50.0f,   // Sample 50% of traces
-};
+new RumConfiguration.Builder()
+.SetApplicationId("YOUR_RUM_APPLICATION_ID")
+.SetSessionSampleRate(75)
+.Build();
 ```
 
 ### Global Attributes
@@ -169,27 +176,23 @@ Add custom attributes to all events:
 
 ```csharp
 // During initialization
-new DatadogConfiguration
+var tags = new Dictionary<string, string>
 {
-    // ... other config ...
-    AdditionalAttributes = new Dictionary<string, object>
-    {
-        { "app_version", "1.2.3" },
-        { "build_number", "456" }
-    }
+    { "app_version", "1.2.3" },
+    { "build_number", "456" }
 };
 
-// At runtime
-DatadogSdk.Instance.AddAttribute("user_tier", "premium");
-DatadogSdk.Instance.RemoveAttribute("user_tier");
+Datadog.SetTags(tags);
+Rum.AddAttribute("user_tier", "premium");
+Rum.RemoveAttribute("user_tier");
 ```
 
 ## Platform Requirements
 
 ### iOS
 
-- **Minimum iOS Version**: 12.0
-- **Supported .NET Versions**: .NET 8, 9, 10
+- **Minimum iOS Version**: 17.0
+- **Supported .NET Versions**: .NET 9, 10
 - **XCFrameworks**: Automatically included in the binding package
 
 ### Android

@@ -21,7 +21,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
 
     <!-- Ensure plugin package version matches your binding set version -->
-    <DatadogSdkVersion Condition="'$(DatadogSdkVersion)' == ''">3.5.0</DatadogSdkVersion>
+    <DatadogSdkVersion Condition="'$(DatadogSdkVersion)' == ''">3.6.0</DatadogSdkVersion>
     <Version>$(DatadogSdkVersion)</Version>
   </PropertyGroup>
 
@@ -38,8 +38,8 @@
     <ProjectReference Include="../Datadog.MAUI.Android.Binding/dd-sdk-android-webview/dd-sdk-android-webview.csproj" />
     <ProjectReference Include="../Datadog.MAUI.Android.Binding/dd-sdk-android-flags/dd-sdk-android-flags.csproj" />
     <ProjectReference Include="../Datadog.MAUI.Android.Binding/dd-sdk-android-okhttp/dd-sdk-android-okhttp.csproj" />
-    <ProjectReference Include="../Datadog.MAUI.Android.Binding/dd-sdk-android-trace-opentelemetry/dd-sdk-android-trace-opentelemetry.csproj" />
-    <ProjectReference Include="../Datadog.MAUI.Android.Binding/dd-sdk-android-okhttp-opentelemetry/dd-sdk-android-okhttp-opentelemetry.csproj" />
+    <ProjectReference Include="../Datadog.MAUI.Android.Binding/dd-sdk-android-trace-otel/dd-sdk-android-trace-otel.csproj" />
+    <ProjectReference Include="../Datadog.MAUI.Android.Binding/dd-sdk-android-okhttp-otel/dd-sdk-android-okhttp-otel.csproj" />
   </ItemGroup>
 
   <!-- iOS Binding project references for testing (temporary) -->
@@ -59,5 +59,13 @@
   <!-- Package README -->
   <ItemGroup>
     <None Include="../README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+  <!-- Ship the AndroidX duplicate class fix .targets file with the NuGet package.
+       buildTransitive: imported by ALL consumers (direct and transitive)
+       build: imported by direct consumers only
+       File name must match PackageId (Datadog.MAUI) for NuGet auto-import. -->
+  <ItemGroup>
+    <None Include="build/Datadog.MAUI.targets" Pack="true" PackagePath="buildTransitive/" />
+    <None Include="build/Datadog.MAUI.targets" Pack="true" PackagePath="build/" />
   </ItemGroup>
 </Project>

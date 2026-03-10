@@ -25,7 +25,7 @@
   <!-- Version for the dependency set -->
   <PropertyGroup>
     <!-- Use the same property you already have in Directory.Build.props -->
-    <DatadogSdkVersion Condition="'$(DatadogSdkVersion)' == ''">3.5.0</DatadogSdkVersion>
+    <DatadogSdkVersion Condition="'$(DatadogSdkVersion)' == ''">3.6.0</DatadogSdkVersion>
   </PropertyGroup>
 
   <!-- Meta-package dependencies: PackageReference to avoid duplicate class errors -->
@@ -50,4 +50,13 @@
     <PackageReference Include="Datadog.MAUI.Android.OkHttp.OpenTelemetry" Version="$(DatadogSdkVersion)" />
 
   </ItemGroup>
+
+  <!-- Ship the AndroidX duplicate class fix .targets file with the NuGet package.
+       buildTransitive: imported by ALL consumers (direct and transitive)
+       build: imported by direct consumers only -->
+  <ItemGroup>
+    <None Include="build/Datadog.MAUI.Android.Binding.targets" Pack="true" PackagePath="buildTransitive/" />
+    <None Include="build/Datadog.MAUI.Android.Binding.targets" Pack="true" PackagePath="build/" />
+  </ItemGroup>
+
 </Project>
