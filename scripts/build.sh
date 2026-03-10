@@ -55,6 +55,8 @@ ANDROID_MODULES=(
     "dd-sdk-android-flags/dd-sdk-android-flags.csproj"
     "dd-sdk-android-okhttp/dd-sdk-android-okhttp.csproj"
     "dd-sdk-android-trace-otel/dd-sdk-android-trace-otel.csproj"
+    "dd-sdk-android-okhttp-otel/dd-sdk-android-okhttp-otel.csproj"
+    "opentracing-api/opentracing-api.csproj"
 )
 
 for module in "${ANDROID_MODULES[@]}"; do
@@ -83,6 +85,7 @@ if [ "$(uname)" = "Darwin" ]; then
             "DatadogSessionReplay/DatadogSessionReplay.csproj"
             "DatadogWebViewTracking/DatadogWebViewTracking.csproj"
             "DatadogFlags/DatadogFlags.csproj"
+            "OpenTelemetryApi/OpenTelemetryApi.csproj"
         )
         
         for module in "${IOS_MODULES[@]}"; do
