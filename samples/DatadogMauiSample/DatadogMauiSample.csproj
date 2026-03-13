@@ -51,9 +51,7 @@
 
 	<!-- Custom target to remove duplicate tracing AAR before dex compilation -->
 	<Target Name="RemoveDuplicateTracingAAR" BeforeTargets="_CompileToDalvik" Condition="'$(TargetFramework)' == 'net10.0-android'">
-		<Exec Command="find $(IntermediateOutputPath)lp -type d -name '12*' -o -name '16*' | while read dir; do if [ -f &quot;$$dir/jl/classes.jar&quot; ] &amp;&amp; unzip -l &quot;$$dir/jl/classes.jar&quot; 2&gt;/dev/null | grep -q 'androidx/tracing/TraceKt.class' &amp;&amp; echo &quot;$$dir&quot; | grep -q '/12'; then echo &quot;Removing duplicate tracing-android from $$dir&quot;; rm -rf &quot;$$dir/jl/classes.jar&quot;; fi; done"
-			  IgnoreExitCode="true"
-			  Condition="Exists('$(IntermediateOutputPath)lp')" />
+		<Exec Command="find $(IntermediateOutputPath)lp -type d -name '12*' -o -name '16*' | while read dir; do if [ -f &quot;$$dir/jl/classes.jar&quot; ] &amp;&amp; unzip -l &quot;$$dir/jl/classes.jar&quot; 2&gt;/dev/null | grep -q 'androidx/tracing/TraceKt.class' &amp;&amp; echo &quot;$$dir&quot; | grep -q '/12'; then echo &quot;Removing duplicate tracing-android from $$dir&quot;; rm -rf &quot;$$dir/jl/classes.jar&quot;; fi; done" IgnoreExitCode="true" Condition="Exists('$(IntermediateOutputPath)lp')" />
 	</Target>
 
 	<ItemGroup>
@@ -72,10 +70,13 @@
 
 		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+		<MauiAsset Include="appsettings.json" LogicalName="appsettings.json" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Datadog.MAUI" Version="3.6.1" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.9" />
 	</ItemGroup>
 
@@ -86,13 +87,7 @@
 
 		<!-- Force consistent SavedState version to prevent duplicate class errors -->
 		<PackageReference Include="Xamarin.AndroidX.SavedState" Version="1.4.0.1" />
-		<PackageReference Include="Xamarin.AndroidX.SavedState.SavedState.Ktx" Version="1.3.1.1" ExcludeAssets="compile;runtime;native" />
-	</ItemGroup>
-
-
-	<!-- Reference Datadog.MAUI unified plugin -->
-	<ItemGroup>
-		<ProjectReference Include="..\..\Datadog.MAUI.Plugin\Datadog.MAUI.Plugin.csproj" />
+		<PackageReference Include="Xamarin.AndroidX.SavedState.SavedState.Ktx" Version="1.4.0.1" ExcludeAssets="compile;runtime;native" />
 	</ItemGroup>
 
 	<!-- ================================================================ -->
@@ -114,11 +109,7 @@
 		<Message Text="  Application ID: $(AndroidApplicationId)" Importance="high" Condition="'$(AndroidApplicationId)' != ''" />
 		<Message Text="⚠️  No Android RUM credentials found! App will use placeholder values." Importance="high" Condition="'$(AndroidClientToken)' == ''" />
 
-		<WriteLinesToFile
-			File="$(MSBuildProjectDirectory)/Config/datadog-rum-android.config"
-			Lines="DD_RUM_ANDROID_CLIENT_TOKEN=$(AndroidClientToken);DD_RUM_ANDROID_APPLICATION_ID=$(AndroidApplicationId)"
-			Overwrite="true"
-			Condition="'$(AndroidClientToken)' != ''" />
+		<WriteLinesToFile File="$(MSBuildProjectDirectory)/Config/datadog-rum-android.config" Lines="DD_RUM_ANDROID_CLIENT_TOKEN=$(AndroidClientToken);DD_RUM_ANDROID_APPLICATION_ID=$(AndroidApplicationId)" Overwrite="true" Condition="'$(AndroidClientToken)' != ''" />
 	</Target>
 
 	<!-- Generate iOS config file before build -->
@@ -128,11 +119,7 @@
 		<Message Text="  Application ID: $(IosApplicationId)" Importance="high" Condition="'$(IosApplicationId)' != ''" />
 		<Message Text="⚠️  No iOS RUM credentials found! App will use placeholder values." Importance="high" Condition="'$(IosClientToken)' == ''" />
 
-		<WriteLinesToFile
-			File="$(MSBuildProjectDirectory)/Config/datadog-rum-ios.config"
-			Lines="DD_RUM_IOS_CLIENT_TOKEN=$(IosClientToken);DD_RUM_IOS_APPLICATION_ID=$(IosApplicationId)"
-			Overwrite="true"
-			Condition="'$(IosClientToken)' != ''" />
+		<WriteLinesToFile File="$(MSBuildProjectDirectory)/Config/datadog-rum-ios.config" Lines="DD_RUM_IOS_CLIENT_TOKEN=$(IosClientToken);DD_RUM_IOS_APPLICATION_ID=$(IosApplicationId)" Overwrite="true" Condition="'$(IosClientToken)' != ''" />
 	</Target>
 
 	<!-- Embed config files as resources -->

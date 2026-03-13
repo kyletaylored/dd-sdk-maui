@@ -1,3 +1,4 @@
+using Datadog.Maui;
 using DatadogMauiSample.Models;
 
 namespace DatadogMauiSample;
@@ -53,12 +54,13 @@ public partial class ProfilePage : ContentPage
             AvatarUrl = $"https://api.dicebear.com/7.x/avataaars/svg?seed={email}"
         };
 
-        // TODO: Set user in Datadog RUM
-        // On Android:
-        // GlobalRumMonitor.Get().SetUser(new UserInfo(_currentUser.Id, _currentUser.Name, _currentUser.Email))
-        //
-        // On iOS:
-        // RUMMonitor.shared().setUserInfo(id: _currentUser.Id, name: _currentUser.Name, email: _currentUser.Email)
+        Datadog.Maui.Datadog.SetUser(new UserInfo
+        {
+            Id = _currentUser.Id,
+            Name = _currentUser.Name,
+            Email = _currentUser.Email,
+            ExtraInfo = new Dictionary<string, object>()
+        });
 
         Console.WriteLine($"[Datadog] User signed in: {_currentUser.Name} ({_currentUser.Email})");
 
@@ -70,12 +72,7 @@ public partial class ProfilePage : ContentPage
     {
         _currentUser = User.Guest;
 
-        // TODO: Clear user in Datadog RUM
-        // On Android:
-        // GlobalRumMonitor.Get().SetUser(null)
-        //
-        // On iOS:
-        // RUMMonitor.shared().setUserInfo(id: nil, name: nil, email: nil)
+        Datadog.Maui.Datadog.ClearUser();
 
         Console.WriteLine("[Datadog] User signed out");
 
@@ -85,12 +82,16 @@ public partial class ProfilePage : ContentPage
 
     private void OnUpdateProfileClicked(object? sender, EventArgs e)
     {
-        // TODO: Add user attribute to Datadog RUM
-        // On Android:
-        // GlobalRumMonitor.Get().AddUserAttribute("plan", "premium")
-        //
-        // On iOS:
-        // RUMMonitor.shared().addUserAttribute(forKey: "plan", value: "premium")
+        Datadog.Maui.Datadog.SetUser(new UserInfo
+        {
+            Id = _currentUser.Id,
+            Name = _currentUser.Name,
+            Email = _currentUser.Email,
+            ExtraInfo = new Dictionary<string, object>
+            {
+                { "plan", "premium" }
+            }
+        });
 
         DisplayAlert("Profile Updated", "User attributes updated in Datadog RUM", "OK");
     }
