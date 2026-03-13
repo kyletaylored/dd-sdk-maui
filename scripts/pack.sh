@@ -124,9 +124,11 @@ echo -e "${GREEN}Packing Android meta-package:${NC}"
 ANDROID_META="$ROOT_DIR/Datadog.MAUI.Android.Binding/Datadog.MAUI.Android.Binding.csproj"
 if [ -f "$ANDROID_META" ]; then
     echo -e "  Packing: Datadog.MAUI.Android.Binding..."
+    # Restore with local source to resolve the module packages created in Step A
+    dotnet restore "$ANDROID_META" --source "$OUTPUT_DIR" --source https://api.nuget.org/v3/index.json -v minimal > /dev/null 2>&1 || true
     # IMPORTANT: Use --source to allow the meta-package to find the module packages we just packed
     # Use --no-build since meta-packages don't produce assemblies
-    dotnet pack "$ANDROID_META" -c "$CONFIGURATION" -o "$OUTPUT_DIR" --source "$OUTPUT_DIR" --no-build -v minimal || {
+    dotnet pack "$ANDROID_META" -c "$CONFIGURATION" -o "$OUTPUT_DIR" --source "$OUTPUT_DIR" --no-build --no-restore -v minimal || {
         echo -e "${RED}  ✗ Failed to pack Android meta-package${NC}"
         exit 1
     }

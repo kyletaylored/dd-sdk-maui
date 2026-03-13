@@ -66,6 +66,10 @@ public static class MauiProgram
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			});
 
+		// Enable Session Replay via platform-native APIs
+		// (not yet exposed in the cross-platform Datadog.Maui builder)
+		EnableSessionReplay(DatadogConfig.SessionReplaySampleRate);
+
 #if DEBUG
 		builder.Logging.AddDebug();
 #endif
@@ -104,6 +108,40 @@ public static class MauiProgram
 		catch (Exception ex)
 		{
 			Console.WriteLine($"[Datadog] ERROR loading appsettings.json: {ex.GetType().Name}: {ex.Message}");
+		}
+	}
+
+	/// <summary>
+	/// Enable Session Replay using platform-native APIs.
+	/// The cross-platform Datadog.Maui builder does not yet expose EnableSessionReplay(),
+	/// so we call the native bindings directly.
+	/// </summary>
+	private static void EnableSessionReplay(float sampleRate)
+	{
+		try
+		{
+#if ANDROID
+			var srConfig = new Datadog.Android.SessionReplay.SessionReplayConfiguration.Builder(sampleRate)
+				.SetTextAndInputPrivacy(Datadog.Android.SessionReplay.TextAndInputPrivacy.MaskSensitiveInputs!)
+				.SetImagePrivacy(Datadog.Android.SessionReplay.ImagePrivacy.MaskLargeOnly!)
+				.SetTouchPrivacy(Datadog.Android.SessionReplay.TouchPrivacy.Show!)
+				.StartRecordingImmediately(true)
+				.Build();
+			Datadog.Android.SessionReplay.SessionReplay.Enable(srConfig);
+#elif IOS
+			var srConfig = new Datadog.iOS.SessionReplay.DDSessionReplayConfiguration(
+				sampleRate,
+				Datadog.iOS.SessionReplay.DDTextAndInputPrivacyLevel.SensitiveInputs,
+				Datadog.iOS.SessionReplay.DDImagePrivacyLevel.NonBundledOnly,
+				Datadog.iOS.SessionReplay.DDTouchPrivacyLevel.Show);
+			srConfig.StartRecordingImmediately = true;
+			Datadog.iOS.SessionReplay.DDSessionReplay.EnableWith(srConfig);
+#endif
+			Console.WriteLine($"[Datadog] Session Replay enabled (sample rate: {sampleRate}%)");
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"[Datadog] ERROR enabling Session Replay: {ex.GetType().Name}: {ex.Message}");
 		}
 	}
 

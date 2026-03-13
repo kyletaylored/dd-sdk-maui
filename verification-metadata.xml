@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="utf-8"?>
+<verification-metadata xmlns="https://schema.gradle.org/dependency-verification">
+   <configuration>
+      <verify-metadata>true</verify-metadata>
+      <verify-signatures>true</verify-signatures>
+   </configuration>
+   <components>
+      <component group="dd-sdk-android" name="dd-sdk-android-core" version="3.5.0">
+         <artifact name="dd-sdk-android-core-3.5.0.aar">
+            <sha256 value="2101d22e8620f9411558bd3d105853e85c948540aebd171d1e1bb0c00dc88b1f" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-core-3.5.0.pom">
+            <sha256 value="4f6d5a761af5d843499ead2ecc3fdba22046822f3f32f4f160d20086a526c7e7" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-core-3.5.0.module">
+            <sha256 value="76399fddc7b1b3e9f1cc7344dab4721c0a68cc5c7230ba13894c03d90cb9e2fc" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+      </component>
+      <component group="dd-sdk-android" name="dd-sdk-android-internal" version="3.5.0">
+         <artifact name="dd-sdk-android-internal-3.5.0.aar">
+            <sha256 value="e9a900d0515461a352782578682e5828618fdcb7af8af175b703edc69a18f39d" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-internal-3.5.0.pom">
+            <sha256 value="96b7f95d0e757c94268c86522c35a2135f960b08648bf4b3f5c558af88db6a2e" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-internal-3.5.0.module">
+            <sha256 value="7416c7dc9aa9e3a98de225c75b53791f75b48a442f64ed7b6e9f2a947a828daf" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+      </component>
+      <component group="dd-sdk-android.features" name="dd-sdk-android-flags" version="3.5.0">
+         <artifact name="dd-sdk-android-flags-3.5.0.aar">
+            <sha256 value="003d8d817e4ed4ae253530074415b0a69fb21641cfd4135767cd004fec4fbf56" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-flags-3.5.0.pom">
+            <sha256 value="a786cca9bf44f54377be9ebe76176a6a7e98c6e05dbbb5055036cf68c67003cd" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-flags-3.5.0.module">
+            <sha256 value="3438fe80f600b1c0650451a4305b52a3c190a9b5170ed24852b09872b9a8f854" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+      </component>
+      <component group="dd-sdk-android.features" name="dd-sdk-android-logs" version="3.5.0">
+         <artifact name="dd-sdk-android-logs-3.5.0.aar">
+            <sha256 value="816a02446ad0efd3c7ce0e9372c86fdf1971446214e59f9e805e85fc7f17fa58" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-logs-3.5.0.pom">
+            <sha256 value="0b0a1633b539c95391e3bf226c6a89bd2181534746eec108420070a517ac19b9" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-logs-3.5.0.module">
+            <sha256 value="a285ee9ccec4209220bb24896435c02c71b4bd577bb2a96561d798dd0e64f2ff" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+      </component>
+      <component group="dd-sdk-android.features" name="dd-sdk-android-ndk" version="3.5.0">
+         <artifact name="dd-sdk-android-ndk-3.5.0.aar">
+            <sha256 value="8a751bae86e87b4ba9ecde03ae87ee1dd8690c1dcde84262d399701cba6bb496" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-ndk-3.5.0.pom">
+            <sha256 value="b98e69bac3e7facb2d57ad68d3a194fdf60c5c63e1dc4e2c06ffab7477bf0459" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-ndk-3.5.0.module">
+            <sha256 value="05282b577d82ac9ff2c70a6aa3606cf5db7c3fdf593b90192c57f104d3a92f41" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+      </component>
+      <component group="dd-sdk-android.features" name="dd-sdk-android-rum" version="3.5.0">
+         <artifact name="dd-sdk-android-rum-3.5.0.aar">
+            <sha256 value="6cf59264fbec6d4ee1b26d4c29d30a3b8d2b14d713162fc74de6dccec5077473" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-rum-3.5.0.pom">
+            <sha256 value="d6762c32bd5a202fe305fc2823e046050c312b247fff1280458df0df73f566a5" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-rum-3.5.0.module">
+            <sha256 value="b615b6b2976e442dbd7b70b5417abc201d557cf73a2e3aa4b51c09526115140f" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+      </component>
+      <component group="dd-sdk-android.features" name="dd-sdk-android-session-replay-compose" version="3.5.0">
+         <artifact name="dd-sdk-android-session-replay-compose-3.5.0.aar">
+            <sha256 value="d9bbf1656e7db49c81fc58c692713e2373aae3ec0bb9ed964c14abeeaa807906" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-session-replay-compose-3.5.0.pom">
+            <sha256 value="7c934ff379aa0012582bb2ef87ec558331011658c976c0e570135fa5bbb068f1" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-session-replay-compose-3.5.0.module">
+            <sha256 value="556a91d01082cc18a9d1855fa876317b4bdd1a5bb5be64754c4d15d1c786c20b" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+      </component>
+      <component group="dd-sdk-android.features" name="dd-sdk-android-session-replay-material" version="3.5.0">
+         <artifact name="dd-sdk-android-session-replay-material-3.5.0.aar">
+            <sha256 value="e9e23516f2312652d168bc82c806105b0c2dea8b31ecd6cbcf101a29148f22f8" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-session-replay-material-3.5.0.pom">
+            <sha256 value="dcf140129cd2a04e4e993bbf0b54fd50d11e7028fcac59f1046a15f78c777226" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-session-replay-material-3.5.0.module">
+            <sha256 value="bd30b65e17a62fb92186668008d7d18aba07811f1f76a888e4b613ad8015509c" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+      </component>
+      <component group="dd-sdk-android.features" name="dd-sdk-android-session-replay" version="3.5.0">
+         <artifact name="dd-sdk-android-session-replay-3.5.0.aar">
+            <sha256 value="8d0a081e2caefdc6d1556b3f98562477b2293a965f6e586aa23ec0b2462c799e" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-session-replay-3.5.0.pom">
+            <sha256 value="51b10f18c8fcb9bdf18dae4bda9bed8aa7f929da6284748096d673a5f046c3eb" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-session-replay-3.5.0.module">
+            <sha256 value="769efc08884b7e1ef305456d07cca648730d9365e56584ea77a6dda14154e7ae" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+      </component>
+      <component group="dd-sdk-android.features" name="dd-sdk-android-trace-otel" version="3.5.0">
+         <artifact name="dd-sdk-android-trace-otel-3.5.0.aar">
+            <sha256 value="1ce1cfd558f933ab4d73516e325fda20b8e146f088a17c7535da2082d14a4a95" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-trace-otel-3.5.0.pom">
+            <sha256 value="9a31d98d63804f462331f7b60481bf57fdbf487350d689e8b753d43aa6ee2c70" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-trace-otel-3.5.0.module">
+            <sha256 value="a6482a7224dbfce4edae5ba5cad152f9ea26f33997c7c7ade570e12b331b9be7" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+      </component>
+      <component group="dd-sdk-android.features" name="dd-sdk-android-trace" version="3.5.0">
+         <artifact name="dd-sdk-android-trace-3.5.0.aar">
+            <sha256 value="6cd0b6697f1d1fb039c76086d4d35d34c0c2bed7a244a901abab4e80ac775b07" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-trace-3.5.0.pom">
+            <sha256 value="22d574789e2dd13ed0bd12f0d2efc6469bfacd56ed58e3b4c090f172a28addda" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-trace-3.5.0.module">
+            <sha256 value="b7be09f5f22fea6bb70e4a951d09fdb3ac558d0ceaba490ca6ffd9e2e3a61ab4" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+      </component>
+      <component group="dd-sdk-android.features" name="dd-sdk-android-webview" version="3.5.0">
+         <artifact name="dd-sdk-android-webview-3.5.0.aar">
+            <sha256 value="cfdeeff2524a2287d928858633e78087f1501516971fc07107e1372f1d2f1cae" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-webview-3.5.0.pom">
+            <sha256 value="d46de3e57ece81f6afd50200bef99b774bfe28a644b823b6ca03b16c6f4ea062" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-webview-3.5.0.module">
+            <sha256 value="95c506abaed99f249ba70f8c93a8ebb7fe589f7112308ff1c95ee85e515619af" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+      </component>
+      <component group="dd-sdk-android.features" name="dd-sdk-android-rum-debug-widget" version="3.5.0">
+         <artifact name="dd-sdk-android-rum-debug-widget-3.5.0.aar">
+            <sha256 value="ccbb6710c0c55ad722ceca5a74cf55bb71fc7a24563f218a08a66ecf6cb0839d" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-rum-debug-widget-3.5.0.pom">
+            <sha256 value="d056ac29a0c6884fdcc026da861724411a1157d51c99d299f7e30527c931072a" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-rum-debug-widget-3.5.0.module">
+            <sha256 value="e7af894a5d149ae727b2de72c554790a6f5334d20de0b7e96336cecf61ad0288" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+      </component>
+      <component group="dd-sdk-android.integrations" name="dd-sdk-android-coil" version="3.5.0">
+         <artifact name="dd-sdk-android-coil-3.5.0.aar">
+            <sha256 value="83c3fb66b12e90d7afae220d92bf4c9dbd0d39958471677bd81c1b3381e7f8d3" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-coil-3.5.0.pom">
+            <sha256 value="89c0f333b0107b9ecc328b86411116f0b9bbd0506c2694c447b2f3c2ac4c16fe" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-coil-3.5.0.module">
+            <sha256 value="aacd2c28e40b9085ad6554738fec787ec68ec15cd7044c113715a6f6ae194414" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+      </component>
+      <component group="dd-sdk-android.integrations" name="dd-sdk-android-compose" version="3.5.0">
+         <artifact name="dd-sdk-android-compose-3.5.0.aar">
+            <sha256 value="72bf4166982c09b410974fe9eae94a20910224c8d6faa1f86ffdcd0512734d35" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-compose-3.5.0.pom">
+            <sha256 value="8172afb8371a49b43e7a85500470d6b2b70ab974a2ad0cb11b4fffee91ec9449" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-compose-3.5.0.module">
+            <sha256 value="327e9e11b3e95c7d97ab86f7ced7e2b29d3cb9f9930d3c4f3b3c654387a200a4" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+      </component>
+      <component group="dd-sdk-android.integrations" name="dd-sdk-android-fresco" version="3.5.0">
+         <artifact name="dd-sdk-android-fresco-3.5.0.aar">
+            <sha256 value="873ad5bddad47a563abbd1705f4fc7dd3eb5020651aaef8789ce5ecad454522a" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-fresco-3.5.0.pom">
+            <sha256 value="cc078739e6f308ecbeaa708640ae1f1bcaf7f968ab3b3ebe3c6af0afb0e90332" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-fresco-3.5.0.module">
+            <sha256 value="16a351952473711a8f59e030a5f5aded8f8d0584cc116e0cd17d7f1e8b977691" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+      </component>
+      <component group="dd-sdk-android.integrations" name="dd-sdk-android-glide" version="3.5.0">
+         <artifact name="dd-sdk-android-glide-3.5.0.aar">
+            <sha256 value="dcd4e15e3ccc62e06a1f0beaf3fa2a48b68174dbb049c6dea4318f62d291443a" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-glide-3.5.0.pom">
+            <sha256 value="599da4b10df3b99130ff1693a572fdd599c611e7cc014135f743a78c4f33bb32" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-glide-3.5.0.module">
+            <sha256 value="8b1504ec25947a33a983f235a99d9bfe23a31036f2ad8852c4855867028bf7f9" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+      </component>
+      <component group="dd-sdk-android.integrations" name="dd-sdk-android-okhttp-otel" version="3.5.0">
+         <artifact name="dd-sdk-android-okhttp-otel-3.5.0.aar">
+            <sha256 value="3ea0cef5345c5685103e3e7ced3d5df4fac97ae8e7d37a01cb163ab0b08b662f" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-okhttp-otel-3.5.0.pom">
+            <sha256 value="34b57f69ad1f10ecb12966545fd384266a01f6b79588d3a1873da5bb91d1b59a" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-okhttp-otel-3.5.0.module">
+            <sha256 value="1e2d51ade3e41fd342b90d37d0f57dae4297deb1118adb568f5a086e61085e82" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+      </component>
+      <component group="dd-sdk-android.integrations" name="dd-sdk-android-okhttp" version="3.5.0">
+         <artifact name="dd-sdk-android-okhttp-3.5.0.aar">
+            <sha256 value="764071e8ac66b160a7ae02b42579f4bda671a5cac978af0a37a8868a091194d9" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-okhttp-3.5.0.pom">
+            <sha256 value="ebca82370d29a642b4982fc49b248ec0a67ce33b3ce9ede34d4ecd78e6ece387" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-okhttp-3.5.0.module">
+            <sha256 value="8bb7095910e5897613304dcac6f77ad0a089323658e092956335426a103c2141" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+      </component>
+      <component group="dd-sdk-android.integrations" name="dd-sdk-android-rum-coroutines" version="3.5.0">
+         <artifact name="dd-sdk-android-rum-coroutines-3.5.0.aar">
+            <sha256 value="e33edaa7dee66cdbcd6c588fb5136bc5f0dbd16eac5b66ed0c25708170b642eb" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-rum-coroutines-3.5.0.pom">
+            <sha256 value="af9321baafc278b6fe1c9132dbf57b5b0687a5af057cd9ecc80989f4743486a6" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-rum-coroutines-3.5.0.module">
+            <sha256 value="f82794a44e47abbce357deae3268583342cc61f5eb8b6bfe4417b7156af5d275" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+      </component>
+      <component group="dd-sdk-android.integrations" name="dd-sdk-android-rx" version="3.5.0">
+         <artifact name="dd-sdk-android-rx-3.5.0.aar">
+            <sha256 value="765d20e3a2541ddc6195f8875e71034ad1aeac7dabaa8c5048cf70004d5e2083" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-rx-3.5.0.pom">
+            <sha256 value="9a57198d5feab88ac009cac52b224535e2c3f4b7d4875998982d488269019312" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-rx-3.5.0.module">
+            <sha256 value="e8ab1b21804f5e35ac371432849ecdf35ce08d6b486f9e11181713b7b6583c05" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+      </component>
+      <component group="dd-sdk-android.integrations" name="dd-sdk-android-sqldelight" version="3.5.0">
+         <artifact name="dd-sdk-android-sqldelight-3.5.0.aar">
+            <sha256 value="59367830ebaf0919e5e4bd3188b4018bfedaada452ebdd6323e2d58e8ff2e07a" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-sqldelight-3.5.0.pom">
+            <sha256 value="cc868b1d9e8653b00a7949ff6919396c5e9fa71acb19779dd631f6daa6c50d09" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-sqldelight-3.5.0.module">
+            <sha256 value="c93a3663710a113f7e2c025e5f15cf7b386c3b92e8660b3570fad540fd0dc35c" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+      </component>
+      <component group="dd-sdk-android.integrations" name="dd-sdk-android-timber" version="3.5.0">
+         <artifact name="dd-sdk-android-timber-3.5.0.aar">
+            <sha256 value="f3d9e6e148bcb07dc15a51b983125cc3223c3458f2badfb3d26ae40f434eef22" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-timber-3.5.0.pom">
+            <sha256 value="b01d2c0a946bcee4523cf89853e4c262ae556f1bb242f8bfa75ae59773cf8814" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-timber-3.5.0.module">
+            <sha256 value="270b341ecf3bdf0acc1e4ed3ec8cb037b860ff6b3319bc11743af83536aed394" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+      </component>
+      <component group="dd-sdk-android.integrations" name="dd-sdk-android-trace-coroutines" version="3.5.0">
+         <artifact name="dd-sdk-android-trace-coroutines-3.5.0.aar">
+            <sha256 value="b19dd3cc2e1268a47abb3f1de56248b4e8a6b69dfda8d7a5ee26c926212ef6a2" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-trace-coroutines-3.5.0.pom">
+            <sha256 value="6fa2c4322d4d116ee7206b9fa14c63e896593d00bc36732036ff70e0449625c8" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-trace-coroutines-3.5.0.module">
+            <sha256 value="9ab0984336b49455cff85e923e1f2a2f6544a21fb6a8ea811716716a34a7da10" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+      </component>
+      <component group="dd-sdk-android.integrations" name="dd-sdk-android-tv" version="3.5.0">
+         <artifact name="dd-sdk-android-tv-3.5.0.aar">
+            <sha256 value="dee95d49f102b0523a7ffc2d1978623c141ab11f949f15539ea77615f397b031" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-tv-3.5.0.pom">
+            <sha256 value="3671fc05cf7309e205ce7c3fdbc57a64230f62f6442c7dc1d97bab0ee93c0cbd" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-tv-3.5.0.module">
+            <sha256 value="825b2543c423633690113c3fa81970e7c3b5c3acc31a544942e6c1627c7f48ff" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+      </component>
+      <component group="dd-sdk-android.integrations" name="dd-sdk-android-coil3" version="3.5.0">
+         <artifact name="dd-sdk-android-coil3-3.5.0.aar">
+            <sha256 value="9b7e9e90ac5c3172b3332b6ba050a35b33d519ad7a8c00b8076fee7fe71b9985" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-coil3-3.5.0.pom">
+            <sha256 value="1d0ddd51b9466488c3a11b1973b8a7f01f7e2136b2a446fc8ad4f5cd0bd96113" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-coil3-3.5.0.module">
+            <sha256 value="6c5cdc96c3ba07ebc647e4c00254ba96e6dee2f345d718afbb59bbd32459ef6a" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+      </component>
+      <component group="dd-sdk-android.integrations" name="dd-sdk-android-cronet" version="3.5.0">
+         <artifact name="dd-sdk-android-cronet-3.5.0.aar">
+            <sha256 value="5e5a2fefdaf5ac00bfe257937418c3a59e21176c856edcd71056a8ba6fa4378e" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-cronet-3.5.0.pom">
+            <sha256 value="3193e6e8070e8e7f8ba637c10fb64f8a878b4cdd6f0132063265e1982db2086a" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+         <artifact name="dd-sdk-android-cronet-3.5.0.module">
+            <sha256 value="27ba93d2e54843ce0810b17b02a51a299e7619dc51638cdb4296be519932b0d3" origin="Datadog official GitHub release"/>
+            <pgp value="CAF18D4EC00CA4450C6725A59333D4EF32A49F0A"/>
+         </artifact>
+      </component>
+   </components>
+</verification-metadata>

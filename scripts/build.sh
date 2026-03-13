@@ -64,7 +64,7 @@ for module in "${ANDROID_MODULES[@]}"; do
     if [ -f "$PROJECT_PATH" ]; then
         MODULE_NAME=$(basename $(dirname $module))
         echo -e "  Building and packing: $MODULE_NAME..."
-        dotnet build "$PROJECT_PATH" -c "$CONFIGURATION" -v minimal > /dev/null 2>&1 || true
+        dotnet build "$PROJECT_PATH" -c "$CONFIGURATION" -v minimal 2>&1 | grep -v "JAVAC0000\|duplicate class" | grep -v "\.java.*error:" > /dev/null 2>&1 || true
         dotnet pack "$PROJECT_PATH" -c "$CONFIGURATION" -o "$ROOT_DIR/artifacts" --no-build -v minimal > /dev/null 2>&1 || {
             echo -e "${YELLOW}  Warning: Failed to pack Android module $MODULE_NAME${NC}"
         }

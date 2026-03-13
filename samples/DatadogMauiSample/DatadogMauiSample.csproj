@@ -74,10 +74,18 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Datadog.MAUI" Version="3.6.1" />
+		<PackageReference Include="Datadog.MAUI" Version="3.6.2" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.9" />
+	</ItemGroup>
+
+	<!-- Session Replay native binding packages (not included in Datadog.MAUI) -->
+	<ItemGroup Condition="$(TargetFramework.Contains('android'))">
+		<PackageReference Include="Datadog.MAUI.Android.SessionReplay" Version="3.6.2" />
+	</ItemGroup>
+	<ItemGroup Condition="$(TargetFramework.Contains('ios'))">
+		<PackageReference Include="Datadog.MAUI.iOS.SessionReplay" Version="3.6.2" />
 	</ItemGroup>
 
 	<!-- Android-specific package exclusions -->
