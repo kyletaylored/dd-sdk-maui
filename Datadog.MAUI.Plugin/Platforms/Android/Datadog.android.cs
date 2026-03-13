@@ -1,8 +1,8 @@
-using Android.App;
+using global::Android.App;
 using Datadog.Maui.Configuration;
-using Com.Datadog.Android;
-using Com.Datadog.Android.Core.Configuration;
-using Com.Datadog.Android.Privacy;
+using global::Datadog.Android;
+using global::Datadog.Android.Core.Configuration;
+using global::Datadog.Android.Privacy;
 
 namespace Datadog.Maui;
 
@@ -10,10 +10,10 @@ public static partial class Datadog
 {
     static partial void PlatformInitialize(DatadogConfiguration configuration)
     {
-        var context = Android.App.Application.Context;
+        var context = global::Android.App.Application.Context;
 
         // Build native configuration
-        var configBuilder = new Com.Datadog.Android.Core.Configuration.Configuration.Builder(
+        var configBuilder = new global::Datadog.Android.Core.Configuration.Configuration.Builder(
             configuration.ClientToken,
             configuration.Environment,
             string.Empty, // variant
@@ -30,24 +30,18 @@ public static partial class Datadog
         }
 
         // Set batch upload configuration
-        configBuilder.SetBatchSize(Com.Datadog.Android.Core.Configuration.BatchSize.Medium);
-        configBuilder.SetUploadFrequency(Com.Datadog.Android.Core.Configuration.UploadFrequency.Average);
+        configBuilder.SetBatchSize(global::Datadog.Android.Core.Configuration.BatchSize.Medium);
+        configBuilder.SetUploadFrequency(global::Datadog.Android.Core.Configuration.UploadFrequency.Average);
 
         var nativeConfig = configBuilder.Build();
 
         // Initialize Datadog SDK
-        Com.Datadog.Android.Datadog.Initialize(context, nativeConfig, MapTrackingConsent(configuration.TrackingConsent));
+        global::Datadog.Android.Datadog.Initialize(context, nativeConfig, MapTrackingConsent(configuration.TrackingConsent));
 
         // Set verbosity
         if (configuration.VerboseLogging)
         {
-            Com.Datadog.Android.Datadog.Verbosity = (int)Android.Util.LogPriority.Verbose;
-        }
-
-        // Apply global tags
-        foreach (var tag in configuration.GlobalTags)
-        {
-            Com.Datadog.Android.Rum.GlobalRumMonitor.Get().AddAttribute(tag.Key, new Java.Lang.String(tag.Value));
+            global::Datadog.Android.Datadog.Verbosity = (int)global::Android.Util.LogPriority.Verbose;
         }
 
         // Enable RUM if configured
@@ -67,11 +61,21 @@ public static partial class Datadog
         {
             InitializeTracing(configuration.Tracing);
         }
+
+        // Apply global tags (must be after RUM is enabled so GlobalRumMonitor is active)
+        if (configuration.GlobalTags.Count > 0)
+        {
+            var rumMonitor = global::Datadog.Android.RUM.GlobalRumMonitor.Get();
+            foreach (var tag in configuration.GlobalTags)
+            {
+                rumMonitor?.AddAttribute(tag.Key, new Java.Lang.String(tag.Value));
+            }
+        }
     }
 
     private static void InitializeRum(RumConfiguration rumConfig)
     {
-        var rumConfigBuilder = new Com.Datadog.Android.Rum.RumConfiguration.Builder(rumConfig.ApplicationId);
+        var rumConfigBuilder = new global::Datadog.Android.RUM.RumConfiguration.Builder(rumConfig.ApplicationId);
 
         rumConfigBuilder.SetSessionSampleRate((float)rumConfig.SessionSampleRate);
         rumConfigBuilder.SetTelemetrySampleRate((float)rumConfig.TelemetrySampleRate);
@@ -88,17 +92,17 @@ public static partial class Datadog
             rumConfigBuilder.SetVitalsUpdateFrequency(MapVitalsFrequency(rumConfig.VitalsUpdateFrequency));
         }
 
-        Com.Datadog.Android.Rum.Rum.Enable(rumConfigBuilder.Build());
+        global::Datadog.Android.RUM.Rum.Enable(rumConfigBuilder.Build());
     }
 
     private static void InitializeLogs(LogsConfiguration logsConfig)
     {
-        var logsConfigBuilder = new Com.Datadog.Android.Log.LogsConfiguration.Builder();
+        var logsConfigBuilder = new global::Datadog.Android.Logs.LogsConfiguration.Builder();
 
         // Note: NetworkInfoEnabled and BundleWithRum settings are not available in Android SDK v3.x
         // These features are enabled by default in the core configuration
 
-        Com.Datadog.Android.Log.Logs.Enable(logsConfigBuilder.Build());
+        global::Datadog.Android.Logs.Logs.Enable(logsConfigBuilder.Build());
     }
 
     private static void InitializeTracing(TracingConfiguration tracingConfig)
@@ -113,67 +117,102 @@ public static partial class Datadog
 
     static partial void PlatformSetUser(UserInfo userInfo)
     {
-        Com.Datadog.Android.Datadog.SetUserInfo(
+        var extraInfo = userInfo.ExtraInfo?.ToDictionary(
+            kvp => kvp.Key,
+            kvp => ToJavaObject(kvp.Value)
+        );
+
+        global::Datadog.Android.Datadog.SetUserInfo(
             userInfo.Id,
             userInfo.Name,
             userInfo.Email,
-            userInfo.ExtraInfo?.ToDictionary(kvp => kvp.Key, kvp => (Java.Lang.Object)kvp.Value)
+            extraInfo
         );
     }
 
     static partial void PlatformSetTags(Dictionary<string, string> tags)
     {
+        var rumMonitor = global::Datadog.Android.RUM.GlobalRumMonitor.Get();
         foreach (var tag in tags)
         {
-            Com.Datadog.Android.Rum.GlobalRumMonitor.Get().AddAttribute(tag.Key, new Java.Lang.String(tag.Value));
+            rumMonitor?.AddAttribute(tag.Key, new Java.Lang.String(tag.Value));
         }
     }
 
     static partial void PlatformSetTrackingConsent(TrackingConsent consent)
     {
         var nativeConsent = MapTrackingConsent(consent);
-        Com.Datadog.Android.Datadog.SetTrackingConsent(nativeConsent);
+        global::Datadog.Android.Datadog.SetTrackingConsent(nativeConsent);
     }
 
     static partial void PlatformClearUser()
     {
-        Com.Datadog.Android.Datadog.SetUserInfo(null, null, null, null);
+        global::Datadog.Android.Datadog.SetUserInfo(null, null, null, null);
+    }
+
+    static partial void PlatformAddAttribute(string key, object value)
+    {
+        global::Datadog.Android.RUM.GlobalRumMonitor.Get()?.AddAttribute(key, ToJavaObject(value));
+    }
+
+    static partial void PlatformRemoveAttribute(string key)
+    {
+        global::Datadog.Android.RUM.GlobalRumMonitor.Get()?.RemoveAttribute(key);
+    }
+
+    /// <summary>
+    /// Converts a .NET object to a Java.Lang.Object, preserving numeric and boolean types.
+    /// </summary>
+    private static Java.Lang.Object ToJavaObject(object? value)
+    {
+        return value switch
+        {
+            null => new Java.Lang.String(""),
+            Java.Lang.Object jObj => jObj,
+            string s => new Java.Lang.String(s),
+            bool b => new Java.Lang.Boolean(b),
+            int i => new Java.Lang.Integer(i),
+            long l => new Java.Lang.Long(l),
+            float f => new Java.Lang.Float(f),
+            double d => new Java.Lang.Double(d),
+            _ => new Java.Lang.String(value.ToString() ?? "")
+        };
     }
 
     // Helper methods to map enums
-    private static Com.Datadog.Android.DatadogSite MapSite(DatadogSite site)
+    private static global::Datadog.Android.DatadogSite MapSite(DatadogSite site)
     {
         return site switch
         {
-            Maui.DatadogSite.US1 => Com.Datadog.Android.DatadogSite.Us1,
-            Maui.DatadogSite.US3 => Com.Datadog.Android.DatadogSite.Us3,
-            Maui.DatadogSite.US5 => Com.Datadog.Android.DatadogSite.Us5,
-            Maui.DatadogSite.EU1 => Com.Datadog.Android.DatadogSite.Eu1,
-            Maui.DatadogSite.US1_FED => Com.Datadog.Android.DatadogSite.Us1Fed,
-            Maui.DatadogSite.AP1 => Com.Datadog.Android.DatadogSite.Ap1,
-            _ => Com.Datadog.Android.DatadogSite.Us1
+            Maui.DatadogSite.US1 => global::Datadog.Android.DatadogSite.Us1,
+            Maui.DatadogSite.US3 => global::Datadog.Android.DatadogSite.Us3,
+            Maui.DatadogSite.US5 => global::Datadog.Android.DatadogSite.Us5,
+            Maui.DatadogSite.EU1 => global::Datadog.Android.DatadogSite.Eu1,
+            Maui.DatadogSite.US1_FED => global::Datadog.Android.DatadogSite.Us1Fed,
+            Maui.DatadogSite.AP1 => global::Datadog.Android.DatadogSite.Ap1,
+            _ => global::Datadog.Android.DatadogSite.Us1
         };
     }
 
-    private static Com.Datadog.Android.Privacy.TrackingConsent MapTrackingConsent(Maui.TrackingConsent consent)
+    private static global::Datadog.Android.Privacy.TrackingConsent MapTrackingConsent(Maui.TrackingConsent consent)
     {
         return consent switch
         {
-            Maui.TrackingConsent.Granted => Com.Datadog.Android.Privacy.TrackingConsent.Granted,
-            Maui.TrackingConsent.NotGranted => Com.Datadog.Android.Privacy.TrackingConsent.NotGranted,
-            Maui.TrackingConsent.Pending => Com.Datadog.Android.Privacy.TrackingConsent.Pending,
-            _ => Com.Datadog.Android.Privacy.TrackingConsent.Pending
+            Maui.TrackingConsent.Granted => global::Datadog.Android.Privacy.TrackingConsent.Granted,
+            Maui.TrackingConsent.NotGranted => global::Datadog.Android.Privacy.TrackingConsent.NotGranted,
+            Maui.TrackingConsent.Pending => global::Datadog.Android.Privacy.TrackingConsent.Pending,
+            _ => global::Datadog.Android.Privacy.TrackingConsent.Pending
         };
     }
 
-    private static Com.Datadog.Android.Rum.Configuration.VitalsUpdateFrequency MapVitalsFrequency(VitalsUpdateFrequency frequency)
+    private static global::Datadog.Android.RUM.Configuration.VitalsUpdateFrequency MapVitalsFrequency(VitalsUpdateFrequency frequency)
     {
         return frequency switch
         {
-            VitalsUpdateFrequency.Frequent => Com.Datadog.Android.Rum.Configuration.VitalsUpdateFrequency.Frequent,
-            VitalsUpdateFrequency.Average => Com.Datadog.Android.Rum.Configuration.VitalsUpdateFrequency.Average,
-            VitalsUpdateFrequency.Rare => Com.Datadog.Android.Rum.Configuration.VitalsUpdateFrequency.Rare,
-            _ => Com.Datadog.Android.Rum.Configuration.VitalsUpdateFrequency.Average
+            VitalsUpdateFrequency.Frequent => global::Datadog.Android.RUM.Configuration.VitalsUpdateFrequency.Frequent,
+            VitalsUpdateFrequency.Average => global::Datadog.Android.RUM.Configuration.VitalsUpdateFrequency.Average,
+            VitalsUpdateFrequency.Rare => global::Datadog.Android.RUM.Configuration.VitalsUpdateFrequency.Rare,
+            _ => global::Datadog.Android.RUM.Configuration.VitalsUpdateFrequency.Average
         };
     }
 }

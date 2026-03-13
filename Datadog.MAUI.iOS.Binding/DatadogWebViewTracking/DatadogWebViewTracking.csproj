@@ -17,7 +17,7 @@
     <PackageTags>.NET MAUI iOS Datadog Mobile Binding WebViewTracking</PackageTags>
 
     <XCFrameworkPath>../artifacts/DatadogWebViewTracking.xcframework</XCFrameworkPath>
-    <IsTrimmable>true</IsTrimmable>
+    <IsTrimmable>false</IsTrimmable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -36,6 +36,7 @@
       <Frameworks>WebKit</Frameworks>
       <SmartLink>True</SmartLink>
       <ForceLoad>True</ForceLoad>
+      <LinkWithSwiftSystemLibraries>True</LinkWithSwiftSystemLibraries>
     </NativeReference>
   </ItemGroup>
 </Project>

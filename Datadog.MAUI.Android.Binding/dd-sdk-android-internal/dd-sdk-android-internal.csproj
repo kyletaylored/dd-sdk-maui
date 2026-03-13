@@ -17,7 +17,7 @@
 
   <ItemGroup>
     <!-- Internal package - included but no C# bindings generated -->
-    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-internal" Version="$(DatadogSdkVersion)" Bind="false" VerifyDependencies="false" />
+    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-internal" Version="$(DatadogAndroidMavenVersion)" Bind="false" VerifyDependencies="false" />
   </ItemGroup>
 
   <!-- Kotlin and AndroidX dependencies as NuGet packages -->

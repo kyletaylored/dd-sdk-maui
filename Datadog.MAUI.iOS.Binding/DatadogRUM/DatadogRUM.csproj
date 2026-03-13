@@ -17,7 +17,7 @@
     <PackageTags>.NET MAUI iOS Datadog Mobile Binding RUM</PackageTags>
 
     <XCFrameworkPath>../artifacts/DatadogRUM.xcframework</XCFrameworkPath>
-    <IsTrimmable>true</IsTrimmable>
+    <IsTrimmable>false</IsTrimmable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -35,6 +35,7 @@
       <Frameworks>WebKit</Frameworks>
       <SmartLink>True</SmartLink>
       <ForceLoad>True</ForceLoad>
+      <LinkWithSwiftSystemLibraries>True</LinkWithSwiftSystemLibraries>
     </NativeReference>
   </ItemGroup>
 </Project>

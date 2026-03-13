@@ -25,7 +25,7 @@
 
   <!-- Version for the dependency set -->
   <PropertyGroup>
-    <DatadogSdkVersion Condition="'$(DatadogSdkVersion)' == ''">3.6.0</DatadogSdkVersion>
+    <DatadogSdkVersion Condition="'$(DatadogSdkVersion)' == ''">3.6.2</DatadogSdkVersion>
   </PropertyGroup>
 
   <!-- Meta-package dependencies: PackageReference to avoid duplicate class errors -->

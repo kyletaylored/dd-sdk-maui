@@ -17,7 +17,7 @@
     <PackageTags>.NET MAUI iOS Datadog Mobile Binding Logs</PackageTags>
 
     <XCFrameworkPath>../artifacts/DatadogLogs.xcframework</XCFrameworkPath>
-    <IsTrimmable>true</IsTrimmable>
+    <IsTrimmable>false</IsTrimmable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -34,6 +34,7 @@
       <Kind>Framework</Kind>
       <SmartLink>True</SmartLink>
       <ForceLoad>True</ForceLoad>
+      <LinkWithSwiftSystemLibraries>True</LinkWithSwiftSystemLibraries>
     </NativeReference>
   </ItemGroup>
 </Project>

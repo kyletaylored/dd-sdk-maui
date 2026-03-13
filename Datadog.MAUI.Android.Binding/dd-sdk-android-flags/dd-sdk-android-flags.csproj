@@ -20,10 +20,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-flags" Version="$(DatadogSdkVersion)" VerifyDependencies="false" />
+    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-flags" Version="$(DatadogAndroidMavenVersion)" VerifyDependencies="false" />
     <!-- Runtime Maven dependencies from POM -->
-    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-core" Version="$(DatadogSdkVersion)" Bind="false" VerifyDependencies="false" />
-    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-internal" Version="$(DatadogSdkVersion)" Bind="false" VerifyDependencies="false" />
+    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-core" Version="$(DatadogAndroidMavenVersion)" Bind="false" VerifyDependencies="false" />
+    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-internal" Version="$(DatadogAndroidMavenVersion)" Bind="false" VerifyDependencies="false" />
     <AndroidMavenLibrary Include="com.lyft.kronos:kronos-android" Version="$(KronosVersion)" Bind="false" VerifyDependencies="false" />
   </ItemGroup>
 

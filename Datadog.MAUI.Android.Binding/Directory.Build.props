@@ -1,12 +1,14 @@
 <Project>
   <PropertyGroup>
     <!-- Single source of truth for package versions -->
-    <DatadogSdkVersion>3.6.0</DatadogSdkVersion>
+    <DatadogSdkVersion>3.6.2</DatadogSdkVersion>
+    <!-- Upstream Android SDK artifact version on Maven Central -->
+    <DatadogAndroidMavenVersion>3.6.0</DatadogAndroidMavenVersion>
     <Version>$(DatadogSdkVersion)</Version>
 
     <!-- Optional: also set the assembly versioning explicitly -->
-    <AssemblyVersion>3.6.0.0</AssemblyVersion>
-    <FileVersion>3.6.0.0</FileVersion>
+    <AssemblyVersion>3.6.2.0</AssemblyVersion>
+    <FileVersion>3.6.2.0</FileVersion>
   </PropertyGroup>
 
   <!-- Disable CPM for binding projects due to JDV incompatibility -->

@@ -20,18 +20,22 @@
   </ItemGroup>
 
   <ItemGroup>
-    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-rum" Version="$(DatadogSdkVersion)" VerifyDependencies="false" />
-    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-core" Version="$(DatadogSdkVersion)" VerifyDependencies="false" Bind="false" />
-    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-internal" Version="$(DatadogSdkVersion)" VerifyDependencies="false" Bind="false" />
+    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-rum" Version="$(DatadogAndroidMavenVersion)" VerifyDependencies="false" />
+    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-core" Version="$(DatadogAndroidMavenVersion)" VerifyDependencies="false" Bind="false" />
+    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-internal" Version="$(DatadogAndroidMavenVersion)" VerifyDependencies="false" Bind="false" />
     <AndroidMavenLibrary Include="com.lyft.kronos:kronos-android" Version="$(KronosVersion)" Bind="false" VerifyDependencies="false" />
     <AndroidMavenLibrary Include="androidx.metrics:metrics-performance" Version="$(AndroidxMetricsVersion)" Bind="false" VerifyDependencies="false" Repository="Google" />
   </ItemGroup>
 
   <!-- AndroidX and Kotlin dependencies as NuGet packages -->
   <ItemGroup>
+    <PackageReference Include="Xamarin.AndroidX.Activity.Ktx" />
     <PackageReference Include="Xamarin.AndroidX.Annotation" />
     <PackageReference Include="Xamarin.AndroidX.Collection" />
     <PackageReference Include="Xamarin.AndroidX.Core" />
+    <PackageReference Include="Xamarin.AndroidX.Fragment.Ktx" />
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Runtime.Ktx" />
+    <PackageReference Include="Xamarin.AndroidX.SavedState.SavedState.Ktx" />
     <PackageReference Include="Xamarin.AndroidX.Tracing.Tracing.Ktx" />
     <PackageReference Include="Xamarin.AndroidX.Navigation.Fragment" />
     <PackageReference Include="Xamarin.AndroidX.Navigation.Runtime" />

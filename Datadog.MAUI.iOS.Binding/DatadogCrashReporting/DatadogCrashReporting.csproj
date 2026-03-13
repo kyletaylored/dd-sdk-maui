@@ -17,7 +17,7 @@
     <PackageTags>.NET MAUI iOS Datadog Mobile Binding CrashReporting</PackageTags>
 
     <XCFrameworkPath>../artifacts/DatadogCrashReporting.xcframework</XCFrameworkPath>
-    <IsTrimmable>true</IsTrimmable>
+    <IsTrimmable>false</IsTrimmable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -36,6 +36,7 @@
       <ForceLoad>True</ForceLoad>
       <IsCxx>True</IsCxx>
       <LinkerFlags>-lc++</LinkerFlags>
+      <LinkWithSwiftSystemLibraries>True</LinkWithSwiftSystemLibraries>
     </NativeReference>
   </ItemGroup>
 </Project>

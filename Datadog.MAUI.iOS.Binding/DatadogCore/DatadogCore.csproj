@@ -18,7 +18,7 @@
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 
     <XCFrameworkPath>../artifacts/DatadogCore.xcframework</XCFrameworkPath>
-    <IsTrimmable>true</IsTrimmable>
+    <IsTrimmable>false</IsTrimmable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -36,6 +36,7 @@
       <Frameworks>Foundation UIKit SystemConfiguration Network</Frameworks>
       <SmartLink>True</SmartLink>
       <ForceLoad>True</ForceLoad>
+      <LinkWithSwiftSystemLibraries>True</LinkWithSwiftSystemLibraries>
     </NativeReference>
   </ItemGroup>
 </Project>

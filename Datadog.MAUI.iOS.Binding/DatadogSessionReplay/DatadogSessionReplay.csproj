@@ -17,7 +17,7 @@
     <PackageTags>.NET MAUI iOS Datadog Mobile Binding SessionReplay</PackageTags>
 
     <XCFrameworkPath>../artifacts/DatadogSessionReplay.xcframework</XCFrameworkPath>
-    <IsTrimmable>true</IsTrimmable>
+    <IsTrimmable>false</IsTrimmable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -35,6 +35,7 @@
       <Kind>Framework</Kind>
       <SmartLink>True</SmartLink>
       <ForceLoad>True</ForceLoad>
+      <LinkWithSwiftSystemLibraries>True</LinkWithSwiftSystemLibraries>
     </NativeReference>
   </ItemGroup>
 </Project>

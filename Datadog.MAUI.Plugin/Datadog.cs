@@ -100,10 +100,63 @@ public static partial class Datadog
         PlatformClearUser();
     }
 
+    /// <summary>
+    /// Adds a custom global attribute to all RUM events.
+    /// </summary>
+    /// <param name="key">Attribute key.</param>
+    /// <param name="value">Attribute value (string, int, double, bool, etc.).</param>
+    public static void AddAttribute(string key, object value)
+    {
+        if (!_isInitialized)
+        {
+            Console.WriteLine("[Datadog] SDK not initialized");
+            return;
+        }
+
+        ArgumentNullException.ThrowIfNull(key);
+        PlatformAddAttribute(key, value);
+    }
+
+    /// <summary>
+    /// Sets (adds or replaces) a custom global attribute on all RUM events.
+    /// Functionally equivalent to AddAttribute — overwrites any existing value for the key.
+    /// </summary>
+    /// <param name="key">Attribute key.</param>
+    /// <param name="value">Attribute value.</param>
+    public static void SetAttribute(string key, object value)
+    {
+        if (!_isInitialized)
+        {
+            Console.WriteLine("[Datadog] SDK not initialized");
+            return;
+        }
+
+        ArgumentNullException.ThrowIfNull(key);
+        PlatformAddAttribute(key, value);
+    }
+
+    /// <summary>
+    /// Removes a custom global attribute from all RUM events.
+    /// </summary>
+    /// <param name="key">Attribute key to remove.</param>
+    public static void RemoveAttribute(string key)
+    {
+        if (!_isInitialized)
+        {
+            Console.WriteLine("[Datadog] SDK not initialized");
+            return;
+        }
+
+        ArgumentNullException.ThrowIfNull(key);
+        PlatformRemoveAttribute(key);
+    }
+
     // Platform-specific partial methods
     static partial void PlatformInitialize(DatadogConfiguration configuration);
     static partial void PlatformSetUser(UserInfo userInfo);
     static partial void PlatformSetTags(Dictionary<string, string> tags);
     static partial void PlatformSetTrackingConsent(TrackingConsent consent);
     static partial void PlatformClearUser();
+    static partial void PlatformAddAttribute(string key, object value);
+    static partial void PlatformRemoveAttribute(string key);
 }

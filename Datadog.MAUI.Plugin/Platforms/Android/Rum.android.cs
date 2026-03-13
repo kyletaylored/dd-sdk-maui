@@ -1,4 +1,4 @@
-using Com.Datadog.Android.Rum;
+using global::Datadog.Android.RUM;
 using Datadog.Maui.Platforms.Android;
 
 namespace Datadog.Maui.Rum;
@@ -52,7 +52,7 @@ public static partial class Rum
     static partial void PlatformStartResource(string key, string method, string url, Dictionary<string, object>? attributes)
     {
         var rumMonitor = GlobalRumMonitor.Get();
-        var resourceMethod = Com.Datadog.Android.Rum.RumResourceMethod.ValueOf(method.ToUpperInvariant());
+        var resourceMethod = global::Datadog.Android.RUM.RumResourceMethod.ValueOf(method.ToUpperInvariant());
 
         if (attributes != null && attributes.Count > 0)
         {
@@ -91,11 +91,11 @@ public static partial class Rum
         if (attributes != null && attributes.Count > 0)
         {
             var javaAttributes = attributes.ToDictionary(kvp => kvp.Key, kvp => ConvertToJavaObject(kvp.Value));
-            rumMonitor.StopResourceWithError(key, null, error.Message, Com.Datadog.Android.Rum.RumErrorSource.Network, throwable, javaAttributes);
+            rumMonitor.StopResourceWithError(key, null, error.Message, global::Datadog.Android.RUM.RumErrorSource.Network, throwable, javaAttributes);
         }
         else
         {
-            rumMonitor.StopResourceWithError(key, null, error.Message, Com.Datadog.Android.Rum.RumErrorSource.Network, throwable, new Dictionary<string, Java.Lang.Object>());
+            rumMonitor.StopResourceWithError(key, null, error.Message, global::Datadog.Android.RUM.RumErrorSource.Network, throwable, new Dictionary<string, Java.Lang.Object>());
         }
     }
 
@@ -146,46 +146,46 @@ public static partial class Rum
         rumMonitor.StopSession();
     }
 
-    private static Com.Datadog.Android.Rum.RumActionType MapActionType(Maui.Rum.RumActionType type)
+    private static global::Datadog.Android.RUM.RumActionType MapActionType(Maui.Rum.RumActionType type)
     {
         return type switch
         {
-            Maui.Rum.RumActionType.Tap => Com.Datadog.Android.Rum.RumActionType.Tap,
-            Maui.Rum.RumActionType.Scroll => Com.Datadog.Android.Rum.RumActionType.Scroll,
-            Maui.Rum.RumActionType.Swipe => Com.Datadog.Android.Rum.RumActionType.Swipe,
-            Maui.Rum.RumActionType.Click => Com.Datadog.Android.Rum.RumActionType.Click,
-            Maui.Rum.RumActionType.Custom => Com.Datadog.Android.Rum.RumActionType.Custom,
-            _ => Com.Datadog.Android.Rum.RumActionType.Custom
+            Maui.Rum.RumActionType.Tap => global::Datadog.Android.RUM.RumActionType.Tap,
+            Maui.Rum.RumActionType.Scroll => global::Datadog.Android.RUM.RumActionType.Scroll,
+            Maui.Rum.RumActionType.Swipe => global::Datadog.Android.RUM.RumActionType.Swipe,
+            Maui.Rum.RumActionType.Click => global::Datadog.Android.RUM.RumActionType.Click,
+            Maui.Rum.RumActionType.Custom => global::Datadog.Android.RUM.RumActionType.Custom,
+            _ => global::Datadog.Android.RUM.RumActionType.Custom
         };
     }
 
-    private static Com.Datadog.Android.Rum.RumResourceKind MapResourceKind(Maui.Rum.RumResourceKind kind)
+    private static global::Datadog.Android.RUM.RumResourceKind MapResourceKind(Maui.Rum.RumResourceKind kind)
     {
         return kind switch
         {
-            Maui.Rum.RumResourceKind.Image => Com.Datadog.Android.Rum.RumResourceKind.Image,
-            Maui.Rum.RumResourceKind.Xhr => Com.Datadog.Android.Rum.RumResourceKind.Xhr,
-            Maui.Rum.RumResourceKind.Beacon => Com.Datadog.Android.Rum.RumResourceKind.Beacon,
-            Maui.Rum.RumResourceKind.Css => Com.Datadog.Android.Rum.RumResourceKind.Css,
-            Maui.Rum.RumResourceKind.Document => Com.Datadog.Android.Rum.RumResourceKind.Document,
-            Maui.Rum.RumResourceKind.Font => Com.Datadog.Android.Rum.RumResourceKind.Font,
-            Maui.Rum.RumResourceKind.Js => Com.Datadog.Android.Rum.RumResourceKind.Js,
-            Maui.Rum.RumResourceKind.Media => Com.Datadog.Android.Rum.RumResourceKind.Media,
-            Maui.Rum.RumResourceKind.Native => Com.Datadog.Android.Rum.RumResourceKind.Native,
-            Maui.Rum.RumResourceKind.Other => Com.Datadog.Android.Rum.RumResourceKind.Other,
-            _ => Com.Datadog.Android.Rum.RumResourceKind.Native
+            Maui.Rum.RumResourceKind.Image => global::Datadog.Android.RUM.RumResourceKind.Image,
+            Maui.Rum.RumResourceKind.Xhr => global::Datadog.Android.RUM.RumResourceKind.Xhr,
+            Maui.Rum.RumResourceKind.Beacon => global::Datadog.Android.RUM.RumResourceKind.Beacon,
+            Maui.Rum.RumResourceKind.Css => global::Datadog.Android.RUM.RumResourceKind.Css,
+            Maui.Rum.RumResourceKind.Document => global::Datadog.Android.RUM.RumResourceKind.Document,
+            Maui.Rum.RumResourceKind.Font => global::Datadog.Android.RUM.RumResourceKind.Font,
+            Maui.Rum.RumResourceKind.Js => global::Datadog.Android.RUM.RumResourceKind.Js,
+            Maui.Rum.RumResourceKind.Media => global::Datadog.Android.RUM.RumResourceKind.Media,
+            Maui.Rum.RumResourceKind.Native => global::Datadog.Android.RUM.RumResourceKind.Native,
+            Maui.Rum.RumResourceKind.Other => global::Datadog.Android.RUM.RumResourceKind.Other,
+            _ => global::Datadog.Android.RUM.RumResourceKind.Native
         };
     }
 
-    private static Com.Datadog.Android.Rum.RumErrorSource MapErrorSource(Maui.Rum.RumErrorSource source)
+    private static global::Datadog.Android.RUM.RumErrorSource MapErrorSource(Maui.Rum.RumErrorSource source)
     {
         return source switch
         {
-            Maui.Rum.RumErrorSource.Source => Com.Datadog.Android.Rum.RumErrorSource.Source,
-            Maui.Rum.RumErrorSource.Network => Com.Datadog.Android.Rum.RumErrorSource.Network,
-            Maui.Rum.RumErrorSource.WebView => Com.Datadog.Android.Rum.RumErrorSource.Webview,
-            Maui.Rum.RumErrorSource.Custom => Com.Datadog.Android.Rum.RumErrorSource.Source,
-            _ => Com.Datadog.Android.Rum.RumErrorSource.Source
+            Maui.Rum.RumErrorSource.Source => global::Datadog.Android.RUM.RumErrorSource.Source,
+            Maui.Rum.RumErrorSource.Network => global::Datadog.Android.RUM.RumErrorSource.Network,
+            Maui.Rum.RumErrorSource.WebView => global::Datadog.Android.RUM.RumErrorSource.Webview,
+            Maui.Rum.RumErrorSource.Custom => global::Datadog.Android.RUM.RumErrorSource.Source,
+            _ => global::Datadog.Android.RUM.RumErrorSource.Source
         };
     }
 

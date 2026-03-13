@@ -3,5 +3,16 @@
     Add metadata transforms here to fix binding issues
     Example:
     <remove-node path="/api/package[@name='com.example']/class[@name='Foo']" />
+    Namespace remapping to align with iOS bindings
+    iOS: Datadog.iOS.Logs
+    Android: Datadog.Android.Logs (was Com.Datadog.Android.Log)
   -->
+  <!-- Note: Top-level package is 'log' (singular) but we map to 'Logs' (plural) to match iOS -->
+  <attr path="/api/package[@name='com.datadog.android.log']" name="managedName">Datadog.Android.Logs</attr>
+  <attr path="/api/package[@name='com.datadog.android.log.internal.utils']" name="managedName">Datadog.Android.Logs.Internal.Utils</attr>
+  <attr path="/api/package[@name='com.datadog.android.log.model']" name="managedName">Datadog.Android.Logs.Model</attr>
+
+  <!-- Hide internal implementation packages -->
+  <!-- These are SDK internals not meant for public consumption -->
+  <attr path="/api/package[starts-with(@name, 'com.datadog.android.log.internal')]" name="visibility">internal</attr>
 </metadata>

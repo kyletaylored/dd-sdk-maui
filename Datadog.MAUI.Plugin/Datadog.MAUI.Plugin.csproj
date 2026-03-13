@@ -21,7 +21,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
 
     <!-- Ensure plugin package version matches your binding set version -->
-    <DatadogSdkVersion Condition="'$(DatadogSdkVersion)' == ''">3.6.0</DatadogSdkVersion>
+    <DatadogSdkVersion Condition="'$(DatadogSdkVersion)' == ''">3.6.2</DatadogSdkVersion>
     <Version>$(DatadogSdkVersion)</Version>
   </PropertyGroup>
 

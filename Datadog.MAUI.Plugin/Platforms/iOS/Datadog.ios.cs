@@ -113,6 +113,16 @@ public static partial class Datadog
         DDDatadog.ClearUserInfo();
     }
 
+    static partial void PlatformAddAttribute(string key, object value)
+    {
+        DDRUMMonitor.Shared?.AddAttribute(key, NSObject.FromObject(value));
+    }
+
+    static partial void PlatformRemoveAttribute(string key)
+    {
+        DDRUMMonitor.Shared?.RemoveAttribute(key);
+    }
+
     // Helper methods to map enums
     private static DDSite MapSite(DatadogSite site)
     {

@@ -4,4 +4,8 @@
     Example:
     <remove-node path="/api/package[@name='com.example']/class[@name='Foo']" />
   -->
+  <!-- Namespace remapping to align with iOS bindings -->
+  <!-- iOS: Datadog.iOS.Internal -->
+  <!-- Android: Datadog.Android.Internal (was Com.Datadog.Android._Internal) -->
+  <attr path="/api/package[@name='com.datadog.android._internal']" name="managedName">Datadog.Android.Internal</attr>
 </metadata>
