@@ -7,13 +7,11 @@
     <IsBindingProject>true</IsBindingProject>
 
     <PackageId>Datadog.MAUI.Android.Flags</PackageId>
-    <RootNamespace>Datadog.MAUI.Android.Flags</RootNamespace>
     <Authors>Datadog</Authors>
     <Description>.NET bindings for Datadog Android SDK Feature Flags module</Description>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/DataDog/dd-sdk-maui</RepositoryUrl>
     <PackageTags>.NET MAUI Android Datadog Mobile Binding</PackageTags>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,26 +19,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-flags" Version="$(DatadogAndroidMavenVersion)" VerifyDependencies="false" />
-    <!-- Runtime Maven dependencies from POM -->
-    <AndroidMavenLibrary Include="com.lyft.kronos:kronos-android" Version="$(KronosVersion)" Bind="false" VerifyDependencies="false" />
-  </ItemGroup>
-
-  <!-- AndroidX and runtime dependencies as NuGet packages -->
-  <ItemGroup>
-    <PackageReference Include="Xamarin.AndroidX.Annotation" />
-    <PackageReference Include="Xamarin.AndroidX.Collection" />
-    <PackageReference Include="Xamarin.AndroidX.Work.Runtime" />
-    <PackageReference Include="Square.OkHttp3" />
+    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-flags" Version="$(DatadogSdkVersion)" />
   </ItemGroup>
 
   <!-- Metadata transforms for binding fixes -->
   <ItemGroup>
     <TransformFile Include="Transforms\Metadata.xml" />
-  </ItemGroup>
-
-  <!-- Package README -->
-  <ItemGroup>
-    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>

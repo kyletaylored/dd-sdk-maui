@@ -5,7 +5,7 @@ namespace DatadogMauiSample.Config;
 public static class DatadogConfig
 {
     // General settings
-    public static string Environment { get; set; } = "dev";
+    public static string Environment { get; set; } = "demo";
     public static string ServiceName { get; set; } = "shopist-maui-demo";
 
     /// <summary>

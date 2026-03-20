@@ -1,0 +1,7 @@
+<metadata>
+  <!--
+    Add metadata transforms here to fix binding issues
+    Example:
+    <remove-node path="/api/package[@name='com.example']/class[@name='Foo']" />
+  -->
+</metadata>

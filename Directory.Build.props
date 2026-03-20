@@ -1,7 +1,9 @@
 <Project>
   <PropertyGroup>
     <!-- Datadog SDK Version - Keep in sync across iOS and Android -->
-    <DatadogSdkVersion>3.5.0</DatadogSdkVersion>
+    <DatadogSdkVersion>3.6.2</DatadogSdkVersion>
+    <!-- Upstream Android SDK artifact version on Maven Central (3.6.2 does not exist; latest 3.6.x is 3.6.0) -->
+    <DatadogAndroidMavenVersion>3.6.0</DatadogAndroidMavenVersion>
 
     <!-- .NET MAUI Binding Package Version -->
     <Version>$(DatadogSdkVersion)</Version>

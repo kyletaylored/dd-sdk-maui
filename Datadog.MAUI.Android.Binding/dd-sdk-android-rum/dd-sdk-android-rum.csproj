@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-rum" Version="$(DatadogSdkVersion)" VerifyDependencies="false" />
+    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-rum" Version="$(DatadogAndroidMavenVersion)" VerifyDependencies="false" />
     <!-- Runtime Maven dependencies from POM -->
     <AndroidMavenLibrary Include="com.lyft.kronos:kronos-android" Version="$(KronosVersion)" Bind="false" VerifyDependencies="false" />
     <AndroidMavenLibrary Include="androidx.metrics:metrics-performance" Version="$(AndroidxMetricsVersion)" Bind="false" VerifyDependencies="false" Repository="Google" />

@@ -1,0 +1,9 @@
+<Project>
+  <!-- Android SDK Directory -->
+  <PropertyGroup>
+    <!-- Set AndroidSdkDirectory to your local Android SDK path, or rely on ANDROID_SDK_ROOT env var -->
+    <!-- <AndroidSdkDirectory>/path/to/android/sdk</AndroidSdkDirectory> -->
+    <!-- Suppress NuGet version constraint warnings, duplicate native library warnings, and missing XML comments -->
+    <NoWarn>$(NoWarn);NU1608;XA4301;CS1591</NoWarn>
+  </PropertyGroup>
+</Project>

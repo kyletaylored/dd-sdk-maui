@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<!-- Only targeting Android and iOS for Datadog SDK -->
+		<!-- Targeting Android (net9.0 and net10.0) and iOS (net9.0 and net10.0) -->
 		<TargetFrameworks>net9.0-android;net10.0-android;net9.0-ios;net10.0-ios</TargetFrameworks>
 
 		<OutputType>Exe</OutputType>
@@ -24,6 +24,15 @@
 		<!-- Platform-specific settings -->
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">17.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">23.0</SupportedOSPlatformVersion>
+		
+		<!-- Android SDK Directory - set via ANDROID_SDK_ROOT env var or override locally in Directory.Build.props -->
+		<!-- <AndroidSdkDirectory>/path/to/android/sdk</AndroidSdkDirectory> -->
+		
+		<!-- Allow newer versions of Xcode to work with this .NET version -->
+		<_XcodeVersionCheckDisabled>true</_XcodeVersionCheckDisabled>
+		
+		<!-- Suppress NuGet version constraint warnings and duplicate native library warnings -->
+		<NoWarn>$(NoWarn);NU1608;XA4301;CS1591</NoWarn>
 	</PropertyGroup>
 
 	<!-- Android-specific settings to fix tracing library conflicts -->

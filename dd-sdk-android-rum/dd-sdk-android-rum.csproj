@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net9.0-android;net10.0-android</TargetFrameworks>
+    <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>true</ImplicitUsings>
+    <IsBindingProject>true</IsBindingProject>
+
+    <PackageId>Datadog.MAUI.Android.RUM</PackageId>
+    <Authors>Datadog</Authors>
+    <Description>.NET bindings for Datadog Android SDK RUM (Real User Monitoring) module</Description>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/DataDog/dd-sdk-maui</RepositoryUrl>
+    <PackageTags>.NET MAUI Android Datadog Mobile Binding</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\dd-sdk-android-core\dd-sdk-android-core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AndroidMavenLibrary Include="com.datadoghq:dd-sdk-android-rum" Version="$(DatadogSdkVersion)" />
+  </ItemGroup>
+
+  <!-- Metadata transforms for binding fixes -->
+  <ItemGroup>
+    <TransformFile Include="Transforms\Metadata.xml" />
+  </ItemGroup>
+</Project>
